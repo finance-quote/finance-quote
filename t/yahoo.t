@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 6};
+BEGIN {plan tests => 7};
 
 use Finance::Quote;
 
@@ -16,6 +16,8 @@ ok(defined(%quotes));
 #  used and most reliable indicators of success.
 ok($quotes{"IBM","last"} > 0);
 ok($quotes{"IBM","success"});
+ok($quotes{"IBM", "currency"} eq "USD");
+
 ok($quotes{"SGI","last"} > 0);
 ok($quotes{"SGI","success"});
 

@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 9};
+BEGIN {plan tests => 10};
 
 use Finance::Quote;
 
@@ -25,6 +25,10 @@ ok(defined(%quotes));
 ok($quotes{"ITE","last"} > 0);
 ok($quotes{"ITE","success"} > 0);
 
+# Check that we're getting currency information.
+ok($quotes{"ITE", "currency"} eq "AUD");
+
 # Check that looking up a bogus stock returns failure:
 %quotes = $q->asx("BOGUS");
 ok(! $quotes{"BOGUS","success"});
+
