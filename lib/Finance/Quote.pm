@@ -38,7 +38,7 @@ use HTTP::Request::Common;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $VERSION $TIMEOUT %MODULES %METHODS $AUTOLOAD
-	    $YAHOO_CURRENCY_URL/;
+	    $YAHOO_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
 
 $YAHOO_CURRENCY_URL = "http://finance.yahoo.com/m5?";
 
@@ -48,6 +48,8 @@ $YAHOO_CURRENCY_URL = "http://finance.yahoo.com/m5?";
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
 $VERSION = '1.04';
+
+$USE_EXPERIMENTAL_UA = 0;
 
 # Autoload method for obsolete methods.  This also allows people to
 # call methods that objects export without having to go through fetch.
@@ -460,7 +462,14 @@ sub user_agent {
 
 	return $this->{UserAgent} if $this->{UserAgent};
 
-	my $ua = Finance::Quote::UserAgent->new;
+	my $ua;
+
+	if ($USE_EXPERIMENTAL_UA) {
+		$ua = Finance::Quote::UserAgent->new;
+	} else {
+		$ua = LWP::UserAgent->new;
+	}
+
 	$ua->timeout($this->{TIMEOUT}) if defined($this->{TIMEOUT});
 	$ua->env_proxy;
 
