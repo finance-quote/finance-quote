@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 15};
+BEGIN {plan tests => 24};
 
 use Finance::Quote;
 
@@ -26,12 +26,26 @@ ok($quotes{"aex","success"});
 ok($quotes{"aex","last"} > 0);
 ok( !defined($quotes{"aex","volume"}) );
 
-
 # Exercise the fetch function 
 %quotes = $quoter->fetch("aex","aab");
 ok(%quotes);
 ok($quotes{"aab","success"});
 ok($quotes{"aab","last"} > 0);
+
+# Test options fetching
+%quotes = $quoter->fetch("aex_options", "aex c oct 2007 300.00", "phi");
+ok(%quotes);
+
+# the following test will fail after Oct 2007 :-(
+ok($quotes{"aex c oct 2007 300.00","success"});
+ok($quotes{"aex c oct 2007 300.00","close"} > 0);
+ok($quotes{"aex c oct 2007 300.00","date"});
+ok($quotes{"aex c oct 2007 300.00","ask"});
+
+ok($quotes{"phi","success"});
+ok($quotes{"phi","options"});
+ok($quotes{ $quotes{"phi","options"}->[0],"close"});
+ok($quotes{ $quotes{"phi","options"}->[0],"date"});
 
 # Check that a bogus fund returns no-success.
 %quotes = $quoter->aex("BOGUS");
