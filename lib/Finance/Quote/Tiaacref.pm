@@ -3,7 +3,7 @@
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
-#    Copyright (C) 2000, Paul Fenwick <pjf@schools.net.au>
+#    Copyright (C) 2000, Paul Fenwick <pjf@cpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -45,6 +45,8 @@ $VERSION = '0.18';
 $TIAACREF_URL = ("http://www.tiaa-cref.org/financials/selection/ann-select.cgi?");
 
 sub methods { return (tiaacref=>\&tiaacref); }
+
+sub labels { return (tiaacref => [qw/symbol exchange name date nav price/]); }
 
 # =======================================================================
 # TIAA-CREF Annuities are not listed on any exchange, unlike their mutual funds
@@ -125,6 +127,7 @@ sub tiaacref
          	  $info{$line[0],"name"} = $tiaacref_ids{$line[0]};
          	  $info{$line[0],"date"} = $line[2];
          	  $info{$line[0],"nav"} =  $line[1];	
+		  $info{$line[0],"price"} = $info{$line[0],"nav"};
 	 	  $info{$line[0],"success"} = 1; #this contains good data, beyond a reasonable doubt
 	 	  $check{$line[0]} = 1;
 	  } else {
