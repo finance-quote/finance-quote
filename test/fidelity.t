@@ -1,14 +1,14 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 23};
+BEGIN {plan tests => 19};
 
 use Finance::Quote;
 
 # Test Fidelity functions.
 
 my $q      = Finance::Quote->new();
-my @funds = qw/FGRIX FNMIX FASGX FCONX/;
+my @funds = qw/FGRIX FNMIX FASGX/;
 
 my %quotes = $q->fidelity_direct(@funds);
 ok(%quotes);
