@@ -642,3 +642,7 @@
 	'undef' is returned if no valid data could be dowloaded
 	(previously it was returning empty strings in such cases).
 
+2003-08-31	Pawel Konieczny <konieczp@users.sourceforge.net>
+	* AEX module: major update: fetching of stock and index options
+	implemented.  POD and test script updated as well.
+

@@ -35,26 +35,35 @@ use strict;
 
 package Finance::Quote::AEX;
 
-use vars qw($VERSION $AEX_URL); 
+use vars qw($VERSION $AEX_URL $AEXOPT_URL $AEXOPT_FULL); 
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.0';
+$VERSION = '1.5';
 
 # URLs of where to obtain information
 
-my $AEX_URL = 'http://www.aex.nl/scripts/pop/kb.asp?';
+my $AEX_URL = 'http://www.aex.nl/scripts/pop/kb.asp?taal=en';
+my $AEXOPT_URL = 'http://www.aex.nl/scripts/marktinfo/OptieKoersen.asp?taal=en';
 
-sub methods { return (dutch => \&aex,
-                      aex   => \&aex) } 
+# $AEXOPT_FULL:
+# 1 - download and search all traded options for a given underlying
+# 0 - download and search only most active options (faster but some options are not visible)
+our $AEXOPT_FULL = 1;
+
+sub methods { return (dutch       => \&aex,
+                      aex         => \&aex,
+                      aex_options => \&aex_options) } 
 
 {
-        my @labels = qw/name symbol price last date p_change bid ask offer open high low close volume currency method exchange time/;
+        my @labels = qw/name symbol price last date time p_change bid ask offer open high low close volume currency method exchange/;
+        my @opt_labels = qw/name options price last date time bid ask open high low close currency method exchange/;
 
-        sub labels { return (dutch => \@labels,
-                             aex   => \@labels); } 
+        sub labels { return (dutch       => \@labels,
+                             aex         => \@labels,
+                             aex_options => \@opt_labels); } 
 }
 
 # ==============================================================================
@@ -97,7 +106,8 @@ sub is_index {
     return defined $indices{uc $_[0]};
 }
 
-
+########################################################################
+# Stocks and indices
 
 sub aex {
     my $quoter = shift;
@@ -113,7 +123,7 @@ sub aex {
     foreach my $symbol (@symbols) {
 
         my $websymbol = aex_webticker($symbol); 
-        $reply = $ua->request(GET $url.join('',"taal=en&alf=",$websymbol)); 
+        $reply = $ua->request(GET $url.join('',"&alf=",$websymbol)); 
 
         if ($reply->is_success) { 
 
@@ -165,7 +175,7 @@ sub aex {
             $info {$symbol, "date"} =~ s/^\s*|\s*$//g;
             $info {$symbol, "time"} =~ s/\s*//g;
 
-            # convert date from dutch (dd mmm yyyy) to US format (mmm/dd/yyyy)
+            # convert date from Dutch (dd mmm yyyy) to US format (mmm/dd/yyyy)
             my @date = split /\s/, $info {$symbol, "date"};
             $info {$symbol, "date"} = $date[1]."/".$date[0]."/".$date[2]; 
 
@@ -183,17 +193,150 @@ sub aex {
             $info {$symbol, "success"} = 1; 
         } else {
             $info {$symbol, "success"} = 0;
-            $info {$symbol, "errormsg"} = "Error retreiving $symbol ";
+            $info {$symbol, "errormsg"} = "Error retreiving $symbol";
         }
     } 
-    return %info if wantarray;
-    return \%info;
+
+    return wantarray? %info : \%info;
 } 
+
+
+########################################################################
+# Options
+
+sub aex_options {
+    my $quoter = shift;
+    my @symbols = @_;
+    my %info;                   # return hash
+    return unless @symbols;
+
+    # we allow ambiguous input: both underlyings and individual options
+    # so we need to collect a pure list of all underlyings needed
+    my @underlyings = map { uc($_) =~ /(\w+)/; } @symbols;
+
+    # we remove the duplicates from @underlyings
+    my %grep;
+    @underlyings = grep { !$grep{$_}++; } @underlyings;
+ 
+    # %lookup will allow quick check whether a given symbol is requested
+    my %lookup;
+    foreach (@symbols) { $lookup{uc($_)} = $_; }
+    
+    my $ua = $quoter->user_agent;
+    $ua->agent('Mozilla/5.0');          # otherwise AEX IIS breaks down
+    
+    foreach my $underlying (@underlyings) {
+
+        my $req = HTTP::Request->new(GET => $AEXOPT_URL . "&a=" . $AEXOPT_FULL . "&Symbool=" . $underlying);
+        my $reply = $ua->request($req);
+        my ($date) = $reply->content =~ m[<OPTION\s+SELECTED>(.*?)</OPTION>]mi;
+
+        unless ($reply->is_success && $date) { 
+            foreach (grep /$underlying\s+([CP]\b)?/i, @symbols) {
+                $info {$_, "success"} = 0;
+                $info {$_, "errormsg"} = "Error retrieving options for underlying $underlying";
+            }
+            next;
+        }
+      
+        # convert date from Dutch (dd mmm yyyy) to US format (mmm/dd/yyyy)
+        my $dateusa = join "/", (split /\s/, $date)[1,0,2];
+            
+        #print STDERR $reply->content,"\n";
+        my $te = new HTML::TableExtract( depth => 1, count => 0 );
+        $te->parse($reply->content); 
+        
+        my @options;
+        foreach my $row ($te->rows) {
+            my $series = uc $row->[9];
+
+            # skip column headings; we assume that AEX will not change the order
+            next if $series =~ /SERIES/; 
+
+            # normalize option name: convert YY to YYYY if needed
+            $series =~ s/^(\w+)\s(\d{2}\s.*)$/$1 20$2/;
+
+            # remove commas from strike prices
+            $series =~ tr/,//d;
+
+            # full option symbol
+            my $symbol;
+
+            # Call
+            $symbol = $lookup{"$underlying C $series"};
+            if ($lookup{$underlying} || $symbol) {
+                #print "   ", join(',', @$row), "\n";
+                $symbol = "$underlying P $series" unless $symbol;
+                push  @options, $symbol;
+
+                $info {$symbol, "success"} = 1;
+                $info {$symbol, "exchange"} = "Amsterdam Euronext eXchange";
+                $info {$symbol, "method"} = "aex_options";
+                $info {$symbol, "name"} = "$underlying C $series";
+                my $pos = 1;
+                foreach my $label (qw/close open high low last time bid ask/) {
+                    ($info {$symbol, $label} = $row->[$pos++]) =~ s/[^\d\.\:]*//g; # Remove garbage
+                    undef $info {$symbol, $label} if $info {$symbol, $label} eq "";
+                }
+                $info {$symbol, "date"} = $dateusa;
+                $info {$symbol, "currency"} = "EUR";
+                $info {$symbol, "price"} = $info {$symbol, "last"};
+            }
+            
+            # Put
+            $symbol = $lookup{"$underlying P $series"};
+            if ($lookup{$underlying} || $symbol) {
+                #print "   ", join(',', @$row), "\n";
+                $symbol = "$underlying P $series" unless $symbol;
+                push  @options, $symbol;
+
+                $info {$symbol, "success"} = 1;
+                $info {$symbol, "exchange"} = "Amsterdam Euronext eXchange";
+                $info {$symbol, "method"} = "aex_options";
+                $info {$symbol, "name"} = "$underlying P $series";
+                my $pos = 11;
+                foreach my $label (qw/close open high low last time bid ask/) {
+                    ($info {$symbol, $label} = $row->[$pos++]) =~ s/[^\d\.\:]*//g; # Remove garbage
+                    undef $info {$symbol, $label} if $info {$symbol, $label} eq "";
+                }
+                $info {$symbol, "date"} = $dateusa;
+                $info {$symbol, "currency"} = "EUR";
+                $info {$symbol, "price"} = $info {$symbol, "last"};
+            }
+        }
+
+        # if the underlying is explicitly requested, "success" has to be reported properly
+        if ($lookup{$underlying}) {
+            if (@options) {
+                $info {$lookup{$underlying}, "success"} = 1;
+            } else {
+                $info {$lookup{$underlying}, "success"} = 0;
+                $info {$lookup{$underlying}, "errormsg"} = "No options found for underlying $underlying";
+            }
+
+            # handy extension of the standard F::Q rules: list of all collected options
+            # per underlying
+            $info { $lookup{$underlying}, "options"} = \@options;
+        }
+
+        # find out which options that were explicitly requested are not found
+        foreach (grep /$underlying\s+[CP]\b/i, @symbols) {
+            unless (defined $info {$_, "success"}) {
+                $info {$_, "success"} = 0;
+                $info {$_, "errormsg"} = "Option series not found";
+            }
+        }
+    } 
+
+    return wantarray? %info : \%info;
+} 
+
 1; 
 
 =head1 NAME
 
-Finance::Quote::AEX Obtain quotes from Amsterdam Euronext eXchange 
+Finance::Quote::AEX Obtain stocks and options quotes from 
+Amsterdam Euronext eXchange 
 
 =head1 SYNOPSIS
 
@@ -203,31 +346,63 @@ Finance::Quote::AEX Obtain quotes from Amsterdam Euronext eXchange
 
     %info = Finance::Quote->fetch("aex","asml");  # Only query AEX
     %info = Finance::Quote->fetch("dutch","phi"); # Failover to other sources OK. 
+    %info = Finance::Quote->fetch("aex_options","phi c oct 2007 20.00"); # Fetch specific option
+    %info = Finance::Quote->fetch("aex_options","phi"); # Fetch all options in PHI
 
 =head1 DESCRIPTION
 
 This module fetches information from the "Amsterdam Euronext
-eXchange AEX" http://www.aex.nl. All dutch stocks and indices are
+eXchange AEX" http://www.aex.nl. All Dutch stocks, options and indices are
 available. 
 
 This module is loaded by default on a Finance::Quote object. It's 
 also possible to load it explicity by placing "AEX" in the argument
 list to Finance::Quote->new().
 
-This module provides both the "aex" and "dutch" fetch methods.
-Please use the "dutch" fetch method if you wish to have failover
-with future sources for Dutch stocks. Using the "aex" method
-will guarantee that your information only comes from the Amsterdam
-Euronext eXchange.
- 
+This module provides both the "aex" and "dutch" fetch methods for fetching
+stock quotes.  Please use the "dutch" fetch method if you wish to have
+failover with future sources for Dutch stocks. Using the "aex" method will
+guarantee that your information only comes from the Amsterdam Euronext
+eXchange.
+
+To fetch stock or index options quotes, use the "aex_options" method.
+Specifying which option to fetch can be done in two ways: naming the
+underlying value, or naming a specific option.  In the first case, all
+tradable options for the given underlying will be returned.  In the second
+case, only the requested options will be returned.  When naming an option,
+use a string consisting of the following space-separated fields (case
+insensitive): 
+    <underlying symbol>
+    <call (C) or put (P) letter>
+    <three-letter expiration month>
+    <four-digit expiration year>
+    <strike price, including decimal point>
+
+Example: "PHI C OCT 2007 20.00" is a call option in Philips, expiration
+month October 2007, strike price 20.00 euro.
+
+Since options series come and go (options expire, new option series start
+being traded), a special label 'options' returns a list of all options
+found (fetched) for a given underlying.  This label is only present for the
+underlyings.
+
 Information obtained by this module may be covered by www.aex.nl 
 terms and conditions See http://www.aex.nl/ for details.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::AEX :
-name, symbol, last, price (=last), date, p_change, bid, ask, offer (=ask),
-open, high, low, close, volume, currency, method, exchange, time.
+The following labels may be returned by Finance::Quote::AEX "aex" method:
+name, symbol, last, price (=last), date, time, p_change, bid, ask, offer
+(=ask), open, high, low, close, volume, currency, method, exchange.
+
+The following labels may be returned by Finance::Quote::AEX "aex_options"
+method: name, options, last, price (=last), date, time, bid, ask, open,
+high, low, close, currency, method, exchange.
+
+=head1 TO DO
+
+Returning of volume and open interest for options.
+Fetching futures quotes.
 
 =head1 SEE ALSO
 
