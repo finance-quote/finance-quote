@@ -754,3 +754,8 @@
 	check date formats.
 
 
+2005-03-19  David Hampton  <david@hampton-pc.rainbolthampton.net>
+
+	* lib/Finance/Quote/Trustnet.pm: Encode the '&' character before
+	calling the user agent GET function.  Fixes bug 747080.
+
