@@ -470,3 +470,10 @@
 	  as intened.
 
 	* Added Jasmin Bertovic's Cdnfundlibrary module.
+
+2001-05-10	Volker Stuerzl
+	* Updated VWD.pm to account for changes in VWD website.
+
+2001-05-11	Paul Fenwick	<pjf@cpan.org>
+	* Tweaked VWD.pm to strip whitespace from currency and
+	  remove asterisks from names.
