@@ -262,7 +262,7 @@ sub _fidelity_mm
 
 Finance::Quote::Fidelity - Obtain information from Fidelity Investments.
 
-=head1 SYNPOSIS
+=head1 SYNOPSIS
 
 use Finance::Quote;
 

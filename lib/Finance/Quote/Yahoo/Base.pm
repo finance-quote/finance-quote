@@ -170,8 +170,15 @@ Finance::Quote::Yahoo::Base - Common functions for fetching Yahoo info.
 
 =head1 SYNOPSIS
 
-No public API defined.  You'll have to look through the very-well
-documented source-code for now.  Sorry.
+Base functions for use by the Finance::Quote::Yahoo::* modules.
+
+=head1 DESCRIPTION
+
+This module is not called directly, rather it provides a set of
+base functions which other Yahoo-related modules can use.  If you're
+thinking of writing a module to fetch specific information from
+Yahoo, then you might wish to look through the source code for
+this module.
 
 =head1 LABELS RETURNED
 
