@@ -27,6 +27,8 @@ ok($quotes{"12150.PA","p_change"} !~ /%/);
 # Check that a bogus stock returns no-success.
 ok(! $quotes{"BOGUS","success"});
 
+# London stocks should be returned in British Pounds (GBP).
+
 my %londonquotes = $q->fetch("yahoo_europe","BT.A.L");
 ok($londonquotes{"BT.A.L","success"});
 ok($londonquotes{"BT.A.L","currency"} eq "GBP");
