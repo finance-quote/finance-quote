@@ -59,3 +59,5 @@
 2000-04-21	Paul Fenwick	<pjf@cpan.org>
 	* Added extra methods to fetch (nasdaq, nyse) which act as
 	  aliases to yahoo.
+
+	* Added stockdump.pl example script, which is handy in debugging.
