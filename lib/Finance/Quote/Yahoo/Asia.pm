@@ -44,22 +44,6 @@ $VERSION = '1.00';
 
 $YAHOO_ASIA_URL = ("http://sg.finance.yahoo.com/d/quotes.csv");
 
-# Each stock comes back in its own currency, or so it seems.
-my %currency_tags = (
-	SI => "SGD",
-	BO => "INR",
-	JK => "IDR",
-	HK => "HKD",
-	NS => "INR",
-	KS => "KRW",
-	KL => "MYR",
-	NZ => "NZD",
-	SS => "CNY",
-	SZ => "CNY",
-	TW => "TWD",
-	TH => "THB"
-);
-
 sub methods {return (asia => \&yahoo_asia,yahoo_asia => \&yahoo_asia)};
 
 {
@@ -80,18 +64,8 @@ sub yahoo_asia
 	my %info = yahoo_request($quoter,$YAHOO_ASIA_URL,\@symbols);
 
 	foreach my $symbol (@symbols) {
-		if ($info{$symbol,"success"}) {
-			$info{$symbol,"method"} = "yahoo_asia";
-
-			# Symbols starting with a hat are always
-			# indexes, so they don't have a currency.
-			if (substr($symbol,0,1) eq "^") {
-				$info{$symbol,"currency"} = undef;
-			} else {
-				my ($exchange) = $symbol =~ /\.([A-Z]{2})$/;
-				$info{$symbol,"currency"} = $currency_tags{$exchange};
-			}
-		}
+		next unless $info{$symbol,"success"};
+		$info{$symbol,"method"} = "yahoo_asia";
 	}
 
 	return %info if wantarray;

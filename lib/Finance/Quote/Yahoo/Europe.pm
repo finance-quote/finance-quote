@@ -62,30 +62,8 @@ sub yahoo_europe
 	my %info = yahoo_request($quoter,$YAHOO_EUROPE_URL,\@symbols);
 
 	foreach my $symbol (@symbols) {
-		if ($info{$symbol,"success"}) {
-			$info{$symbol,"method"} = "yahoo_europe";
-
-			# London sources return in pence, not Euros.
-			# We'd like them to return in pounds (divide
-			# by 100).
-
-			if ($symbol =~ /\.L$/i) {
-				$info{$symbol,"currency"} = "GBP";
-				foreach my $field ($quoter->default_currency_fields) {
-					next unless ($info{$symbol,$field});
-					$info{$symbol,$field} = $quoter->scale_field($info{$symbol,$field},0.01);
-				}
-			} elsif ($symbol =~ /\.ST$/i) {
-				# Prices from Stockholm are in Swedish
-				# Krona (SEK).
-				$info{$symbol,"currency"} = "SEK";
-			} elsif (substr($symbol,0,1) ne "^") {
-				# All other non-indexes are in Euros.
-				$info{$symbol,"currency"} = "EUR";
-			} else {
-				$info{$symbol,"currency"} = undef;
-			}
-		}
+		next unless $info{$symbol,"success"};
+		$info{$symbol,"method"} = "yahoo_europe";
 	}
 
 	return %info if wantarray;
