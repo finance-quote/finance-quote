@@ -238,7 +238,7 @@ sub yahoo_request {
 			# return in pence. We'd like them to return in pounds
 			# (divide by 100).
 			if (defined($exchange)) {
-			  if ($exchange eq "L") {
+			  if ($exchange eq "L" || $exchange eq "TA") {
 			    foreach my $field ($quoter->default_currency_fields) {
 			      next unless ($info{$symbol,$field});
 			      $info{$symbol,$field} =
