@@ -281,3 +281,7 @@
 	  may be useful for future module writers.
 
 	* CVSTAG: finance_quote_1_01
+
+2000-07-31	Paul Fenwick	<pjf@cpan.org>
+	* The currency function no longer makes an expensive HTTP
+	  request if both the to and from currencies are identical.
