@@ -61,6 +61,9 @@ $ make test
 
 The tests do take some time to run, so please be patient.
 
+Note, there are two modules that are known to currency require
+maintenance, so expect the asx.t and trustnet.t tests to fail.
+
 What if my tests fail?
 ----------------------
 Your tests could fail if your machine does not have a connection to the
