@@ -125,8 +125,6 @@ sub timeout {
 # =======================================================================
 # Grabbed from the Perl Cookbook. Parsing csv isn't as simple as you thought!
 #
-# Obsoleted code?  I can't see this being called anywhere.
-#
 sub _parse_csv
 {
     my $text = shift;      # record containing comma-separated values
