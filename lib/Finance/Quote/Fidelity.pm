@@ -47,7 +47,8 @@ $FIDELITY_GLBND_URL = ("http://personal441.fidelity.com/gen/prices/glbnd.csv");
 $FIDELITY_MM_URL = ("http://personal441.fidelity.com/gen/prices/mm.csv");
 $FIDELITY_ASSET_URL = ("http://personal441.fidelity.com/gen/prices/asset.csv");
 
-sub methods {return (fidelity=>\&fidelity);}
+sub methods {return (fidelity        => \&fidelity,
+                     fidelity_direct => \&fidelity);}
 
 sub labels { return (fidelity=>[qw/exchange name number nav change ask
                                    date yield price/]); }
@@ -236,3 +237,44 @@ sub _fidelity_mm
 }
 
 1;
+
+=head1 NAME
+
+Finance::Quote::Fidelity - Obtain information from Fidelity Investments.
+
+=head1 SYNPOSIS
+
+use Finance::Quote;
+
+$q = Finance::Quote->new;
+
+%info = Finance::Quote->fetch("fidelity","FBGRX");
+%info = Finance::Quote->fetch("fidelity_direct","FBGRX");
+
+=head1 DESCRIPTION
+
+This module obtains information from Fidelity Investments,
+http://www.fidelity.com/.  This module is loaded by default on
+the Finance::Quote object.  It is also possible to load this
+module explicitly by passing "Fidelity" as one of
+Finance::Quote->new()'s parameters.
+
+The "fidelity" fetch method may make use of failover modules.
+The "fidelity_direct" method will only obtain information
+directly from Fidelity.
+
+Information returned by this module is governed by Fidelity
+Investment's terms and conditions.
+
+=head1 LABELS RETURNED
+
+The following labels may be returned by Finance::Quote::Fidelity:
+exchange, name, number, nav, change, ask, date, yield, price.
+
+=head1 SEE ALSO
+
+Fidelity Investments, http://www.fidelity.com/
+
+Finance::Quote::Yahoo::USA;
+
+=cut

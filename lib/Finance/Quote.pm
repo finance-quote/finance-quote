@@ -428,14 +428,20 @@ sub fetch {
 # Returns a LWP::UserAgent which conforms to the relevant timeouts,
 # proxies, and other settings on the particular Finance::Quote object.
 #
-# This function is mainly intended to be used by the modules that we load.
+# This function is mainly intended to be used by the modules that we load,
+# but it can be used by the application to directly play with the
+# user-agent settings.
 
 sub user_agent {
 	my $this = shift;
 
+	return $this->{UserAgent} if $this->{UserAgent};
+
 	my $ua = LWP::UserAgent->new;
 	$ua->timeout($this->{TIMEOUT}) if defined($this->{TIMEOUT});
 	$ua->env_proxy;
+
+	$this->{UserAgent} = $ua;
 
 	return $ua;
 }
@@ -549,6 +555,25 @@ the empty list may be returned, or undef in a scalar context.
 
 =head1 AVAILABLE METHODS
 
+=head2 NEW
+
+my $q = Finance::Quote->new;
+my $q = Finance::Quote->new("ASX");
+my $q = Finance::Quote->new("-defaults", "CustomModule");
+
+In the first form, this creates a new Finance::Quote object
+with the default methods.  In the second form, an object
+is created with only the specified modules loaded.  In
+the third form, both the default methods and the speicified
+modules afterwards are loaded.
+
+Any modules specified will automatically be looked for in the
+Finance::Quote:: module-space.  Hence,
+Finance::Quote->new("ASX") will load the module Finance::Quote::ASX.
+
+Please read the Finance::Quote hacker's guide for information
+on how to create new modules for Finance::Quote.
+
 =head2 FETCH
 
     my %stocks  = $q->fetch("usa","IBM","MSFT","LNUX");
@@ -576,6 +601,10 @@ of this hash is described earlier in this document.
 The fetch method automatically arranges for failover support and
 currency conversion if requested.
 
+If you wish to fetch information from only one particular source,
+then consult the documentation of that sub-module for further
+information.
+
 =head2 CURRENCY
 
 $conversion_rate = $q->currency("USD","AUD");
@@ -597,7 +626,43 @@ See Finance::Quote::Yahoo for more information.
 $q->set_currency("FRF");	# Get results in French Francs.
 
 The set_currency method can be used to request that all information be
-returned in the specified currency.  
+returned in the specified currency.  Note that this increases the
+chance stock-lookup failure, as remote requests must be made to fetch
+both the stock information and the currency rates.  In order to
+improve reliability and speed performance, currency conversion rates
+are cached and are assumed not to change for the duration of the
+Finance::Quote object.
+
+At this time, currency conversions are only looked up using Yahoo!'s
+services, and hence information obtained with automatic currency
+conversion is bound by Yahoo!'s terms and conditions.
+
+=head2 FAILOVER
+
+$q->failover(1);	# Set automatic failover support.
+$q->failover(0);	# Disable failover support.
+
+The failover method takes a single argument which either sets (if
+true) or unsets (if false) automatic failover support.  If automatic
+failover support is enabled (default) then multiple information
+sources will be tried if one or more sources fail to return the
+requested information.  Failover support will significantly increase
+the time spent looking for a non-existant stock.
+
+If the failover method is called with no arguments, or with an
+undefined argument, it will return the current failover state
+(true/false).
+
+=head2 user_agent
+
+my $ua = $q->user_agent;
+
+The user_agent method returns the LWP::UserAgent object that
+Finance::Quote and its helpers use.  Normally this would not
+be useful to an application, however it is possible to modify
+the user-agent directly using this method:
+
+$q->user_agent->timeout(10);	# Set the timeout directly.
 
 =head1 ENVIRONMENT
 
@@ -613,6 +678,9 @@ The two-dimensional hash is a somewhat unwieldly method of passing
 around information when compared to references.  A future release
 is planned that will allow for information to be returned in a
 more flexible $hash{$stock}{$label} style format.
+
+There is no way to override the default behaviour to cache currency
+conversion rates.
 
 =head1 COPYRIGHT
 
@@ -649,5 +717,14 @@ http://www.padz.net/~djpadz/YahooQuote/
 
 The GnuCash home page can be found at
 http://www.gnucash.org/
+
+=head1 SEE ALSO
+
+Finance::Quote::Yahoo, Finance::Quote::ASX, Finance::Quote::Fidelity,
+Finance::Quote::Tiaacref, Finance::Quote::Troweprice, LWP::UserAgent
+
+You should have also received the Finance::Quote hacker's guide with
+this package.  Please read it if you are interested in adding extra
+methods to this package.
 
 =cut
