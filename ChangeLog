@@ -28,3 +28,5 @@
 	  Previously they would waste time looking up nothing.
 
 	* Documentation additions and corrections.
+
+	* Added test files (Use.t, asx.t)
