@@ -785,26 +785,37 @@ sub tiaacref
     my(@line);		#holds the return from _parse_csv
     my(%info);		
     my($ua,$url);   #useragent and target url
-    my($data);		#the reply from TIAA-CREF's cgi
+    my($reply);		#the reply from TIAA-CREF's cgi
 
     $url = $TIAACREF_URL;
     foreach my $fund (@funds) {
+	if ($tiaacref_ids{$fund}) {
 		$url .=  $fund . "=yes&";
+	} else {
+		$info{$fund,"success"} = 0;
+		$info{$fund,"errormsg"} = "Bad symbol";
+	}
     }
     $url .=  "selected=1";
 
     $ua = LWP::UserAgent->new;
     $ua->timeout($TIMEOUT) if defined $TIMEOUT;
     $ua->env_proxy();
-    $data = $ua->request(GET $url)->content;
+    $reply = $ua->request(GET $url);
+    if ($reply ->is_success) {
 
-    foreach (split('\012',$data) ){
-        @line = _parse_csv($_);
-        $info{$line[0],"symbol"} = $line[0]; #in case the caller needs this in the hash
-        $info{$line[0],"exchange"} = "TIAA-CREF";
-        $info{$line[0],"name"} = $tiaacref_ids{$line[0]};
-        $info{$line[0],"date"} = $line[2];
-        $info{$line[0],"nav"} =  $line[1];	
+       foreach (split('\012',$reply->content) ){
+           @line = _parse_csv($_);
+           $info{$line[0],"symbol"} = $line[0]; #in case the caller needs this in the hash
+           $info{$line[0],"exchange"} = "TIAA-CREF";
+           $info{$line[0],"name"} = $tiaacref_ids{$line[0]};
+           $info{$line[0],"date"} = $line[2];
+           $info{$line[0],"nav"} =  $line[1];	
+	   $info{$line[0],"success"} = 1; #not necessarily, but we'll assume so until i implement a check for well-formedness
+       }
+    } else {
+	return undef; #perhaps we should return the hash with each elemnet
+		      #showing failure, with the errormsg "HTTP failure"
     }
 
     return %info;

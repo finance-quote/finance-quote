@@ -68,3 +68,12 @@
 	  used to be returned as 'N/A'.
 
 	* yahoo() now supports the $stocks{$sym,'success'} notation.
+
+2000-04-21      Brent Neal      <brent@phys.lsu.edu>
+        * Added checking for bogus symbols in tiaacref
+        * Added checking of the LWP::UserAgent->is_success method
+	* tiaacref() now supports $stocks{$sym,'success'} notation.
+        * Updated t/tiaacref.t and Examples/Quote_example.pl for
+               the changes
+
+
