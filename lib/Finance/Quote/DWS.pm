@@ -28,7 +28,7 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 #
-# $Id: DWS.pm,v 1.1 2000/08/16 02:31:04 pjf Exp $
+# $Id: DWS.pm,v 1.2 2000/08/21 20:05:03 volkers Exp $
 
 package Finance::Quote::DWS;
 require 5.005;
@@ -59,7 +59,7 @@ sub dwsfunds
   my @funds = @_;
   return unless @funds;
   my $ua = $quoter->user_agent;
-  my (%fundhash, @q, %info);
+  my (%fundhash, @q, @date, %info);
 
   # create hash of all funds requested
   foreach my $fund (@funds)
@@ -78,6 +78,13 @@ sub dwsfunds
       if (exists $fundhash{$q[0]})
       {
         $fundhash{$q[0]} = 1;
+
+        # convert price from german (0,00) to US format (0.00)
+        $q[1] =~ s/,/\./;
+
+        # convert date from german (dd.mm.yyyy) to US format (mm/dd/yyyy)
+        @date = split /\./, $q[2];
+        $q[2] = $date[1]."/".$date[0]."/".$date[2];
 
         $info{$q[0], "exchange"} = "DWS";
         $info{$q[0], "name"}     = $q[0];
@@ -126,7 +133,7 @@ sub dwsurl
   my $wday = $time[6];
 
   # during weekend use file of friday
-  if ($wday == 6 || $wday == 7)
+  if ($wday == 6 || $wday == 0)
   {
     $wday = 5;
   }
