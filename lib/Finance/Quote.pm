@@ -477,24 +477,44 @@ Finance::Quote - Get stock and mutual fund quotes from various exchanges
 =head1 SYNOPSIS
 
  use Finance::Quote;
- my $q = Finance::Quote->new;          # New Finance::Quote object.
- $q->timeout(60);		       # Timeout max of 60 seconds
- %quotes = $q->yahoo(@symbols);	       # NYSE quotes 
- %quotes = $q->yahoo_europe(@symbols); # Europe quotes
- %quotes = $q->fidelity(@symbols);     # Fidelity Investments Quotes
- %quotes = $q->troweprice();           # Quotes from T. Rowe Price
- %quotes = $q->tiaacref(@symbols);     # Annuities from TIAA-CREF
- %quotes = $q->asx(@symbols);          # Australian quotes from ASX.
- %quotes = $q->fetch("asx",@symbols);  # Same as above, different syntax.
- print ("the last price was ", $quotes{"IBM", "last"} );
+ $q = Finance::Quote->new;
+
+ $q->timeout(60);
+
+ $conversion_rate = $q->currency("AUD","USD");
+ $q->set_currency("EUR");  # Return all info in Euros.
+
+ $q->require_labels(qw/price date high low volume/);
+
+ $q->failover(1);	# Set failover support (on by default).
+
+ %quotes  = $q->fetch("nasdaq",@stocks);
+ $hashref = $q->fetch("nyse",@stocks);
 
 =head1 DESCRIPTION
 
 This module gets stock quotes from various internet sources, including
-Yahoo!  Finance, Fidelity Investments, and the Australian Stock Exchange.
-The functions will return a quote for each of the stock symbols passed to
-it.  The return value of each of the routines is a hash, which may include
-one or more of the following elements:
+Yahoo! Finance, Fidelity Investments, and the Australian Stock Exchange.
+There are two methods of using this module -- a functional interface
+that is depreciated, and an object-orientated method that provides
+greater flexibility and stability.
+
+With the exception of straight currency exchange rates, all information
+is returned as a two-dimensional hash (or a reference to such a hash,
+if called in a scalar context).  For example:
+
+	%info = $q->fetch("australia","CML");
+	print "The price of CML is ".$info{"CML","price"};
+
+The first part of the hash (eg, "CML") is referred to as the stock.
+The second part (in this case, "price") is referred to as the label.
+
+=head2 LABELS
+
+When information about a stock is returned, the following standard labels
+may be used.  Some custom-written modules may use labels not mentioned
+here.  If you wish to be certain that you obtain a certain set of labels
+for a given stock, you can specify that using require_labels().
 
     name         Company or Mutual Fund Name
     last         Last Price
@@ -524,50 +544,60 @@ one or more of the following elements:
     success	 Did the stock successfully return information? (true/false)
     errormsg	 If success is false, this field may contain the reason why.
 
-    (Elements which are not yet implemented have no key associated
-     with them.  Not all methods return all keys at all times.)
-
 If all stock lookups fail (possibly because of a failed connection) then
-`undef' may be returned.
+the empty list may be returned, or undef in a scalar context.
 
-You may optionally override the default LWP timeout of 180 seconds by setting
-$quote->timeout() or Finance::Quote::timeout() to your preferred value.
-
-Note that prices from the Australian Stock Exchange (ASX) are in
-Australian Dollars.  Prices from Yahoo! Europe are in Euros.  All other
-prices are in US Dollars.
-
-=head2 troweprice
-
-The troweprice() function ignores any arguments passed to it.  Instead it
-returns all funds managed by T.RowePrice.
-
-=head2 tiaacref
-
-For TIAA and CREF Annuities, you must use TIAA-CREF's pseudosymbols. These
-are as follows:
-
-    Stock:				CREFstok
-    Money Market:			CREFmony
-    Equity Index:			CREFequi
-    Inflation-Linked Bond:		CREFinfb
-    Bond Market:			CREFbond
-    TIAA Real Estate:			TIAAreal
-    Social Choice:			CREFsoci
-    Teachers PA Stock Index:		TIAAsndx
-    Global Equities:			CREFglob
-    Teachers PA Select Stock:		TIAAsele
-    Growth:				CREFgrow
+=head1 AVAILABLE METHODS
 
 =head2 FETCH
 
-    my %stocks = $q->fetch("nasdaq","IBM","MSFT");
+    my %stocks  = $q->fetch("usa","IBM","MSFT","LNUX");
+    my $hashref = $q->fetch("usa","IBM","MSFT","LNUX");
 
-A new function, fetch(), provides a more generic and easy-to-use interface
-to the library.  It takes a source as the first argument, and then a list
-of ticker-symbols to obtain from that source.  fetch() will understand the
-case-insensitive sources "nasdaq", "nyse" and "europe", and map them to
-the yahoo or yahoo_europe methods appropriately.
+Fetch takes an exchange as its first argument.  The second and remaining
+arguments are treated as stock-names.  In the standard Finance::Quote
+distribution, the following exchanges are recognised:
+
+	australia		Australan Stock Exchange
+	fidelity		Fidelity Investments
+	tiaacref		TIAA-CREF
+	troweprice		T. Rowe Price
+	europe			European Markets
+	canada			Canadian Markets
+	usa			USA Markets
+	nyse			New York Stock Exchange
+	nasdaq			NASDAQ
+	vanguard		Vanguard Investments
+
+When called in an array context, a hash is returned.  In a scalar
+context, a reference to a hash will be returned.  The structure
+of this hash is described earlier in this document.
+
+The fetch method automatically arranges for failover support and
+currency conversion if requested.
+
+=head2 CURRENCY
+
+$conversion_rate = $q->currency("USD","AUD");
+
+The currency method takes two arguments, and returns a conversion rate
+that can be used to convert from the first currency into the second.
+In the example above, we've requested the factor that would convert
+US dollars into Australian dollars.
+
+The currency method will return a false value if a given currency
+conversion cannot be fetched.
+
+At the moment, currency rates are fetched from Yahoo!, and the
+information returned is governed by Yahoo!'s terms and conditions.
+See Finance::Quote::Yahoo for more information.
+
+=head2 SET_CURRENCY
+
+$q->set_currency("FRF");	# Get results in French Francs.
+
+The set_currency method can be used to request that all information be
+returned in the specified currency.  
 
 =head1 ENVIRONMENT
 
@@ -575,48 +605,21 @@ Finance::Quote respects all environment that your installed
 version of LWP::UserAgent respects.  Most importantly, it
 respects the http_proxy environment variable.
 
-=head1 FAQ
-
-If there's one question I get asked over and over again, it's how did I
-figure out the format string for Yahoo! quotes?  Having typed the answer in
-innumerable emails, I figure sticking it directly into the man page might
-help save my fingers a bit...
-
-If you have a My Yahoo! (http://my.yahoo.com) account, go to the
-following URL:
-
-    http://edit.my.yahoo.com/config/edit_pfview?.vk=v1
-
-Viewing the source of this page, you'll come across the section that
-defines the menus that let you select which elements go into a
-particular view.  The <option> values are the strings that pick up
-the information described in the menu item.  For example, Symbol
-refers to the string "s" and name refers to the string "l".  Using
-"sl" as the format string, we would get the symbol followed by the
-name of the security.
-
-If you have questions regarding this, play around with $YAHOO_URL, changing
-the value of the f parameter.
-
 =head1 BUGS
 
-Not all functions return an errormsg when a failure results.
+There are no ways for a user to define a failover list.
 
-Not everything checks for errors as well as they could.
-
-There is no way to add extra aliases to the fetch list.
-
-There is no good documentation on which functions return what fields.
-
-This documentation is getting a little long and cumbersome.  It should
-be broken up into more logical sections.
+The two-dimensional hash is a somewhat unwieldly method of passing
+around information when compared to references.  A future release
+is planned that will allow for information to be returned in a
+more flexible $hash{$stock}{$label} style format.
 
 =head1 COPYRIGHT
 
  Copyright 1998, Dj Padzensky
  Copyright 1998, 1999 Linas Vepstas
  Copyright 2000, Yannick LE NY (update for Yahoo Europe and YahooQuote)
- Copyright 2000, Paul Fenwick (update for ASX)
+ Copyright 2000, Paul Fenwick (updates for ASX, maintainence and release)
  Copyright 2000, Brent Neal (update for TIAA-CREF)
 
 This program is free software; you can redistribute it and/or modify
@@ -624,20 +627,11 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or (at
 your option) any later version.
 
-The information that you obtain with this library may be copyrighted
-by Yahoo! Inc., and is governed by their usage license. See
-http://www.yahoo.com/docs/info/gen_disclaimer.html for more
-information.
-
-The information that you obtain with this library may be copyrighted
-by the ASX, and is governed by its usage license.  See
-http://www3.asx.com.au/Fdis.htm for more information.
-
-The information that you obtain with this library may be copyrighted
-by TIAA-CREF, and is governed by its usage license.
+Currency information fetched through this module is bound by
+Yahoo!'s terms and conditons.
 
 Other copyrights and conditions may apply to data fetched through this
-module.
+module.  Please refer to the sub-modules for further information.
 
 =head1 AUTHORS
 
