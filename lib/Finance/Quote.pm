@@ -41,6 +41,7 @@ use vars qw($VERSION @EXPORT @ISA $TIMEOUT @EXPORT_OK @EXPORT_TAGS
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
+use Carp;
 use Exporter ();
 
 # Export information
@@ -89,6 +90,37 @@ sub timeout {
 	$timeout = $self unless (ref $self);
 	$TIMEOUT = $timeout;
 }
+
+# =======================================================================
+# Fetch is a wonderful generic fetcher.  It takes a method and stuff to
+# fetch.  It's a nicer interface for when you have a list of stocks with
+# different sources which you wish to deal with.
+{
+	# Private hash used by fetch.  We don't place it inside the
+	# fetch function because then it gets rebuilt every time we 
+	# run fetch.  We don't place it at the top-level because that
+	# means other things that shouldn't care can play with it.
+	my %methods = ( asx   => \&asx,
+			fidelity => \&fidelity,
+			tiaacref => \&tiaacref,
+			troweprice => \&troweprice,
+			yahoo => \&yahoo,
+			yahoo_europe => \&yahoo_europe );
+
+	sub fetch {
+		shift if ref ($_[0]);	# Shift off the object if there is one.
+		my $method = shift;
+		my @stocks = @_;
+
+		unless (exists $methods{$method}) {
+			carp "Undefined fetch-method $method passed to ".
+			     "Finance::Quote::fetch";
+			return undef;
+		}
+		return &{$methods{$method}}(@stocks);
+	}
+}
+
 
 # =======================================================================
 # Grabbed from the Perl Cookbook. Parsing csv isn't as simple as you thought!
