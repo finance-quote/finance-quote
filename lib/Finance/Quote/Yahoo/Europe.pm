@@ -40,7 +40,7 @@ $VERSION = '1.03';
 
 # URLs of where to obtain information.
 
-$YAHOO_EUROPE_URL = ("http://finance.uk.yahoo.com/d/quotes.csv");
+$YAHOO_EUROPE_URL = ("http://uk.finance.yahoo.com/d/quotes.csv");
 
 sub methods {return (europe => \&yahoo_europe,yahoo_europe => \&yahoo_europe)};
 
