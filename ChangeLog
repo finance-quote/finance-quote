@@ -460,3 +460,7 @@
 	  more. Thanks Leigh.
 
 	* Added Tobias Vancura's F::Q::Fool module.
+
+	* Added Fool as a automatically loaded loaded module from
+	  F::Quote.pm.
+
