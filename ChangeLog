@@ -279,3 +279,5 @@
 	* Finance::Quote has a new scale_field() function that is used in
 	  currency conversion and by some sub-modules (Yahoo::Europe).  This
 	  may be useful for future module writers.
+
+	* CVSTAG: finance_quote_1_01
