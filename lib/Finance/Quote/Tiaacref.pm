@@ -32,18 +32,18 @@ require 5.005;
 
 use strict;
 
-use vars qw($VERSION $CREF_URL $TIAA_URL %tiaacref_ids %tiaacref_locs);
+use vars qw($VERSION $CREF_URL $TIAA_URL
+            %tiaacref_ids %tiaacref_locs %tiaacref_vals);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use Carp;
 
-$VERSION = '1.01';
+$VERSION = '1.02';
 
 # URLs of where to obtain information.
-
-$CREF_URL = ("http://www.tiaa-cref.org/financials/selection/ann-select.cgi?");
-$TIAA_URL = ("http://www.tiaa-cref.org/financials/selection/pa-select.cgi?");
+# This used to be different for the CREF and TIAA annuities, but this changed.
+$CREF_URL = ("http://www5.tiaa-cref.org/ddata/DownloadData?");
 
 sub methods { return (tiaacref=>\&tiaacref); }
 
@@ -68,14 +68,19 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date nav price/
 #Growth:			CREFgrow
 #TIAA Real Estate:		TIAAreal
 #PA Stock Index:		TIAAsndx
-#PA Select Stock:		TIAAsele
-#PA Select Growth Equity:	TIAAgreq
-#PA Select Growth Income:	TIAAgrin
-#PA Select Int'l Equity:	TIAAintl
-#PA Select Social Choice:	TIAAsocl
+#PA Select Stock:		TLSIX
+#PA Select Growth Equity:	TLGEX
+#PA Select Growth Income:	TLGIX
+#PA Select Int'l Equity:	TLIEX
+#PA Select Social Choice:	TLSCX
+#PA Select Large Cap Value: TLLCX
+#PA Select Small Cap Equity: TLCEX
+#PA Select Real Estate:	TLREX
 
 #
 # This subroutine was written by Brent Neal <brentn@users.sourceforge.net>
+# Modified to support new TIAA-CREF webpages by Kevin Foss <kfoss@maine.edu> and Brent Neal
+
 #
 # TODO:
 #
@@ -98,12 +103,42 @@ sub tiaacref
     	$tiaacref_ids{"CREFgrow"} = "CREF Growth";
     	$tiaacref_ids{"TIAAreal"} = "TIAA Real Estate";
     	$tiaacref_ids{"TIAAsndx"} = "TIAA Teachers Personal Annuity Stock Index";
-    	$tiaacref_ids{"TIAAsele"} = "TIAA Teachers Personal Annuity Select Stock"; 
-	$tiaacref_ids{"TIAAgreq"} = "TIAA Teachers Personal Annuity Select Growth Equity";
-        $tiaacref_ids{"TIAAgrin"} = "TIAA Teachers Personal Annuity Select Growth Income";
-        $tiaacref_ids{"TIAAintl"} = "TIAA Teachers Personal Annuity Select International Equity";
-        $tiaacref_ids{"TIAAsocl"} = "TIAA Teachers Personal Annuity Select Social Choice Equity";
+	    $tiaacref_ids{"TLSIX"} = "TIAA Personal Annuity Select Stock Index";
+		$tiaacref_ids{"TLGEX"} = "TIAA Personal Annuity Select Growth Equity";
+        $tiaacref_ids{"TLGIX"} = "TIAA Personal Annuity Select Growth & Income";
+        $tiaacref_ids{"TLIEX"} = "TIAA Personal Annuity Select International Equity";
+        $tiaacref_ids{"TLSCX"} = "TIAA Personal Annuity Select Social Choice Equity";
+        $tiaacref_ids{"TLLCX"} = "TIAA Personal Annuity Select Large Cap Value";
+        $tiaacref_ids{"TLCEX"} = "TIAA Personal Annuity Select Small Cap Equity";
+        $tiaacref_ids{"TLREX"} = "TIAA Personal Annuity Select Real Estate Securities";
+
     }
+    
+    if (! %tiaacref_vals) {
+    $tiaacref_vals{"CREFstok"} = "1001";
+	$tiaacref_vals{"CREFmony"} = "1008";
+	$tiaacref_vals{"CREFequi"} = "1004";
+	$tiaacref_vals{"CREFinfb"} = "1007";
+	$tiaacref_vals{"CREFbond"} = "1006";
+	$tiaacref_vals{"CREFsoci"} = "1005";
+	$tiaacref_vals{"CREFglob"} = "1002";
+	$tiaacref_vals{"CREFgrow"} = "1003";
+	$tiaacref_vals{"TIAAreal"} = "1009";
+	$tiaacref_vals{"TIAAsndx"} = "1010";
+	$tiaacref_vals{"TLSIX"}    = "1011";
+	$tiaacref_vals{"TLGEX"}    = "1012";
+	$tiaacref_vals{"TLGIX"}    = "1013";
+	$tiaacref_vals{"TLIEX"}    = "1014";
+	$tiaacref_vals{"TLSCX"}    = "1015";
+	$tiaacref_vals{"TLLCX"}    = "1016";
+	$tiaacref_vals{"TLCEX"}    = "1017";
+	$tiaacref_vals{"TLREX"}    = "1018";
+    }
+    
+#The location doesn't matter anymore. 
+#I'm leaving this data structure in place in case it changes again
+#FBN 23/JAN/04
+    
     if (! %tiaacref_locs) {
         $tiaacref_locs{"CREFstok"} = 1;
         $tiaacref_locs{"CREFmony"} = 1;
@@ -114,12 +149,15 @@ sub tiaacref
         $tiaacref_locs{"CREFglob"} = 1;
         $tiaacref_locs{"CREFgrow"} = 1;
         $tiaacref_locs{"TIAAreal"} = 1;
-        $tiaacref_locs{"TIAAsndx"} = 2;
-        $tiaacref_locs{"TIAAsele"} = 2;
-        $tiaacref_locs{"TIAAgreq"} = 2;
-        $tiaacref_locs{"TIAAgrin"} = 2;
-        $tiaacref_locs{"TIAAintl"} = 2;
-        $tiaacref_locs{"TIAAsocl"} = 2;
+        $tiaacref_locs{"TIAAsndx"} = 1;
+		$tiaacref_locs{"TLSIX"}    = 1;
+		$tiaacref_locs{"TLGEX"}    = 1;
+		$tiaacref_locs{"TLGIX"}    = 1;
+		$tiaacref_locs{"TLIEX"}    = 1;
+		$tiaacref_locs{"TLSCX"}    = 1;
+		$tiaacref_locs{"TLLCX"}    = 1;
+		$tiaacref_locs{"TLCEX"}    = 1;
+		$tiaacref_locs{"TLREX"}    = 1;
     }
     my(@funds) = @_;
     return unless @funds;
@@ -141,10 +179,10 @@ sub tiaacref
     foreach my $fund (@funds) {
 	if ($tiaacref_ids{$fund}) {
         	if ($tiaacref_locs{$fund} == 1) {
-			$urlc .=  $fund . "=yes&";
 			$cntc++;
+			$urlc .=  "f" . $cntc . "=" . $tiaacref_vals{$fund} . "&";
 		} else {
-			$urlt .= $fund . "=yes&";
+ 			$urlt .= $fund . "=yes&";
 			$cntt++;
 		}
 		$check{$fund} = 0;
@@ -153,7 +191,7 @@ sub tiaacref
 		$info{$fund,"errormsg"} = "Bad symbol";
 	}
     }
-    $urlc .=  "selected=1";
+    $urlc .=  "days=1";
     $urlt .=  "selected=1";
     $qdata ="";
     $ua = $quoter->user_agent;
@@ -240,12 +278,15 @@ The following symbols can be used:
     Global Equities:			CREFglob
     Growth:				CREFgrow
     TIAA Real Estate:			TIAAreal
-    PA Stock Index:			TIAAsndx
-    PA Select Stock:			TIAAsele
-    PA Select Growth Equity:      	TIAAgreq
-    PA Select Growth Income:       	TIAAgrin
-    PA Select Int'l Equity:        	TIAAintl
-    PA Select Social Choice:       	TIAAsocl
+	PA Stock Index:		TIAAsndx
+	PA Select Stock:		TLSIX
+	PA Select Growth Equity:	TLGEX
+	PA Select Growth Income:	TLGIX
+	PA Select Int'l Equity:	TLIEX
+	PA Select Social Choice:	TLSCX
+	PA Select Large Cap Value: TLLCX
+	PA Select Small Cap Equity: TLCEX
+	PA Select Real Estate:	TLREX
 
 This module is loaded by default on a Finance::Quote object.  It's
 also possible to load it explicitly by passing "Tiaacref" in to the
