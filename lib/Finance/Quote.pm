@@ -64,7 +64,7 @@ $VERSION = '0.18';
 
 # URLs of where to obtain information.
 
-$YAHOO_URL = ("http://quote.yahoo.com/d?f=snl1d1t1c1p2va2bapomwerr1dyj1&s=");
+$YAHOO_URL = ("http://quote.yahoo.com/d?f=snl1d1t1c1p2va2bapomwerr1dyj1q&s=");
 $YAHOO_EUROPE_URL = ("http://finance.fr.yahoo.com/d/quotes.csv?f=snl1d1t1c1p2va2bapomwerr1dyj1&s=");
 $YAHOO_CURRENCY_URL = ("http://finance.yahoo.com/m5?");
 $FIDELITY_GANDI_URL = ("http://personal441.fidelity.com/gen/prices/gandi.csv");
@@ -200,6 +200,7 @@ sub yahoo
       $aa {$sym, "div"} = $q[18];
       $aa {$sym, "div_yield"} = $q[19];
       $aa {$sym, "cap"} = $q[20];
+      $aa {$sym, "ex_div"} = $q[21];
 
       # Yahoo returns a line filled with N/A's if we look up a
       # non-existant symbol.  AFAIK, the date flag will /never/
@@ -985,6 +986,7 @@ one or more of the following elements:
     div          Dividend per Share
     div_yield    Dividend Yield
     cap          Market Capitalization
+    ex_div	 Ex-Dividend Date.
     nav          Net Asset Value
     yield        Yield (usually 30 day avg)
     success	 Did the stock successfully return information? (true/false)
