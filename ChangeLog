@@ -340,3 +340,7 @@
 2000-09-01	Paul Fenwick	<pjf@cpan.org>
 	* Tweaked ASX.pm to avoid divide-by-zero errors and dodgy
 	  bogus-looking label values.
+
+2000-09-04	Paul Fenwick	<pjf@cpan.org>
+	* Keith Refson's patch to Trustnet to avoid premature returns
+	  in case of a bad symbol.
