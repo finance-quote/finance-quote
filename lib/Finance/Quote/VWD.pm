@@ -28,7 +28,7 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 #
-# $Id: VWD.pm,v 1.1 2000/09/16 08:13:24 pjf Exp $
+# $Id: VWD.pm,v 1.2 2000/10/20 09:21:48 pjf Exp $
 
 # =============================================================
 # Workaround by Matt Sisk for handling newlines in table cells.
@@ -84,7 +84,7 @@ sub vwd
     {
       # parse table
       my $te = new HTML::TableExtract::Workaround
-        (headers => [qw/WKN Name Whrg Rückn Rückn Zwg Rückn AA/]);
+        (headers => [qw/WKN Name Whrg Rückn Rückn Zwg Rückn Ausgabe/]);
       $te->parse($response->content);
 
       # extract table contents
