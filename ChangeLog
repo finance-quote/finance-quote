@@ -606,3 +606,9 @@
 	  work with the new TD Waterhouse website.  Many thanks
 	  to Robert Clark again. (#750843)
 
+	* Added the BM Nesbitt Burns module provided by Robert
+	  Clark, including test cases.  (#752423).
+
+	* Updated BMONesbittBurns module to provide better date
+	  handling, screening out of high-ascii characters from
+	  fields, and removal of spurious debug output.
