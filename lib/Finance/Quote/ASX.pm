@@ -102,6 +102,8 @@ sub asx {
 		# Also delete high bit characters.
 		$stock =~ tr/* \200-\377//d;
 
+		$info{$stock,'symbol'} = $stock;
+
 		foreach my $label (qw/name last p_change bid offer open
 			      high low volume/) {
 			$info{$stock,$label} = shift(@$row);
@@ -172,11 +174,6 @@ sub asx {
 =head1 NAME
 
 Finance::Quote::ASX	- Obtain quotes from the Australian Stock Exchange.
-
-=head1 NOTE NOTE NOTE NOTE NOTE NOTE NOTE
-
-This module is currently non-functional.  For Australian stock prices,
-please use the "australian" quote source instead.
 
 =head1 SYNOPSIS
 
