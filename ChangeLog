@@ -612,3 +612,5 @@
 	* Updated BMONesbittBurns module to provide better date
 	  handling, screening out of high-ascii characters from
 	  fields, and removal of spurious debug output.
+
+	* CVSTAG: finance_quote_1_08
