@@ -264,12 +264,12 @@ Finance::Quote::Fidelity - Obtain information from Fidelity Investments.
 
 =head1 SYNOPSIS
 
-use Finance::Quote;
+    use Finance::Quote;
 
-$q = Finance::Quote->new;
+    $q = Finance::Quote->new;
 
-%info = Finance::Quote->fetch("fidelity","FBGRX");
-%info = Finance::Quote->fetch("fidelity_direct","FBGRX");
+    %info = Finance::Quote->fetch("fidelity","FBGRX");
+    %info = Finance::Quote->fetch("fidelity_direct","FBGRX");
 
 =head1 DESCRIPTION
 
