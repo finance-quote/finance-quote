@@ -571,3 +571,14 @@
 
 	* Fixed problem where no symbol tag was being defined in ASX.
 	  Thanks again to Rik Harris.  (#653035)
+
+	* Fixed problem where undefined currencies would be returned
+	  as zero, and not undefined as occured in previous versions.
+
+	* Fixed tests in currency.t which assumed that conversion
+	  could be done between EUR and former European currencies.
+	  These are no longer supported due to a change in the
+	  lookups provided by Yahoo.
+
+	* Updated Fidelity and Trowprice.pm to indicate their current
+	  non-working status.
