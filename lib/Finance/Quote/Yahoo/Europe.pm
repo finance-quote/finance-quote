@@ -151,4 +151,6 @@ currency label is also returned.
 
 Yahoo Europe, http://finance.uk.yahoo.com/
 
+Finance::Quote::Yahoo::Base
+
 =cut

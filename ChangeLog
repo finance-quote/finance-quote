@@ -519,3 +519,6 @@
 	  file accordingly.  This means that autoamtic installs from
 	  CPAN won't run the regression tests, which was causing
 	  installation to fail on some systems.
+
+	* Updated lists of copyright holders, SEE ALSO sections
+	  in man-pages.
