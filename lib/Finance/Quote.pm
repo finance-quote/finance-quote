@@ -167,7 +167,7 @@ sub new {
 		 	       ASX Troweprice Tiaacref Yahoo::USA Yahoo::Europe
 			       DWS VWD Trustnet Fool AEX Tdwaterhouse Tdefunds
 			       Yahoo::Asia FTPortfolios IndiaMutual Union
-			       BMONesbittBurns Yahoo::Brasil TSP/;
+			       BMONesbittBurns Yahoo::Brasil TSP SEB/;
 	}
 
 	$this->_load_modules(@modules,@reqmodules);
