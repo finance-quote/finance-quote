@@ -128,3 +128,7 @@
 
 2000-05-13	Paul Fenwick	<pjf@cpan.org>
 	* Added Documentation/FAQ file.
+
+2000-05-14	Paul Fenwick	<pjf@cpan.org>
+	* Huge re-write and change of everything so that it should be easy
+	  to plug in new modules without changing any existing code.
