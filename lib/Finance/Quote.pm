@@ -129,14 +129,15 @@ sub new {
 	if (!scalar(@_) or $_[0] eq "-defaults") {
 		shift if (scalar(@_));
 		# Default modules
-		 @modules = qw/Yahoo::USA Yahoo::Europe Fidelity 
-			       Troweprice ASX Tiaacref/;
+		 @modules = qw/Fidelity ASX Troweprice Tiaacref
+		               Yahoo::USA Yahoo::Europe/;
 	}
 
 	$this->_load_modules(@modules,@_);
 
 	$this->{TIMEOUT} = $TIMEOUT if defined($TIMEOUT);
 	$this->{FAILOVER} = 1;
+	$this->{REQUIRED} = [];
 
 	return $this;
 }
@@ -201,6 +202,25 @@ sub require_labels {
 	return;
 }
 
+# _require_test (private object method)
+#
+# This function takes an array.  It returns true if all required
+# labels appear in the arrayref.  It returns false otherwise.
+#
+# This function could probably be made more efficient.
+
+sub _require_test {
+	my $this = shift;
+	my %available;
+	@available{@_} = ();	# Ooooh, hash-slice.  :)
+	my @required = @{$this->{REQUIRED}};
+	return 1 unless @required;
+	for (my $i = 0; $i < @required; $i++) {
+		return 0 unless exists $available{$required[$i]};
+	}
+	return 1;
+}
+
 # =======================================================================
 # fetch (public object method)
 #
@@ -222,32 +242,27 @@ sub fetch {
 	}
 
 	# Failover code.  This steps through all availabe methods while
-	# we still have failed stocks to look-up.
+	# we still have failed stocks to look-up.  This loop only
+	# runs a single time unless FAILOVER is defined.
 
-	if ($this->{FAILOVER}) {
-		my %returnhash = ();
+	my %returnhash = ();
 
-		foreach my $methodinfo (@{$METHODS{$method}}) {
-			my $funcref = $methodinfo->{"function"};
-			my @failed_stocks = ();
-			%returnhash = (%returnhash,&$funcref($this,@stocks));
+	foreach my $methodinfo (@{$METHODS{$method}}) {
+		my $funcref = $methodinfo->{"function"};
+		next unless $this->_require_test(@{$methodinfo->{"labels"}});
+		my @failed_stocks = ();
+		%returnhash = (%returnhash,&$funcref($this,@stocks));
 
-			foreach my $stock (@stocks) {
-				push(@failed_stocks,$stock)
-					unless ($returnhash{$stock,"success"});
-			}
-			last unless @failed_stocks;
-			@stocks = @failed_stocks;
+		foreach my $stock (@stocks) {
+			push(@failed_stocks,$stock)
+				unless ($returnhash{$stock,"success"});
 		}
-
-		return %returnhash;
+		last unless $this->{FAILOVER};
+		last unless @failed_stocks;
+		@stocks = @failed_stocks;
 	}
 
-	# No failover?  Okay, we'll just use the first method available
-	# then.
-
-	my $funcref = @{$METHODS{$method}}[0];
-	return &$funcref($this,@stocks);
+	return %returnhash;
 }
 
 # =======================================================================
