@@ -28,6 +28,7 @@ lib/Finance/Quote/AEX.pm
 lib/Finance/Quote/Cdnfundlibrary.pm
 lib/Finance/Quote/Tdwaterhouse.pm
 lib/Finance/Quote/FTPortfolios.pm
+lib/Finance/Quote/IndiaMutual.pm
 lib/Finance/Quote.pm
 test/currency.t
 test/Use.t
@@ -42,3 +43,4 @@ test/vanguard.t
 test/vwd.t
 test/yahoo.t
 test/yahoo_europe.t
+test/indiamutual.t
