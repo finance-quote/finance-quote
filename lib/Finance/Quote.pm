@@ -292,12 +292,7 @@ sub default_currency_fields {
 			foreach my $field (@$convert_fields) {
 				next unless (defined $info->{$stock,$field});
 
-				my @chunks = split(/([^0-9.])/,$info->{$stock,$field});
-				for (my $i=0; $i < @chunks; $i++) {
-					next unless $chunks[$i] =~ /\d/;
-					$chunks[$i] *= $conversion{$currency,$new_currency};
-				}
-				$info->{$stock,$field} = join("",@chunks);
+				$info->{$stock,$field} = $this->scale_field($info->{$stock,$field},$conversion{$currency,$new_currency});
 			}
 
 			# Set the new currency.
@@ -305,6 +300,27 @@ sub default_currency_fields {
 		}
 	}
 }
+
+# =======================================================================
+# Helper function that can scale a field.  This is useful because it
+# handles things like ranges "105.4 - 108.3", and not just straight fields.
+#
+# The function takes a string or number to scale, and the factor to scale
+# it by.  For example, scale_field("1023","0.01") would return "10.23".
+
+sub scale_field {
+	shift if ref $_[0];	# Shift off the object, if there is one.
+
+	my ($field, $scale) = @_;
+	my @chunks = split(/([^0-9.])/,$field);
+
+	for (my $i=0; $i < @chunks; $i++) {
+		next unless $chunks[$i] =~ /\d/;
+		$chunks[$i] *= $scale;
+	}
+	return join("",@chunks);
+}
+
 
 # =======================================================================
 # Timeout code.  If called on a particular object, then it sets
@@ -666,6 +682,18 @@ be useful to an application, however it is possible to modify
 the user-agent directly using this method:
 
     $q->user_agent->timeout(10);	# Set the timeout directly.
+
+
+=head2 SCALE_FIELD
+
+    my $pounds = $q->scale_field($item_in_pence,0.01);
+
+The scale_field() function is a helper that can scale complex fields such
+as ranges (eg, "102.5 - 103.8") and other fields where the numbers should
+be scaled but any surrounding text preserved.  It's most useful in writing
+new Finance::Quote modules where you may retrieve information in a
+non-ISO4217 unit (such as cents) and would like to scale it to a more
+useful unit (like dollars).
 
 =head1 ENVIRONMENT
 
