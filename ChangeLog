@@ -61,3 +61,5 @@
 	  aliases to yahoo.
 
 	* Added stockdump.pl example script, which is handy in debugging.
+
+	* fetch is now an exportable function.
