@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 7};
+BEGIN {plan tests => 8};
 
 use Finance::Quote;
 
@@ -20,6 +20,10 @@ ok($quotes{"IBM", "currency"} eq "USD");
 
 ok($quotes{"SGI","last"} > 0);
 ok($quotes{"SGI","success"});
+
+# Make sure there are no spurious % signs.
+
+ok($quotes{"SGI","p_change"} !~ /%/);
 
 # Check that bogus stocks return failure:
 
