@@ -152,3 +152,5 @@
 	* Updated Quote.pm to query new labels methods.
 
 	* Provided a failover method for fidelity via Yahoo.
+
+	* Added failover functionality.
