@@ -12,6 +12,7 @@ Paul Fenwick <pjf@cpan.org>, May 2000
 		2.4 Using your new module.
 	3. How to contribute your module to the world.
 	4. How to find out more?
+	5. How to join the mailing lists?
 
 1. Introduction
 ===============
@@ -56,7 +57,7 @@ This would indicate that your package provides methods for
 "dodgyfunds" and "dodgyloans", and that the subroutines
 "funds" and "loans" should be called to access that information.
 
-The following methods should be used for the following information
+The following method names should be used for the following information
 sources:
 
 	Method-Name			Source
@@ -79,19 +80,21 @@ rely upon it.
 It's strongly recommended that you also provide a unique name for your
 method, in case you (or others) wish to call that method exclusively
 in code.  Hence if you had written a module to fetch information from
-the NYSE from inspecting chicken entrails, you might use the following
+the NYSE from inspecting chicken entails, you might use the following
 methods function:
 
-	sub methods { return ( nyse => \&chicken_entrails,
-			       chicken_entrails => \&chicken_entrails ); }
+XXX Hence ... function.:  is unclear.
+
+	sub methods { return ( nyse => \&chicken_entails,
+			       chicken_entails => \&chicken_entails ); }
 
 This means that people who only want to use your function can use
-$quoter->fetch('chicken_entrails',@stocks), but those who don't
-care where their NYSE stocks come from can use $quoter->fetch('nyse',@stocks).
-The advantage of the first form here is that you know exactly
-where the information is coming from.  In the second, failover methods
-means that many different functions could be used to fetch the
-information, not just yours.
+$quoter->fetch('chicken_entails',@stocks), but those who don't care where
+their NYSE stock information is fetched from can use
+$quoter->fetch('nyse',@stocks).  The first form allows you to know exactly
+where the information is coming from.  In the second, failover methods mean
+that many different functions could be used to fetch the stock information,
+not just the one you have defined.
 
 2.3 The functions specified by methods().
 -----------------------------------------
@@ -101,14 +104,14 @@ Finance::Quote object provides the following ready-to-use methods:
 
 	user_agent();	# Provides a ready-to-use LWP::UserAgent
 
-	parse_csv();	# Parses a list of comma-seperated values
+	parse_csv();	# Parses a list of comma-separated values
 			# and returns an array.
 
 The user_agent() method should be used if possible to fetch the information,
-as it will already be configured to use the timeout, proxy, and other
+as it should be already configured to use the timeout, proxy, and other
 settings requested by the calling program.
 
-Your function should return a two-dimensonal hash as specified in the
+Your function should return a two-dimensional hash as specified in the
 Finance::Quote man-page.  Eg:
 
 	$hash{$symbol,'last'} = $last_price;
@@ -116,16 +119,19 @@ Finance::Quote man-page.  Eg:
 	# etc etc.
 
 It is ESSENTIAL that your hash contain a true value for {$symbol,'success'}
-for information that has been successfully obtained.  If you could
-not obtain the information for any reason, then {$symbol,'success'} should
+for information that has been successfully obtained.  If the information
+was not obtained for any reason, then {$symbol,'success'} should
 be set to a false value (preferably 0), and a human-readable error
 message placed in {$symbol,'errormsg'}.  The following code snippet
 demonstrates this:
 
 	sub funds {
+
 		my $quoter = shift;	# The Finance::Quote object.
 		my @stocks = @_;
 		my %info;
+
+		my $DODGY_URL = "http://dodgybank.xxx/funds.csv?";
 
 		my $ua = $quoter->user_agent;	# This gives us a user-agent
 						# with timeouts, proxies,
@@ -147,6 +153,8 @@ demonstrates this:
 It is valid to return undef or the empty list if all stock lookups failed.
 Setting the errormsg is not strictly required, but it is very rude not
 to do so.
+
+XXX needs greater clarification now I think.
 
 It is also very very strongly recommended that you place your module's
 name in the {$stock,"source"} field.  This allows others to check where
@@ -178,26 +186,36 @@ little advantages over the fetch() method:
 
 	my %loaninfo = $quoter->dodgyloans("car","boat","loan");
 
+This mainly exists to maintain compatibility with previous versions of
+Finance::Quote.
+
 3. How to contribute your module to the world.
 ==============================================
 If you'd like others to use your module, then send a post to
-<finance-quote-devel@sourceforge.net> to get in touch with the
-other finance-quote developers and maintainers.  You can also submit
-your module using the patch manager at:
+
+	<finance-quote-devel@sourceforge.net> 
+
+to get in touch with the other finance-quote developers and maintainers.
+You can also submit your module using the patch manager at:
 
 	http://sourceforge.net/project/?group_id=4232
 
 4. How to find out more?
 ========================
-You might also choose to visit the Finance::Quote webpage located at:
+The Finance::Quote webpage is located at:
 
 	http://finance-quote.sourceforge.net/
 
-or make use of the tools at:
+You are welcome to make use of the tools at:
 
 	http://sourceforge.net/project/?group_id=4232
 
-You might also wish to consider joining the Finance::Quote mailing lists.
-Information on these lists can be found at:
+5. How to join the mailing lists?
+=================================
+
+There are two mailing lists for Finance::Quote.  These can both be accessed
+from:
 
 	http://sourceforge.net/mail/?group_id=4232
+
+
