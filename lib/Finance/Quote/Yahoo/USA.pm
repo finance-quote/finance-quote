@@ -49,7 +49,7 @@ sub methods {return (canada   => \&yahoo,
 		     nyse     => \&yahoo,
 		     nasdaq   => \&yahoo,
 		     vanguard => \&yahoo,
-		     fidelity => \&yahoo)};
+		     fidelity => \&yahoo_fidelity)};
 
 {
 	my @labels = (base_yahoo_labels(),"currency", "method");
@@ -60,7 +60,48 @@ sub methods {return (canada   => \&yahoo,
 			     nyse	=> \@labels,
 			     nasdaq	=> \@labels,
 			     vanguard	=> \@labels,
-			     fidelity   => \@labels); }
+			     fidelity   => [@labels,'yield','nav']); }
+}
+
+# This is a special wrapper to provide information compatible with
+# the primary Fidelity function of Finance::Quote.  It does a good
+# job of a failover.
+{
+
+	# Really this list should be common for both the Fidelity.pm
+	# and this module.  We could possibly get away with checking
+	# for /XX$/, but I don't know how reliable that is.
+
+	my %yield_funds = (FDRXX => 1,
+	                   FDTXX => 1,
+			   FGMXX => 1,
+			   FRTXX => 1,
+			   SPRXX => 1,
+			   SPAXX => 1,
+			   FDLXX => 1,
+			   FGRXX => 1);
+
+	sub yahoo_fidelity {
+		my $quoter = shift;
+		my @symbols = @_;
+		return unless @symbols;
+
+		# Call the normal yahoo function (defined later in this
+		# file).
+
+		my %info = yahoo($quoter,@symbols);
+
+		foreach my $symbol (@symbols) {
+			next unless $info{$symbol,"success"};
+			if ($yield_funds{$symbol}) {
+				$info{$symbol,"yield"}=$info{$symbol,"price"};
+			} else {
+				$info{$symbol,"nav"} = $info{$symbol,"price"};
+			}
+		}
+
+		return wantarray ? %info : \%info;
+	}
 }
 
 sub yahoo

@@ -330,3 +330,6 @@
 	* Added Keith Refson's Trustnet module.
 
 	* Added .cvsignore file to reduce spam for developers using CVS.
+
+	* Updated Yahoo/USA.pm to provide more compatible returns when
+	  called as a fidelity failover.
