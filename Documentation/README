@@ -1,6 +1,6 @@
 Welcome to Finance::Quote
 =========================
-Written by: pjf@cpan.org
+Maintained by: Paul Fenwick <pjf@cpan.org>
 
 This project is currently under development, and currently only contains
 a few files.  Those files are:
@@ -17,3 +17,14 @@ scripts, and more examples.
 Try running `perldoc' over lib/Finance/Quote.pm for more information on
 how to use the library, or `perldoc Finance::Quote' once things have been
 installed.
+
+WHERE TO GET THE LATEST VERSION?
+================================
+The latest version of Finance::Quote can be obtained from Sourceforge at
+the following page:
+
+http://sourceforge.net/project/?group_id=4232
+
+Alternatively, you can take the link from:
+
+http://finance-quote.sourceforge.net/
