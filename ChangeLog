@@ -510,3 +510,5 @@
 
 	* Removed failover into Fool.pm support, as I'd like to do more
 	  testing before it enters the failover system.
+
+	* Updated the FAQ.
