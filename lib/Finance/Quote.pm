@@ -132,11 +132,12 @@ sub yahoo
       @q = _parse_csv($_);
 
       $sym = $q[0];
-      $aa {$sym, "exchange"} = "NYSE";  # new  york stock exchange
       $aa {$sym, "name"} = $q[1];
       $aa {$sym, "last"} = $q[2];
       $aa {$sym, "date"} = $q[3];
       $aa {$sym, "time"} = $q[4];
+      $aa {$sym, "net"}  = $q[5];
+      $aa {$sym, "p_change"} = $q[6];
       $aa {$sym, "volume"} = $q[7];
       $aa {$sym, "bid"} = $q[9];
       $aa {$sym, "ask"} = $q[10];
@@ -145,6 +146,11 @@ sub yahoo
       $aa {$sym, "eps"} = $q[15];
       $aa {$sym, "pe"} = $q[16];
       $aa {$sym, "cap"} = $q[20];
+
+      if ($q[13] =~ m{^"?\s*(\S+)\s*-\s*(\S+)"?$}) {
+        $aa {$sym, "low"} = $1;
+        $aa {$sym, "high"} = $2;
+      }
     }
 
     # return wantarray() ? @qr : \@qr;
@@ -793,7 +799,7 @@ following elements:
     low		 Lowest trade today
     date         Last Trade Date  (MM/DD/YY format)
     time         Last Trade Time
-                 Change
+    net          Net Change
     p_change     Percent Change from previous day's close
     volume       Volume
                  Average Daily Vol
