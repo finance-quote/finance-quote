@@ -42,11 +42,12 @@ $VERSION = '0.19';
 
 $YAHOO_URL = ("http://quote.yahoo.com/d?f=snl1d1t1c1p2va2bapomwerr1dyj1q&s=");
 
-sub methods {return (canada => \&yahoo,
-                     usa    => \&yahoo,
-		     yahoo  => \&yahoo,
-		     nyse   => \&yahoo,
-		     nasdaq => \&yahoo)};
+sub methods {return (canada   => \&yahoo,
+                     usa      => \&yahoo,
+		     yahoo    => \&yahoo,
+		     nyse     => \&yahoo,
+		     nasdaq   => \&yahoo,
+		     vanguard => \&yahoo)};
 
 sub yahoo
 {
