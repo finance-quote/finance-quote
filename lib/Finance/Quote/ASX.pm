@@ -27,7 +27,7 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 
-require 5.004;
+require 5.005;
 
 use strict;
 
@@ -44,7 +44,7 @@ sub methods {return (australia => \&asx,asx => \&asx)}
 
 {
 	my @labels = qw/date bid ask open high low last close p_change
-	                volume price/;
+	                volume price method exchange/;
 
 	sub labels { return (australia => \@labels,
 	                     asx       => \@labels); }
@@ -172,6 +172,9 @@ sub asx {
 	# Australian indexes all begin with X, so don't tag them
 	# as having currency info.
         $info{$stock, "currency"} = "AUD" unless ($stock =~ /^X/);
+
+	$info{$stock, "method"} = "asx";
+	$info{$stock, "exchange"} = "Australian Stock Exchange";
     }
     return %info if wantarray;
     return \%info;

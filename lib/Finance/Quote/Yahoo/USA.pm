@@ -28,7 +28,7 @@
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 
 package Finance::Quote::Yahoo::USA;
-require 5.004;
+require 5.005;
 
 use strict;
 use HTTP::Request::Common;
@@ -52,7 +52,7 @@ sub methods {return (canada   => \&yahoo,
 		     fidelity => \&yahoo)};
 
 {
-	my @labels = (base_yahoo_labels(),"currency");
+	my @labels = (base_yahoo_labels(),"currency", "method");
 
 	sub labels { return (canada	=> \@labels,
 			     usa	=> \@labels,
@@ -77,8 +77,72 @@ sub yahoo
 		# tag them with a currency.
 		if ($info{$symbol,"success"} and $symbol !~ /^\^/) {
 			$info{$symbol,"currency"} = "USD";
+			$info{$symbol,"method"} = "yahoo";
 		}
 	}
 	return %info if wantarray;
 	return \%info;
 }
+
+1;
+
+=head1 NAME
+
+Finance::Quote::Yahoo::USA - Obtain information about stocks and funds
+in the USA and Canada.
+
+=head1 SYNOPSIS
+
+    use Finance::Quote;
+
+    $q = Finance::Quote->new;
+
+    %info = $q->fetch("usa","SGI");
+
+=head1 DESCRIPTION
+
+This method provides access to financial information from a number
+of exhcanges in the United States and Canada.  The following methods
+are available:
+
+	canada
+	usa
+	yahoo
+	nyse
+	nasdaq
+	vanguard
+	fidelity
+
+These methods all use the same information source, and hence can
+be considered somewhat interchangable.  However, the method "yahoo"
+should be passed to fetch if you wish to obtain information
+from any source that Yahoo tracks.
+
+This method is loaded by default by Finance::Quote, although it
+can be explicitly loaded by passing the argument "Yahoo::USA"
+to Finance::Quote->new().
+
+Information returned by this module may be subject to Yahoo's
+terms and conditions.  See http://finance.yahoo.com/ for more
+information.
+
+=head1 LABELS RETURNED
+
+This module returns all the standard labels that Yahoo provides,
+as well as the currency label.  See Finance::Quote::Yahoo::Base
+for more information.
+
+=head1 BUGS
+
+Yahoo does not make a distinction between the various exchanges
+in the United States and Canada.  For example, it is possible to request
+a stock using the "NYSE" method and still obtain data even if that stock
+does not exist on the NYSE but exists on a different exchange.
+
+=head1 SEE ALSO
+
+Yahoo Finance, http://finance.yahoo.com/
+
+Finance::Quote::Base
+
+=cut

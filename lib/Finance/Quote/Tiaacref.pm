@@ -28,7 +28,7 @@
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 
 package Finance::Quote::Tiaacref;
-require 5.004;
+require 5.005;
 
 use strict;
 
@@ -46,7 +46,7 @@ $TIAACREF_URL = ("http://www.tiaa-cref.org/financials/selection/ann-select.cgi?"
 
 sub methods { return (tiaacref=>\&tiaacref); }
 
-sub labels { return (tiaacref => [qw/symbol exchange name date nav price/]); }
+sub labels { return (tiaacref => [qw/method symbol exchange name date nav price/]); }
 
 # =======================================================================
 # TIAA-CREF Annuities are not listed on any exchange, unlike their mutual funds
@@ -130,7 +130,9 @@ sub tiaacref
 		  $info{$line[0],"price"} = $info{$line[0],"nav"};
 	 	  $info{$line[0],"success"} = 1; #this contains good data, 
                                                  #beyond a reasonable doubt
-                  $info{$line[0],"currency"} = "USD";                                
+                  $info{$line[0],"currency"} = "USD";
+		  $info{$line[0],"method"} = "tiaacref";
+		  $info{$line[0],"exchange"} = "TIAA-CREF";
 	 	  $check{$line[0]} = 1;
 	  } else {
 	  	$info{$line[0],"success"} = 0;

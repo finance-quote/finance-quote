@@ -30,7 +30,7 @@
 # also been integrated.
 
 package Finance::Quote::Yahoo::Base;
-require 5.004;
+require 5.005;
 
 use strict;
 use LWP::UserAgent;
@@ -161,3 +161,28 @@ sub yahoo_request {
 	return %info if wantarray;
 	return \%info;
 }
+
+1;
+
+=head1 NAME
+
+Finance::Quote::Yahoo::Base - Common functions for fetching Yahoo info.
+
+=head1 SYNOPSIS
+
+No public API defined.  You'll have to look through the very-well
+documented source-code for now.  Sorry.
+
+=head1 LABELS RETURNED
+
+Most Yahoo functions will return a standard set of labels.  These
+include (where available): symbol, name, last, date, time, net,
+p_change, volume, bid, ask close, open, day_range, year_range, eps,
+pe, div_date, div, div_yield, cap, ex_div, avg_vol.
+
+=head1 SEE ALSO
+
+Finance::Quote::Yahoo::Australia, Finance::Quote::Yahoo::USA,
+Finance::Quote::Yahoo::Europe.
+
+=cut

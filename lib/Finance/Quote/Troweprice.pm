@@ -28,7 +28,7 @@
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 
 package Finance::Quote::Troweprice;
-require 5.004;
+require 5.005;
 
 use strict;
 
@@ -46,7 +46,7 @@ $TROWEPRICE_URL = ("http://www.troweprice.com/funds/prices.csv");
 
 sub methods { return (troweprice => \&troweprice); }
 
-sub labels { return (troweprice => [qw/exchange name nav date price/]); }
+sub labels { return (troweprice => [qw/method exchange name nav date price/]); }
 
 # =======================================================================
 
@@ -68,6 +68,7 @@ sub troweprice
         ($sym = $q[0]) =~ s/^ +//;
         if ($sym) {
             $aa {$sym, "exchange"} = "T. Rowe Price";  # TRP
+	    $aa {$sym, "method"} = "troweprice";
             # ($aa {$sym, "name"} = $q[0]) =~ s/^ +//;
             $aa {$sym, "name"} = $sym;  # no name supplied ... 
             $aa {$sym, "nav"} = $q[1];
