@@ -236,7 +236,13 @@ sub currency {
 	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}s=$from&t=$to")->content;
 	my ($exchange_rate) = $data =~ m#$from$to=X</a></th><th>1</th><th(?: nowrap)?>[^<]+</th><t[dh]>(\d+\.\d+)</t[dh]>#;
 
-	return undef unless $exchange_rate;
+	{
+		local $^W = 0;	# Avoid undef warnings.
+
+		# We force this to a number to avoid situations where
+		# we may have extra cruft, or no amount.
+		return undef unless ($exchange_rate+0);
+	}
 	return ($exchange_rate * $amount);
 }
 
