@@ -350,3 +350,10 @@
 
 2000-09-16	Paul Fenwick	<pjf@cpan.org>
 	* Added Volker's VWD module and testing script.
+
+	* Updated Makefile to check for HTML::TableExtract.
+
+	* Updated INSTALL file to provide infomation on how to install
+	  modules that F::Q depends upon.
+
+	* Updated Quote.pm to load VWD, DWS and Trustnet by default.
