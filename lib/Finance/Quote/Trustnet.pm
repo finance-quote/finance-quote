@@ -161,7 +161,7 @@ Finance::Quote::Trustnet	- Obtain unit trust prices from trustnet.co.uk
     $q = Finance::Quote->new;
 
     %stockinfo = $q->fetch("unit_trusts","trust-name"); # Can failover to other methods
-    %stockinfo = $q->fetch("trustnex","trust-name"); # Use this module only.
+    %stockinfo = $q->fetch("trustnet","trust-name"); # Use this module only.
 
 =head1 DESCRIPTION
 
