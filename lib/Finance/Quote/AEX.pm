@@ -48,6 +48,8 @@ $VERSION = '1.5';
 my $AEX_URL = 'http://www.aex.nl/scripts/pop/kb.asp?taal=en';
 my $AEXOPT_URL = 'http://www.aex.nl/scripts/marktinfo/OptieKoersen.asp?taal=en';
 
+# Undocumented features:
+# 
 # $AEXOPT_FULL:
 # 1 - download and search all traded options for a given underlying
 # 0 - download and search only most active options (faster but some options are not visible)
@@ -266,7 +268,7 @@ sub aex_options {
             $symbol = $lookup{"$underlying C $series"};
             if ($lookup{$underlying} || $symbol) {
                 #print "   ", join(',', @$row), "\n";
-                $symbol = "$underlying P $series" unless $symbol;
+                $symbol = "$underlying C $series" unless $symbol;
                 push  @options, $symbol;
 
                 $info {$symbol, "success"} = 1;
@@ -280,7 +282,7 @@ sub aex_options {
                 }
                 $info {$symbol, "date"} = $dateusa;
                 $info {$symbol, "currency"} = "EUR";
-                $info {$symbol, "price"} = $info {$symbol, "last"};
+                $info {$symbol, "price"} = $info {$symbol, "last"} if defined ($info {$symbol, "last"});
             }
             
             # Put
@@ -301,7 +303,7 @@ sub aex_options {
                 }
                 $info {$symbol, "date"} = $dateusa;
                 $info {$symbol, "currency"} = "EUR";
-                $info {$symbol, "price"} = $info {$symbol, "last"};
+                $info {$symbol, "price"} = $info {$symbol, "last"} if defined ($info {$symbol, "last"});
             }
         }
 
