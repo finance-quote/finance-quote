@@ -40,7 +40,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $VERSION $TIMEOUT %MODULES %METHODS $AUTOLOAD
 	    $YAHOO_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
 
-$YAHOO_CURRENCY_URL = "http://finance.yahoo.com/m5?";
+$YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/m5?";
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
