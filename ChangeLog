@@ -377,3 +377,9 @@
 
 	* Updated all test scripts to remove spurious warnings under
 	  Perl 5.6.
+
+	* Updated ASX module to deal with stocks when they have market
+	  announcements.  Previously this would result in garbage being
+	  returned for that stock.
+
+
