@@ -21,3 +21,5 @@ in Finance::Quote.
   Eg, Yahoo methods barf if more than about 50 stocks are requested
   at once.  (Patch by Peter Thatcher provided which needs to be
   installed.)
+
+* Webpage to be made pretty (bnh).
