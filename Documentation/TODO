@@ -38,3 +38,5 @@ in Finance::Quote.
 
 * Yahoo function to be updated to return more reasonable values
   when being called as a fidelity failover.  (nav, yield, etc)
+
+* Build debian/RPM files for distribution.
