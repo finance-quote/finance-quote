@@ -15,8 +15,8 @@ die "Usage: $0 FROM TO\n" unless defined($ARGV[1]);
 
 my $q = Finance::Quote->new();
 
-my %hash = $q->currency($ARGV[0],$ARGV[1]);
+my $exchange_rate = $q->currency($ARGV[0],$ARGV[1]);
 
-die "Urgh!  Nothing back\n" unless defined(%hash);
+die "Urgh!  Nothing back\n" unless $exchange_rate;
 
-print $hash{from}."->".$hash{to}." = ".$hash{exchange}."\n";
+print $ARGV[0]."->".$ARGV[1]." = ".$exchange_rate."\n";
