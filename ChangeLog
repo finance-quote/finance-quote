@@ -112,3 +112,5 @@
 	  div_date, div, and div_yield.
 
 	* Fixed typo in docs  s/yeild/yield/;
+	
+	* Added ex_div for Ex-Divident Date in yahoo().
