@@ -38,6 +38,10 @@ $name,  $date,       $last,   $p_change, $high,   $low,    $volume,   $close
 
 foreach my $code (@ARGV) {
 	my %quote = asx($code);
+	unless ($quote{$code,"success"}) {
+		warn "Lookup of $code failed - ".$quote{$code,"errormsg"}."\n";
+		next;
+	}
 	$name = $quote{$code,'name'};
 	$date = $quote{$code,'date'};
 	$last = $quote{$code,'last'};
