@@ -165,7 +165,8 @@ sub new {
 		# Default modules
 		 @modules = qw/Cdnfundlibrary Yahoo::Australia Fidelity
 		 	       ASX Troweprice Tiaacref Yahoo::USA Yahoo::Europe
-			       DWS VWD Trustnet Fool AEX Tdwaterhouse/;
+			       DWS VWD Trustnet Fool AEX Tdwaterhouse
+			       Yahoo::Asia/;
 	}
 
 	$this->_load_modules(@modules,@reqmodules);

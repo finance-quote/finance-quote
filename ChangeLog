@@ -537,3 +537,9 @@
 	  Stockholm exhcnage (.ST) are correctly listed as being in
 	  Swedish Krona (SEK).
 
+2001-12-19	Paul Fenwick	<pjf@cpan.org>
+	* Added Finance::Quote::Yahoo::Asia to provide lookup of
+	  Asian stock quotes (not including Japan).  Many thanks
+	  to M.R.Muthu Kumar for this patch.
+
+
