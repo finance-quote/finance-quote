@@ -542,4 +542,6 @@
 	  Asian stock quotes (not including Japan).  Many thanks
 	  to M.R.Muthu Kumar for this patch.
 
-
+2002-04-18	Paul Fenwick	<pjf@cpan.org>
+	* Patched Quote.pm after currency conversion started to fail.
+	  Many thanks to Sean Wenzel for the fix.
