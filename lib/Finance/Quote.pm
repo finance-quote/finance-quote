@@ -162,7 +162,7 @@ sub new {
 		# Default modules
 		 @modules = qw/Yahoo::Australia Fidelity ASX Troweprice
                                Tiaacref Yahoo::USA Yahoo::Europe
-			       DWS VWD Trustnet/;
+			       DWS VWD Trustnet Fool/;
 	}
 
 	$this->_load_modules(@modules,@_);
