@@ -38,13 +38,52 @@ $VERSION = '1.00';
 # URLs of where to obtain information.
 
 #$TD_URL = ("http://tdfunds.tdam.com/tden/FundProfile/FundProfile.cfm");
-$TD_URL = ("http://tdfunds.tdam.com/tden/Download/v_DownloadProcess.cfm?SortField=FundName&SortOrder=ASC&Nav=No&Group=99&WhereClause=Where%20FC%2EFund%5FClass%5FORDER%20%3C%2099%20and%20TD%2ERisk%5FCat%5FID%20%21%3D%204&DownloadType=CSV");
+#$TD_URL = ("http://tdfunds.tdam.com/tden/Download/v_DownloadProcess.cfm?SortField=FundName&SortOrder=ASC&Nav=No&Group=99&WhereClause=Where%20FC%2EFund%5FClass%5FORDER%20%3C%2099%20and%20TD%2ERisk%5FCat%5FID%20%21%3D%204&DownloadType=CSV");
+$TD_URL = ("http://www.tdassetmanagement.com/TDAMFunds/Download/v_Download.asp?TAB=PRICE&PID=5&DT=csv&SORT=TDAM_FUND_NAME&FT=all&MAP=N&SI=4");
+
+my(%currencies) = (
+	"CDN"	=>	"CAD",
+	"US"	=>	"USD"
+);
 
 sub methods { return (tdwaterhouse => \&tdwaterhouse); }
 
 sub labels { return (tdwaterhouse => [qw/method exchange name nav date price/]); }
 
 # =======================================================================
+
+#
+# Converts a description to a stock-like symbol
+#
+sub tdwaterhouse_create_symbol {
+	my($name) = shift;
+
+	# Take out any bad characters
+	$name =~ s/[^a-zA-Z\.\^\ \*]//g;
+
+	# Multiple consecutive speces converted to a single space.
+	$name =~ s/\s+/ /g;
+
+	return $name;
+
+	# return "TDSCITECH";
+}
+
+#
+# Maps the provided currency, where possible, to the correct ISO code.
+#
+sub tdwaterhouse_get_currency {
+    my($currency) = shift;
+
+    $currency =~ s/\$//g;
+    $currency =~ s/\s//g;
+
+    if ( defined($currencies{$currency}) ) {
+        $currency = $currencies{$currency};
+    }
+
+    return $currency;
+}
 
 sub tdwaterhouse
 {
@@ -59,21 +98,33 @@ sub tdwaterhouse
     {
         @q = $quoter->parse_csv($_);
 
+	# Skip the non-data rows.
+	next if (!defined($q[0]) || !defined($q[1])); # Skip the section headers
+	next if $q[0] =~ /^Fund Number/; # Skip the title
+
         ($sym = $q[1]) =~ s/^ +//;
         if ($sym) {
+
+	    # make sure what we get looks like an acceptable stock symbol
+	    # only allow a-z + '.' + "^"
+	    my($name) = $sym;
+            $sym = &tdwaterhouse_create_symbol($sym);
+
+	    # $sym =~ tr/a-z/A-Z/;
 	    $aa {$sym, "exchange"} = "TD Waterhouse";  # TRP
 	    $aa {$sym, "method"} = "tdwaterhouse";
-	    $aa {$sym, "name"} = $sym;
+	    $aa {$sym, "name"} = $name;
 	    $price = $q[3];
 	    $price =~ s/\$//;
-	    $aa {$sym, "nav"} = $price;
-	    $aa {$sym, "date"} = $q[2];
-	    $aa {$sym, "price"} = $aa{$sym,"nav"};
+            $price =~ s/^ +//;
+	    $aa {$sym, "last"} = $price;
+	    ($aa {$sym, "date"} = $q[2]) =~ s/^ +//;
+	    $aa {$sym, "nav"} = $aa{$sym,"last"};
 	    $aa {$sym, "success"} = 1;
-	    $aa {$sym, "currency"} = $q[4];
+	    $aa {$sym, "currency"} = &tdwaterhouse_get_currency($q[4]);
         } else {
 	    $aa {$sym, "success"} = 0;
-	    $aa {$sym, "errormsg"} = "Stock lookup failed.";
+	    $aa {$sym, "errormsg"} = "Fund lookup failed.";
 	}
     }
 
@@ -103,6 +154,11 @@ Finance::Quote::Tdwaterhouse	- Obtain quotes from TD Waterhouse Canada
 
 This module obtains information about managed funds from TD
 Waterhouse Canada. All TD Waterhouse funds are downloaded at once. 
+
+The symbols for each mutual fund are the names of the fund with any
+unusal characters (not a letter, space or period) removed. For example;
+a fund called "TD Health Sciences ($US)" would have the symbol
+"TD Health Sciences US". 
 
 =head1 LABELS RETURNED
 
