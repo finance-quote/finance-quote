@@ -202,3 +202,6 @@
 	* Updated Examples/stockdump.pl to allow currency to be specified.
 
 	* Automatic currency conversion now works.
+
+	* Updated ASX and Yahoo::USA to not tag indexes with currency
+	  labels.
