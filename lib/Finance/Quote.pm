@@ -64,7 +64,12 @@ sub AUTOLOAD {
 
 	if (exists($METHODS{$method})) {
 		eval qq[sub $method {
-			_dummy()->fetch("$method",\@_); 
+			my \$this;
+			if (ref \$_[0]) {
+				\$this = shift;
+			}
+			\$this ||= _dummy();
+			\$this->fetch("$method",\@_); 
 		}];
 		carp $@ if $@;
 		no strict 'refs';	# So we can use &$method
