@@ -9,7 +9,7 @@ use Finance::Quote;
 
 my $q      = Finance::Quote->new();
 
-my %quotes = $q->tiaacref("CREFmony","TIAAgrin","TIAAreal","TIAAsndx","BOGOname");
+my %quotes = $q->tiaacref("CREFmony","TLGIX","TIAAreal","TLSIX","BOGOname");
 ok(%quotes);
 
 ok($quotes{"CREFmony","nav"} > 0);
@@ -21,11 +21,11 @@ ok(length($quotes{"TIAAreal","date"}) > 0);
 
 #Now check the other URL
 
-ok($quotes{"TIAAsndx","success"} > 0);
-ok ($quotes{"TIAAsndx","nav"} > 0); 
-ok(length($quotes{"TIAAsndx","date"}) > 0);
+ok($quotes{"TLSIX","success"} > 0);
+ok ($quotes{"TLSIX","nav"} > 0); 
+ok(length($quotes{"TLSIX","date"}) > 0);
 
-ok($quotes{"TIAAgrin","success"} > 0);
+ok($quotes{"TLGIX","success"} > 0);
 
 ok($quotes{"BOGOname","success"} == 0);
 ok($quotes{"BOGOname","errormsg"} eq "Bad symbol");
