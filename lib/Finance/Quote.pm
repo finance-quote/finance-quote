@@ -163,12 +163,12 @@ sub new {
 	if (!@reqmodules or $reqmodules[0] eq "-defaults") {
 		shift(@reqmodules) if (@reqmodules);
 		# Default modules
-		 @modules = qw/Cdnfundlibrary Yahoo::Australia Fidelity
-		 	       ASX Troweprice Tiaacref Yahoo::USA Yahoo::Europe
-			       DWS VWD Trustnet Fool AEX Tdwaterhouse Tdefunds
-			       Yahoo::Asia FTPortfolios IndiaMutual Union
-			       BMONesbittBurns Yahoo::Brasil TSP SEB/;
-	}
+		@modules = qw/AEX ASX BMONesbittBurns Cdnfundlibrary
+			      DWS FTPortfolios Fidelity Fool IndiaMutual
+			      SEB TSP Tdefunds Tdwaterhouse Tiaacref
+			      Troweprice Trustnet Union VWD
+			      Yahoo::Asia Yahoo::Australia Yahoo::Brasil
+			      Yahoo::Europe Yahoo::USA/; }
 
 	$this->_load_modules(@modules,@reqmodules);
 
