@@ -477,3 +477,8 @@
 2001-05-11	Paul Fenwick	<pjf@cpan.org>
 	* Tweaked VWD.pm to strip whitespace from currency and
 	  remove asterisks from names.
+
+2001-06-04	Brent Neal	<brentn@users.sourceforge.net>
+	* Fixed Tiaacref.pm to reflect new CGIs at www.tiaa-cref.org
+	  New symbols available for the module - check the POD 
+	  documentation for more info. 
