@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 3};
+BEGIN {plan tests => 5};
 
 use Finance::Quote;
 
@@ -16,3 +16,7 @@ ok(defined(%quotes));
 # reliable indicators of success.
 ok($quotes{"CML","last"} > 0);
 ok($quotes{"BHP","last"} > 0);
+
+%quotes = $q->fetch("asx","ITE");
+ok(defined(%quotes));
+ok($quotes{"ITE","last"} > 0);
