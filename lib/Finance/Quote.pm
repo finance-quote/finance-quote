@@ -4,6 +4,7 @@
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
 #    Copyright (C) 2000, Paul Fenwick <pjf@schools.net.au>
+#    Copyright (C) 2000, Brent Neal <brent@phys.lsu.edu>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -36,7 +37,7 @@ use vars qw($VERSION @EXPORT @ISA $TIMEOUT @EXPORT_OK @EXPORT_TAGS
             $FIDELITY_GLBND_URL $FIDELITY_MM_URL $FIDELITY_ASSET_URL
             $TROWEPRICE_URL
             $VANGUARD_QUERY_URL $VANGUARD_CSV_URL @vanguard_ids
-            $ASX_URL);
+            $ASX_URL $TIAACREF_URL %tiaacref_ids);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
@@ -45,10 +46,10 @@ use Exporter ();
 # Export information
 @ISA = qw/Exporter/;
 @EXPORT      = ();
-@EXPORT_OK   = qw/yahoo yahoo_europe fidelity troweprice vanguard asx/;
+@EXPORT_OK   = qw/yahoo yahoo_europe fidelity troweprice vanguard asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK] );
 
-$VERSION = '0.16';
+$VERSION = '0.17';
 
 # URLs of where to obtain information.
 
@@ -64,6 +65,7 @@ $TROWEPRICE_URL = ("http://www.troweprice.com/funds/prices.csv");
 $VANGUARD_QUERY_URL = ("http://www.vanguard.com/cgi-bin/Custom/daily/custom/CustRpt?");
 $VANGUARD_CSV_URL = ("http://www.vanguard.com/cgi-bin/Custom?ACTION=Download&FileName=");
 $ASX_URL = ('http://www3.asx.com.au/nd50/nd_isapi_50.dll/JSP/EquitySearchResults.jsp?method=post&template=F1001&ASXCodes=');
+$TIAACREF_URL = ("http://www.tiaa-cref.org/financials/selection/ann-select.cgi?");
 
 undef $TIMEOUT;
 
@@ -676,6 +678,81 @@ sub asx {
     }
     return %info;
 }
+# =======================================================================
+# TIAA-CREF Annuities are not listed on any exchange, unlike their mutual funds
+# TIAA-CREF provides unit values via a cgi on their website. The cgi returns
+# a csv file in the format 
+#		bogus_symbol1,price1,date1
+#		bogus_symbol2,price2,date2
+#       ..etc.
+# where bogus_symbol takes on the following values for the various annuities:
+#
+#Stock: 			CREFstok
+#Money Market:			CREFmony
+#Equity Index:			CREFequi
+#Inf-Linked Bond:		CREFinfb
+#Bond Market:			CREFbond
+#Social Choice:			CREFsoci
+#Global Equities:		CREFglob
+#Growth:			CREFgrow
+#TIAA Real Estate:		TIAAreal
+#PA Stock Index:		TIAAsndx
+#PA Select Stock:		TIAAsele
+
+#
+# This subroutine was written by Brent Neal <brent@phys.lsu.edu>
+#
+# TODO:
+#
+# The TIAA-CREF cgi allows you to specify the exact dates for which to retrieve
+# price data. That functionality could be worked into this subroutine.
+# Currently, we only grab the most recent price data.
+# 
+
+sub tiaacref
+{
+    shift if (ref $_[0]);	# Shift off the object if there is one.
+    if (! %tiaacref_ids ) {  #build a name hash for the annuities (once only)
+    	$tiaacref_ids{"CREFstok"} = "CREF Stock";
+    	$tiaacref_ids{"CREFmony"} = "CREF Money Market";
+    	$tiaacref_ids{"CREFequi"} = "CREF Equity Index";
+    	$tiaacref_ids{"CREFinfb"} = "CREF Inflation-Linked Bond";
+    	$tiaacref_ids{"CREFbond"} = "CREF Bond Market";
+    	$tiaacref_ids{"CREFsoci"} = "CREF Social Choice";
+    	$tiaacref_ids{"CREFglob"} = "CREF Global Equities";
+    	$tiaacref_ids{"CREFgrow"} = "CREF Growth";
+    	$tiaacref_ids{"TIAAreal"} = "TIAA Real Estate";
+    	$tiaacref_ids{"TIAAsndx"} = "TIAA Teachers Personal Annuity Stock Index";
+    	$tiaacref_ids{"TIAAsele"} = "TIAA Teachers Personal Annuity Select Stock"; 
+    }
+    my(@line);		#holds the return from _parse_csv
+    my(%info);		
+    my($ua,$url);   #useragent and target url
+    my($data);		#the reply from TIAA-CREF's cgi
+    my(@funds) = @_;
+
+    $url = $TIAACREF_URL;
+    foreach my $fund (@funds) {
+		$url .=  $fund . "=yes&";
+    }
+    $url .=  "selected=1";
+
+    $ua = LWP::UserAgent->new;
+    $ua->timeout($TIMEOUT) if defined $TIMEOUT;
+    $ua->env_proxy();
+    $data = $ua->request(GET $url)->content;
+
+    foreach (split('\012',$data) ){
+        @line = _parse_csv($_);
+        $info{$line[0],"symbol"} = $line[0]; #in case the caller needs this in the hash
+        $info{$line[0],"exchange"} = "TIAA-CREF";
+        $info{$line[0],"name"} = $tiaacref_ids{$line[0]};
+        $info{$line[0],"date"} = $line[2];
+        $info{$line[0],"nav"} =  $line[1];	
+    }
+
+    return %info;
+}
 
 
 # =======================================================================
@@ -699,6 +776,7 @@ Finance::Quote - Get stock and mutual fund quotes from various exchanges
  %quotes = $q->troweprice(@symbols);   # Quotes from T. Rowe Price
  %quotes = $q->vanguard(@symbols);     # Quotes from Vanguard Group
  %quotes = $q->asx(@symbols);          # Australian quotes from ASX.
+ %quotes = $q->tiaacref(@symbols);     # Annuities from TIAA-CREF
  print ("the last price was ", $quotes{"IBM", "last"} );
 
 =head1 DESCRIPTION
@@ -744,6 +822,21 @@ Note that prices from the Australian Stock Exchange (ASX) are in
 Australian Dollars.  Prices from Yahoo! Europe are in euros.  All other
 prices are in US Dollars.
 
+For TIAA and CREF Annuities, you must use TIAA-CREF's pseudosymbols. These
+are as follows:
+
+    Stock:				CREFstok
+    Money Market:			CREFmony
+    Equity Index:			CREFequi
+    Inflation-Linked Bond:		CREFinfb
+    Bond Market:			CREFbond
+    TIAA Real Estate:			TIAAreal
+    Social Choice:			CREFsoci
+    Teachers PA Stock Index:		TIAAsndx
+    Global Equities:			CREFglob
+    Teachers PA Select Stock:		TIAAsele
+    Growth:				CREFgrow
+
 =head1 FAQ
 
 If there's one question I get asked over and over again, it's how did
@@ -773,6 +866,7 @@ the value of the f parameter.
  Copyright 1998, 1999 Linas Vepstas
  Copyright 2000, Yannick LE NY (update for Yahoo Europe and YahooQuote)
  Copyright 2000, Paul Fenwick (update for ASX)
+ Copyright 2000, Brent Neal (update for TIAA-CREF)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -788,6 +882,9 @@ The information that you obtain with this library may be copyrighted
 by the ASX, and is governed by its usage license.  See
 http://www3.asx.com.au/Fdis.htm for more information.
 
+The information that you obtain with this library may be copyrighted
+by TIAA-CREF, and is governed by its usage license.
+
 Other copyrights and conditions may apply to data fetched through this
 module.
 
@@ -797,6 +894,7 @@ module.
   Linas Vepstas (C<linas@linas.org>)
   Yannick LE NY (C<y-le-ny@ifrance.com>)
   Paul Fenwick (C<pjf@schools.net.au>)
+  Brent Neal (C<brent@phys.lsu.edu>)
 
 The Finance::Quote home page can be found at
 http://finance-quote.sourceforge.net/
