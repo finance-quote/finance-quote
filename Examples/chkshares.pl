@@ -5,19 +5,16 @@ use Finance::Quote qw/asx/;
 
 =head1 NAME
 
-chkshares.pl - Check ASX share information.
+chkshares.pl - Check share information.
 
 =head1 USAGE
 
-chkshares.pl TLS CML ITE
+chkshares.pl australia TLS CML ITE
 
 =head1 NOTES
 
-Example program.  Demonstrates how to use one of the interfaces to
-Finance::Quote.
-
-In the future this program will be expanded to handle other Finance::Quote
-interfaces (eg, yahoo and yahoo_europe).
+Example program.  Demonstrates how to use one of the interface to
+Finance::Quote.  The first argument must be the market.
 
 =cut
 
@@ -32,17 +29,21 @@ TICKER         DATE      LAST  %CHANGE       HIGH      LOW    VOLUME     CLOSE
 .
 
 format STDOUT =
- @<<<   @>>>>>>>>>>  @###.### @###.###   @###.### @###.### @>>>>>>>>  @###.###
+@<<<<<< @>>>>>>>>>>  @###.### @###.###   @###.### @###.### @>>>>>>>>  @###.###
 $name,  $date,       $last,   $p_change, $high,   $low,    $volume,   $close
 .
 
+my $quoter = Finance::Quote->new();
+my $market = shift || die "Usage: $0 market stocks\n";
+
+my %quote = $quoter->fetch($market,@ARGV);
+
 foreach my $code (@ARGV) {
-	my %quote = asx($code);
 	unless ($quote{$code,"success"}) {
 		warn "Lookup of $code failed - ".$quote{$code,"errormsg"}."\n";
 		next;
 	}
-	$name = $quote{$code,'name'};
+	$name = $code;
 	$date = $quote{$code,'date'};
 	$last = $quote{$code,'last'};
 	$p_change = $quote{$code,'p_change'};
