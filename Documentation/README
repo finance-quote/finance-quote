@@ -1,0 +1,15 @@
+Welcome to Finance::Quote
+=========================
+
+This project is currently under deevlopment, and currently only contains
+a few files.  Those files are:
+
+Finance/Quote.pm	- The Quote fetching module.
+Quote_example.pl	- A script which demonstrates the features of
+			  Finance::Quote.
+
+The repository will shortly contain better documentation, installation
+scripts, and more examples.
+
+Try running `perldoc' over Finance/Quote.pm for more information on
+how things work.
