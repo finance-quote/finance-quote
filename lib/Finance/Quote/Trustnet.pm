@@ -66,7 +66,7 @@ sub trustnet
     return unless @symbols;
     my(@q,%aa,$ua,$url,$sym,$ts,$date,$price,$currency,$reply,$trust);
     my ($row, $datarow, $matches);
-    my %curr_iso = ("£" => "GBP", "\$" => "USD");
+    my %curr_iso = (GBP => "GBP", "£" => "GBP", "\$" => "USD");
     my( $isodate, $day, $month, $year);
     my %imonth = ( "Jan" => "01", "Feb" => "02", "Mar" => "03",
                    "Apr" => "04", "May" => "05", "Jun" => "06",
@@ -117,7 +117,7 @@ sub trustnet
 	  # ($aa {$trust, "name"} = $$datarow[0]) =~ s/^ +//;
 	  $aa {$trust, "name"} = $trust; # no name supplied ... 
 	  ($price = $$datarow[2]) =~ s/\s*\((.*)\)//;
-	  $currency=$1;
+	  $currency=$1||"GBP";
 	  $aa {$trust, "currency"} = $curr_iso{"$currency"};
 	  $aa {$trust, "bid"} = $price * 0.01;
 	  ($price = $$datarow[3]) =~ s/\s*\((.*)\)//;
