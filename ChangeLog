@@ -637,3 +637,8 @@
 2003-07-07	Pawel Konieczny	<konieczp@users.sourceforge.net>
 	* AEX module: added label 'symbol'
 
+2003-08-27	Pawel Konieczny	<konieczp@users.sourceforge.net>
+	* AEX module: following a suffestion of Paul Fenwick, value
+	'undef' is returned if no valid data could be dowloaded
+	(previously it was returning empty strings in such cases).
+
