@@ -42,7 +42,7 @@ use vars qw/$ASX_URL $VERSION/;
 
 $VERSION = "1.04";
 
-$ASX_URL = 'http://www.asx.com.au/scripts/nd_ISAPI_50.dll/asx/markets/EquitySearchResults.jsp?method=post&template=F1001&ASXCodes=';
+$ASX_URL = 'http://www.asx.com.au/asx/markets/PriceResults.jsp?method=get&template=F1001&ASXCodes=';
 
 sub methods {return (australia => \&asx,asx => \&asx)}
 
