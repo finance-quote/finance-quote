@@ -148,3 +148,5 @@
 	* Added labels method to everything.
 
 	* Added price labels to everything.
+
+	* Updated Quote.pm to query new labels methods.
