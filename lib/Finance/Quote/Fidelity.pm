@@ -63,6 +63,12 @@ sub fidelity
     return unless @symbols;
     my(%aa,%cc,$sym, $k);
 
+    # Build a small hash of symbols people want, because it provides a
+    # quick and easy way to only return desired symbols.
+
+    my %symbolhash;
+    @symbolhash{@symbols} = map(1,@symbols);
+
     # rather irritatingly, fidelity sorts its funds into different groups.
     # as a result, the fetch that we need to do depends on the group.
     my @gandi    = ("FBALX", "FCVSX", "FEQIX", "FEQTX", "FFIDX", "FGRIX",
@@ -100,42 +106,42 @@ sub fidelity
     for (@symbols) {
        if ($agandi {$_} ) {
           if (0 == $dgandi ) {
-             %cc = &_fidelity_nav ($quoter, $FIDELITY_GANDI_URL);
+             %cc = &_fidelity_nav ($quoter, $FIDELITY_GANDI_URL,\%symbolhash);
              $dgandi = 1;
              foreach $k (keys %cc) { $aa{$k} = $cc{$k}; }
           }
        }
        if ($agrowth {$_} ) {
           if (0 ==  $dgrowth ) {
-             %cc = &_fidelity_nav ($quoter, $FIDELITY_GROWTH_URL);
+             %cc = &_fidelity_nav ($quoter, $FIDELITY_GROWTH_URL,\%symbolhash);
              $dgrowth = 1;
              foreach $k (keys %cc) { $aa{$k} = $cc{$k}; }
           }
        }
        if ($acorpbond {$_} ) {
           if (0 ==  $dcorpbond ) {
-             %cc = &_fidelity_nav ($quoter, $FIDELITY_CORPBOND_URL);
+             %cc = &_fidelity_nav ($quoter, $FIDELITY_CORPBOND_URL,\%symbolhash);
              $dcorpbond = 1;
              foreach $k (keys %cc) { $aa{$k} = $cc{$k}; }
           }
        }
        if ($aglbnd {$_} ) {
           if (0 ==  $dglbnd ) {
-             %cc = &_fidelity_nav ($quoter, $FIDELITY_GLBND_URL);
+             %cc = &_fidelity_nav ($quoter, $FIDELITY_GLBND_URL,\%symbolhash);
              $dglbnd = 1;
              foreach $k (keys %cc) { $aa{$k} = $cc{$k}; }
           }
        }
        if ($amm {$_} ) {
           if (0 ==  $dmm ) {
-             %cc = &_fidelity_mm ($quoter, $FIDELITY_MM_URL);
+             %cc = &_fidelity_mm ($quoter, $FIDELITY_MM_URL,\%symbolhash);
              $dmm = 1;
              foreach $k (keys %cc) { $aa{$k} = $cc{$k}; }
           }
        }
        if ($aasset {$_} ) {
           if (0 ==  $dasset ) {
-             %cc = &_fidelity_nav ($quoter, $FIDELITY_ASSET_URL);
+             %cc = &_fidelity_nav ($quoter, $FIDELITY_ASSET_URL,\%symbolhash);
              $dasset = 1;
              foreach $k (keys %cc) { $aa{$k} = $cc{$k}; }
           }
@@ -152,13 +158,14 @@ sub fidelity
 sub _fidelity_nav
 {
     my $quoter = shift;
-    my(@q,%aa,$ua,$url,$sym, $dayte);
+    my $url = shift;
+    my $symbolhash = shift;
+    my(@q,%aa,$ua,$sym, $dayte);
     my %days = ('Monday','Mon','Tuesday','Tue','Wednesday','Wed',
                 'Thursday','Thu','Friday','Fri','Saturday','Sat',
                 'Sunday','Sun');
 
     # for Fidelity, we get them all. 
-    $url = $_[0];
     $ua = $quoter->user_agent;
     my $reply = $ua->request(GET $url);
     return unless ($reply->is_success);
@@ -166,15 +173,19 @@ sub _fidelity_nav
     {
         @q = $quoter->parse_csv($_) or next;
 
+        $sym = $q[2] or next;
+        $sym =~ s/^ +//;
+
+	# Skip symbols we didn't ask for.
+	next unless (defined($symbolhash->{$sym}));
+
         # extract the date which is usually on the second line fo the file.
         if (! defined ($dayte)) {
            if ($days {$q[0]} ) {          
               ($dayte = $q[1]) =~ s/^ +//;
            }
         }
-        $sym = $q[2];
         if ($q[7]) {
-            $sym =~ s/^ +//;
             $aa {$sym, "exchange"} = "Fidelity";  # Fidelity
             ($aa {$sym, "name"}   = $q[0]) =~ s/^ +//;
              $aa {$sym, "name"}   =~ s/$ +//;
@@ -198,13 +209,15 @@ sub _fidelity_nav
 sub _fidelity_mm
 {
     my $quoter = shift;
-    my(@q,%aa,$ua,$url,$sym, $dayte);
+    my $url = shift;
+    my $symbolhash = shift;
+
+    my(@q,%aa,$ua,$sym, $dayte);
     my %days = ('Monday','Mon','Tuesday','Tue','Wednesday','Wed',
                 'Thursday','Thu','Friday','Fri','Saturday','Sat',
                 'Sunday','Sun');
 
     # for Fidelity, we get them all. 
-    $url = $_[0];
     $ua = $quoter->user_agent;
     my $reply = $ua->request(GET $url);
     return unless ($reply->is_success);
@@ -212,13 +225,19 @@ sub _fidelity_mm
     {
         @q = $quoter->parse_csv($_) or next;
 
+        $sym = $q[2] or next;
+        $sym =~ s/^ +//;
+
+	# Skip symbols we didn't ask for.
+	next unless (defined($symbolhash->{$sym}));
+
         # extract the date which is usually on the second line fo the file.
         if (! defined ($dayte)) {
            if ($days {$q[0]} ) {          
               ($dayte = $q[1]) =~ s/^ +//;
            }
         }
-        $sym = $q[2];
+
         if ($q[3]) {
             $sym =~ s/^ +//;
             $aa {$sym, "exchange"} = "Fidelity";  # Fidelity

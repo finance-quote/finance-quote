@@ -232,3 +232,7 @@
 
 2000-07-08	Paul Fenwick	<pjf@cpan.org>
 	* Added POD for TIAA-CREF and T. Rowe Price sub-modules.
+
+2000-07-13	Paul Fenwick	<pjf@cpan.org>
+	* Improved fidelity module such that it doesn't return information
+	  about stocks we did not request.
