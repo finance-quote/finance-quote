@@ -671,4 +671,8 @@
 
 	* Yahoo/Base.pm: Added suffixes for the Brussels and Dublin
 	exchanges.
- 
+
+2004-07-02	Paul Fenwick <pjf@cpan.org>
+
+	* Added Finance/Quote/Tdefunds.pm thanks to David Grant.
+	* Added t/tdefunds.t basic regression test (3 tests).

@@ -165,7 +165,7 @@ sub new {
 		# Default modules
 		 @modules = qw/Cdnfundlibrary Yahoo::Australia Fidelity
 		 	       ASX Troweprice Tiaacref Yahoo::USA Yahoo::Europe
-			       DWS VWD Trustnet Fool AEX Tdwaterhouse
+			       DWS VWD Trustnet Fool AEX Tdwaterhouse Tdefunds
 			       Yahoo::Asia FTPortfolios IndiaMutual
 			       BMONesbittBurns/;
 	}
@@ -841,7 +841,7 @@ http://www.gnucash.org/
 
 Finance::Quote::AEX, Finance::Quote::ASX, Finance::Quote::Cdnfundlibrary,
 Finance::Quote::DWS, Finance::Quote::Fidelity, Finance::Quote::Fool,
-Finance::Quote::FTPortfolios,
+Finance::Quote::FTPortfolios, Finance::Quote::Tdefunds,
 Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice, Finance::Quote::Trustnet,
 Finance::Quote::VWD, Finance::Quote::Yahoo::Australia,
