@@ -253,11 +253,17 @@ sub default_currency_fields {
 		my $convert_fields = shift;
 		my $new_currency = $this->{"currency"};
 
+		# Skip all this unless they actually want conversion.
+		return unless $new_currency;
+
 		foreach my $stock (@$stocks) {
 			my $currency;
 
 			# Skip stocks that don't have a currency.
 			next unless ($currency = $info->{$stock,"currency"});
+
+			# Skip if it's already in the same currency.
+			next if ($currency eq $new_currency);
 
 			# Lookup the currency conversion if we haven't
 			# already.
@@ -275,10 +281,27 @@ sub default_currency_fields {
 				next;
 			}
 
-			# Okay, we have clean data.  Convert it.
+			# Okay, we have clean data.  Convert it.  Ideally
+			# we'd like to just *= entire fields, but
+			# unfortunately some things (like ranges,
+			# capitalisation, etc) don't take well to that.
+			# Hence we pull out any numbers we see, convert
+			# them, and stick them back in.  That's pretty
+			# yucky, but it works.
+
 			foreach my $field (@$convert_fields) {
-				$info->{$stock,$field} *= $conversion{$currency,$new_currency};
+				next unless (exists $info->{$stock,$field});
+
+				my @chunks = split(/([^0-9.])/,$info->{$stock,$field});
+				for (my $i=0; $i < @chunks; $i++) {
+					next unless $chunks[$i] =~ /\d/;
+					$chunks[$i] *= $conversion{$currency,$new_currency};
+				}
+				$info->{$stock,$field} = join("",@chunks);
 			}
+
+			# Set the new currency.
+			$info->{$stock,"currency"} = $new_currency;
 		}
 	}
 }
@@ -386,10 +409,15 @@ sub fetch {
 			push(@failed_stocks,$stock)
 				unless ($returnhash{$stock,"success"});
 		}
+
+		$this->_convert(\%returnhash,\@stocks,
+		                $methodinfo->{"currency_fields"});
+
 		last unless $this->{FAILOVER};
 		last unless @failed_stocks;
 		@stocks = @failed_stocks;
 	}
+
 
 	return %returnhash;
 }

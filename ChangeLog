@@ -200,3 +200,5 @@
 	* Cleaned up the hacker's guide.
 
 	* Updated Examples/stockdump.pl to allow currency to be specified.
+
+	* Automatic currency conversion now works.
