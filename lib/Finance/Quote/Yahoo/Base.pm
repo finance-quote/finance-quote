@@ -155,6 +155,7 @@ sub yahoo_request {
 
 	foreach my $key (keys %info) {
 		$info{$key} =~ s/<[^>]*>//g;
+		$info{$key} =~ s/&nbsp;.*$//;
 		undef $info{$key} if (defined($info{$key}) and 
                                       $info{$key} eq "N/A");
 	}
