@@ -117,6 +117,12 @@ sub _load_modules {
 			
 			my @currency_fields = &$curr_fields_func;
 
+			# @currency_fields may contain duplicates.
+			# This following chunk of code removes them.
+
+			my %seen;
+			@currency_fields=grep {!$seen{$_}++} @currency_fields;
+
 			foreach my $method (keys %methodhash) {
 				push (@{$METHODS{$method}},
 					{ function => $methodhash{$method},
