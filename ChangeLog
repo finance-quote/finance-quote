@@ -190,3 +190,6 @@
 
 	* Expanded the number of fields available via Yahoo::Europe.
 
+2000-06-22	Paul Fenwick	<pjf@cpan.org>
+	* Added sections on currency conversion to the hacker's guide.
+	  Now I just need to write the code.  :)
