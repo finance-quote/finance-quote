@@ -344,3 +344,6 @@
 2000-09-04	Paul Fenwick	<pjf@cpan.org>
 	* Keith Refson's patch to Trustnet to avoid premature returns
 	  in case of a bad symbol.
+
+2000-09-12	Paul Fenwick	<pjf@cpan.org>
+	* Mention of Bill Bell's java library in the FAQ.
