@@ -17,3 +17,14 @@
 
 	* Incorporated Cooper Vertz's patch to add high, low and net change
 	  to quotes obtained from Yahoo!
+
+2000-04-13	Paul Fenwick	<pjf@cpan.org>
+	* Fidelity private functions renamed to indicate they are private.
+
+	* Small optimisations in fidelity functions to avoid spurious warnings
+	  and un-needed processing of non-useful lines.
+
+	* Functions now quickly return undef when not passed a list of stocks.
+	  Previously they would waste time looking up nothing.
+
+	* Documentation additions and corrections.
