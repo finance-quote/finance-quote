@@ -94,3 +94,6 @@
 2000-04-24	Paul Fenwick	<pjf@cpan.org>
 	* Updated in-line code regarding checking for Yahoo!
 	  successes.
+
+	* Added meaningful error-messages to Yahoo! when stock
+	  lookups fail.

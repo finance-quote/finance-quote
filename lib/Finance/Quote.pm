@@ -201,7 +201,12 @@ sub yahoo
       # Hence we can use this to check if we've successfully
       # obtained the stock or not.
 
-      $aa{$sym, "success"} = ($aa{$sym,"date"} eq "N/A") ? 0 : 1;
+      if ($aa{$sym,"date"} eq "N/A") {
+        $aa{$sym,"success"}  = 0;
+        $aa{$sym,"errormsg"} = "Stock lookup failed";
+      } else {
+        $aa{$sym,"success"} = 1;
+      }
 
       if ($q[13] =~ m{^"?\s*(\S+)\s*-\s*(\S+)"?$}) {
         $aa {$sym, "low"} = $1;
