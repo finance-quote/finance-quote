@@ -1,4 +1,4 @@
-#/usr/bin/perl -w
+#!/usr/bin/perl -w
 use strict;
 use Test;
 BEGIN {plan tests => 10};
