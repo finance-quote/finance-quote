@@ -545,3 +545,8 @@
 2002-04-18	Paul Fenwick	<pjf@cpan.org>
 	* Patched Quote.pm after currency conversion started to fail.
 	  Many thanks to Sean Wenzel for the fix.
+
+	* Updated documentation in ASX.pm and Trustnet.pm to note their
+	  current functional unhappiness.
+
+	* CVSTAG: finance_quote_1_07
