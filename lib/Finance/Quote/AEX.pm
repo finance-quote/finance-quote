@@ -29,7 +29,7 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 
-require 5.6;
+require 5.006;
 
 use strict;
 
