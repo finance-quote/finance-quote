@@ -33,6 +33,7 @@ require 5.004;
 use strict;
 use HTTP::Request::Common;
 use LWP::UserAgent;
+use Finance::Quote::Yahoo::Base qw/yahoo_request base_yahoo_labels/;
 
 use vars qw/$VERSION $YAHOO_URL/;
 
@@ -40,7 +41,7 @@ $VERSION = '0.19';
 
 # URLs of where to obtain information.
 
-$YAHOO_URL = ("http://quote.yahoo.com/d?f=snl1d1t1c1p2va2bapomwerr1dyj1q&s=");
+$YAHOO_URL = ("http://quote.yahoo.com/d");
 
 sub methods {return (canada   => \&yahoo,
                      usa      => \&yahoo,
@@ -51,9 +52,7 @@ sub methods {return (canada   => \&yahoo,
 		     fidelity => \&yahoo)};
 
 {
-	my @labels = qw/name last date time net p_change volume avg_vol
-	                bid ask close open day_range year_range eps pe
-			div_date div div_yield cap ex_div price low high/;
+	my @labels = (base_yahoo_labels(),"currency");
 
 	sub labels { return (canada	=> \@labels,
 			     usa	=> \@labels,
@@ -66,76 +65,18 @@ sub methods {return (canada   => \&yahoo,
 
 sub yahoo
 {
-    my $quoter = shift;
-    my @symbols = @_;
-    return unless @symbols;	# Nothing if no symbols.
-    my($x,@q,%aa,$ua,$url,$sym);
+	my $quoter = shift;
+	my @symbols = @_;
+	return unless @symbols;	# Nothing if no symbols.
 
-    $x = $";
-    $" = "+";
-    $url = $YAHOO_URL."@symbols";
-    $" = $x;
-    $ua = $quoter->user_agent;
+	# This does all the hard work.
+	my %info = yahoo_request($quoter,$YAHOO_URL,@symbols);
 
-    my $reply = $ua->request(GET $url);
-    return unless ($reply->is_success);
-    foreach (split('\015?\012',$reply->content))
-    {
-      @q = $quoter->parse_csv($_);
-
-      $sym = $q[0];
-      $aa {$sym, "name"} = $q[1];
-      $aa {$sym, "last"} = $q[2];
-      $aa {$sym, "date"} = $q[3];
-      $aa {$sym, "time"} = $q[4];
-      $aa {$sym, "net"}  = $q[5];
-      $aa {$sym, "p_change"} = $q[6];
-      $aa {$sym, "volume"} = $q[7];
-      $aa {$sym, "avg_vol"} = $q[8];
-      $aa {$sym, "bid"} = $q[9];
-      $aa {$sym, "ask"} = $q[10];
-      $aa {$sym, "close"} = $q[11];
-      $aa {$sym, "open"} = $q[12];
-      $aa {$sym, "day_range"} = $q[13];
-      $aa {$sym, "year_range"} = $q[14];
-      $aa {$sym, "eps"} = $q[15];
-      $aa {$sym, "pe"} = $q[16];
-      $aa {$sym, "div_date"} = $q[17];
-      $aa {$sym, "div"} = $q[18];
-      $aa {$sym, "div_yield"} = $q[19];
-      $aa {$sym, "cap"} = $q[20];
-      $aa {$sym, "ex_div"} = $q[21];
-      $aa {$sym, "price"} = $aa {$sym, "last"};
-      # We believe that Yahoo returns in USD always although it is possible
-      # to look up Canadian stocks with it.  If this is not true it's going
-      # to be a pain to fix.
-      $aa {$sym, "currency"} = "USD";  
-
-      # Yahoo returns a line filled with N/A's if we look up a
-      # non-existant symbol.  AFAIK, the date flag will /never/
-      # be defined properly unless we've looked up a real stock.
-      # Hence we can use this to check if we've successfully
-      # obtained the stock or not.
-
-      if ($aa{$sym,"date"} eq "N/A") {
-        $aa{$sym,"success"}  = 0;
-        $aa{$sym,"errormsg"} = "Stock lookup failed";
-      } else {
-        $aa{$sym,"success"} = 1;
-      }
-
-      if ($q[13] =~ m{^"?\s*(\S+)\s*-\s*(\S+)"?$}) {
-        $aa {$sym, "low"} = $1;
-        $aa {$sym, "high"} = $2;
-      }
-    }
-
-    # Return undef's rather than N/As.  This makes things more suitable
-    # for insertion into databases, etc.
-    foreach my $key (keys %aa) {
-      undef $aa{$key} if (defined($aa{$key}) and $aa{$key} eq "N/A");
-    }
-
-    return %aa if wantarray;
-    return \%aa;
+	foreach my $symbol (@symbols) {
+		if ($info{$symbol,"success"}) {
+			$info{$symbol,"currency"} = "USD";
+		}
+	}
+	return %info if wantarray;
+	return \%info;
 }

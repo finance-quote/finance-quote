@@ -33,6 +33,7 @@ require 5.004;
 use strict;
 use HTTP::Request::Common;
 use LWP::UserAgent;
+use Finance::Quote::Yahoo::Base qw/yahoo_request base_yahoo_labels/;
 
 use vars qw($VERSION $YAHOO_EUROPE_URL);
 
@@ -40,13 +41,12 @@ $VERSION = '0.19';
 
 # URLs of where to obtain information.
 
-$YAHOO_EUROPE_URL = ("http://finance.fr.yahoo.com/d/quotes.csv?f=snl1d1t1c1p2va2bapomwerr1dyj1&s=");
+$YAHOO_EUROPE_URL = ("http://finance.uk.yahoo.com/d/quotes.csv");
 
 sub methods {return (europe => \&yahoo_europe,yahoo_europe => \&yahoo_europe)};
 
 {
-	my @labels = qw/name last date time volume bid ask close open eps
-	                pe cap price/;
+	my @labels = (base_yahoo_labels(),"currency");
 
 	sub labels { return (europe => \@labels, yahoo_europe => \@labels); }
 }
@@ -55,59 +55,19 @@ sub methods {return (europe => \&yahoo_europe,yahoo_europe => \&yahoo_europe)};
 # yahoo_europe gets quotes for European markets from Yahoo.
 sub yahoo_europe
 {
-    my $quoter = shift;
-    my @symbols = @_;
-    return unless @symbols;	# Nothing if no symbols.
-    my($x,@q,%aa,$ua,$url,$sym);
+	my $quoter = shift;
+	my @symbols = @_;
+	return unless @symbols;	# Nothing if no symbols.
 
-    $x = $";
-    $" = "+";
-    $url = $YAHOO_EUROPE_URL."@symbols";
-    $" = $x;
-    $ua = $quoter->user_agent;
-    my $reply = $ua->request(GET $url);
-    return unless ($reply->is_success);
-    foreach (split('\015?\012',$reply->content))
-    {
-      @q = $quoter->parse_csv($_);
+	# This does all the hard work.
+	my %info = yahoo_request($quoter,$YAHOO_EUROPE_URL,@symbols);
 
-      $sym = $q[0];
-      $aa {$sym, "name"} = $q[1];
-      $aa {$sym, "last"} = $q[2];
-      $aa {$sym, "date"} = $q[3];
-      $aa {$sym, "time"} = $q[4];
-      $aa {$sym, "volume"} = $q[7];
-      $aa {$sym, "bid"} = $q[9];
-      $aa {$sym, "ask"} = $q[10];
-      $aa {$sym, "close"} = $q[11];
-      $aa {$sym, "open"} = $q[12];
-      $aa {$sym, "eps"} = $q[15];
-      $aa {$sym, "pe"} = $q[16];
-      $aa {$sym, "cap"} = $q[20];
-      $aa {$sym, "price"} = $aa {$sym, "last"};
-      $aa {$sym, "currency"} = "EUR";
+	foreach my $symbol (@symbols) {
+		if ($info{$symbol,"success"}) {
+			$info{$symbol,"currency"} = "EUR";
+		}
+	}
 
-      # Yahoo returns a line filled with N/A's if we look up a
-      # non-existant symbol.  AFAIK, the date flag will /never/
-      # be defined properly unless we've looked up a real stock.
-      # Hence we can use this to check if we've successfully
-      # obtained the stock or not.
-      if ($aa{$sym,"date"} eq "N/A") {
-        $aa{$sym, "success"} = 0;
-	$aa{$sym, "errormsg"} = "Stock lookup failed.";
-      } else {
-        $aa{$sym, "success"} = 1;
-      }
-    }
-
-    # Return undef's rather than N/As.  This makes things more suitable
-    # for insertion into databases, etc.  Also remove silly HTML that
-    # yahoo inserts to put in little euro symbols.
-    foreach my $key (keys %aa) {
-      $aa{$key} =~ s/<[^>]*>//g;
-      undef $aa{$key} if (defined($aa{$key}) and $aa{$key} eq "N/A");
-    }
-
-    return %aa if wantarray;
-    return \%aa;
+	return %info if wantarray;
+	return \%info;
 }
