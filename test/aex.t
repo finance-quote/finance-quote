@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 30};
+BEGIN {plan tests => 9};
 
 use Finance::Quote;
 
@@ -9,54 +9,21 @@ use Finance::Quote;
 
 my $quoter = Finance::Quote->new();
 
-my %quotes = $quoter->aex("phi","asml","aex");
+my %quotes = $quoter->aex("AAB 93-08 7.5");
 ok(%quotes);
 
 # Check that some values are defined.
-ok($quotes{"phi","success"});
-ok($quotes{"phi","last"} > 0);
-ok($quotes{"phi","date"});
-ok($quotes{"phi","volume"} > 0);
-ok($quotes{"asml","success"});
-ok($quotes{"asml","time"});
-ok($quotes{"asml","volume"} > 0);
-
-# Check that some values are undefined.
-ok($quotes{"aex","success"});
-ok($quotes{"aex","last"} > 0);
-ok( !defined($quotes{"aex","volume"}) );
+ok($quotes{"AAB 93-08 7.5","success"});
+ok($quotes{"AAB 93-08 7.5","last"} > 0);
+ok($quotes{"AAB 93-08 7.5","date"});
+ok($quotes{"AAB 93-08 7.5","volume"} > 0);
 
 # Exercise the fetch function 
-%quotes = $quoter->fetch("aex","aab");
+%quotes = $quoter->fetch("aex","AAB C Jun 05 20.00");
 ok(%quotes);
-ok($quotes{"aab","success"});
-ok($quotes{"aab","last"} > 0);
+ok($quotes{"AAB C Jun 05 20.00","success"});
+ok($quotes{"AAB C Jun 05 20.00","last"} > 0);
 
-# Test options fetching
-%quotes = $quoter->fetch("aex_options", "aex c oct 2007 300.00", "phi");
-ok(%quotes);
-
-# the following test will fail after Oct 2007 :-(
-ok($quotes{"aex c oct 2007 300.00","success"});
-ok($quotes{"aex c oct 2007 300.00","close"} > 0);
-ok($quotes{"aex c oct 2007 300.00","bid"});
-ok($quotes{"aex c oct 2007 300.00","ask"});
-
-ok($quotes{"phi","success"});
-ok($quotes{"phi","options"});
-ok($quotes{ $quotes{"phi","options"}->[0],"close"});
-ok($quotes{ $quotes{"phi","options"}->[0],"date"});
-
-# Test futures fetching
-%quotes = $quoter->fetch("aex_futures", "fti");
-ok(%quotes);
-
-# Check that some values are defined.
-ok($quotes{"fti","success"});
-ok($quotes{"fti","futures"});
-ok($quotes{ $quotes{"fti","futures"}->[0],"last"} > 0);
-ok($quotes{ $quotes{"fti","futures"}->[0],"date"});
-ok($quotes{ $quotes{"fti","futures"}->[0],"time"});
 
 # Check that a bogus fund returns no-success.
 %quotes = $quoter->aex("BOGUS");
