@@ -52,7 +52,10 @@ $MAX_REQUEST_SIZE = 40;
 
 @FIELDS = qw/symbol price change open close high low yhigh ylow div yield vol avg_vol pe/;
 
-sub methods {return (fool => \&fool)}
+sub methods {return (fool   => \&fool,
+                     usa    => \&fool,
+		     nasdaq => \&fool,
+		     nyse   => \&fool )}
 
 {
 	my @labels = (base_fool_labels(), "p_change", "currency", "method");
