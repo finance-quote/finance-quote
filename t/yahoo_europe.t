@@ -2,7 +2,7 @@
 use strict;
 use Test;
 use Data::Dumper;
-BEGIN {plan tests => 8};
+BEGIN {plan tests => 9};
 
 use Finance::Quote;
 
@@ -19,6 +19,10 @@ ok($quotes{"12150.PA","last"} > 0);
 ok(length($quotes{"12150.PA","name"}) > 0);
 ok($quotes{"12150.PA","success"});
 ok($quotes{"12150.PA", "currency"} eq "EUR");
+
+# Make sure we don't have spurious % signs.
+
+ok($quotes{"12150.PA","p_change"} !~ /%/);
 
 # Check that a bogus stock returns no-success.
 ok(! $quotes{"BOGUS","success"});
