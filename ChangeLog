@@ -393,3 +393,8 @@
 	* Updated yahoo_europe test suite as one of the symbols we were
 	  using for testing has since dissapeared.  (Bankrupt? Merged?)
 
+2000-10-29	Paul Fenwick	<pjf@cpan.org>
+	* F::Q now makes use of a custom F::Q::UserAgent to fetch
+	  information.  This is capable of doing proxy authentication
+	  and other arbitary http-headers.
+
