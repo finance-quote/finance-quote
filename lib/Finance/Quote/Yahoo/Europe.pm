@@ -36,7 +36,7 @@ use Finance::Quote::Yahoo::Base qw/yahoo_request base_yahoo_labels/;
 
 use vars qw($VERSION $YAHOO_EUROPE_URL);
 
-$VERSION = '1.01';
+$VERSION = '1.02';
 
 # URLs of where to obtain information.
 
@@ -68,15 +68,18 @@ sub yahoo_europe
 			# London sources return in pence, not Euros.
 			# We'd like them to return in pounds (divide
 			# by 100).
+
 			if ($symbol =~ /\.L$/i) {
 				$info{$symbol,"currency"} = "GBP";
 				foreach my $field ($quoter->default_currency_fields) {
 					next unless ($info{$symbol,$field});
 					$info{$symbol,$field} = $quoter->scale_field($info{$symbol,$field},0.01);
 				}
-			} else {
-				# All other markets are in Euros.
+			} elsif (substr($symbol,0,1) ne "^") {
+				# All other non-indexes are in Euros.
 				$info{$symbol,"currency"} = "EUR";
+			} else {
+				$info{$symbol,"currency"} = undef;
 			}
 		}
 	}
