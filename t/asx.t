@@ -9,6 +9,8 @@ use Finance::Quote;
 
 my $q      = Finance::Quote->new();
 
+$q->timeout(120);	# ASX is broken regularly, so timeouts are good.
+
 my %quotes = $q->asx("CML","BHP");
 ok(defined(%quotes));
 
