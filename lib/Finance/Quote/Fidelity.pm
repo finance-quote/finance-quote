@@ -3,7 +3,7 @@
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
-#    Copyright (C) 2000, Paul Fenwick <pjf@schools.net.au>
+#    Copyright (C) 2000, Paul Fenwick <pjf@cpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -48,6 +48,9 @@ $FIDELITY_MM_URL = ("http://personal441.fidelity.com/gen/prices/mm.csv");
 $FIDELITY_ASSET_URL = ("http://personal441.fidelity.com/gen/prices/asset.csv");
 
 sub methods {return (fidelity=>\&fidelity);}
+
+sub labels { return (fidelity=>[qw/exchange name number nav change ask
+                                   date yield price/]); }
 
 # =======================================================================
 # the fidelity routine gets quotes from fidelity investments
@@ -178,6 +181,7 @@ sub _fidelity_nav
             ($aa {$sym, "change"} = $q[4]) =~ s/^ +//;
             ($aa {$sym, "ask"}    = $q[7]) =~ s/^ +//;
              $aa {$sym, "date"} = $dayte;
+	     $aa {$sym, "price"} = $aa{$sym, "nav"};
 	     $aa {$sym, "success"} = 1;
 	}
     }
@@ -220,6 +224,7 @@ sub _fidelity_mm
             ($aa {$sym, "number"} = $q[1]) =~ s/^ +//;
             ($aa {$sym, "yield"}  = $q[3]) =~ s/^ +//;
              $aa {$sym, "date"} = $dayte;
+	     $aa {$sym, "price"} = $aa{$sym, "yield"};
 	     $aa {$sym, "success"} = 1;
 	}
     }
