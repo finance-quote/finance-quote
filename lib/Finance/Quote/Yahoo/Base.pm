@@ -58,9 +58,9 @@ $MAX_REQUEST_SIZE = 40;
 
 @FIELDS = qw/symbol name last date time net p_change volume bid ask
              close open day_range year_range eps pe div_date div div_yield
-	     cap ex_div avg_vol/;
+	     cap ex_div avg_vol currency/;
 
-@FIELD_ENCODING = qw/s n l1 d1 t1 c1 p2 v b a p o m w e r r1 d y j1 q a2/;
+@FIELD_ENCODING = qw/s n l1 d1 t1 c1 p2 v b a p o m w e r r1 d y j1 q a2 c4/;
 
 # This returns a list of labels that are provided, so that code
 # that make use of this module can know what it's dealing with.
@@ -224,14 +224,22 @@ sub yahoo_request {
 				$info{$symbol, "high"} = $2;
 			}
 
-			# Determine the currency from the exchange name.
-			# Symbols without an exchange are in USD. Symbols
-			# starting with a hat are always indexes, so they
-			# don't have a currency.
-			if (defined($exchange)) {
-			  $info{$symbol,"currency"} = $currency_tags{$exchange};
-			} elsif (substr($symbol,0,1) ne "^") {
-			  $info{$symbol,"currency"} = "USD";
+			if (defined($info{$symbol,"currency"})) {
+			  # Convert the currency to be all uppercase for
+			  # backward compatability.  Needed because Yahoo
+			  # returns GBP as GBp.  There may be others.
+			  $info{$symbol,"currency"} =~ tr/a-z/A-Z/
+			} else {
+			  # Determine the currency from the exchange name.
+			  # Symbols without an exchange are in USD. Symbols
+			  # starting with a hat are always indexes, so they
+			  # don't have a currency.
+			  if (defined($exchange)) {
+			    $info{$symbol,"currency"} = $currency_tags{$exchange};
+			  } elsif (substr($symbol,0,1) ne "^") {
+			    $info{$symbol,"currency"} = "USD";
+			  }
+			  $info{$symbol,"currency_set_by_fq"} = 1;
 			}
 
 			# Convert prices (when needed). E.G. London sources
