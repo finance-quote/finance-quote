@@ -6,10 +6,10 @@ Paul Fenwick (pjf at cpan.org)
 	0. Table of Contents.
 	1. Where's the Finance::Quote webpage?
 	2. Where can I get a beginner's introduction to F::Q?
-	3. What does it mean if "make test" fails?
-	4. How can I use proxyauth (experimental)?
-	5. Is there anything similar to F::Q in other languages?
-	6. Where can I get more help?
+	3. How can I use proxyauth (experimental)?
+	4. Is there anything similar to F::Q in other programming languages?
+	5. Where can I get more help?
+	6. Is there commercial support for F::Q available?
 
 1. Where is the Finance::Quote webpage?
 =======================================
@@ -23,36 +23,10 @@ Paul Fenwick (pjf at cpan.org)
 	final draft of this essay at
 	<http://finance-quote.sourceforge.net/documentation.html>.
 
-3. What does it mean if "make test" fails?
-==========================================
-	Finance::Quote performs a number of tests to try and ensure good
-	operation of its modules.  These rely upon a good network connection
-	and the quote-sources providing the data used for testing.  Sometimes,
-	a test will fail intermittently, this is sometimes caused by a
-	slow link or network congestion, and is nothing to be worried
-	about.
-
-	If a particular test continues to fail, then it may indicate a
-	problem.  Normally a failed test only indicates a problem with
-	a particular module, and this will only affect you if you're
-	using that module to obtain data.  Sometimes, if you're using
-	failover support (which is on by default), this isn't even an
-	issue.
-
-	Before each version of F::Q is released, checks are made to ensure
-	that all tests are passed.  Sometimes the data that F::Q uses for
-	its tests becomes invalid (eg, if a stock no longer exists).  In
-	this case it will be corrected in the next version of F::Q.
-
-	If you think you've found a bug, or want to know if others are
-	experiencing similar problems to you, you can visit the F::Q
-	bug-tracking system via
-	    http://finance-quote.sourceforge.net/developer.html
-
-4. How can I use proxyauth (experimental)?
+3. How can I use proxyauth (experimental)?
 ==========================================
 	WARNING: THIS SUPPORT IS EXPERIMENTAL AND SYNTAX _WILL_ CHANGE IN
-	         THE FUTURE.  USE AT YOUR OWN RISK.
+	         THE FUTURE.  If it breaks, you get to keep both pieces.
 
 	Finance::Quote provides experimental support for authenticated
 	proxies.  If you wish to try this, then put the following at the
@@ -72,9 +46,8 @@ Paul Fenwick (pjf at cpan.org)
 	This object is used as a template for any new HTTP requests made by
 	Finance::Quote.
 
-5. Is there anything similar to F::Q in other languages?
-========================================================
-
+4. Is there anything similar to F::Q in other programming languages?
+====================================================================
 	Vidyut Luther has written a stock-lookup library in PHP.  It's
 	available at <http://www.gotslack.com/stocks/>
 
@@ -82,7 +55,7 @@ Paul Fenwick (pjf at cpan.org)
 	available at <http://www.aboutbillbell.com/>.  Follow the
 	"Code Downloads" link in the left sidebar.
 
-6. Where can I get more help?
+5. Where can I get more help?
 =============================
 	If you haven't already done so, try the Finance::Quote webpage
 	at <http://finance-quote.sourceforge.net/>.  There are also lots
@@ -93,3 +66,9 @@ Paul Fenwick (pjf at cpan.org)
 	developer's list, at <finance-quote-devel@lists.sourceforge.net>.
 	The archives of this list are available on-line at
 	<http://sourceforge.net/mail/?group_id=4232>.
+
+6. Is there commercial support for F::Q available?
+==================================================
+	The Obsidian Consulting Group <http://www.obsidian.com.au/> provides
+	commercial support for Finance::Quote.  For more information, send
+	e-mail to <contact@obsidian.com.au>.
