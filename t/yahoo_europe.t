@@ -29,6 +29,6 @@ ok(! $quotes{"BOGUS","success"});
 
 # London stocks should be returned in British Pounds (GBP).
 
-my %londonquotes = $q->fetch("yahoo_europe","BT.A.L");
-ok($londonquotes{"BT.A.L","success"});
-ok($londonquotes{"BT.A.L","currency"} eq "GBP");
+my %londonquotes = $q->fetch("yahoo_europe","BAY.L");
+ok($londonquotes{"BAY.L","success"});
+ok($londonquotes{"BAY.L","currency"} eq "GBP");

@@ -388,3 +388,8 @@
 	* Updated F::Q version to 1.03.
 
 	* CVSTAG: finance_quote_1_03
+
+2000-10-27	Paul Fenwick	<pjf@cpan.org>
+	* Updated yahoo_europe test suite as one of the symbols we were
+	  using for testing has since dissapeared.  (Bankrupt? Merged?)
+
