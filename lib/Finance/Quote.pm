@@ -164,7 +164,7 @@ sub new {
 		shift(@reqmodules) if (@reqmodules);
 		# Default modules
 		 @modules = qw/Yahoo::Australia Fidelity ASX Troweprice
-                               Tiaacref Yahoo::USA Yahoo::Europe
+                               Tdwaterhouse Tiaacref Yahoo::USA Yahoo::Europe
 			       DWS VWD Trustnet Fool/;
 	}
 
