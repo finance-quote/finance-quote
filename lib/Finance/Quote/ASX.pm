@@ -36,7 +36,9 @@ package Finance::Quote::ASX;
 use HTTP::Request::Common;
 use LWP::UserAgent;
 
-use vars qw/$ASX_URL/;
+use vars qw/$ASX_URL $VERSION/;
+
+$VERSION = "1.00";
 
 $ASX_URL = 'http://www3.asx.com.au/nd50/nd_isapi_50.dll/JSP/EquitySearchResults.jsp?method=post&template=F1001&ASXCodes=';
 

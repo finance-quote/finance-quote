@@ -38,7 +38,7 @@ use vars qw/$FIDELITY_GANDI_URL $FIDELITY_GROWTH_URL $FIDELITY_CORPBOND_URL
 use LWP::UserAgent;
 use HTTP::Request::Common;
 
-$VERSION = '0.19';
+$VERSION = '1.00';
 
 $FIDELITY_GANDI_URL = ("http://personal441.fidelity.com/gen/prices/gandi.csv");
 $FIDELITY_GROWTH_URL = ("http://personal441.fidelity.com/gen/prices/growth.csv");
