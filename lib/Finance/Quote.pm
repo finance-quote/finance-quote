@@ -47,7 +47,7 @@ $YAHOO_CURRENCY_URL = "http://finance.yahoo.com/m5?";
 @EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.02';
+$VERSION = '1.03';
 
 # Autoload method for obsolete methods.  This also allows people to
 # call methods that objects export without having to go through fetch.

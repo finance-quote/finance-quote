@@ -384,3 +384,7 @@
 
 	* Updated VWD module so it can parse information from the new
 	  VWD site.
+
+	* Updated F::Q version to 1.03.
+
+	* CVSTAG: finance_quote_1_03
