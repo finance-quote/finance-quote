@@ -488,3 +488,8 @@
 
 2001-06-26	Paul Fenwick <pjf@cpan.org>
 	* Added AEX module courtesy of Rob Sessink.
+
+	* Updated ASX module to use the new (again!) ASX website.
+	
+	* Updated ASX module to use HTML::TableExtract.  Code is much
+	  simplier now.
