@@ -288,3 +288,7 @@
 
 2000-08-04	Paul Fenwick	<pjf@cpan.org>
 	* Patched Yahoo::Base to no longer return spurious percentage signs.
+
+2000-08-06	Paul Fenwick	<pjf@cpan.org>
+	* Updated regression testing scripts to make sure that spurious
+	  percentage signs are no longer returned.
