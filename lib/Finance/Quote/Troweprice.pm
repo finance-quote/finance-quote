@@ -3,7 +3,7 @@
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
-#    Copyright (C) 2000, Paul Fenwick <pjf@schools.net.au>
+#    Copyright (C) 2000, Paul Fenwick <pjf@cpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -46,6 +46,8 @@ $TROWEPRICE_URL = ("http://www.troweprice.com/funds/prices.csv");
 
 sub methods { return (troweprice => \&troweprice); }
 
+sub labels { return (troweprice => [qw/exchange name nav date price/]); }
+
 # =======================================================================
 
 sub troweprice
@@ -70,6 +72,7 @@ sub troweprice
             $aa {$sym, "name"} = $sym;  # no name supplied ... 
             $aa {$sym, "nav"} = $q[1];
             $aa {$sym, "date"} = $q[2];
+	    $aa {$sym, "price"} = $aa{$sym,"nav"};
 	    $aa {$sym, "success"} = 1;
         } else {
 	    $aa {$sym, "success"} = 0;
