@@ -524,3 +524,10 @@
 	  in man-pages.
 
 	* CVSTAG: finance_quote_1_06
+
+2001-07-04	Paul Fenwick	<pjf@cpan.org>
+	* Confirmed debian packages release with Ross Peachey.
+
+	* Moved cvs tags in debian/* so that finance_quote_1_06
+	  point to the files used in building 1.06, not those building
+	  1.05.
