@@ -656,3 +656,10 @@
 	* Yahoo/Base.pm: Added suffixes for 1) the US Options, 2) US
 	exchanges when using a non-US Yahoo site, and 3) the Zurich
 	exchange.
+
+2003-09-15	Pawel Konieczny <konieczp@users.sourceforge.net>
+	* AEX module: major update: additional labels for options available:
+	volume, oi, and other. Subframes cache implemented, resulting in 
+	substantial speedup for repeating (intraday) requests of individual 
+	options.
+
