@@ -469,3 +469,4 @@
 	  FQ_LOAD_QUOTELETS environment variable.  This now works
 	  as intened.
 
+	* Added Jasmin Bertovic's Cdnfundlibrary module.
