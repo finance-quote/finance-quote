@@ -52,10 +52,14 @@ $MAX_REQUEST_SIZE = 40;
 
 @FIELDS = qw/symbol price change open close high low yhigh ylow div yield vol avg_vol pe/;
 
-sub methods {return (fool   => \&fool,
-                     usa    => \&fool,
-		     nasdaq => \&fool,
-		     nyse   => \&fool )}
+sub methods {return (fool   => \&fool)}
+
+# The follow methods are valid, but not enabled for this release until further
+# testing has been performed.
+#                     usa    => \&fool,
+#		     nasdaq => \&fool,
+#		     nyse   => \&fool )}
+#
 
 {
 	my @labels = (base_fool_labels(), "p_change", "currency", "method");
@@ -101,7 +105,7 @@ sub fool {
 		$info{$symbol, $FIELDS[$j]} = $q[$j];
 	      }
 	      $info{$symbol, "currency"} = "USD";
-              $info{$symbol, "method"} = "Fool";
+              $info{$symbol, "method"} = "fool";
 	         # change_p = change / prev_cl * 100%
 	      $info{$symbol, "p_change"} = $q[2]/$q[4]*100;
 	    }

@@ -507,3 +507,6 @@
 	  for had changed its name, causing the test to fail.
 
 	* Added AEX test suite to repository.
+
+	* Removed failover into Fool.pm support, as I'd like to do more
+	  testing before it enters the failover system.
