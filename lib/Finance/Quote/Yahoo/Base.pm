@@ -157,6 +157,8 @@ sub yahoo_request {
 	# The suffix is used to specify particular markets.
 	my $suffix = shift || "";
 	
+	my $uses_semicolon = shift || 0;
+
 	my %info;
 	my $ua = $quoter->user_agent;
 
@@ -180,7 +182,12 @@ sub yahoo_request {
 		# the hash now.
 
 		foreach (split('\015?\012',$response->content)) {
-			my @q = $quoter->parse_csv($_);
+			my @q;
+			if ($uses_semicolon) {
+				@q = $quoter->parse_csv_semicolon($_);
+			} else {
+				@q = $quoter->parse_csv($_);
+			}
 			my $symbol = $q[0];
 			my ($exchange) = $symbol =~ m/\.([A-Z]+)/;
 
