@@ -188,12 +188,12 @@ Finance::Quote::ASX	- Obtain quotes from the Australian Stock Exchange.
 
 =head1 SYNOPSIS
 
-use Finance::Quote;
+    use Finance::Quote;
 
-$q = Finance::Quote->new;
+    $q = Finance::Quote->new;
 
-%stockinfo = $q->fetch("asx","BHP");	   # Only query ASX.
-%stockinfo = $q->fetch("australia","BHP"); # Failover to other sources OK.
+    %stockinfo = $q->fetch("asx","BHP");	   # Only query ASX.
+    %stockinfo = $q->fetch("australia","BHP"); # Failover to other sources OK.
 
 =head1 DESCRIPTION
 

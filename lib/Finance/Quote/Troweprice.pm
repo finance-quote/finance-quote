@@ -94,12 +94,12 @@ Finance::Quote::Troweprice	- Obtain quotes from T. Rowe Price
 
 =head1 SYNOPSIS
 
-use Finance::Quote;
+    use Finance::Quote;
 
-$q = Finance::Quote->new;
+    $q = Finance::Quote->new;
 
-%stockinfo = $q->fetch("troweprice","PRFDX"); # Can failover to other methods
-%stockinfo = $q->fetch("troweprice_direct","PRFDX"); # Use this module only.
+    %stockinfo = $q->fetch("troweprice","PRFDX"); # Can failover to other methods
+    %stockinfo = $q->fetch("troweprice_direct","PRFDX"); # Use this module only.
 
 =head1 DESCRIPTION
 
