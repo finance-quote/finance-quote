@@ -2,7 +2,7 @@
 use strict;
 use Test;
 use Data::Dumper;
-BEGIN {plan tests => 3};
+BEGIN {plan tests => 5};
 
 use Finance::Quote;
 
@@ -10,10 +10,14 @@ use Finance::Quote;
 
 my $q      = Finance::Quote->new();
 
-my %quotes = $q->yahoo_europe("12150.PA");
+my %quotes = $q->yahoo_europe("12150.PA","BOGUS");
 ok(defined(%quotes));
 
 # Check the nav values are defined.  These are the most
 #  used and most reliable indicators of success.
 ok($quotes{"12150.PA","last"} > 0);
 ok(length($quotes{"12150.PA","name"}) > 0);
+ok($quotes{"12150.PA","success"});
+
+# Check that a bogus stock returns no-success.
+ok(! $quotes{"BOGUS","success"});
