@@ -1,0 +1,11 @@
+2000-04-06	Paul Fenwick	<pjf@cpan.org>
+	* CVSTAG: finance_quote_0_16
+
+	* Initial public release.
+
+2000-04-08	Paul Fenwick	<pjf@cpan.org>
+	* Integrated TIAA-CREF changes from Brent Neal.
+
+	* Changes to Makefile.PL to check dependancies, etc.
+
+	* Updated Examples/Quote_example.pl to include TIAA-CREF examples.
