@@ -597,3 +597,7 @@
 
 	* Added Ganesan Rajagopal's excellent IndiaMutal module.
 	  (#720896)
+
+	* Fixed Cdnfundlibrary to correctly set the success flag
+	  when successful.  Thanks to Robert Clark for finding
+	  this bug.  (#752395)
