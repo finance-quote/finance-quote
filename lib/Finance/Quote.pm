@@ -272,7 +272,12 @@ sub yahoo_europe
       # be defined properly unless we've looked up a real stock.
       # Hence we can use this to check if we've successfully
       # obtained the stock or not.
-      $aa {$sym, "success"} = ($aa{$sym,"date"} eq "N/A") ? 0 : 1;
+      if ($aa{$sym,"date"} eq "N/A") {
+        $aa{$sym, "success"} = 0;
+	$aa{$sym, "errormsg"} = "Stock lookup failed.";
+      } else {
+        $aa{$sym, "success"} = 1;
+      }
     }
 
     # Return undef's rather than N/As.  This makes things more suitable
@@ -419,7 +424,7 @@ sub _fidelity_nav
             ($aa {$sym, "ask"}    = $q[7]) =~ s/^ +//;
              $aa {$sym, "date"} = $dayte;
 	     $aa {$sym, "success"} = 1;
-        }
+	}
     }
 
     return %aa;
@@ -463,7 +468,7 @@ sub _fidelity_mm
             ($aa {$sym, "yield"}  = $q[3]) =~ s/^ +//;
              $aa {$sym, "date"} = $dayte;
 	     $aa {$sym, "success"} = 1;
-        }
+	}
     }
 
     return %aa;
@@ -496,7 +501,10 @@ sub troweprice
             $aa {$sym, "nav"} = $q[1];
             $aa {$sym, "date"} = $q[2];
 	    $aa {$sym, "success"} = 1;
-        }
+        } else {
+	    $aa {$sym, "success"} = 0;
+	    $aa {$sym, "errormsg"} = "Stock lookup failed.";
+	}
     }
 
     return %aa;
@@ -1005,8 +1013,12 @@ Note that prices from the Australian Stock Exchange (ASX) are in
 Australian Dollars.  Prices from Yahoo! Europe are in Euros.  All other
 prices are in US Dollars.
 
+=head2 troweprice
+
 The troweprice() function ignores any arguments passed to it.  Instead it
 returns all funds managed by T.RowePrice.
+
+=head2 tiaacref
 
 For TIAA and CREF Annuities, you must use TIAA-CREF's pseudosymbols. These
 are as follows:

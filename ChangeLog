@@ -114,3 +114,8 @@
 	* Fixed typo in docs  s/yeild/yield/;
 	
 	* Added ex_div for Ex-Divident Date in yahoo().
+
+2000-04-30	Paul Fenwick	<pjf@cpan.org>
+	* Updated POD.
+
+	* Improved returned error messages.
