@@ -68,7 +68,7 @@ sub methods { return (tiaacref=>\&tiaacref); }
 #PA Select Stock:		TIAAsele
 
 #
-# This subroutine was written by Brent Neal <brent@phys.lsu.edu>
+# This subroutine was written by Brent Neal <brentn@users.sourceforge.net>
 #
 # TODO:
 #
