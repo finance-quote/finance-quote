@@ -482,20 +482,20 @@ Finance::Quote - Get stock and mutual fund quotes from various exchanges
 
 =head1 SYNOPSIS
 
- use Finance::Quote;
- $q = Finance::Quote->new;
+   use Finance::Quote;
+   $q = Finance::Quote->new;
 
- $q->timeout(60);
+   $q->timeout(60);
 
- $conversion_rate = $q->currency("AUD","USD");
- $q->set_currency("EUR");  # Return all info in Euros.
+   $conversion_rate = $q->currency("AUD","USD");
+   $q->set_currency("EUR");  # Return all info in Euros.
 
- $q->require_labels(qw/price date high low volume/);
+   $q->require_labels(qw/price date high low volume/);
 
- $q->failover(1);	# Set failover support (on by default).
+   $q->failover(1);	# Set failover support (on by default).
 
- %quotes  = $q->fetch("nasdaq",@stocks);
- $hashref = $q->fetch("nyse",@stocks);
+   %quotes  = $q->fetch("nasdaq",@stocks);
+   $hashref = $q->fetch("nyse",@stocks);
 
 =head1 DESCRIPTION
 
@@ -509,8 +509,8 @@ With the exception of straight currency exchange rates, all information
 is returned as a two-dimensional hash (or a reference to such a hash,
 if called in a scalar context).  For example:
 
-	%info = $q->fetch("australia","CML");
-	print "The price of CML is ".$info{"CML","price"};
+    %info = $q->fetch("australia","CML");
+    print "The price of CML is ".$info{"CML","price"};
 
 The first part of the hash (eg, "CML") is referred to as the stock.
 The second part (in this case, "price") is referred to as the label.
@@ -560,9 +560,9 @@ the empty list may be returned, or undef in a scalar context.
 
 =head2 NEW
 
-my $q = Finance::Quote->new;
-my $q = Finance::Quote->new("ASX");
-my $q = Finance::Quote->new("-defaults", "CustomModule");
+    my $q = Finance::Quote->new;
+    my $q = Finance::Quote->new("ASX");
+    my $q = Finance::Quote->new("-defaults", "CustomModule");
 
 In the first form, this creates a new Finance::Quote object
 with the default methods.  In the second form, an object
@@ -586,16 +586,16 @@ Fetch takes an exchange as its first argument.  The second and remaining
 arguments are treated as stock-names.  In the standard Finance::Quote
 distribution, the following exchanges are recognised:
 
-	australia		Australan Stock Exchange
-	fidelity		Fidelity Investments
-	tiaacref		TIAA-CREF
-	troweprice		T. Rowe Price
-	europe			European Markets
-	canada			Canadian Markets
-	usa			USA Markets
-	nyse			New York Stock Exchange
-	nasdaq			NASDAQ
-	vanguard		Vanguard Investments
+    australia		Australan Stock Exchange
+    fidelity		Fidelity Investments
+    tiaacref		TIAA-CREF
+    troweprice		T. Rowe Price
+    europe		European Markets
+    canada		Canadian Markets
+    usa			USA Markets
+    nyse		New York Stock Exchange
+    nasdaq		NASDAQ
+    vanguard		Vanguard Investments
 
 When called in an array context, a hash is returned.  In a scalar
 context, a reference to a hash will be returned.  The structure
@@ -610,7 +610,7 @@ information.
 
 =head2 CURRENCY
 
-$conversion_rate = $q->currency("USD","AUD");
+    $conversion_rate = $q->currency("USD","AUD");
 
 The currency method takes two arguments, and returns a conversion rate
 that can be used to convert from the first currency into the second.
@@ -626,7 +626,7 @@ See Finance::Quote::Yahoo for more information.
 
 =head2 SET_CURRENCY
 
-$q->set_currency("FRF");	# Get results in French Francs.
+    $q->set_currency("FRF");	# Get results in French Francs.
 
 The set_currency method can be used to request that all information be
 returned in the specified currency.  Note that this increases the
@@ -642,8 +642,8 @@ conversion is bound by Yahoo!'s terms and conditions.
 
 =head2 FAILOVER
 
-$q->failover(1);	# Set automatic failover support.
-$q->failover(0);	# Disable failover support.
+    $q->failover(1);	# Set automatic failover support.
+    $q->failover(0);	# Disable failover support.
 
 The failover method takes a single argument which either sets (if
 true) or unsets (if false) automatic failover support.  If automatic
@@ -658,14 +658,14 @@ undefined argument, it will return the current failover state
 
 =head2 USER_AGENT
 
-my $ua = $q->user_agent;
+    my $ua = $q->user_agent;
 
 The user_agent method returns the LWP::UserAgent object that
 Finance::Quote and its helpers use.  Normally this would not
 be useful to an application, however it is possible to modify
 the user-agent directly using this method:
 
-$q->user_agent->timeout(10);	# Set the timeout directly.
+    $q->user_agent->timeout(10);	# Set the timeout directly.
 
 =head1 ENVIRONMENT
 
