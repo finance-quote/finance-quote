@@ -109,6 +109,7 @@ one of the following:
 	ST - Stockholm
 	SG - Stuttgart
 	VA - Valence
+	VI - Vienna
 	DE - Xetra (was FX)
 
 This module provides both the "europe" and "yahoo_europe" methods.
