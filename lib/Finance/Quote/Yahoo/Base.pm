@@ -200,7 +200,10 @@ sub yahoo_request {
 			# loads all the returned fields into our hash.
 
 			for (my $i=0; $i < @FIELDS; $i++) {
-				$info{$symbol,$FIELDS[$i]} = $q[$i];
+				# Every now and then on a failed
+				# retrieval, Yahoo will drop in an
+				# undefined field
+				$info{$symbol,$FIELDS[$i]} = $q[$i] if defined $q[$i];
 			}
 
 			# Yahoo returns a line filled with N/A's if we
