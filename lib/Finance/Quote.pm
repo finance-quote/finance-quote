@@ -447,7 +447,7 @@ module.
   Linas Vepstas (C<linas@linas.org>)
   Yannick LE NY (C<y-le-ny@ifrance.com>)
   Paul Fenwick (C<pjf@schools.net.au>)
-  Brent Neal (C<brent@phys.lsu.edu>)
+  Brent Neal (C<brentn@users.sourceforge.net>)
 
 The Finance::Quote home page can be found at
 http://finance-quote.sourceforge.net/
