@@ -85,6 +85,7 @@ sub yahoo_europe
       $aa {$sym, "pe"} = $q[16];
       $aa {$sym, "cap"} = $q[20];
       $aa {$sym, "price"} = $aa {$sym, "last"};
+      $aa {$sym, "currency"} = "EUR";
 
       # Yahoo returns a line filled with N/A's if we look up a
       # non-existant symbol.  AFAIK, the date flag will /never/
