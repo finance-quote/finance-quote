@@ -651,3 +651,8 @@
 	* Yahoo/Base.pm: Added entry for the Lisbon Portugal stock
 	exchange.
 
+2003-09-12  David Hampton  <hampton@employees.org>
+
+	* Yahoo/Base.pm: Added suffixes for 1) the US Options, 2) US
+	exchanges when using a non-US Yahoo site, and 3) the Zurich
+	exchange.
