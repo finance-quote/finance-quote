@@ -493,3 +493,8 @@
 	
 	* Updated ASX module to use HTML::TableExtract.  Code is much
 	  simplier now.
+
+	* Updated Fidelity module to make use of the new fidelity website.
+
+	* Updated the Fidelity test to always test the fidelity_direct method.
+
