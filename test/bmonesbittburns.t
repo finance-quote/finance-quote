@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 10};
+BEGIN {plan tests => 9};
 
 use Finance::Quote;
 
