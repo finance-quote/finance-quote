@@ -439,3 +439,6 @@
 2000-02-16	Paul Fenwick	<pjf@cpan.org>
 	* Updated to repsect formatting changes in data fed to the
 	  currency function.
+
+	* Updated Quote.pm to include updated information on 
+	  FQ_LOAD_QUOTELET
