@@ -464,3 +464,8 @@
 	* Added Fool as a automatically loaded loaded module from
 	  F::Quote.pm.
 
+2001-05-09	Paul Fenwick	<pjf@cpan.org>
+	* Fixed strange behaviour which could occur when using
+	  FQ_LOAD_QUOTELETS environment variable.  This now works
+	  as intened.
+

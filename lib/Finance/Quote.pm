@@ -148,24 +148,27 @@ sub new {
 	bless $this, $class;
 
 	my @modules = ();
+	my @reqmodules = ();	# Requested modules.
 
 	# If there's no argument list, but we have the appropriate
 	# environment variable set, we'll use that instead.
 	if ($ENV{FQ_LOAD_QUOTELET} and !@_) {
-		@_ = split(' ',$ENV{FQ_LOAD_QUOTELET});
+		@reqmodules = split(' ',$ENV{FQ_LOAD_QUOTELET});
+	} else {
+		@reqmodules = @_;
 	}
 
 	# If we get an empty new(), or one starting with -defaults,
 	# then load up the default methods.
-	if (!@_ or $_[0] eq "-defaults") {
-		shift if (@_);
+	if (!@reqmodules or $reqmodules[0] eq "-defaults") {
+		shift(@reqmodules) if (@reqmodules);
 		# Default modules
 		 @modules = qw/Yahoo::Australia Fidelity ASX Troweprice
                                Tiaacref Yahoo::USA Yahoo::Europe
 			       DWS VWD Trustnet Fool/;
 	}
 
-	$this->_load_modules(@modules,@_);
+	$this->_load_modules(@modules,@reqmodules);
 
 	$this->{TIMEOUT} = $TIMEOUT if defined($TIMEOUT);
 	$this->{FAILOVER} = 1;
