@@ -2,6 +2,7 @@
 
 #  Cdnfundlibrary.pm
 #
+#  Version 0.5 made functional again
 #  Version 0.4 fixed up multiple lookup  (March 3, 2001)
 #  Version 0.3 fixed up yield lookup
 #  Version 0.2 functional with Finance::Quote - added error-checking
@@ -24,7 +25,7 @@ $VERSION = '0.2';
 # URLs of where to obtain information.
 
 $FUNDLIB_URL =
-("http://www.fundlibrary.com/FundCard/FundCard_TFL.cfm?FundID=");
+("http://www.fundlibrary.com/funds/db/_fundcard.asp?t=7&id=");
 $FUNDLIB_MAIN_URL=("http://www.fundlibrary.com");
 
 sub methods { return (canadamutual => \&fundlibrary,
@@ -51,7 +52,8 @@ sub fundlibrary   {
 
     # Local Variables
     my(%fundquote, $mutual);
-    my($ua, $url, $reply, $ts, $row, $rowhd, $te);
+    my($ua, $url, $reply, $ts, $row, $rowhd, $te, @rows, @ts);
+
 #    my $te = new HTML::TableExtract();
 
     $ua = $quoter->user_agent;
@@ -70,61 +72,31 @@ add later##
       $te->parse($reply->content);
 
       # Fund name
-      $ts = $te->table_state(0,1);
+      $ts = $te->table_state(1,2);
       if($ts) {
-          ($row) = $ts->rows;
-          $fundquote {$mutual, "name"} = $$row[0];
-
+	@rows = $ts->rows;
           $fundquote {$mutual, "currency"} = "CAD";
           $fundquote {$mutual, "source"} = $FUNDLIB_MAIN_URL;
           $fundquote {$mutual, "link"} = $url;
           $fundquote {$mutual, "method"} = "fundlibrary";
 
           # Fund price and date
-          $ts = $te->table_state(2,1);
-          ($row) = $ts->rows;
-          if ($$row[1] =~ /^\$.+as of/) {
-              $$row[1] =~ /(\d+\.\d+)/g;
-              $fundquote {$mutual, "price"} =  $1;
-              $fundquote {$mutual, "nav"} = $1;
-              $fundquote {$mutual, "last"} = $1;
+	  $row = $rows[1];
+          $$row[1] =~ /(\d+\.\d+)/g;
+          $fundquote {$mutual, "price"} =  $1;
+          $fundquote {$mutual, "nav"} = $1;
+          $fundquote {$mutual, "last"} = $1;
 
-              $$row[1] =~ /(\w+) (\d{1,2})\, (\d{4})/g;
-              $fundquote {$mutual, "date"} =  $1.' '.$2.', '.$3;
+          $$row[0] =~ /(\d{1,2})\/(\d{1,2})\/(\d{4})/g;
+          $fundquote {$mutual, "date"} =  $1.' '.$2.', '.$3;
 
-              # Assume things are fine here.
-              $fundquote {$mutual, "success"} = 1;
-          }
-          else {
-              $fundquote {$mutual, "success"} = 0;
-              $fundquote {$mutual, "errormsg"} = "Parse error retrieving
-price and date";
-          }
+          # Assume things are fine here.
+          $fundquote {$mutual, "success"} = 1;
 
           # Performance yield
           ### Fix up by looking for headers instead
 
-          $ts = $te->table_state(2,3);
-          ($rowhd, $row) = $ts->rows;
-          if ($rowhd && $row) {
-              if ($$row[1] =~ /%/ && $$rowhd[1] =~ /Performance/) {
-                  $$row[1] =~ s/ //g;
-                  $fundquote {$mutual, "yield"} = $$row[1];
-              }
-          }
-          else {
-              $ts = $te->table_state(2,4);
-              ($rowhd, $row) = $ts->rows;
-              if ($rowhd && $row) {
-                  if ($$row[1] =~ /%/ && $$rowhd[1] =~ /Performance/) {
-                      $$row[1] =~ s/ //g;
-                      $fundquote {$mutual, "yield"} = $$row[1];
-                  }
-              }
-              else {
-                  $fundquote {$mutual, "yield"} = "NA";
-              }
-          }
+          $fundquote {$mutual, "yield"} = "NA";
       }
       else {
           $fundquote {$mutual, "success"} = 0;
