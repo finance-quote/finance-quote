@@ -36,3 +36,22 @@
 
 	* Added an example script (currency-lookup.pl) to test said
 	  currency conversion.
+
+2000-04-14	Paul Fenwick	<pjf@cpan.org>
+	* Added TIAA-CREF testing script.
+
+	* Added troweprice testing script.
+
+2000-04-16	Paul Fenwick	<pjf@cpan.org>
+	* Added yahoo_europe test script.
+
+	* Removed depreciated vanguard function.
+
+2000-04-18	Paul Fenwick	<pjf@cpan.org>
+	* Added fetch() function to provide a cleaner interface to fetching
+	  quotes from a variety of sources.
+
+	* Added tests for fetch() to the asx.t test script.
+
+2000-04-20	Paul Fenwick	<pjf@cpan.org>
+	* Removed misleading comments from Finance::Quote.pm
