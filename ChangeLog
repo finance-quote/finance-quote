@@ -55,3 +55,7 @@
 
 2000-04-20	Paul Fenwick	<pjf@cpan.org>
 	* Removed misleading comments from Finance::Quote.pm
+
+2000-04-21	Paul Fenwick	<pjf@cpan.org>
+	* Added extra methods to fetch (nasdaq, nyse) which act as
+	  aliases to yahoo.
