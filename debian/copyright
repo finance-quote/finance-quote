@@ -1,7 +1,7 @@
 This is Debian GNU/Linux's prepackaged version of Finance::Quote.  This
 is a set of perl modules which provide access to securities prices.
 
-This package was put together by Ross Peachey <rcp@users.sourceforge.net>, from
+This package was put together by Ross Peachey <rcp@debian.org>, from
 the original sources, available from:
 
      http://sourceforge.net/projects/finance-quote/
