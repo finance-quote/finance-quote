@@ -168,6 +168,7 @@ sub asx {
 	$info{$stock,"last"} ||= $info{$stock,"close"};
 	$info{$stock,"price"}  = $info{$stock,"last"};
 	$info{$stock,"success"} = 1;
+        $info{$stock, "currency"} = "AUD";
     }
     return %info if wantarray;
     return \%info;
