@@ -402,4 +402,8 @@
 	* BUG 121557: Fixed bug where the 40th symbol in a Yahoo lookup
 	  would fail.
 
+	* F::Q::UserAgent is now ready for release, but is still considered
+	  experimental.  Users must explicitly turn it on by setting
+	  $Finance::Quote::USE_EXPERIMENTAL_UA = 1;
 
+	* Updated the FAQ.
