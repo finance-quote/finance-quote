@@ -64,14 +64,9 @@ sub trustnet
     my @symbols = @_;
     
     return unless @symbols;
-    my(@q,%aa,$ua,$url,$sym,$ts,$date,$price,$currency,$reply,$trust,$trusto,$unittype,$suffix);
+    my(@q,%aa,$ua,$url,$sym,$ts,$price,$currency,$reply,$trust,$trusto,$unittype,$suffix);
     my ($row, $datarow, $matches);
     my %curr_iso = (GBP => "GBP", "£" => "GBP", "\$" => "USD");
-    my( $isodate, $day, $month, $year, $null);
-    my %imonth = ( "Jan" => "01", "Feb" => "02", "Mar" => "03",
-                   "Apr" => "04", "May" => "05", "Jun" => "06",
-		   "Jul" => "07", "Aug" => "08", "Sep" => "09",
-		   "Oct" => "10", "Nov" => "11", "Dec" => "12");
     
     my %symbolhash;
     @symbolhash{@symbols} = map(1,@symbols);
