@@ -106,6 +106,10 @@ sub yahoo
       $aa {$sym, "cap"} = $q[20];
       $aa {$sym, "ex_div"} = $q[21];
       $aa {$sym, "price"} = $aa {$sym, "last"};
+      # We believe that Yahoo returns in USD always although it is possible
+      # to look up Canadian stocks with it.  If this is not true it's going
+      # to be a pain to fix.
+      $aa {$sym, "currency"} = "USD";  
 
       # Yahoo returns a line filled with N/A's if we look up a
       # non-existant symbol.  AFAIK, the date flag will /never/
