@@ -382,4 +382,5 @@
 	  announcements.  Previously this would result in garbage being
 	  returned for that stock.
 
-
+	* Updated VWD module so it can parse information from the new
+	  VWD site.
