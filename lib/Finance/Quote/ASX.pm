@@ -78,7 +78,7 @@ sub asx {
 	}
 
 	my $te = HTML::TableExtract->new(
-		headers => ["Code", "Last", "$ +/-", "Bid", "Offer",
+		headers => ["Code", "Last", '\+/-', "Bid", "Offer",
 		            "Open", "High", "Low", "Vol"]);
 
 	$te->parse($response->content);
