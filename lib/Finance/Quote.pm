@@ -205,7 +205,7 @@ sub yahoo
 
     # Return undef's rather than N/As.  This makes things more suitable
     # for insertion into databases, etc.
-    foreach my $key (%aa) {
+    foreach my $key (keys %aa) {
       undef $aa{$key} if (defined($aa{$key}) and $aa{$key} eq "N/A");
     }
 
@@ -252,8 +252,10 @@ sub yahoo_europe
     }
 
     # Return undef's rather than N/As.  This makes things more suitable
-    # for insertion into databases, etc.
-    foreach my $key (%aa) {
+    # for insertion into databases, etc.  Also remove silly HTML that
+    # yahoo inserts to put in little euro symbols.
+    foreach my $key (keys %aa) {
+      $aa{$key} =~ s/<[^>]*>//g;
       undef $aa{$key} if (defined($aa{$key}) and $aa{$key} eq "N/A");
     }
 
