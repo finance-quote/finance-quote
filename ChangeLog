@@ -254,3 +254,13 @@
 
 2000-07-16	Paul Fenwick	<pjf@cpan.org>
 	* Documented the list of possible markets in Yahoo::Europe.
+
+	* Many many small syntax fixes in documentation.
+
+	* Expanded and improved webpage.
+
+	* Updated revision to 1.00
+
+	* Updated INSTALL documentation.
+
+	* CVSTAG: finance_quote_1_00
