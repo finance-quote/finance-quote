@@ -427,3 +427,8 @@
 
 	* Thanks to Jan Willamowius for the above two changes.
 
+2000-12-05	Paul Fenwick	<pjf@cpan.org>
+	* Updated the Yahoo::USA source to finance.yahoo.com as
+	  the quote.yahoo.com may become depreciated in the future.
+	  Thanks to Iain Lea for spotting this.
+
