@@ -47,12 +47,13 @@ $TRUSTNET_URL = ("http://www.trustnet.co.uk/ut/funds/perf.asp?sort=0&print=y&txt
 
 $TRUSTNET_ALL="http://www.trustnet.co.uk/ut/funds/perf.asp?sort=0";
 
-sub methods { return (unit_trusts => \&trustnet, trustnet => \&trustnet); }
+sub methods { return (uk_unit_trusts => \&trustnet, trustnet => \&trustnet); }
 
 {
         my @labels = qw/exchange method source name currency bid ask yield price/;
 	
-	sub labels { return (trustnet => \@labels, unit_trusts => \@labels); }
+	sub labels { return (trustnet => \@labels, 
+	                     uk_unit_trusts => \@labels); }
 }
 
 # =======================================================================
@@ -176,11 +177,10 @@ Therefore enough of the name should be given including spaces to yield
 a unique match.  Trustnet sometimes uses abbreviated names, and the
 string given should match the abbreviation.
 
-Consult http://www.trustnet.co.uk/ut/funds/perf-cont.asp?sort=0
+Consult http://www.trustnet.co.uk/ut/funds/perf.asp?sort=0
 to find a match for your unit trusts.
 
 Example "jupiter income"
-
 
 =head1 LABELS RETURNED
 
