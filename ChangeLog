@@ -483,6 +483,8 @@
 	  New symbols available for the module - check the POD 
 	  documentation for more info. 
 
-2001-06-26	Linas Vepstas
+2001-06-25	Linas Vepstas
 	* Added Tdwaterhouse module from James A. Treacy.
 
+2001-06-26	Paul Fenwick <pjf@cpan.org>
+	* Added AEX module courtesy of Rob Sessink.
