@@ -163,9 +163,9 @@ sub new {
 	if (!@reqmodules or $reqmodules[0] eq "-defaults") {
 		shift(@reqmodules) if (@reqmodules);
 		# Default modules
-		 @modules = qw/Yahoo::Australia Fidelity ASX Troweprice
-                               Tdwaterhouse Tiaacref Yahoo::USA Yahoo::Europe
-			       DWS VWD Trustnet Fool/;
+		 @modules = qw/Cdnfundlibrary Yahoo::Australia Fidelity
+		 	       ASX Troweprice Tiaacref Yahoo::USA Yahoo::Europe
+			       DWS VWD Trustnet Fool AEX Tdwaterhouse/;
 	}
 
 	$this->_load_modules(@modules,@reqmodules);
@@ -188,6 +188,20 @@ sub new {
 		return $dummy_obj ||= Finance::Quote->new;
 	}
 }
+
+# =======================================================================
+# sources (public object method)
+#
+# sources returns a list of sources which can be passed to fetch to
+# obtain information.
+#
+# Usage: @sources   = $quoter->sources();
+#        $sourceref = $quoter->sources();
+
+sub sources {
+	return(wantarray ? keys %METHODS : [keys %METHODS]);
+}
+
 
 # =======================================================================
 # currency (public object method)
@@ -668,6 +682,15 @@ currency conversion if requested.
 If you wish to fetch information from only one particular source,
 then consult the documentation of that sub-module for further
 information.
+
+=head2 SOURCES
+
+    my @sources = $q->sources;
+    my $listref = $q->sources;
+
+The sources method returns a list of sources that have currently been loaded and
+can be passed to the fetch method.  If you're providing a user with a list of
+sources to choose from, then it is recommended that you use this method.
 
 =head2 CURRENCY
 
