@@ -47,7 +47,7 @@ $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/m5?";
 @EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.04';
+$VERSION = '1.05';
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -149,10 +149,16 @@ sub new {
 
 	my @modules = ();
 
+	# If there's no argument list, but we have the appropriate
+	# environment variable set, we'll use that instead.
+	if ($ENV{FQ_LOAD_QUOTELET} and !@_) {
+		@_ = split(' ',$ENV{FQ_LOAD_QUOTELET});
+	}
+
 	# If we get an empty new(), or one starting with -defaults,
 	# then load up the default methods.
-	if (!scalar(@_) or $_[0] eq "-defaults") {
-		shift if (scalar(@_));
+	if (!@_ or $_[0] eq "-defaults") {
+		shift if (@_);
 		# Default modules
 		 @modules = qw/Yahoo::Australia Fidelity ASX Troweprice
                                Tiaacref Yahoo::USA Yahoo::Europe
