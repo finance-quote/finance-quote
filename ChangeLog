@@ -138,3 +138,6 @@
 
 	* Tweaked Quote.pm to provide an AUTOLOAD method for those people
 	  who don't want to go through the fetch() methods.
+
+2000-05-31	Paul Fenwick	<pjf@cpan.org>
+	* Added Documentation/TODO.
