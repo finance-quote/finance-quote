@@ -41,7 +41,7 @@ $VERSION = '1.00';
 
 # URLs of where to obtain information.
 
-$YAHOO_URL = ("http://quote.yahoo.com/d");
+$YAHOO_URL = ("http://finance.yahoo.com/d");
 
 sub methods {return (canada   => \&yahoo,
                      usa      => \&yahoo,
