@@ -120,7 +120,7 @@ sub aex {
      # This gets returned when a bad symbol name is given
      unless ( $te->tables ) 
      {
-       $info {$symbol,"succes"} = 0;
+       $info {$symbol,"success"} = 0;
        $info {$symbol,"errormsg"} = "Fund name $symbol not found, bad symbol name";
        next;
      } 
@@ -152,7 +152,7 @@ sub aex {
  
      unless ( $found ) 
      {
-       $info {$symbol,"succes"} = 0;
+       $info {$symbol,"success"} = 0;
        $info {$symbol,"errormsg"} = "Fund name $symbol not found";
        next;
      }
