@@ -115,6 +115,7 @@ my %currency_tags = (
   	AS  => "EUR", # Netherlands	Amsterdam
   	OS  => "NOK", # Norway		Oslo
 	LM  => "PEN", # Peru		Lima
+	IN  => "EUR", # Portugal	Lisbon
 	SI  => "SGD", # Singapore
 	BC  => "EUR", # Spain		Barcelona
 	BI  => "EUR", # 		Bilbao
