@@ -305,3 +305,6 @@
 	* Updated asx.t script because it really hurts the entire
 	  "make test" thing when ASX is unhappy.  Now it still hurts
 	  (because the ASX module sucks), but less.
+
+2000-08-21	Paul Fenwick	<pjf@cpan.org>
+	* Improved documentation in the yahoo_europe test script.
