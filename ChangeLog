@@ -225,3 +225,7 @@
 2000-06-25	Paul Fenwick	<pjf@cpan.org>
 	* Documented many of the new 0.19 functions in the Finance::Quote
 	  POD.
+
+2000-07-02	Paul Fenwick	<pjf@cpan.org>
+	* Many more documentation improvements in both the Finance::Quote
+	  POD and the sub-modules.
