@@ -326,3 +326,5 @@
 
 	* fetch() now returns a hashref if called in a scalar context.
 
+2000-08-31	Paul Fenwick	<pjf@cpan.org>
+	* Added Keith Refson's Trustnet module.
