@@ -91,6 +91,9 @@ add later##
 
               $$row[1] =~ /(\w+) (\d{1,2})\, (\d{4})/g;
               $fundquote {$mutual, "date"} =  $1.' '.$2.', '.$3;
+
+              # Assume things are fine here.
+              $fundquote {$mutual, "success"} = 1;
           }
           else {
               $fundquote {$mutual, "success"} = 0;
