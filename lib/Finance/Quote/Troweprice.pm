@@ -42,11 +42,17 @@ $VERSION = '1.00';
 
 # URLs of where to obtain information.
 
-$TROWEPRICE_URL = ("http://www.troweprice.com/funds/prices.csv");
+$TROWEPRICE_URL = ("http://www.troweprice.com/mutual/prices.csv");
 
-sub methods { return (troweprice => \&troweprice); }
+sub methods { return (troweprice        => \&troweprice,
+ 		      troweprice_direct => \&troweprice); }
 
-sub labels { return (troweprice => [qw/method exchange name nav date price/]); }
+{
+  my @labels = qw/method exchange name nav date price/;
+
+  sub labels { return (troweprice        => \@labels,
+		       troweprice_direct => \@labels); }
+}
 
 # =======================================================================
 
@@ -91,10 +97,6 @@ sub troweprice
 =head1 NAME
 
 Finance::Quote::Troweprice	- Obtain quotes from T. Rowe Price
-
-=head1 NOTE NOTE NOTE NOTE NOTE
-
-This module is currently non-functional.
 
 =head1 SYNOPSIS
 

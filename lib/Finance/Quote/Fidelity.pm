@@ -50,8 +50,13 @@ $FIDELITY_ASSET_URL = ("http://activequote100.fidelity.com/nav/asset.csv");
 sub methods {return (fidelity        => \&fidelity,
                      fidelity_direct => \&fidelity);}
 
-sub labels { return (fidelity=>[qw/exchange name number nav change ask
-                                   date yield price method/]); }
+{
+	my @labels = qw/exchange name number nav change ask
+                        date yield price method/;
+
+	sub labels { return (fidelity        => \@labels,
+	                     fidelity_direct => \@labels); }
+}
 
 # =======================================================================
 # the fidelity routine gets quotes from fidelity investments
