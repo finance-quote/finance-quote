@@ -90,3 +90,7 @@
 	* Removed HTML from returns from yahoo_europe.
 
 	* Fixed logic bug in process yahoo_* N/As into undefs.
+
+2000-04-24	Paul Fenwick	<pjf@cpan.org>
+	* Updated in-line code regarding checking for Yahoo!
+	  successes.

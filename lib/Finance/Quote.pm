@@ -195,6 +195,12 @@ sub yahoo
       $aa {$sym, "pe"} = $q[16];
       $aa {$sym, "cap"} = $q[20];
 
+      # Yahoo returns a line filled with N/A's if we look up a
+      # non-existant symbol.  AFAIK, the date flag will /never/
+      # be defined properly unless we've looked up a real stock.
+      # Hence we can use this to check if we've successfully
+      # obtained the stock or not.
+
       $aa{$sym, "success"} = ($aa{$sym,"date"} eq "N/A") ? 0 : 1;
 
       if ($q[13] =~ m{^"?\s*(\S+)\s*-\s*(\S+)"?$}) {
@@ -248,6 +254,12 @@ sub yahoo_europe
       $aa {$sym, "eps"} = $q[15];
       $aa {$sym, "pe"} = $q[16];
       $aa {$sym, "cap"} = $q[20];
+
+      # Yahoo returns a line filled with N/A's if we look up a
+      # non-existant symbol.  AFAIK, the date flag will /never/
+      # be defined properly unless we've looked up a real stock.
+      # Hence we can use this to check if we've successfully
+      # obtained the stock or not.
       $aa {$sym, "success"} = ($aa{$sym,"date"} eq "N/A") ? 0 : 1;
     }
 
