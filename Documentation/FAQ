@@ -2,3 +2,8 @@ Is there anything that looks up stock quotes for PHP?
 -----------------------------------------------------
 	Vidyut Luther has written a stock-lookup library in PHP.  It's
 	available at <http://www.gotslack.com/stocks/>
+
+Is there anything that looks up stock quotes for Java?
+------------------------------------------------------
+	Bill Bell has written a stock-lookup library in Java.  It's
+	available at <http://www.aboutbillbell.com/>
