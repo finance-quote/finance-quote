@@ -114,12 +114,8 @@ sub yahoo
 	my %info = yahoo_request($quoter,$YAHOO_URL,\@symbols);
 
 	foreach my $symbol (@symbols) {
-		# Yahoo indexes all start with a hat, so don't
-		# tag them with a currency.
-		if ($info{$symbol,"success"} and $symbol !~ /^\^/) {
-			$info{$symbol,"currency"} = "USD";
-			$info{$symbol,"method"} = "yahoo";
-		}
+		next unless $info{$symbol,"success"};
+		$info{$symbol,"method"} = "yahoo";
 	}
 	return %info if wantarray;
 	return \%info;

@@ -65,7 +65,6 @@ sub yahoo_australia
 
 	foreach my $symbol (@symbols) {
 		next unless $info{$symbol,"success"};
-		$info{$symbol,"currency"} = "AUD";
 		$info{$symbol,"exchange"} = "Australian Stock Exchange";
 		$info{$symbol,"method"} = "yahoo_australia";
 	}
