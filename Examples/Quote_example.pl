@@ -77,3 +77,12 @@ foreach $f (@funds) {
 	      $quotes{$f,"date"}."\n";
 }
 print "\n\n";
+
+# Demo for TIAA-CREF.
+@funds = qw/CREFstok TIAAreal CREFmony/;
+%quotes = $q->tiaacref(@funds);
+foreach $f (@funds) {
+	print "TIAA-CREF Price of ".$quotes{$f,"name"}." is ".$quotes{$f,"nav"}.
+              " at ".$quotes{$f,"date"}."\n";
+}
+print "\n\n";
