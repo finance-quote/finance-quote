@@ -186,12 +186,14 @@ sub currency {
 	$from =~ s/^\s*(\d*\.?\d*)\s*//;
 	my $amount = $1 || 1;
 
-	my $ua = $this->user_agent;
-
 	# Don't know if these have to be in upper case, but it's
 	# better to be safe than sorry.
 	$to = uc($to);
 	$from = uc($from);
+
+	return $amount if ($from eq $to);	# Trivial case.
+
+	my $ua = $this->user_agent;
 
 	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}s=$from&t=$to")->content;
 	my ($exchange_rate) = $data =~ m#$from$to=X</a></td><td>1</td><td>[^<]+</td><td>(\d+\.\d+)</td>#;
