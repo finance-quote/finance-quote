@@ -9,3 +9,5 @@
 	* Changes to Makefile.PL to check dependancies, etc.
 
 	* Updated Examples/Quote_example.pl to include TIAA-CREF examples.
+
+	* CVSTAG: finance_quote_0_17
