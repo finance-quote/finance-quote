@@ -36,7 +36,7 @@ use Finance::Quote::Yahoo::Base qw/yahoo_request base_yahoo_labels/;
 
 use vars qw($VERSION $YAHOO_EUROPE_URL);
 
-$VERSION = '1.02';
+$VERSION = '1.03';
 
 # URLs of where to obtain information.
 
@@ -75,6 +75,10 @@ sub yahoo_europe
 					next unless ($info{$symbol,$field});
 					$info{$symbol,$field} = $quoter->scale_field($info{$symbol,$field},0.01);
 				}
+			} elsif ($symbol =~ /\.ST$/i) {
+				# Prices from Stockholm are in Swedish
+				# Krona (SEK).
+				$info{$symbol,"currency"} = "SEK";
 			} elsif (substr($symbol,0,1) ne "^") {
 				# All other non-indexes are in Euros.
 				$info{$symbol,"currency"} = "EUR";
