@@ -166,6 +166,7 @@ sub asx {
 	# Outside of business hours, the last price is the same as the
 	# previous day's close.
 	$info{$stock,"last"} ||= $info{$stock,"close"};
+	$info{$stock,"price"}  = $info{$stock,"last"};
 	$info{$stock,"success"} = 1;
     }
     return %info;
