@@ -366,3 +366,12 @@
 
 2000-09-27	Paul Fenwick	<pjf@cpan.org>
 	* Updated Trustnet module with patch from Keith Refson.
+
+2000-10-20	Paul Fenwick	<pjf@cpan.org>
+	* Much better discovery of non-existant stocks in ASX.pm.
+
+	* Checks for possible divide-by-zero problems in ASX.pm.
+	  Thanks to Stephen Stebbing for catching this.
+
+	* Updated ASX testing.
+
