@@ -357,3 +357,9 @@
 	  modules that F::Q depends upon.
 
 	* Updated Quote.pm to load VWD, DWS and Trustnet by default.
+
+	* Updated README file to mention the webpage.
+
+	* Added Trustnet regression testing program.
+
+	* CVSTAG: finance_quote_1_02
