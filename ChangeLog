@@ -66,3 +66,5 @@
 
 	* yahoo() function no longer returns entries for fields that
 	  used to be returned as 'N/A'.
+
+	* yahoo() now supports the $stocks{$sym,'success'} notation.

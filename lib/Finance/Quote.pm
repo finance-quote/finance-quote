@@ -181,6 +181,8 @@ sub yahoo
       $aa {$sym, "pe"} = $q[16];
       $aa {$sym, "cap"} = $q[20];
 
+      $aa{$sym, "success"} = ($aa{$sym,"date"} eq "N/A") ? 0 : 1;
+
       if ($q[13] =~ m{^"?\s*(\S+)\s*-\s*(\S+)"?$}) {
         $aa {$sym, "low"} = $1;
         $aa {$sym, "high"} = $2;
