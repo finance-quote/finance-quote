@@ -106,3 +106,9 @@
 
 2000-04-25	Paul Fenwick	<pjf@cpan.org>
 	* Rolled changes together when CVS got a little out-of-whack.  :)
+
+	* Return many new fields from yahoo() which we previously fetched
+	  but did not use.  These include avg_vol, day_range, year_range,
+	  div_date, div, and div_yield.
+
+	* Fixed typo in docs  s/yeild/yield/;

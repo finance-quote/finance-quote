@@ -187,12 +187,18 @@ sub yahoo
       $aa {$sym, "net"}  = $q[5];
       $aa {$sym, "p_change"} = $q[6];
       $aa {$sym, "volume"} = $q[7];
+      $aa {$sym, "avg_vol"} = $q[8];
       $aa {$sym, "bid"} = $q[9];
       $aa {$sym, "ask"} = $q[10];
       $aa {$sym, "close"} = $q[11];
       $aa {$sym, "open"} = $q[12];
+      $aa {$sym, "day_range"} = $q[13];
+      $aa {$sym, "year_range"} = $q[14];
       $aa {$sym, "eps"} = $q[15];
       $aa {$sym, "pe"} = $q[16];
+      $aa {$sym, "div_date"} = $q[17];
+      $aa {$sym, "div"} = $q[18];
+      $aa {$sym, "div_yield"} = $q[19];
       $aa {$sym, "cap"} = $q[20];
 
       # Yahoo returns a line filled with N/A's if we look up a
@@ -966,21 +972,21 @@ one or more of the following elements:
     net          Net Change
     p_change     Percent Change from previous day's close
     volume       Volume
-                 Average Daily Vol
+    avg_vol      Average Daily Vol
     bid          Bid
     ask          Ask
     close        Previous Close
     open         Today's Open
-                 Day's Range
-                 52-Week Range
+    day_range    Day's Range
+    year_range   52-Week Range
     eps          Earnings per Share
     pe           P/E Ratio
-                 Dividend Pay Date
-                 Dividend per Share
-                 Dividend Yield
+    div_date     Dividend Pay Date
+    div          Dividend per Share
+    div_yield    Dividend Yield
     cap          Market Capitalization
     nav          Net Asset Value
-    yeild        Yeild (usually 30 day avg)
+    yield        Yield (usually 30 day avg)
     success	 Did the stock successfully return information? (true/false)
     errormsg	 If success is false, this field may contain the reason why.
 
