@@ -610,6 +610,7 @@ arguments are treated as stock-names.  In the standard Finance::Quote
 distribution, the following exchanges are recognised:
 
     australia		Australan Stock Exchange
+    dwsfunds		Deutsche Bank Gruppe funds
     fidelity		Fidelity Investments
     tiaacref		TIAA-CREF
     troweprice		T. Rowe Price
@@ -618,7 +619,9 @@ distribution, the following exchanges are recognised:
     usa			USA Markets
     nyse		New York Stock Exchange
     nasdaq		NASDAQ
+    uk_unit_trusts	UK Unit Trusts
     vanguard		Vanguard Investments
+    vwd			Vereinigte Wirtschaftsdienste GmbH
 
 When called in an array context, a hash is returned.  In a scalar
 context, a reference to a hash will be returned.  The structure
@@ -746,6 +749,8 @@ module.  Please refer to the sub-modules for further information.
   Yannick LE NY (C<y-le-ny@ifrance.com>)
   Paul Fenwick (C<pjf@schools.net.au>)
   Brent Neal (C<brentn@users.sourceforge.net>)
+  Volker Stuerzl (C<volker.stuerzl@gmx.de>)
+  Keith Refson (C<Keith.Refson#earth.ox.ac.uk>)
 
 The Finance::Quote home page can be found at
 http://finance-quote.sourceforge.net/
@@ -759,10 +764,12 @@ http://www.gnucash.org/
 =head1 SEE ALSO
 
 Finance::Quote::Yahoo, Finance::Quote::ASX, Finance::Quote::Fidelity,
-Finance::Quote::Tiaacref, Finance::Quote::Troweprice, LWP::UserAgent
+Finance::Quote::Tiaacref, Finance::Quote::Troweprice, LWP::UserAgent,
+Finance::Quote::DWS, Finance::Quote::VWD, Finance::Quote::Trustnet
 
 You should have also received the Finance::Quote hacker's guide with
 this package.  Please read it if you are interested in adding extra
-methods to this package.
+methods to this package.  The hacker's guide can also be found
+on the Finance::Quote website, http://finance-quote.sourceforge.net/
 
 =cut
