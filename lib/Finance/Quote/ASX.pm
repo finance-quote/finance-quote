@@ -36,10 +36,11 @@ package Finance::Quote::ASX;
 
 use HTTP::Request::Common;
 use LWP::UserAgent;
+use HTML::TableExtract;
 
 use vars qw/$ASX_URL $VERSION/;
 
-$VERSION = "1.03";
+$VERSION = "1.04";
 
 $ASX_URL = 'http://www.asx.com.au/scripts/nd_ISAPI_50.dll/asx/markets/EquitySearchResults.jsp?method=post&template=F1001&ASXCodes=';
 
@@ -75,69 +76,40 @@ sub asx {
 		}
 		return wantarray() ? %info : \%info;
 	}
-	my $reply = $response->content;
 
-	# First remove all the junk.
-	# Remove top of page.
-	$reply =~ s#.*Share Price Results">##s;
-	# Grab the table
-	$reply =~ m#(<table.*?>.*?)</table>#s;
-	$reply = $1;
-	# Remove all the '&nbsp;'
-	$reply =~ s#&nbsp;##sg;
-	# Remove all multiple white space.
-	$reply =~ s#\s{2,}##sg;
+	my $te = HTML::TableExtract->new(
+		headers => ["Code","Company Name", "Last", "$ +/-", "Bid", "Offer",
+		            "Open", "High", "Low", "Vol"]);
 
-	# Grab the values by parsing the table
+	$te->parse($response->content);
 
-	my @values;
-	my ($i,$j);
-	# First split the table into rows
-	foreach $i (split /<\/tr>/, $reply) {
-	    # Skip the headings row
-	    next if $i =~ m/Code.*Company Name/;
-
-	    # Then split the row into fields.
-	    (@values) = split /<\/td>/, $i;
-	    # Get rid of extraneous html tags.
-	    foreach $j (@values)
-	    {
-		$j =~ s/<.+?>//g;
-	    }
-  
-	    if (@values % 13) { # Wrong number of fields?  Damn!
-		warn "Bad number of fields returned from ASX website in ".
-		     "Finance::Quote::ASX.  Aborting query.\n";
-	
+	# Extract table contents.
+	my @rows;
+	unless (@rows = $te->rows) {
 		foreach my $stock (@stocks) {
-			$info{$stock,"success"}  = 0;
-			$info{$stock,"errormsg"} = "ASX website corrupted.";
+			$info{$stock,"success"} = 0;
+			$info{$stock,"errormsg"} = "Failed to parse HTML table.";
 		}
-		return %info if wantarray;
-		return \%info;
-	    }
+		return wantarray() ? %info : \%info;
+	}
 
-	    # Go through all the values and pack them into our structure.
-	    # We rely upon the particular ordering of fields at the ASX,
-	    # so this is a little dangerous.
+	# Pack the resulting data into our structure.
+	foreach my $row (@rows) {
+		my $stock = shift(@$row);
 
-	    while (@values) {
-		my $stock = shift @values;
-		# delete the '*' which sometimes appears after the stock
-		$stock =~ tr/*//d;
+		# Delete spaces and '*' which sometimes appears after the code.
+		# Also delete high bit characters.
+		$stock =~ tr/* \200-\377//d;
 
 		foreach my $label (qw/name last p_change bid offer open
-			      high low volume JUNK JUNK JUNK/) {
+			      high low volume/) {
+			$info{$stock,$label} = shift(@$row);
 
-			my $value = shift @values;
-			next if ($label eq "JUNK");
-
-			# Clean the value.
-			$value =~ tr/$,%//d;
-
-			$info{$stock,$label} = $value;
+			# Again, get rid of nasty high-bit characters.
+			$info{$stock,$label} =~ tr/ \200-\377//d 
+				unless ($label eq "name");
 		}
-
+		
 		# If that stock does not exist, it will have a empty
 		# string for all the fields.  The "last" price should
 		# always be defined (even if zero), if we see an empty
@@ -148,6 +120,9 @@ sub asx {
 			$info{$stock,'errormsg'}="Stock does not exist on ASX.";
 			next;
 		}
+
+		# Drop commas from volume.
+		$info{$stock,"volume"} =~ tr/,//d;
 
 		# The ASX returns zeros for a number of things if there
 		# has been no trading.  This not only looks silly, but
@@ -183,7 +158,6 @@ sub asx {
 		$info{$stock, "exchange"} = "Australian Stock Exchange";
 		$info{$stock, "price"} = $info{$stock,"last"};
 		$info{$stock, "success"} = 1;
-	    }
 	}
 
 	# All done.
