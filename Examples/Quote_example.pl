@@ -5,7 +5,7 @@
 #
 # This script was originally part of GnuCash.
 
-use lib '..';
+use lib '../lib';
 use Finance::Quote;
 
 my $q = Finance::Quote->new();
