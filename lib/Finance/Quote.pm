@@ -33,7 +33,7 @@ require 5.005;
 use strict;
 use Exporter ();
 use Carp;
-use LWP::UserAgent;
+use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
@@ -460,7 +460,7 @@ sub user_agent {
 
 	return $this->{UserAgent} if $this->{UserAgent};
 
-	my $ua = LWP::UserAgent->new;
+	my $ua = Finance::Quote::UserAgent->new;
 	$ua->timeout($this->{TIMEOUT}) if defined($this->{TIMEOUT});
 	$ua->env_proxy;
 
