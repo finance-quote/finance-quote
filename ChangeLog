@@ -30,3 +30,9 @@
 	* Documentation additions and corrections.
 
 	* Added test files (Use.t, asx.t, yahoo.t, fidelity.t)
+
+	* Added experimental function (currency) to look-up conversion
+	  rates between currencies.
+
+	* Added an example script (currency-lookup.pl) to test said
+	  currency conversion.
