@@ -10,7 +10,7 @@ use Finance::Quote;
 
 my $q = Finance::Quote->new();
 
-my @stocks = ("ABBEY AMERICAN GROWTH","PERPETUAL GLOBAL BOND");
+my @stocks = ("ABBEY AMERICAN GROWTH","PERPETUAL LATIN AMERICAN GTH");
 
 my %quotes = $q->fetch("trustnet",@stocks);
 

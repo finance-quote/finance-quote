@@ -498,3 +498,12 @@
 
 	* Updated the Fidelity test to always test the fidelity_direct method.
 
+	* Bumped version number on F::Q to 1.06.
+
+	* Updated Trustnet module to assume GBP if no currency explicitly
+	  shown.
+
+	* Updated Trustnet test because one of the funds we were looking
+	  for had changed its name, causing the test to fail.
+
+
