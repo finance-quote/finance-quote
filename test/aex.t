@@ -39,7 +39,7 @@ ok(%quotes);
 # the following test will fail after Oct 2007 :-(
 ok($quotes{"aex c oct 2007 300.00","success"});
 ok($quotes{"aex c oct 2007 300.00","close"} > 0);
-ok($quotes{"aex c oct 2007 300.00","date"});
+ok($quotes{"aex c oct 2007 300.00","bid"});
 ok($quotes{"aex c oct 2007 300.00","ask"});
 
 ok($quotes{"phi","success"});
