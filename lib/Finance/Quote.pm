@@ -35,7 +35,7 @@ use vars qw($VERSION @EXPORT @ISA $TIMEOUT @EXPORT_OK @EXPORT_TAGS
             $YAHOO_URL $YAHOO_EUROPE_URL
             $FIDELITY_GANDI_URL $FIDELITY_GROWTH_URL $FIDELITY_CORPBOND_URL
             $FIDELITY_GLBND_URL $FIDELITY_MM_URL $FIDELITY_ASSET_URL
-            $TROWEPRICE_URL
+            $TROWEPRICE_URL $YAHOO_CURRENCY_URL
             $VANGUARD_QUERY_URL $VANGUARD_CSV_URL @vanguard_ids
             $ASX_URL $TIAACREF_URL %tiaacref_ids);
 
@@ -55,6 +55,7 @@ $VERSION = '0.18';
 
 $YAHOO_URL = ("http://quote.yahoo.com/d?f=snl1d1t1c1p2va2bapomwerr1dyj1&s=");
 $YAHOO_EUROPE_URL = ("http://finance.fr.yahoo.com/d/quotes.csv?f=snl1d1t1c1p2va2bapomwerr1dyj1&s=");
+$YAHOO_CURRENCY_URL = ("http://finance.yahoo.com/m5?");
 $FIDELITY_GANDI_URL = ("http://personal441.fidelity.com/gen/prices/gandi.csv");
 $FIDELITY_GROWTH_URL = ("http://personal441.fidelity.com/gen/prices/growth.csv");
 $FIDELITY_CORPBOND_URL = ("http://personal441.fidelity.com/gen/prices/corpbond.csv");
@@ -768,6 +769,23 @@ sub tiaacref
     return %info;
 }
 
+# Currency allows the user to convert from one currency to another.
+# WARNING - This function is still under development.
+
+sub currency {
+	shift if (ref($_[0]));	# Pop the object if we have one.
+	my ($from, $to) = @_;
+	return undef unless ($from and $to);
+
+	my $ua = LWP::UserAgent->new;
+	$ua->timeout($TIMEOUT) if defined $TIMEOUT;
+	$ua->env_proxy();
+	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}s=$from&t=$to")->content;
+	
+	my ($exchange) = $data =~ m#$from$to=X</a></td><td>1</td><td>\d\d?:\d\d\w\w</td><td>(\d+\.\d+)</td>#;
+
+	return ( from => $from, to => $to, exchange => $exchange );
+}
 
 # =======================================================================
 
