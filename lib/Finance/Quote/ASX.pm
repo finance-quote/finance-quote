@@ -60,7 +60,7 @@ sub methods {return (australia => \&asx,asx => \&asx)}
 sub asx {
     my $quoter = shift;
     my @stocks = @_;
-    return undef unless @stocks;
+    return unless @stocks;
     my %info;
 
     my $ua = $quoter->user_agent;
@@ -98,7 +98,7 @@ sub asx {
 	 s/October/10/   or
 	 s/November/11/ or
 	 s/December/12/  or (warn "Bizarre month $_ from ASX. Skipped $stock\n"
-	                          and return undef));
+	                          and return));
 
 	$info{$stock,"date"} = "$_/$day/$year"; # Silly 'merkin format.
 
@@ -131,7 +131,7 @@ sub asx {
 		    # Oops!  We got back a stock that we didn't want?
 		    warn "Bad stocks returned from the ASX.  ".
 			 "Wanted $stock but got $value.";
-		    return undef;
+		    return;
 		}
 		next;
 	    }
@@ -169,5 +169,6 @@ sub asx {
 	$info{$stock,"price"}  = $info{$stock,"last"};
 	$info{$stock,"success"} = 1;
     }
-    return %info;
+    return %info if wantarray;
+    return \%info;
 }
