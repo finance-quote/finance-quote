@@ -1,6 +1,9 @@
 TODO list.  This is an un-ordered list of things that would be good
 in Finance::Quote.
 
+It's also worth checking the Finance::Quote task manager in sourceforge,
+which will also contain much of this information.
+
 * Automatic currency conversion.  Eg:
 
 	$quoter->currency("AUD");
@@ -11,7 +14,7 @@ in Finance::Quote.
 
 * More regression testing.  Particularly of loadable module support.
 
-* Better documentation.  Each sub-module should contain information
+* BETTER DOCUMENTATION.  Each sub-module should contain information
   specific to that module (eg, fields returned, etc).
 
 * Yahoo::USA and Yahoo::Europe inheriting off a common base (good
