@@ -406,7 +406,9 @@ sub troweprice
 }
 
 # =======================================================================
-
+# The Vanguard function is depreciated and no longer works due to a
+# re-structure of the Vanguard website.  We hope to fix this in the
+# future.
 sub vanguard
 {
     shift if (ref $_[0]);	# Shift off the object if there is one.
@@ -770,7 +772,8 @@ sub tiaacref
 }
 
 # Currency allows the user to convert from one currency to another.
-# WARNING - This function is still under development.
+# WARNING - This function is still under development.  Expect the
+#           interface to change shortly.
 
 sub currency {
 	shift if (ref($_[0]));	# Pop the object if we have one.
@@ -806,7 +809,6 @@ Finance::Quote - Get stock and mutual fund quotes from various exchanges
  %quotes = $q->yahoo_europe(@symbols); # Europe quotes
  %quotes = $q->fidelity(@symbols);     # Fidelity Investments Quotes
  %quotes = $q->troweprice();           # Quotes from T. Rowe Price
- %quotes = $q->vanguard(@symbols);     # Quotes from Vanguard Group
  %quotes = $q->asx(@symbols);          # Australian quotes from ASX.
  %quotes = $q->tiaacref(@symbols);     # Annuities from TIAA-CREF
  print ("the last price was ", $quotes{"IBM", "last"} );
@@ -851,7 +853,7 @@ You may optionally override the default LWP timeout of 180 seconds by setting
 $quote->timeout() or Finance::Quote::timeout() to your preferred value.
 
 Note that prices from the Australian Stock Exchange (ASX) are in
-Australian Dollars.  Prices from Yahoo! Europe are in euros.  All other
+Australian Dollars.  Prices from Yahoo! Europe are in Euros.  All other
 prices are in US Dollars.
 
 The troweprice() function ignores any arguments passed to it.  Instead it
