@@ -150,3 +150,5 @@
 	* Added price labels to everything.
 
 	* Updated Quote.pm to query new labels methods.
+
+	* Provided a failover method for fidelity via Yahoo.
