@@ -28,7 +28,7 @@
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 
 package Finance::Quote::Yahoo::Europe;
-require 5.004;
+require 5.005;
 
 use strict;
 use HTTP::Request::Common;
@@ -46,7 +46,7 @@ $YAHOO_EUROPE_URL = ("http://finance.uk.yahoo.com/d/quotes.csv");
 sub methods {return (europe => \&yahoo_europe,yahoo_europe => \&yahoo_europe)};
 
 {
-	my @labels = (base_yahoo_labels(),"currency");
+	my @labels = (base_yahoo_labels(),"currency","method");
 
 	sub labels { return (europe => \@labels, yahoo_europe => \@labels); }
 }
@@ -65,9 +65,56 @@ sub yahoo_europe
 	foreach my $symbol (@symbols) {
 		if ($info{$symbol,"success"}) {
 			$info{$symbol,"currency"} = "EUR";
+			$info{$symbol,"method"} = "yahoo_europe";
 		}
 	}
 
 	return %info if wantarray;
 	return \%info;
 }
+
+1;
+
+=head1 NAME
+
+Finance::Quote::Yahoo::Europe - Fetch quotes from Yahoo Europe
+
+=head1 SYNOPSIS
+
+    use Finance::Quote;
+    $q = Finance::Quote->new;
+
+    %info = $q->fetch("europe","12150.PA"); # Failover to other methods ok.
+    %info = $q->fetch("yahoo_europe","12150.PA"); # Use this module only.
+
+=head1 DESCRIPTION
+
+This module fetches information from Yahoo Europe.  Symbols should be
+provided in the format "SYMBOL.EXCHANGE", where the exchange code is
+one of the following:
+
+	XXX - Fill in list here.
+
+This module provides both the "europe" and "yahoo_europe" methods.
+The "europe" method should be used if failover methods are desirable.
+The "yahoo_europe" method should be used you desire to only fetch
+information from Yahoo Europe.
+
+This module is loaded by default by Finance::Quote, but can be loaded
+explicitly by specifying the parameter "Yahoo::Europe" to
+Finance::Quote->new().
+
+Information obtained by this module may be covered by Yahoo's terms
+and conditions.  See http://finance.uk.yahoo.com/ for more details.
+
+=head1 LABELS RETURNED
+
+This module returns all the standard labels (where available) provided
+by Yahoo.  See Finance::Quote::Yahoo::Base for a list of these.  The
+currency label is also returned.
+
+=head1 SEE ALSO
+
+Yahoo Europe, http://finance.uk.yahoo.com/
+
+=cut

@@ -28,7 +28,7 @@
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 
 package Finance::Quote;
-require 5.004;
+require 5.005;
 
 use strict;
 use Exporter ();
@@ -547,8 +547,11 @@ for a given stock, you can specify that using require_labels().
     ex_div	 Ex-Dividend Date.
     nav          Net Asset Value
     yield        Yield (usually 30 day avg)
+    exchange	 The exchange the information was obtained from.
     success	 Did the stock successfully return information? (true/false)
     errormsg	 If success is false, this field may contain the reason why.
+    method	 The module (as could be passed to fetch) which found
+		 this information.
 
 If all stock lookups fail (possibly because of a failed connection) then
 the empty list may be returned, or undef in a scalar context.

@@ -28,7 +28,7 @@
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 
 package Finance::Quote::Fidelity;
-require 5.004;
+require 5.005;
 
 use strict;
 use vars qw/$FIDELITY_GANDI_URL $FIDELITY_GROWTH_URL $FIDELITY_CORPBOND_URL
@@ -51,7 +51,7 @@ sub methods {return (fidelity        => \&fidelity,
                      fidelity_direct => \&fidelity);}
 
 sub labels { return (fidelity=>[qw/exchange name number nav change ask
-                                   date yield price/]); }
+                                   date yield price method/]); }
 
 # =======================================================================
 # the fidelity routine gets quotes from fidelity investments
@@ -187,6 +187,7 @@ sub _fidelity_nav
         }
         if ($q[7]) {
             $aa {$sym, "exchange"} = "Fidelity";  # Fidelity
+            $aa {$sym, "method"} = "fidelity_direct";
             ($aa {$sym, "name"}   = $q[0]) =~ s/^ +//;
              $aa {$sym, "name"}   =~ s/$ +//;
             ($aa {$sym, "number"} = $q[1]) =~ s/^ +//;
