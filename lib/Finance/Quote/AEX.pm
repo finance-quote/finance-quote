@@ -110,9 +110,9 @@ sub aex {
     my $ua = $quoter->user_agent;       # user_agent
     $url = $AEX_URL;                    # base url 
 
-    foreach my $symbols (@symbols) {
+    foreach my $symbol (@symbols) {
 
-        my $websymbol = aex_webticker($symbols); 
+        my $websymbol = aex_webticker($symbol); 
         $reply = $ua->request(GET $url.join('',"taal=en&alf=",$websymbol)); 
 
         if ($reply->is_success) { 
@@ -128,8 +128,8 @@ sub aex {
             # This gets returned when a bad symbol name is given.
             unless ( $te->tables ) 
             {
-                $info {$symbols,"succes"} = 0;
-                $info {$symbols,"errormsg"} = "Fund name $symbols not found, bad symbol name";
+                $info {$symbol,"succes"} = 0;
+                $info {$symbol,"errormsg"} = "Fund name $symbol not found, bad symbol name";
                 next;
             } 
 
@@ -137,48 +137,53 @@ sub aex {
             my @rows; 
             unless (@rows = $te->rows)
             {
-                $info {$symbols,"success"} = 0;
-                $info {$symbols,"errormsg"} = "Parse error";
+                $info {$symbol,"success"} = 0;
+                $info {$symbol,"errormsg"} = "Parse error";
                 next;
             }
 
-            $info {$symbols, "success"} = 1;
-            $info {$symbols, "symbol"} = $symbols;
-            $info {$symbols, "exchange"} = "Amsterdam Euronext eXchange";
-            $info {$symbols, "method"} = "aex";
-            $info {$symbols, "name"} = $symbols;
-            ($info {$symbols, "last"} = $rows[0][0]) =~ s/[^\d\.]*//g; # Remove garbage
-            ($info {$symbols, "bid"} = $rows[1][0]) =~ s/[^\d\.]*//g; 
-            ($info {$symbols, "ask"} = $rows[2][0]) =~ s/[^\d\.]*//g;
-            ($info {$symbols, "high"} = $rows[3][0]) =~ s/[^\d\.]*//g; 
-            ($info {$symbols, "low"} = $rows[4][0]) =~ s/[^\d\.]*//g;
-            ($info {$symbols, "open"} = $rows[5][0]) =~ s/[^\d\.]*//g;
-            ($info {$symbols, "close"} = $rows[6][0]) =~ s/[^\d\.]*//g;
-            ($info {$symbols, "p_change"} = $rows[7][1]) =~ s/[^\d\.\-\%]*//g;
-            ($info {$symbols, "volume"} = $rows[0][2]) =~ s/[^\d\.]*//g;
+            $info {$symbol, "success"} = 1;
+            $info {$symbol, "symbol"} = $symbol;
+            $info {$symbol, "exchange"} = "Amsterdam Euronext eXchange";
+            $info {$symbol, "method"} = "aex";
+            $info {$symbol, "name"} = $symbol;
+            ($info {$symbol, "last"} = $rows[0][0]) =~ s/[^\d\.]*//g; # Remove garbage
+            ($info {$symbol, "bid"} = $rows[1][0]) =~ s/[^\d\.]*//g; 
+            ($info {$symbol, "ask"} = $rows[2][0]) =~ s/[^\d\.]*//g;
+            ($info {$symbol, "high"} = $rows[3][0]) =~ s/[^\d\.]*//g; 
+            ($info {$symbol, "low"} = $rows[4][0]) =~ s/[^\d\.]*//g;
+            ($info {$symbol, "open"} = $rows[5][0]) =~ s/[^\d\.]*//g;
+            ($info {$symbol, "close"} = $rows[6][0]) =~ s/[^\d\.]*//g;
+            ($info {$symbol, "p_change"} = $rows[7][1]) =~ s/[^\d\.\-\%]*//g;
+            ($info {$symbol, "volume"} = $rows[0][2]) =~ s/[^\d\.]*//g;
 
             # Split the date and time from one table entity 
-            ($info {$symbols, "date"} = $rows[0][1]) =~ s/\d{2}:\d{2}//;  
-            ($info {$symbols, "time"} = $rows[0][1]) =~ s/\d{2}\s\w{3}\s\d{4}\s//;
+            ($info {$symbol, "date"} = $rows[0][1]) =~ s/\d{2}:\d{2}//;  
+            ($info {$symbol, "time"} = $rows[0][1]) =~ s/\d{2}\s\w{3}\s\d{4}\s//;
 
             # Remove spaces at the front and back of the date 
-            $info {$symbols, "date"} =~ s/^\s*|\s*$//g;
-            $info {$symbols, "time"} =~ s/\s*//g;
+            $info {$symbol, "date"} =~ s/^\s*|\s*$//g;
+            $info {$symbol, "time"} =~ s/\s*//g;
 
             # convert date from dutch (dd mmm yyyy) to US format (mmm/dd/yyyy)
-            my @date = split /\s/, $info {$symbols, "date"};
-            $info {$symbols, "date"} = $date[1]."/".$date[0]."/".$date[2]; 
+            my @date = split /\s/, $info {$symbol, "date"};
+            $info {$symbol, "date"} = $date[1]."/".$date[0]."/".$date[2]; 
 
-            $info {$symbols, "currency"} = "EUR" unless is_index($symbols);
+            $info {$symbol, "currency"} = "EUR" unless is_index($symbol);
 
             # adding some legacy labels
-            $info {$symbols, "offer"} = $info {$symbols, "ask"};
-            $info {$symbols, "price"} = $info {$symbols, "last"};
+            $info {$symbol, "offer"} = $info {$symbol, "ask"};
+            $info {$symbol, "price"} = $info {$symbol, "last"};
 
-            $info {$symbols, "success"} = 1; 
+            # convert "no-data" fields to undefs
+            foreach my $label (qw/price last bid ask high low open close p_change volume date time offer/) {
+                undef $info {$symbol, $label} if $info {$symbol, $label} eq "";
+            }
+
+            $info {$symbol, "success"} = 1; 
         } else {
-            $info {$symbols, "success"} = 0;
-            $info {$symbols, "errormsg"} = "Error retreiving $symbols ";
+            $info {$symbol, "success"} = 0;
+            $info {$symbol, "errormsg"} = "Error retreiving $symbol ";
         }
     } 
     return %info if wantarray;
