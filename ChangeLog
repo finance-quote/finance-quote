@@ -308,3 +308,15 @@
 
 2000-08-21	Paul Fenwick	<pjf@cpan.org>
 	* Improved documentation in the yahoo_europe test script.
+
+2000-08-22	Volker Stuerzl	<volkers@users.sourceforge.net>
+	* Added DWS test script.
+
+2000-08-29	Paul Fenwick	<pjf@cpan.org>
+	* Rejiggered ASX module to try and make it work again after
+	  an ASX site rewrite.
+
+	* Updated Quote.pm so that if a method was called directly
+	  (old-style) not through fetch, then it would do the right
+	  thing if called via an object.  This means that things
+	  like $q->asx(@stocks) work correctly again.
