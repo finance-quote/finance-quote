@@ -14,5 +14,5 @@ ok(defined(%quotes));
 
 # Check the last values are defined.  These are the most used and most
 # reliable indicators of success.
-ok($quotes{"CML","last"});
-ok($quotes{"BHP","last"});
+ok($quotes{"CML","last"} > 0);
+ok($quotes{"BHP","last"} > 0);
