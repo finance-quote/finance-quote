@@ -336,3 +336,7 @@
 
 	* Tweaked DWS.t testing script so that it loads the module
 	  correctly.
+
+2000-09-01	Paul Fenwick	<pjf@cpan.org>
+	* Tweaked ASX.pm to avoid divide-by-zero errors and dodgy
+	  bogus-looking label values.
