@@ -51,7 +51,7 @@ sub methods { return (dutch => \&aex,
                       aex   => \&aex) } 
 
 {
-        my @labels = qw/name price last date p_change bid ask offer open high low close volume currency method exchange time/;
+        my @labels = qw/name symbol price last date p_change bid ask offer open high low close volume currency method exchange time/;
 
         sub labels { return (dutch => \@labels,
                              aex   => \@labels); } 
@@ -143,6 +143,7 @@ sub aex {
             }
 
             $info {$symbols, "success"} = 1;
+            $info {$symbols, "symbol"} = $symbols;
             $info {$symbols, "exchange"} = "Amsterdam Euronext eXchange";
             $info {$symbols, "method"} = "aex";
             $info {$symbols, "name"} = $symbols;
@@ -220,8 +221,8 @@ terms and conditions See http://www.aex.nl/ for details.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::AEX :
-name, last, price (=last), date, p_change, bid, ask, offer (=ask), open,
-high, low, close, volume, currency, method, exchange, time.
+name, symbol, last, price (=last), date, p_change, bid, ask, offer (=ask),
+open, high, low, close, volume, currency, method, exchange, time.
 
 =head1 SEE ALSO
 
