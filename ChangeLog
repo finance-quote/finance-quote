@@ -69,7 +69,7 @@
 
 	* yahoo() now supports the $stocks{$sym,'success'} notation.
 
-2000-04-21      Brent Neal      <brent@phys.lsu.edu>
+2000-04-21      Brent Neal      <brentn@users.sourceforge.net>
         * Added checking for bogus symbols in tiaacref
         * Added checking of the LWP::UserAgent->is_success method
 	* tiaacref() now supports $stocks{$sym,'success'} notation.
@@ -97,3 +97,10 @@
 
 	* Added meaningful error-messages to Yahoo! when stock
 	  lookups fail.
+	  
+2000-04-24	Brent Neal		<brentn@users.sourceforge.net>
+	* Finished updating error-checking for tiaacref. The tiaacref
+	  function now returns a success/failure flag for every symbol
+	  passed to it. It also checks that the data is valid. Returns
+	  meaningful error messages for these failures.
+

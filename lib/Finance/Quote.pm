@@ -4,7 +4,7 @@
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
 #    Copyright (C) 2000, Paul Fenwick <pjf@schools.net.au>
-#    Copyright (C) 2000, Brent Neal <brent@phys.lsu.edu>
+#    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,15 +31,6 @@ package Finance::Quote;
 require 5.004;
 
 use strict;
-
-# These should really be moved to near their corresponding functions,
-# and possibly wrapped into lexical my's around the functions similar
-# to what's been done with fetch.
-#
-# Of course, it would also make sense to move a lot of these methods
-# into their own seperate sub-modules.  Much cleaner and nicer that
-# way.
-
 use vars qw($VERSION @EXPORT @ISA $TIMEOUT @EXPORT_OK @EXPORT_TAGS
             $YAHOO_URL $YAHOO_EUROPE_URL
             $FIDELITY_GANDI_URL $FIDELITY_GROWTH_URL $FIDELITY_CORPBOND_URL
@@ -53,8 +44,7 @@ use HTTP::Request::Common;
 use Carp;
 use Exporter ();
 
-# Export information.  Allow lots of things to be exported, but not
-# by default.
+# Export information
 @ISA = qw/Exporter/;
 @EXPORT      = ();
 @EXPORT_OK   = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref fetch/;
@@ -115,10 +105,9 @@ sub timeout {
 			tiaacref => \&tiaacref,
 			troweprice => \&troweprice,
 			yahoo => \&yahoo,
-			nasdaq => \&yahoo,
-			nyse => \&yahoo,
 			yahoo_europe => \&yahoo_europe,
-			europe => \&yahoo_europe);
+			nasdaq => \&yahoo,
+			nyse => \&yahoo);
 
 	sub fetch {
 		shift if ref ($_[0]);	# Shift off the object if there is one.
@@ -162,7 +151,7 @@ sub yahoo
 {
     shift if (ref $_[0]);	# Shift off the object if there is one.
     my @symbols = @_;
-    return undef unless @symbols;	# Nothing if no symbols.
+    return undef unless @symbols;
     my($x,@q,%aa,$ua,$url,$sym);
 
     $x = $";
@@ -172,10 +161,7 @@ sub yahoo
     $ua = LWP::UserAgent->new;
     $ua->timeout($TIMEOUT) if defined $TIMEOUT;
     $ua->env_proxy();
-
-    my $reply = $ua->request(GET $url);
-    return undef unless ($reply->is_success);
-    foreach (split('\015?\012',$reply->content))
+    foreach (split('\015?\012',$ua->request(GET $url)->content))
     {
       @q = _parse_csv($_);
 
@@ -195,18 +181,7 @@ sub yahoo
       $aa {$sym, "pe"} = $q[16];
       $aa {$sym, "cap"} = $q[20];
 
-      # Yahoo returns a line filled with N/A's if we look up a
-      # non-existant symbol.  AFAIK, the date flag will /never/
-      # be defined properly unless we've looked up a real stock.
-      # Hence we can use this to check if we've successfully
-      # obtained the stock or not.
-
-      if ($aa{$sym,"date"} eq "N/A") {
-        $aa{$sym,"success"}  = 0;
-        $aa{$sym,"errormsg"} = "Stock lookup failed";
-      } else {
-        $aa{$sym,"success"} = 1;
-      }
+      $aa{$sym, "success"} = ($aa{$sym,"date"} eq "N/A") ? 0 : 1;
 
       if ($q[13] =~ m{^"?\s*(\S+)\s*-\s*(\S+)"?$}) {
         $aa {$sym, "low"} = $1;
@@ -216,7 +191,7 @@ sub yahoo
 
     # Return undef's rather than N/As.  This makes things more suitable
     # for insertion into databases, etc.
-    foreach my $key (keys %aa) {
+    foreach my $key (%aa) {
       undef $aa{$key} if (defined($aa{$key}) and $aa{$key} eq "N/A");
     }
 
@@ -229,7 +204,7 @@ sub yahoo_europe
 {
     shift if (ref $_[0]);	# Shift off the object if there is one.
     my @symbols = @_;
-    return undef unless @symbols;	# Nothing if no symbols.
+    return undef unless @symbols;
     my($x,@q,%aa,$ua,$url,$sym);
 
     $x = $";
@@ -239,9 +214,7 @@ sub yahoo_europe
     $ua = LWP::UserAgent->new;
     $ua->timeout($TIMEOUT) if defined $TIMEOUT;
     $ua->env_proxy();
-    my $reply = $ua->request(GET $url);
-    return undef unless ($reply->is_success);
-    foreach (split('\015?\012',$reply->content))
+    foreach (split('\015?\012',$ua->request(GET $url)->content))
     {
       @q = _parse_csv($_);
 
@@ -259,21 +232,6 @@ sub yahoo_europe
       $aa {$sym, "eps"} = $q[15];
       $aa {$sym, "pe"} = $q[16];
       $aa {$sym, "cap"} = $q[20];
-
-      # Yahoo returns a line filled with N/A's if we look up a
-      # non-existant symbol.  AFAIK, the date flag will /never/
-      # be defined properly unless we've looked up a real stock.
-      # Hence we can use this to check if we've successfully
-      # obtained the stock or not.
-      $aa {$sym, "success"} = ($aa{$sym,"date"} eq "N/A") ? 0 : 1;
-    }
-
-    # Return undef's rather than N/As.  This makes things more suitable
-    # for insertion into databases, etc.  Also remove silly HTML that
-    # yahoo inserts to put in little euro symbols.
-    foreach my $key (keys %aa) {
-      $aa{$key} =~ s/<[^>]*>//g;
-      undef $aa{$key} if (defined($aa{$key}) and $aa{$key} eq "N/A");
     }
 
     # return wantarray() ? @qr : \@qr;
@@ -388,9 +346,7 @@ sub _fidelity_nav
     $ua = LWP::UserAgent->new;
     $ua->timeout($TIMEOUT) if defined $TIMEOUT;
     $ua->env_proxy();
-    my $reply = $ua->request(GET $url);
-    return undef unless ($reply->is_success);
-    foreach (split('\015?\012',$reply->content))
+    foreach (split('\015?\012',$ua->request(GET $url)->content))
     {
         @q = _parse_csv($_) or next;
 
@@ -410,8 +366,7 @@ sub _fidelity_nav
             ($aa {$sym, "nav"}    = $q[3]) =~ s/^ +//;
             ($aa {$sym, "change"} = $q[4]) =~ s/^ +//;
             ($aa {$sym, "ask"}    = $q[7]) =~ s/^ +//;
-             $aa {$sym, "date"} = $dayte;
-	     $aa {$sym, "success"} = 1;
+            $aa {$sym, "date"} = $dayte;
         }
     }
 
@@ -434,9 +389,7 @@ sub _fidelity_mm
     $ua = LWP::UserAgent->new;
     $ua->timeout($TIMEOUT) if defined $TIMEOUT;
     $ua->env_proxy();
-    my $reply = $ua->request(GET $url);
-    return undef unless ($reply->is_success);
-    foreach (split('\015?\012',$reply->content))
+    foreach (split('\015?\012',$ua->request(GET $url)->content))
     {
         @q = _parse_csv($_) or next;
 
@@ -454,8 +407,7 @@ sub _fidelity_mm
              $aa {$sym, "name"} =~ s/$ +//;
             ($aa {$sym, "number"} = $q[1]) =~ s/^ +//;
             ($aa {$sym, "yield"}  = $q[3]) =~ s/^ +//;
-             $aa {$sym, "date"} = $dayte;
-	     $aa {$sym, "success"} = 1;
+            $aa {$sym, "date"} = $dayte;
         }
     }
 
@@ -474,9 +426,7 @@ sub troweprice
     $ua = LWP::UserAgent->new;
     $ua->timeout($TIMEOUT) if defined $TIMEOUT;
     $ua->env_proxy();
-    my $reply = $ua->request(GET $url);
-    return undef unless ($reply->is_success);
-    foreach (split('\015?\012',$reply->content))
+    foreach (split('\015?\012',$ua->request(GET $url)->content))
     {
         @q = _parse_csv($_);
 
@@ -488,7 +438,6 @@ sub troweprice
             $aa {$sym, "name"} = $sym;  # no name supplied ... 
             $aa {$sym, "nav"} = $q[1];
             $aa {$sym, "date"} = $q[2];
-	    $aa {$sym, "success"} = 1;
         }
     }
 
@@ -693,24 +642,12 @@ sub asx {
     $ua->env_proxy();
 
     foreach my $stock (@stocks) {
-        my $response = $ua->request(GET $ASX_URL.$stock);
-	unless ($response->is_success) {
-	    $info{$stock,"success"} = 0;
-	    $info{$stock,"errormsg"} = "HTTP session failed";
-	    next;
-	}
-	my $reply = $response->content;
+        my $reply = $ua->request(GET $ASX_URL.$stock)->content;
 
 	# Grab the date.  This is a pretty clunky way of doing it, but
 	# my mind's still in brain-saver mode.
 
 	my ($day, $month, $year) = $reply =~ /(\d\d?) (January|February|March|April|May|June|July|August|September|October|November|December) (\d{4})/;
-
-	unless ($month) {
-	    $info{$stock,"sucess"} = 0;
-	    $info{$stock,"errormsg"} = "Symbol Lookup failed";
-	    next;
-	}
 
 	$_ = $month;
 	(s/January/1/    or
@@ -724,7 +661,7 @@ sub asx {
 	 s/September/9/  or
 	 s/October/10/   or
 	 s/November/11/ or
-	 s/December/12/  or (warn "Bizzare month $_ from ASX. Skipped $stock\n"
+	 s/December/12/  or (warn "Bizarre month $_ from ASX. Skipped $stock\n"
 	                          and return undef));
 
 	$info{$stock,"date"} = "$_/$day/$year"; # Silly 'merkin format.
@@ -793,7 +730,6 @@ sub asx {
 	# Outside of business hours, the last price is the same as the
 	# previous day's close.
 	$info{$stock,"last"} ||= $info{$stock,"close"};
-	$info{$stock,"success"} = 1;
     }
     return %info;
 }
@@ -847,7 +783,8 @@ sub tiaacref
     my(@funds) = @_;
     return undef unless @funds;
     my(@line);		#holds the return from _parse_csv
-    my(%info);		
+    my(%info);
+    my(%check);		#holds success value if data returned	
     my($ua,$url);   #useragent and target url
     my($reply);		#the reply from TIAA-CREF's cgi
 
@@ -855,6 +792,7 @@ sub tiaacref
     foreach my $fund (@funds) {
 	if ($tiaacref_ids{$fund}) {
 		$url .=  $fund . "=yes&";
+		$check{$fund} = 0;
 	} else {
 		$info{$fund,"success"} = 0;
 		$info{$fund,"errormsg"} = "Bad symbol";
@@ -870,25 +808,42 @@ sub tiaacref
 
        foreach (split('\012',$reply->content) ){
            @line = _parse_csv($_);
-           $info{$line[0],"symbol"} = $line[0]; #in case the caller needs this in the hash
-           $info{$line[0],"exchange"} = "TIAA-CREF";
-           $info{$line[0],"name"} = $tiaacref_ids{$line[0]};
-           $info{$line[0],"date"} = $line[2];
-           $info{$line[0],"nav"} =  $line[1];	
-	   $info{$line[0],"success"} = 1; #not necessarily, but we'll assume so until i implement a check for well-formedness
+           if (exists $check{$line[0]}) {   #did we ask for this data?
+		  $info{$line[0],"symbol"} = $line[0]; #in case the caller needs this in the hash
+         	  $info{$line[0],"exchange"} = "TIAA-CREF";
+         	  $info{$line[0],"name"} = $tiaacref_ids{$line[0]};
+         	  $info{$line[0],"date"} = $line[2];
+         	  $info{$line[0],"nav"} =  $line[1];	
+	 	  $info{$line[0],"success"} = 1; #this contains good data, beyond a reasonable doubt
+	 	  $check{$line[0]} = 1;
+	  } else {
+	  	$info{$line[0],"success"} = 0;
+	  	$info{$line[0],"errormsg"} = "Bad data returned";
+	  }
        }
     } else {
-	return undef; #perhaps we should return the hash with each elemnet
-		      #showing failure, with the errormsg "HTTP failure"
+	foreach $_ (@funds) {
+		$info{$_,"success"} = 0;
+		$info{$_,"errormsg"} = "HTTP error";
+	} # foreach
+	
+    } #if $reply->is_success else
+    
+    
+    #now check to make sure a value was returned for every symbol asked for
+    foreach my $k (keys %check) {
+    	if ($check{$k} == 0) {
+    		$info{$k,"success"} = 0;
+    		$info{$k,"errormsg"} = "No data returned";
+    	}
     }
 
     return %info;
 }
 
 # Currency allows the user to convert from one currency to another.
-# WARNING - This function is still under development.  Use at your
-#           own risk.  This function's interface and behaviour can
-#           and WILL change in the future.
+# WARNING - This function is still under development.  Expect the
+#           interface to change shortly.
 
 sub currency {
 	shift if (ref($_[0]));	# Pop the object if we have one.
@@ -924,9 +879,8 @@ Finance::Quote - Get stock and mutual fund quotes from various exchanges
  %quotes = $q->yahoo_europe(@symbols); # Europe quotes
  %quotes = $q->fidelity(@symbols);     # Fidelity Investments Quotes
  %quotes = $q->troweprice();           # Quotes from T. Rowe Price
- %quotes = $q->tiaacref(@symbols);     # Annuities from TIAA-CREF
  %quotes = $q->asx(@symbols);          # Australian quotes from ASX.
- %quotes = $q->fetch("asx",@symbols);  # Same as above, different syntax.
+ %quotes = $q->tiaacref(@symbols);     # Annuities from TIAA-CREF
  print ("the last price was ", $quotes{"IBM", "last"} );
 
 =head1 DESCRIPTION
@@ -961,14 +915,9 @@ one or more of the following elements:
     cap          Market Capitalization
     nav          Net Asset Value
     yeild        Yeild (usually 30 day avg)
-    success	 Did the stock successfully return information? (true/false)
-    errormsg	 If success is false, this field may contain the reason why.
 
     (Elements which are not yet implemented have no key associated
      with them.  Not all methods return all keys at all times.)
-
-If all stock lookups fail (possibly because of a failed connection) then
-`undef' may be returned.
 
 You may optionally override the default LWP timeout of 180 seconds by setting
 $quote->timeout() or Finance::Quote::timeout() to your preferred value.
@@ -994,16 +943,6 @@ are as follows:
     Global Equities:			CREFglob
     Teachers PA Select Stock:		TIAAsele
     Growth:				CREFgrow
-
-=head2 FETCH
-
-    my %stocks = $q->fetch("nasdaq","IBM","MSFT");
-
-A new function, fetch(), provides a more generic and easy-to-use interface
-to the library.  It takes a source as the first argument, and then a list
-of ticker-symbols to obtain from that source.  fetch() will understand the
-case-insensitive sources "nasdaq", "nyse" and "europe", and map them to
-the yahoo or yahoo_europe methods appropriately.
 
 =head1 ENVIRONMENT
 
@@ -1033,19 +972,6 @@ name of the security.
 
 If you have questions regarding this, play around with $YAHOO_URL, changing
 the value of the f parameter.
-
-=head1 BUGS
-
-Not all functions return an errormsg when a failure results.
-
-Not everything checks for errors as well as they could.
-
-There is no way to add extra aliases to the fetch list.
-
-There is no good documentation on which functions return what fields.
-
-This documentation is getting a little long and cumbersome.  It should
-be broken up into more logical sections.
 
 =head1 COPYRIGHT
 
