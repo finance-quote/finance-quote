@@ -38,9 +38,9 @@ use LWP::UserAgent;
 
 use vars qw/$ASX_URL $VERSION/;
 
-$VERSION = "1.02";
+$VERSION = "1.03";
 
-$ASX_URL = 'http://www.asx.com.au/nd50/nd_ISAPI_50.dll/asx/markets/EquitySearchResults.jsp?method=post&template=F1001&ASXCodes=';
+$ASX_URL = 'http://www.asx.com.au/nd51/nd_ISAPI_50.dll/asx/markets/PriceResults.jsp?method=post&template=F1001&ASXCodes=';
 
 sub methods {return (australia => \&asx,asx => \&asx)}
 
@@ -211,6 +211,13 @@ from the Australian Stock Exchange.
 
 Information returned by this module is governed by the Australian
 Stock Exchange's terms and conditions.
+
+Since the ASX tends to often change their layout of their site,
+and their website is not friendly to Netscape under Linux, it
+is VERY strongly recommended that you use the "australia"
+fetch method, or (if knowing your source is consistant is
+important to use) the "yahoo_australia" method, both of which
+are much more reliable.
 
 =head1 LABELS RETURNED
 
