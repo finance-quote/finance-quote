@@ -86,7 +86,7 @@ sub asx {
 	# Grab the values
 	my @values;
 
-	while ($reply =~ m#<font size='2' face='Arial' color='\#000051'>(.*?)</Font>#g) {
+	while ($reply =~ m#<font size='2' face='Arial' color='\#000051'>([^<]*).*?</Font>#g) {
 		push @values, $1;
 	}
 
