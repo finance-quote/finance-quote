@@ -96,7 +96,7 @@ sub tiaacref
     	$tiaacref_ids{"TIAAsele"} = "TIAA Teachers Personal Annuity Select Stock"; 
     }
     my(@funds) = @_;
-    return undef unless @funds;
+    return unless @funds;
     my(@line);		#holds the return from parse_csv
     my(%info);
     my(%check);		#holds success value if data returned	
@@ -152,7 +152,8 @@ sub tiaacref
     	}
     }
 
-    return %info;
+    return %info if wantarray;
+    return \%info;
 }
 
 1;

@@ -68,7 +68,7 @@ sub yahoo
 {
     my $quoter = shift;
     my @symbols = @_;
-    return undef unless @symbols;	# Nothing if no symbols.
+    return unless @symbols;	# Nothing if no symbols.
     my($x,@q,%aa,$ua,$url,$sym);
 
     $x = $";
@@ -78,7 +78,7 @@ sub yahoo
     $ua = $quoter->user_agent;
 
     my $reply = $ua->request(GET $url);
-    return undef unless ($reply->is_success);
+    return unless ($reply->is_success);
     foreach (split('\015?\012',$reply->content))
     {
       @q = $quoter->parse_csv($_);
@@ -132,5 +132,6 @@ sub yahoo
       undef $aa{$key} if (defined($aa{$key}) and $aa{$key} eq "N/A");
     }
 
-    return %aa;
+    return %aa if wantarray;
+    return \%aa;
 }

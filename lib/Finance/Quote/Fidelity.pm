@@ -59,7 +59,7 @@ sub fidelity
 {
     my $quoter = shift;
     my @symbols = @_;
-    return undef unless @symbols;
+    return unless @symbols;
     my(%aa,%cc,$sym, $k);
 
     # rather irritatingly, fidelity sorts its funds into different groups.
@@ -141,7 +141,8 @@ sub fidelity
        }
     }
 
-    return %aa;
+    return %aa if wantarray;
+    return \%aa;
 }
 
 # =======================================================================
@@ -159,7 +160,7 @@ sub _fidelity_nav
     $url = $_[0];
     $ua = $quoter->user_agent;
     my $reply = $ua->request(GET $url);
-    return undef unless ($reply->is_success);
+    return unless ($reply->is_success);
     foreach (split('\015?\012',$reply->content))
     {
         @q = $quoter->parse_csv($_) or next;
@@ -204,7 +205,7 @@ sub _fidelity_mm
     $url = $_[0];
     $ua = $quoter->user_agent;
     my $reply = $ua->request(GET $url);
-    return undef unless ($reply->is_success);
+    return unless ($reply->is_success);
     foreach (split('\015?\012',$reply->content))
     {
         @q = $quoter->parse_csv($_) or next;
