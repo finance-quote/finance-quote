@@ -10,7 +10,7 @@ use Finance::Quote;
 my $q      = Finance::Quote->new();
 my @funds = qw/FGRIX FNMIX FASGX FCONX/;
 
-my %quotes = $q->fidelity(@funds);
+my %quotes = $q->fidelity_direct(@funds);
 ok(%quotes);
 
 # Check that the name and nav are defined for all of the funds.
