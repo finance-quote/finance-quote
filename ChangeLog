@@ -11,3 +11,6 @@
 	* Updated Examples/Quote_example.pl to include TIAA-CREF examples.
 
 	* CVSTAG: finance_quote_0_17
+
+2000-04-10	Paul Fenwick	<pjf@cpan.org>
+	* Changed Examples/chkshares.pl to print a pretty table.
