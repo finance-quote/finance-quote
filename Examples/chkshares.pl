@@ -2,7 +2,6 @@
 use strict;
 use lib '../lib';
 use Finance::Quote qw/asx/;
-use Data::Dumper;
 
 =head1 NAME
 
@@ -22,6 +21,30 @@ interfaces (eg, yahoo and yahoo_europe).
 
 =cut
 
+my ($name, $date, $last, $p_change, $high, $low, $volume, $close);
+
+format STDOUT_TOP =
+
+                                 STOCK REPORT
+
+TICKER         DATE      LAST  %CHANGE       HIGH      LOW    VOLUME     CLOSE
+-------------------------------------------------------------------------------
+.
+
+format STDOUT =
+ @<<<   @>>>>>>>>>>  @###.### @###.###   @###.### @###.### @>>>>>>>>  @###.###
+$name,  $date,       $last,   $p_change, $high,   $low,    $volume,   $close
+.
+
 foreach my $code (@ARGV) {
-	print Dumper(\{asx($code)});
+	my %quote = asx($code);
+	$name = $quote{$code,'name'};
+	$date = $quote{$code,'date'};
+	$last = $quote{$code,'last'};
+	$p_change = $quote{$code,'p_change'};
+	$high = $quote{$code,'high'};
+	$low = $quote{$code,'low'};
+	$volume = $quote{$code,'volume'};
+	$close = $quote{$code,'close'};
+	write;
 }
