@@ -586,3 +586,7 @@
 	  a troweprice_direct method.  (#666351)
 
 	* As above, for the Fidelity module.  (#666353)
+
+	* Accepted David Hampton's patch to Yahoo currencies.
+	  The correct currency will now be flagged on stocks regardless
+	  of the module used to grab them. (#666361)
