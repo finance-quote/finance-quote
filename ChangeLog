@@ -236,3 +236,18 @@
 2000-07-13	Paul Fenwick	<pjf@cpan.org>
 	* Improved fidelity module such that it doesn't return information
 	  about stocks we did not request.
+
+2000-07-15	Paul Fenwick	<pjf@cpan.org>
+	* Wrote documentation for Yahoo::Europe (incomplete) and
+	  Yahoo::USA.  Changed modules to require perl 5.005 because
+	  we make use of some of its features (like hash slices).
+
+	* Improved labels documentation in Finance::Quote.
+
+	* Added exchange and method information (where possible)
+	  to the various sub-modules.
+
+	* Improved chkshares example script to check for errors.
+
+	* Removed bad test in currency.t and replaced it with a better
+	  one.
