@@ -166,7 +166,7 @@ sub new {
 		 @modules = qw/Cdnfundlibrary Yahoo::Australia Fidelity
 		 	       ASX Troweprice Tiaacref Yahoo::USA Yahoo::Europe
 			       DWS VWD Trustnet Fool AEX Tdwaterhouse Tdefunds
-			       Yahoo::Asia FTPortfolios IndiaMutual
+			       Yahoo::Asia FTPortfolios IndiaMutual Union
 			       BMONesbittBurns/;
 	}
 
