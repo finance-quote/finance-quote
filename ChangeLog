@@ -205,3 +205,10 @@
 
 	* Updated ASX and Yahoo::USA to not tag indexes with currency
 	  labels.
+
+	* Updated Yahoo::Base to automatically accomodate suffixes for
+	  when we wish to add them automatically.
+
+	* Added Yahoo::Australia to look up Australian stocks.
+
+	* Tested failover of Yahoo::Australia to Yahoo::ASX.
