@@ -46,7 +46,7 @@ use Exporter ();
 # Export information
 @ISA = qw/Exporter/;
 @EXPORT      = ();
-@EXPORT_OK   = qw/yahoo yahoo_europe fidelity troweprice vanguard asx tiaacref/;
+@EXPORT_OK   = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK] );
 
 $VERSION = '0.18';
