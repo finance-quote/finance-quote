@@ -184,6 +184,7 @@ sub _fidelity_nav
              $aa {$sym, "date"} = $dayte;
 	     $aa {$sym, "price"} = $aa{$sym, "nav"};
 	     $aa {$sym, "success"} = 1;
+             $aa {$sym, "currency"} = "USD";
 	}
     }
 
@@ -227,6 +228,7 @@ sub _fidelity_mm
              $aa {$sym, "date"} = $dayte;
 	     $aa {$sym, "price"} = $aa{$sym, "yield"};
 	     $aa {$sym, "success"} = 1;
+             $aa {$sym, "currency"} = "USD";
 	}
     }
 

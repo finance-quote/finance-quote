@@ -74,6 +74,7 @@ sub troweprice
             $aa {$sym, "date"} = $q[2];
 	    $aa {$sym, "price"} = $aa{$sym,"nav"};
 	    $aa {$sym, "success"} = 1;
+            $aa {$sym, "currency"} = "USD";
         } else {
 	    $aa {$sym, "success"} = 0;
 	    $aa {$sym, "errormsg"} = "Stock lookup failed.";

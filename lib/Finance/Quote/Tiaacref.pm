@@ -128,7 +128,9 @@ sub tiaacref
          	  $info{$line[0],"date"} = $line[2];
          	  $info{$line[0],"nav"} =  $line[1];	
 		  $info{$line[0],"price"} = $info{$line[0],"nav"};
-	 	  $info{$line[0],"success"} = 1; #this contains good data, beyond a reasonable doubt
+	 	  $info{$line[0],"success"} = 1; #this contains good data, 
+                                                 #beyond a reasonable doubt
+                  $info{$line[0],"currency"} = "USD";                                
 	 	  $check{$line[0]} = 1;
 	  } else {
 	  	$info{$line[0],"success"} = 0;
