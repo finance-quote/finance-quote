@@ -63,3 +63,6 @@
 	* Added stockdump.pl example script, which is handy in debugging.
 
 	* fetch is now an exportable function.
+
+	* yahoo() function no longer returns entries for fields that
+	  used to be returned as 'N/A'.
