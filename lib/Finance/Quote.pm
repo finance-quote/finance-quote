@@ -141,8 +141,8 @@ sub new {
 	if (!scalar(@_) or $_[0] eq "-defaults") {
 		shift if (scalar(@_));
 		# Default modules
-		 @modules = qw/Fidelity ASX Troweprice Tiaacref
-		               Yahoo::USA Yahoo::Europe/;
+		 @modules = qw/Yahoo::Australia Fidelity ASX Troweprice
+                               Tiaacref Yahoo::USA Yahoo::Europe/;
 	}
 
 	$this->_load_modules(@modules,@_);
