@@ -690,16 +690,16 @@ Finance::Quote - Get stock and mutual fund quotes from various exchanges
 
 =head1 SYNOPSIS
 
-  use Finance::Quote;
-  my $quote = Finance::Quote->new;	    # Create a Finance::Quote object.
-  $quote->timeout(60);			    # Timeout maximum of 60 seconds
-  %quotes = $quote->yahoo(@symbols);	    # NYSE quotes from Yahoo
-  %quotes = $quote->yahoo_europe(@symbols); # Europe quotes from Yahoo France
-  %quotes = $quote->fidelity(@symbols);	    # Quotes from Fidelity Investments
-  %quotes = $quote->troweprice(@symbols);   # Quotes from T. Rowe Price
-  %quotes = $quote->vanguard(@symbols);     # Quotes from the Vanguard Group
-  %quotes = $quote->asx(@symbols);          # Australian quotes from the ASX.
-  print ("the last price was ", $quotes{"IBM", "last"} );
+ use Finance::Quote;
+ my $q = Finance::Quote->new;          # New Finance::Quote object.
+ $q->timeout(60);		       # Timeout max of 60 seconds
+ %quotes = $q->yahoo(@symbols);	       # NYSE quotes 
+ %quotes = $q->yahoo_europe(@symbols); # Europe quotes
+ %quotes = $q->fidelity(@symbols);     # Fidelity Investments Quotes
+ %quotes = $q->troweprice(@symbols);   # Quotes from T. Rowe Price
+ %quotes = $q->vanguard(@symbols);     # Quotes from Vanguard Group
+ %quotes = $q->asx(@symbols);          # Australian quotes from ASX.
+ print ("the last price was ", $quotes{"IBM", "last"} );
 
 =head1 DESCRIPTION
 
@@ -769,10 +769,10 @@ the value of the f parameter.
 
 =head1 COPYRIGHT
 
-Copyright 1998, Dj Padzensky
-Copyright 1998, 1999 Linas Vepstas
-Copyright 2000, Yannick LE NY (update for Yahoo Europe and YahooQuote)
-Copyright 2000, Paul Fenwick (update for ASX)
+ Copyright 1998, Dj Padzensky
+ Copyright 1998, 1999 Linas Vepstas
+ Copyright 2000, Yannick LE NY (update for Yahoo Europe and YahooQuote)
+ Copyright 2000, Paul Fenwick (update for ASX)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -799,7 +799,7 @@ module.
   Paul Fenwick (C<pjf@schools.net.au>)
 
 The Finance::Quote home page can be found at
-http://
+http://finance-quote.sourceforge.net/
 
 The Finance::YahooQuote home page can be found at
 http://www.padz.net/~djpadz/YahooQuote/
