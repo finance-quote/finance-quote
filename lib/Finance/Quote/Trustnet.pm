@@ -39,13 +39,13 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.01';
+$VERSION = '1.02';
 
 # URLs of where to obtain information.
 
-$TRUSTNET_URL = ("http://www.trustnet.co.uk/ut/funds/perf.asp?sort=0&txtS=");
+$TRUSTNET_URL = ('http://www.trustnet.com/ut/funds/perf.asp?reg=all&sec=all&unit=all&type=all&sort=5&ss=0&booAutif=0&txtS=');
 
-$TRUSTNET_ALL="http://www.trustnet.co.uk/ut/funds/perf.asp?sort=0";
+$TRUSTNET_ALL="http://www.trustnet.co.uk/ut/funds/perf.asp";
 
 sub methods { return (uk_unit_trusts => \&trustnet, trustnet => \&trustnet); }
 

@@ -444,3 +444,13 @@
 	  FQ_LOAD_QUOTELET
 
 	* CVSTAG: finance_quote_1_05
+
+2001-04-05	Paul Fenwick	<pjf@cpan.org>
+	* Updated ASX.pm module to reflect changed location of
+	  information on the ASX's website.  (Still doesn't
+	  help when the ASX site is totally broken, as is
+	  too often the case.)
+
+	* Updated Trustnet.pm module to reflect changes to the
+	  Trustnet site.
+
