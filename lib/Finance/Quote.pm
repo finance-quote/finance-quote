@@ -37,7 +37,10 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
-            $VERSION $TIMEOUT %MODULES %METHODS $AUTOLOAD/;
+            $VERSION $TIMEOUT %MODULES %METHODS $AUTOLOAD
+	    $YAHOO_CURRENCY_URL/;
+
+$YAHOO_CURRENCY_URL = "http://finance.yahoo.com/m5?";
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
@@ -153,6 +156,41 @@ sub new {
 		return $dummy_obj ||= Finance::Quote->new;
 	}
 }
+
+# =======================================================================
+# currency (public object method)
+#
+# currency allows the conversion of one currency to another.
+#
+# Usage: $quoter->currency("USD","AUD");
+#	 $quoter->currency("15.95 USD","AUD");
+#
+# undef is returned upon error.
+
+sub currency {
+	my $this = shift if (ref($_[0]));
+	$this ||= _dummy();
+
+	my ($from, $to) = @_;
+	return undef unless ($from and $to);
+
+	$from =~ s/^\s*(\d*\.?\d*)\s*//;
+	my $amount = $1 || 1;
+
+	my $ua = $this->user_agent;
+
+	# Don't know if these have to be in upper case, but it's
+	# better to be safe than sorry.
+	$to = uc($to);
+	$from = uc($from);
+
+	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}s=$from&t=$to")->content;
+	my ($exchange_rate) = $data =~ m#$from$to=X</a></td><td>1</td><td>\d\d?:\d\d\w\w</td><td>(\d+\.\d+)</td>#;
+
+	return undef unless $exchange_rate;
+	return ($exchange_rate * $amount);
+}
+	
 
 # =======================================================================
 # Timeout code.  If called on a particular object, then it sets
