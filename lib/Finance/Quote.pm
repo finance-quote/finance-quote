@@ -413,7 +413,7 @@ sub fetch {
 	unless (exists $METHODS{$method}) {
 		carp "Undefined fetch-method $method passed to ".
 		     "Finance::Quote::fetch";
-		return undef;
+		return;
 	}
 
 	# Failover code.  This steps through all availabe methods while
@@ -441,8 +441,7 @@ sub fetch {
 		@stocks = @failed_stocks;
 	}
 
-
-	return %returnhash;
+	return wantarray() ? %returnhash : \%returnhash;
 }
 
 # =======================================================================

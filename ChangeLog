@@ -320,3 +320,9 @@
 	  (old-style) not through fetch, then it would do the right
 	  thing if called via an object.  This means that things
 	  like $q->asx(@stocks) work correctly again.
+
+	* Updated fetch() method so that it returns the empty list
+	  rather than undef when called in an array context.
+
+	* fetch() now returns a hashref if called in a scalar context.
+
