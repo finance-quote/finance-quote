@@ -262,6 +262,10 @@ sub _fidelity_mm
 
 Finance::Quote::Fidelity - Obtain information from Fidelity Investments.
 
+=head1 NOTE NOTE NOTE NOTE NOTE
+
+This module is currently non-functional.
+
 =head1 SYNOPSIS
 
     use Finance::Quote;
