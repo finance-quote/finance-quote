@@ -3,7 +3,7 @@
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
-#    Copyright (C) 2000, Paul Fenwick <pjf@schools.net.au>
+#    Copyright (C) 2000, Paul Fenwick <pjf@cpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -44,6 +44,13 @@ $YAHOO_EUROPE_URL = ("http://finance.fr.yahoo.com/d/quotes.csv?f=snl1d1t1c1p2va2
 
 sub methods {return (europe => \&yahoo_europe,yahoo_europe => \&yahoo_europe)};
 
+{
+	my @labels = qw/name last date time volume bid ask close open eps
+	                pe cap price/;
+
+	sub labels { return (europe => \@labels, yahoo_europe => \@labels); }
+}
+
 # =======================================================================
 # yahoo_europe gets quotes for European markets from Yahoo.
 sub yahoo_europe
@@ -77,6 +84,7 @@ sub yahoo_europe
       $aa {$sym, "eps"} = $q[15];
       $aa {$sym, "pe"} = $q[16];
       $aa {$sym, "cap"} = $q[20];
+      $aa {$sym, "price"} = $aa {$sym, "last"};
 
       # Yahoo returns a line filled with N/A's if we look up a
       # non-existant symbol.  AFAIK, the date flag will /never/
