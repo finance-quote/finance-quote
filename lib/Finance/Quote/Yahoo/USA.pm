@@ -47,7 +47,8 @@ sub methods {return (canada   => \&yahoo,
 		     yahoo    => \&yahoo,
 		     nyse     => \&yahoo,
 		     nasdaq   => \&yahoo,
-		     vanguard => \&yahoo)};
+		     vanguard => \&yahoo,
+		     fidelity => \&yahoo)};
 
 {
 	my @labels = qw/name last date time net p_change volume avg_vol
@@ -59,7 +60,8 @@ sub methods {return (canada   => \&yahoo,
 			     yahoo	=> \@labels,
 			     nyse	=> \@labels,
 			     nasdaq	=> \@labels,
-			     vanguard	=> \@labels); }
+			     vanguard	=> \@labels,
+			     fidelity   => \@labels); }
 }
 
 sub yahoo
