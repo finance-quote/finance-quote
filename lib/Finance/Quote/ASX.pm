@@ -3,7 +3,7 @@
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
-#    Copyright (C) 2000, Paul Fenwick <pjf@schools.net.au>
+#    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -40,7 +40,15 @@ use vars qw/$ASX_URL/;
 
 $ASX_URL = 'http://www3.asx.com.au/nd50/nd_isapi_50.dll/JSP/EquitySearchResults.jsp?method=post&template=F1001&ASXCodes=';
 
-sub methods {return (australia => \&asx,asx => \&asx)};
+sub methods {return (australia => \&asx,asx => \&asx)}
+
+{
+	my @labels = qw/date bid ask open high low last close p_change
+	                volume price/;
+
+	sub labels { return (australia => \@labels,
+	                     asx       => \@labels); }
+}
 
 # Australian Stock Exchange (ASX)
 # The ASX provides free delayed quotes through their webpage.
@@ -72,7 +80,7 @@ sub asx {
 	my ($day, $month, $year) = $reply =~ /(\d\d?) (January|February|March|April|May|June|July|August|September|October|November|December) (\d{4})/;
 
 	unless ($month) {
-	    $info{$stock,"sucess"} = 0;
+	    $info{$stock,"success"} = 0;
 	    $info{$stock,"errormsg"} = "Symbol Lookup failed";
 	    next;
 	}
