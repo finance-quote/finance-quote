@@ -614,3 +614,23 @@
 	  fields, and removal of spurious debug output.
 
 	* CVSTAG: finance_quote_1_08
+
+2003-07-06	Pawel Konieczny	<konieczp@users.sourceforge.net>
+	* Update of F::Q::AEX module: added a remap functionality 
+	  which translates the official stock ticker to AEX CGI 
+	  symbol
+
+	* Update of F::Q::AEX module: Distiguishing indices and stocks:
+	  indices will have "currency" label undefined, stocks will have
+	  value "EUR".  This fixes the currency conversion problem for
+	  indices.
+
+	* Update of F::Q::AEX module: Cleanup of labels: "offer" renamed to
+	  "ask" ("ask" is more common, besides, it can be
+	  currency-converted). Label "offer" stays for backward
+	  compatibility.
+
+	* Update of F::Q::AEX module: Cleanup of garbage in some fields.
+	  (Ocassionally, the http fetch & parse will return garbage for
+	  some values).
+
