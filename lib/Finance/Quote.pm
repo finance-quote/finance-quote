@@ -102,10 +102,19 @@ sub _load_modules {
 			my %methodhash = $modpath->methods;
 			my %labelhash = $modpath->labels;
 
+			# Find the labels that we can do currency conversion
+			# on.
+
+			my $curr_fields_func = $modpath->can("currency_fields")
+						|| \&default_currency_fields;
+			
+			my @currency_fields = &$curr_fields_func;
+
 			foreach my $method (keys %methodhash) {
 				push (@{$METHODS{$method}},
 					{ function => $methodhash{$method},
-					  labels   => $labelhash{$method} });
+					  labels   => $labelhash{$method},
+					  currency_fields => \@currency_fields});
 			}
 		}
 	}
@@ -213,6 +222,64 @@ sub set_currency {
 		delete $this->{"currency"};
 	} else {
 		$this->{"currency"} = $_[0];
+	}
+}
+
+# default_currency_fields (public method)
+#
+# This is a list of fields that will be automatically converted during
+# currency conversion.  If a module provides a currency_fields()
+# function then that list will be used instead.
+
+sub default_currency_fields {
+	return qw/last high low net bid ask close open day_range year_range
+	          eps div cap nav price/;
+}
+
+# _convert (private object method)
+#
+# This function converts between one currency and another.  It expects
+# to receive a hashref to the information, a reference to a list
+# of the stocks to be converted, and a reference to a  list of fields
+# that conversion should apply to.
+
+{
+	my %conversion;		# Conversion lookup table.
+
+	sub _convert {
+		my $this = shift;
+		my $info = shift;
+		my $stocks = shift;
+		my $convert_fields = shift;
+		my $new_currency = $this->{"currency"};
+
+		foreach my $stock (@$stocks) {
+			my $currency;
+
+			# Skip stocks that don't have a currency.
+			next unless ($currency = $info->{$stock,"currency"});
+
+			# Lookup the currency conversion if we haven't
+			# already.
+			unless (exists $conversion{$currency,$new_currency}) {
+				$conversion{$currency,$new_currency} =
+					$this->currency($currency,$new_currency);
+			}
+
+			# Make sure we have a reasonable currency conversion.
+			# If we don't, mark the stock as bad.
+			unless ($conversion{$currency,$new_currency}) {
+				$info->{$stock,"success"} = 0;
+				$info->{$stock,"errormsg"} =
+					"Currency conversion failed.";
+				next;
+			}
+
+			# Okay, we have clean data.  Convert it.
+			foreach my $field (@$convert_fields) {
+				$info->{$stock,$field} *= $conversion{$currency,$new_currency};
+			}
+		}
 	}
 }
 
