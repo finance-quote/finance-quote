@@ -2,7 +2,10 @@
 #
 # example script showing how to use the Quote perl module.
 # gets prices for some stocks, for some mutual funds
+#
+# This script was originally part of GnuCash.
 
+use lib '..';
 use Finance::Quote;
 
 my $q = Finance::Quote->new();
