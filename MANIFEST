@@ -13,6 +13,7 @@ Examples/stockdump.pl
 lib/Finance/Quote/Fidelity.pm
 lib/Finance/Quote/ASX.pm
 lib/Finance/Quote/DWS.pm
+lib/Finance/Quote/Yahoo/Asia.pm
 lib/Finance/Quote/Yahoo/Australia.pm
 lib/Finance/Quote/Yahoo/Base.pm
 lib/Finance/Quote/Yahoo/Europe.pm
