@@ -21,7 +21,6 @@
 #    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #    02111-1307, USA
 #
-#
 # This code derived from Padzensky's work on package Finance::YahooQuote,
 # but extends its capabilites to encompas a greater number of data sources.
 #
@@ -64,8 +63,21 @@ sub yahoo_europe
 
 	foreach my $symbol (@symbols) {
 		if ($info{$symbol,"success"}) {
-			$info{$symbol,"currency"} = "EUR";
 			$info{$symbol,"method"} = "yahoo_europe";
+
+			# London sources return in pence, not Euros.
+			# We'd like them to return in pounds (divide
+			# by 100).
+			if ($symbol =~ /\.L$/i) {
+				$info{$symbol,"currency"} = "GBP";
+				foreach my $field ($quoter->default_currency_fields) {
+					next unless ($info{$symbol,$field});
+					$info{$symbol,$field} = $quoter->scale_field($info{$symbol,$field},0.01);
+				}
+			} else {
+				# All other markets are in Euros.
+				$info{$symbol,"currency"} = "EUR";
+			}
 		}
 	}
 
