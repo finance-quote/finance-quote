@@ -14,6 +14,7 @@ lib/Finance/Quote.pm
 lib/Finance/Quote/ASX.pm
 lib/Finance/Quote/DWS.pm
 lib/Finance/Quote/Fidelity.pm
+lib/Finance/Quote/Fool.pm
 lib/Finance/Quote/Tiaacref.pm
 lib/Finance/Quote/Troweprice.pm
 lib/Finance/Quote/Trustnet.pm
