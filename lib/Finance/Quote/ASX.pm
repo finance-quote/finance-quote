@@ -38,15 +38,15 @@ use LWP::UserAgent;
 
 use vars qw/$ASX_URL $VERSION/;
 
-$VERSION = "1.00";
+$VERSION = "1.01";
 
-$ASX_URL = 'http://www3.asx.com.au/nd50/nd_isapi_50.dll/JSP/EquitySearchResults.jsp?method=post&template=F1001&ASXCodes=';
+$ASX_URL = 'http://www.asx.com.au/nd50/nd_ISAPI_50.dll/asx/markets/EquitySearchResults.jsp?method=post&template=F1001&ASXCodes=';
 
 sub methods {return (australia => \&asx,asx => \&asx)}
 
 {
-	my @labels = qw/date bid ask open high low last close p_change
-	                volume price method exchange/;
+	my @labels = qw/name last p_change bid offer high low volume
+	                price method exchange/;
 
 	sub labels { return (australia => \@labels,
 	                     asx       => \@labels); }
@@ -60,126 +60,96 @@ sub methods {return (australia => \&asx,asx => \&asx)}
 # TODO: It's possible to fetch multiple stocks in one operation.  It would
 #       be nice to do this, and should not be hard.
 sub asx {
-    my $quoter = shift;
-    my @stocks = @_;
-    return unless @stocks;
-    my %info;
+	my $quoter = shift;
+	my @stocks = @_;
+	return unless @stocks;
+	my %info;
 
-    my $ua = $quoter->user_agent;
+	my $ua = $quoter->user_agent;
 
-    foreach my $stock (@stocks) {
-        my $response = $ua->request(GET $ASX_URL.$stock);
+	my $response = $ua->request(GET $ASX_URL.join("%20",@stocks));
 	unless ($response->is_success) {
-	    $info{$stock,"success"} = 0;
-	    $info{$stock,"errormsg"} = "HTTP session failed";
-	    next;
+		foreach my $stock (@stocks) {
+			$info{$stock,"success"} = 0;
+			$info{$stock,"errormsg"} = "HTTP session failed";
+		}
+		return wantarray() ? %info : \%info;
 	}
 	my $reply = $response->content;
 
-	# Grab the date.  This is a pretty clunky way of doing it, but
-	# my mind's still in brain-saver mode.
-
-	my ($day, $month, $year) = $reply =~ /(\d\d?) (January|February|March|April|May|June|July|August|September|October|November|December) (\d{4})/;
-
-	unless ($month) {
-	    $info{$stock,"success"} = 0;
-	    $info{$stock,"errormsg"} = "Symbol Lookup failed";
-	    next;
-	}
-
-	$_ = $month;
-	(s/January/1/    or
-	 s/February/2/   or
-	 s/March/3/      or
-	 s/April/4/      or
-	 s/May/5/        or
-	 s/June/6/       or
-	 s/July/7/       or
-	 s/August/8/     or
-	 s/September/9/  or
-	 s/October/10/   or
-	 s/November/11/ or
-	 s/December/12/  or (warn "Bizarre month $_ from ASX. Skipped $stock\n"
-	                          and return));
-
-	$info{$stock,"date"} = "$_/$day/$year"; # Silly 'merkin format.
-
 	# These first two steps aren't really needed, but are done for
 	# safety.
+
 	# Remove the bottom part of the page.
 	$reply =~ s#</table>\s*\n<table>.*$##s;
 	# Remove top of page.
-	$reply =~ s#.*<table##s;
+	$reply =~ s#.*Chart</font></a></td></tr><tr><td nowrap valign=top>##s;
 
-        # Now pluck out the headings.
-	my @headings;
-	while ($reply =~ m#<FONT +SIZE=2><B>([%\w ]*).*?</B>#g) {
-	    push @headings, $1;
-	}
-
-	# Now grab the values
+	# Grab the values
 	my @values;
-	while ($reply =~ m#<td align=(left|right)><Font Size=2>(.*?)</Font>#g) {
-	    push @values, $2;
+
+	while ($reply =~ m#<font size='2' face='Arial' color='\#000051'>(.*?)</Font>#g) {
+		push @values, $1;
 	}
 
-	# Put the two together and we get shares information.
-	foreach my $heading (@headings) {
-	    my $value = shift @values;
+	if (@values % 13) { # Wrong number of fields?  Damn!
+		warn "Bad number of fields returned from ASX website in ".
+		     "Finance::Quote::ASX.  Aborting query.\n";
 
-	    # Check the code that we got back.
-	    if ($heading =~ /ASX CODE/) {
-		if ($value ne $stock) {
-		    # Oops!  We got back a stock that we didn't want?
-		    warn "Bad stocks returned from the ASX.  ".
-			 "Wanted $stock but got $value.";
-		    return;
+		foreach my $stock (@stocks) {
+			$info{$stock,"success"}  = 0;
+			$info{$stock,"errormsg"} = "ASX website corrupted.";
 		}
-		next;
-	    }
-
-	    # Convert ASX headings to labels we want to return.
-	    $_ = $heading;
-	    (s/LAST/last/)  or
-	    (s/BID/bid/)    or
-	    (s/OFFER/ask/)  or
-	    (s/OPEN/open/)  or
-	    (s/HIGH/high/)  or
-	    (s/LOW/low/)    or
-	    (s/LAST/last/)  or
-	    (s/PDC/close/)  or
-	    (s/%/p_change/) or
-	    (s/VOLUME/volume/) or (warn "Unknown heading from ASX: $_.  Skipped"
-	                           and next);
-
-	    # Clean the value
-	    $value =~ tr/$,%//d;
-
-	    # If the value if nbsp then skip it.  Some things are not
-	    # defined outside trading hours.
-
-            next if $value =~ /&nbsp;/;
-
-	    # Put the info into our hash.
-	    $info{$stock,$_} = $value;
+		return %info if wantarray;
+		return \%info;
 	}
-	$info{$stock,"name"} = $stock;	# ASX doesn't give names.  :(
 
-	# Outside of business hours, the last price is the same as the
-	# previous day's close.
-	$info{$stock,"last"} ||= $info{$stock,"close"};
-	$info{$stock,"price"}  = $info{$stock,"last"};
-	$info{$stock,"success"} = 1;
+	# Go through all the values and pack them into our structure.
+	# We rely upon the particular ordering of fields at the ASX,
+	# so this is a little dangerous.
 
-	# Australian indexes all begin with X, so don't tag them
-	# as having currency info.
-        $info{$stock, "currency"} = "AUD" unless ($stock =~ /^X/);
+	while (@values) {
+		my $stock = shift @values;
+		$stock =~ s/&nbsp;//;	# Remove guff.
 
-	$info{$stock, "method"} = "asx";
-	$info{$stock, "exchange"} = "Australian Stock Exchange";
-    }
-    return %info if wantarray;
-    return \%info;
+		foreach my $label (qw/name last p_change bid offer open
+			      high low volume JUNK JUNK JUNK/) {
+
+			my $value = shift @values;
+			next if ($label eq "JUNK");
+
+			# Clean the value.
+
+			$value =~ tr/$,%//d;
+			$value =~ s/&nbsp;//;
+
+			$info{$stock,$label} = $value;
+		}
+
+		# We get a dollar plus/minus change, rather than a
+		# percentage change, so we convert this into a
+		# percentage change, as required.
+
+		$info{$stock,"p_change"} = sprintf("%.2f",
+		                           ($info{$stock,"p_change"}*100)/
+				             $info{$stock,"open"});
+		   
+
+		# Australian indexes all begin with X, so don't tag them
+		# as having currency info.
+
+		$info{$stock, "currency"} = "AUD" unless ($stock =~ /^X/);
+
+		$info{$stock, "method"} = "asx";
+		$info{$stock, "exchange"} = "Australian Stock Exchange";
+		$info{$stock, "price"} = $info{$stock,"last"};
+		$info{$stock, "success"} = 1;
+	}
+
+	# All done.
+
+	return %info if wantarray;
+	return \%info;
 }
 
 1;
