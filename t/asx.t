@@ -35,6 +35,6 @@ $quotes{"ITE","p_change"} ||= "";	# Avoid warning if undefined.
 ok($quotes{"ITE","p_change"} !~ /%/);
 
 # Check that looking up a bogus stock returns failure:
-%quotes = $q->asx("BOGUS");
-ok(! $quotes{"BOGUS","success"});
+%quotes = $q->asx("BOG");
+ok(! $quotes{"BOG","success"});
 
