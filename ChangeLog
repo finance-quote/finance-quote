@@ -328,3 +328,5 @@
 
 2000-08-31	Paul Fenwick	<pjf@cpan.org>
 	* Added Keith Refson's Trustnet module.
+
+	* Added .cvsignore file to reduce spam for developers using CVS.
