@@ -24,14 +24,6 @@ in Finance::Quote.
 
 * Webpage to be made pretty (bnh).
 
-* Return a hashref if functions are called in a list context.  This should
-  give us small performance improvements, especially with large sets of
-  data.
-
-* For "complete, unspecified errors" we want to return the empty list in
-  list context, or undef in scalar context.  I believe this can just
-  be implemented by using "return" with no arguments.
-
 * Labels to indicate which sources data came from.
 
 * User-defined failover lists (maybe).
