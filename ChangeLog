@@ -292,3 +292,7 @@
 2000-08-06	Paul Fenwick	<pjf@cpan.org>
 	* Updated regression testing scripts to make sure that spurious
 	  percentage signs are no longer returned.
+
+2000-08-14	Paul Fenwick	<pjf@cpan.org>
+	* Updated chkshares script so that it can deal with any market,
+	  not just the ASX.
