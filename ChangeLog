@@ -482,3 +482,7 @@
 	* Fixed Tiaacref.pm to reflect new CGIs at www.tiaa-cref.org
 	  New symbols available for the module - check the POD 
 	  documentation for more info. 
+
+2001-06-26	Linas Vepstas
+	* Added Tdwaterhouse module from James A. Treacy.
+
