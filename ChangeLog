@@ -212,3 +212,12 @@
 	* Added Yahoo::Australia to look up Australian stocks.
 
 	* Tested failover of Yahoo::Australia to Yahoo::ASX.
+
+2000-06-24	Paul Fenwick	<pjf@cpan.org>
+	* Updated currency regression testing script.
+
+	* Updated currency fetching routines to handle different date
+	  formats returned by Yahoo!
+
+	* Updated automatic currency conversion routines to avoid
+	  spurious warnings.
