@@ -48,7 +48,7 @@ sub methods { return (troweprice        => \&troweprice,
  		      troweprice_direct => \&troweprice); }
 
 {
-  my @labels = qw/method exchange name nav date price/;
+  my @labels = qw/method exchange name nav date isodate price/;
 
   sub labels { return (troweprice        => \@labels,
 		       troweprice_direct => \@labels); }
@@ -78,7 +78,7 @@ sub troweprice
             # ($aa {$sym, "name"} = $q[0]) =~ s/^ +//;
             $aa {$sym, "name"} = $sym;  # no name supplied ... 
             $aa {$sym, "nav"} = $q[1];
-            $aa {$sym, "date"} = $q[2];
+	    $quoter->store_date(\%aa, $sym, {usdate => $q[2]});
 	    $aa {$sym, "price"} = $aa{$sym,"nav"};
 	    $aa {$sym, "success"} = 1;
             $aa {$sym, "currency"} = "USD";

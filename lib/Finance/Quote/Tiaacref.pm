@@ -47,7 +47,7 @@ $CREF_URL = ("http://www5.tiaa-cref.org/ddata/DownloadData?");
 
 sub methods { return (tiaacref=>\&tiaacref); }
 
-sub labels { return (tiaacref => [qw/method symbol exchange name date nav price/]); }
+sub labels { return (tiaacref => [qw/method symbol exchange name date isodate nav price/]); }
 
 # =======================================================================
 # TIAA-CREF Annuities are not listed on any exchange, unlike their mutual funds
@@ -214,7 +214,7 @@ sub tiaacref
 		  $info{$line[0],"symbol"} = $line[0]; #in case the caller needs this in the hash
          	  $info{$line[0],"exchange"} = "TIAA-CREF";
          	  $info{$line[0],"name"} = $tiaacref_ids{$line[0]};
-         	  $info{$line[0],"date"} = $line[2];
+		  $quoter->store_date(\%info, $line[0], {usdate => $line[2]});
          	  $info{$line[0],"nav"} =  $line[1];	
 		  $info{$line[0],"price"} = $info{$line[0],"nav"};
 	 	  $info{$line[0],"success"} = 1; #this contains good data, 

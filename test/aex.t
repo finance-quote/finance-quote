@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 9};
+BEGIN {plan tests => 11};
 
 use Finance::Quote;
 
@@ -17,6 +17,10 @@ ok($quotes{"AAB 93-08 7.5","success"});
 ok($quotes{"AAB 93-08 7.5","last"} > 0);
 ok($quotes{"AAB 93-08 7.5","date"});
 ok($quotes{"AAB 93-08 7.5","volume"} > 0);
+
+my $year = (localtime())[5] + 1900;
+ok(substr($quotes{"AAB 93-08 7.5","isodate"},0,4) == $year);
+ok(substr($quotes{"AAB 93-08 7.5","date"},6,4) == $year);
 
 # Exercise the fetch function 
 %quotes = $quoter->fetch("aex","AAB C Jun 05 20.00");

@@ -28,7 +28,7 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 #
-# $Id: VWD.pm,v 1.5 2003/02/03 23:27:03 pjf Exp $
+# $Id: VWD.pm,v 1.6 2005/03/20 01:44:13 hampton Exp $
 
 # =============================================================
 # Workaround by Matt Sisk for handling newlines in table cells.
@@ -61,7 +61,7 @@ $VERSION = '1.00';
 $VWD_FUNDS_URL = "http://www.vwd.gfa-fonds.de/fondspreise/liste.hbs?suchtext=";
 
 sub methods { return (vwd => \&vwd); }
-sub labels { return (vwd => [qw/exchange name date price method/]); }
+sub labels { return (vwd => [qw/exchange name date isodate price method/]); }
 
 # =======================================================================
 # The vwd routine gets quotes of funds from the website of
@@ -118,7 +118,7 @@ sub vwd
       $info{$fund, "name"}     = $name[1];
       $info{$fund, "price"}    = $rows[2][3];
       $info{$fund, "last"}     = $rows[2][3];
-      $info{$fund, "date"}     = $date;
+      $quoter->store_date(\%info, $fund, {usdate => $date});
       $info{$fund, "method"}   = "vwd";
       $info{$fund, "currency"} = $rows[2][2];
       $info{$fund, "success"}  = 1;

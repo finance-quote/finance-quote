@@ -40,7 +40,7 @@ $SEB_FUNDS_URL = 'http://taz.vv.sebank.se/cgi-bin/pts3/pow/fmk/2100/Senaste_fond
 sub methods { return (seb_funds => \&seb_funds); }
 
 {
-  my @labels = qw/date method source name currency price/;
+  my @labels = qw/date isodate method source name currency price/;
 	
   sub labels { return (seb_funds => \@labels); }
 }
@@ -71,9 +71,7 @@ sub seb_funds {
     if (grep {$_ eq $name} @symbols) {
       $price =~ s/,/\./; # change decimal point from , to .
       $funds{$name, 'symbol'}   = $name;
-      $funds{$name, 'isodate'}  = $date;
-      $date =~ /(\d\d\d\d)-(\d\d)-(\d\d)/;
-      $funds{$name, 'date'}     = "$2/$3/$1";
+      $quoter->store_date(\%funds, $name, {isodate => $date});
       $funds{$name, 'method'}   = 'seb_funds';
       $funds{$name, 'source'}   = 'Finance::Quote::SEB';
       $funds{$name, 'name'}     = $name;

@@ -27,7 +27,7 @@ sub methods { return (indiamutual => \&amfiindia,
 		      amfiindia => \&amfiindia); }
 
 {
-    my @labels = qw/method source link name currency date nav rprice sprice/;
+    my @labels = qw/method source link name currency date isodate nav rprice sprice/;
     sub labels { return (indiamutual => \@labels,
 			 amfiindia => \@labels); }
 }
@@ -88,7 +88,7 @@ sub amfiindia   {
 	    $fundquote{$symbol, "nav"} = $data->[1];
 	    $fundquote{$symbol, "rprice"} = $data->[2];
 	    $fundquote{$symbol, "sprice"} = $data->[3];
-	    $fundquote{$symbol, "date"} =  $data->[4];
+	    $quoter->store_date(\%fundquote, $symbol, {eurodate => $data->[4]});
 	    $fundquote{$symbol, "success"} = 1;
 	} else {
 	    $fundquote{$symbol, "success"} = 0;

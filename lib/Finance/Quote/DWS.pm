@@ -28,7 +28,7 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 #
-# $Id: DWS.pm,v 1.5 2002/06/18 19:20:06 volkers Exp $
+# $Id: DWS.pm,v 1.6 2005/03/20 01:44:13 hampton Exp $
 
 package Finance::Quote::DWS;
 require 5.005;
@@ -42,7 +42,7 @@ use vars qw/$VERSION/;
 $VERSION = '1.00';
 
 sub methods { return (dwsfunds => \&dwsfunds); }
-sub labels { return (dwsfunds => [qw/exchange name date price method/]); }
+sub labels { return (dwsfunds => [qw/exchange name date isodate price method/]); }
 
 # =======================================================================
 # The dwsfunds routine gets quotes of DWS funds (Deutsche Bank Gruppe)
@@ -84,14 +84,13 @@ sub dwsfunds
 
         # convert date from german (dd.mm.yyyy) to US format (mm/dd/yyyy)
         @date = split /\./, $q[2];
-        $q[2] = $date[1]."/".$date[0]."/".$date[2];
+	$quoter->store_date(\%info, $q[0], {month => $date[1], day => $date[0], year => $date[2]});
 
         $info{$q[0], "exchange"} = "DWS";
         $info{$q[0], "name"}     = $q[0];
         $info{$q[0], "symbol"}   = $q[0];
         $info{$q[0], "price"}    = $q[1];
         $info{$q[0], "last"}     = $q[1];
-        $info{$q[0], "date"}     = $q[2];
         $info{$q[0], "method"}   = "dwsfunds";
         $info{$q[0], "currency"} = "EUR";
         $info{$q[0], "success"}  = 1;

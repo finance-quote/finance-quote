@@ -2,13 +2,14 @@
 use strict;
 use Test;
 use Data::Dumper;
-BEGIN {plan tests => 19};
+BEGIN {plan tests => 21};
 
 use Finance::Quote;
 
 # Test Yahoo_europe functions.
 
 my $q      = Finance::Quote->new();
+my $year   = (localtime())[5] + 1900;
 
 my %quotes = $q->yahoo_europe("12150.PA","BOGUS.L");
 ok(%quotes);
@@ -19,6 +20,8 @@ ok($quotes{"12150.PA","last"} > 0);
 ok(length($quotes{"12150.PA","name"}) > 0);
 ok($quotes{"12150.PA","success"});
 ok($quotes{"12150.PA", "currency"} eq "EUR");
+ok(substr($quotes{"12150.PA","isodate"},0,4) == $year);
+ok(substr($quotes{"12150.PA","date"},6,4) == $year);
 
 # Make sure we don't have spurious % signs.
 

@@ -66,22 +66,7 @@ sub aex {
    
  my (%info,$url,$reply,$te);
  my ($row, $datarow, $matches);
- my (%month_nr, $day, $month, $year, $time);
-
-# month names and corresponding numbers 
- %month_nr = ( 
-        jan => 1,
-        feb => 2,
-        mar => 3,
-        apr => 4,
-        may => 5,
-        jun => 6,
-        jul => 7,
-        aug => 8,
-        sep => 9,
-        oct => 10,
-        nov => 11,
-        dec => 12 );
+ my ($time);
 
  $url = $AEX_URL;    		# base url 
 
@@ -100,7 +85,7 @@ sub aex {
 
     # Compose POST request
     my $request = new HTTP::Request("POST", $url, $headers);
-    printf $request . "\n";
+    #printf $request . "\n";
     $request->content( $form_data );
 
     # Pass request to the user agent and get a response back
@@ -180,16 +165,9 @@ sub aex {
 # Check for "dd mmm yyyy hh:mm" date/time format like "01 Aug 2004 16:34" 
      if ($dateTime =~ m/(\d{2}) \s ([a-z]{3}) \s (\d{4}) \s
                         (\d{2}:\d{2})/xi ) { 
-     $day   = "$1";
-     $month = $month_nr{lc("$2")};
-     $year  = "$3";
-     $time  = "$4";
-     $day   =~ s/^[0]//;	# remove leading zero
+       $quoter->store_date(\%info, $symbol, {month => $2, day => $1, year => $3});
+       $info {$symbol, "time"} = "$4";
      }
-
-# Compose US format (mm/dd/yyyy) date
-     $info {$symbol, "date"} = $month . "/" . $day . "/" . $year; 
-     $info {$symbol, "isodate"} = sprintf "%4d-%02d-%02d", $year, $month, $day;
 
      $info {$symbol, "currency"} = "EUR";
      $info {$symbol, "success"} = 1; 

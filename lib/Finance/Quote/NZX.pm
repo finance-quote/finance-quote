@@ -55,8 +55,7 @@ sub nzx
   my $isLineOne = 1;
   my $ua = $quoter->user_agent;
   my $sDate;
-  my $sDateUS;
-  my (%symbolhash, @q, @aDate, %info);
+  my (%symbolhash, @q, %info);
 
   # create hash of all stocks requested
   foreach my $symbol (@symbols)
@@ -75,10 +74,6 @@ sub nzx
       {
        $isLineOne = 0;
        ($sDate) =  ($_ =~ /([0-9]{4}\/[0-9]{2}\/[0-9]{2})/g);
-       # convert date from NZX's reverse format (yyyy/mm/dd) to US format (mm/dd/yyyy)
-       @aDate = split /\//, $sDate;
-       $sDateUS = $aDate[1]."/".$aDate[2]."/".$aDate[0];
-       
       }
       @q = $quoter->parse_csv($_) or next;
       if (exists $symbolhash{$q[0]})
@@ -90,8 +85,7 @@ sub nzx
         $info{$q[0], "symbol"}   = $q[0];
         $info{$q[0], "price"}    = $q[1];
         $info{$q[0], "last"}     = $q[7];
-	$info{$q[0], "date"}     = $sDateUS;
-       ($info{$q[0], "isodate"}  = $sDate) =~ s#/#-#g;
+	$quoter->store_date(\%info, $q[0], {isodate => $sDate});
         $info{$q[0], "method"}   = "nzx";
         $info{$q[0], "currency"} = "NZD";
         $info{$q[0], "success"}  = 1;

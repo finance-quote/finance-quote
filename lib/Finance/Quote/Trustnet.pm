@@ -158,19 +158,10 @@ sub trustnet
 	  # Due to the way UK unit trust prices are calculated, assigning an exact date is problematic anyway.
 	  if ( $reply->content =~
 	       /Source : TrustNet - ([\w\d-]+) - http:\/\/www.trustnet.com/m) {
-	    $isodate=$1;
-	    ($day,$month,$year) = ($isodate =~ /([0-9]+)-(\w+)-([0-9]+)/);
-	    $date = $imonth{$month}."/".$day."/".$year;
+	    $quoter->store_date(\%aa, $trust, {isodate => $1});
 	  } else {
-	    ($null,$null,$null,$day,$month,$year,$null,$null,$null) =
-                                                               localtime(time);
-	    $year = $year+1900;
-	    $month = $month+1;
-	    $date = "$month/$day/$year";
-	    $isodate = sprintf "%4d-%02d-%02d", $year, $month, $day;
+	    $quoter->store_date(\%aa, $trust, {today => 1});
 	  }
-	  $aa {$trust, "isodate"} = $isodate;
-	  $aa {$trust, "date"} = $date;
 	}
       } else {
 	$aa {$trust, "success"} = 0;

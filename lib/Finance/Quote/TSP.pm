@@ -47,7 +47,7 @@ my $TSP_URL = 'http://www.tsp.gov/rates/share-prices.html';
 sub methods { return (tsp => \&tsp) }
  
 { 
-	my @labels = qw/name nav date currency method/;
+	my @labels = qw/name nav date isodate currency method/;
 
 	sub labels { return (tsp => \@labels); } 
 }
@@ -122,15 +122,7 @@ sub tsp {
 			$info {$symbol,"errormsg"} = "Unrecognized fund";
 		}
 
-		# From a non-working module by Trent Piepho <xyzzy@spekeasy.org>
-
-		# Convert date format.  There is probably a 5000 line perl module that
-		# would let me do this same thing in just 3 lines of code instead of 4.
-		my %mnames = (Jan => 1, Feb => 2, Mar => 3, Apr => 4, May => 5, Jun => 6,
-			      Jul => 7, Aug => 8, Sep => 9, Oct =>10, Nov =>11, Dec =>12);
-		$rows[0][0] =~ /(...) (\d\d), (\d\d\d\d)/;
-		$info {$symbol, "date"} = "$mnames{$1}/$2/$3";
-		
+		$quoter->store_date(\%info, $symbol, {usdate => $rows[0][0]});
 		$info {$symbol, "currency"} = "USD";
 	} 
 	return %info if wantarray;
