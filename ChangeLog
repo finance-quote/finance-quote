@@ -454,3 +454,8 @@
 	* Updated Trustnet.pm module to reflect changes to the
 	  Trustnet site.
 
+2001-05-08	Paul Fenwick	<pjf@cpan.org>
+	* Applied Leigh Wedding's patch to ASX.pm, after ASX changed
+	  their website yet again!  All is working happily once
+	  more. Thanks Leigh.
+
