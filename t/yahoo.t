@@ -10,7 +10,7 @@ use Finance::Quote;
 my $q      = Finance::Quote->new();
 
 my %quotes = $q->yahoo("IBM","SGI","BOGUS");
-ok(defined(%quotes));
+ok(%quotes);
 
 # Check the last values are defined.  These are the most
 #  used and most reliable indicators of success.

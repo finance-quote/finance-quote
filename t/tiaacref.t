@@ -10,7 +10,7 @@ use Finance::Quote;
 my $q      = Finance::Quote->new();
 
 my %quotes = $q->tiaacref("CREFmony","TIAAreal","BOGOname");
-ok(defined(%quotes));
+ok(%quotes);
 
 ok($quotes{"CREFmony","nav"} > 0);
 ok($quotes{"CREFmony", "currency"} eq "USD");

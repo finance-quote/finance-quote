@@ -11,7 +11,7 @@ use Finance::Quote;
 my $q      = Finance::Quote->new();
 
 my %quotes = $q->yahoo_europe("12150.PA","BOGUS");
-ok(defined(%quotes));
+ok(%quotes);
 
 # Check the nav values are defined.  These are the most
 #  used and most reliable indicators of success.

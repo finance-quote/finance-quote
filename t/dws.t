@@ -10,7 +10,7 @@ use Finance::Quote;
 my $q      = Finance::Quote->new("DWS");
 
 my %quotes = $q->fetch("dwsfunds","847402","BOGUS");
-ok(defined(%quotes));
+ok(%quotes);
 
 # Check that the last and date values are defined.
 ok($quotes{"847402","success"});

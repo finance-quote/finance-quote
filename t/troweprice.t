@@ -10,7 +10,7 @@ use Finance::Quote;
 my $q      = Finance::Quote->new();
 
 my %quotes = $q->troweprice;
-ok(defined(%quotes));
+ok(%quotes);
 
 # Check that nav and date are defined as our tests.
 ok($quotes{"PRFDX","nav"} > 0);
