@@ -601,3 +601,8 @@
 	* Fixed Cdnfundlibrary to correctly set the success flag
 	  when successful.  Thanks to Robert Clark for finding
 	  this bug.  (#752395)
+
+	* Updated Tdwaterhouse.pm with Robert Clark's changes to
+	  work with the new TD Waterhouse website.  Many thanks
+	  to Robert Clark again. (#750843)
+
