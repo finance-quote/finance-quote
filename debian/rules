@@ -33,13 +33,14 @@ clean:
 	dh_clean
 
 binary-indep: build
-	dh_testversion ge 2.0.40
 	dh_testdir
 	dh_testroot
 	dh_clean -k
 	dh_installdirs
 	$(MAKE)                 pure_install
 	dh_perl
+	find `pwd`/debian/tmp -type f -name .packlist | xargs -r rm -f
+	-find `pwd`/debian/tmp -type d -empty | xargs -r rmdir -p --ignore-fail-on-non-empty
 	dh_installdocs          Documentation/README  \
 				Documentation/Hackers-Guide Documentation/FAQ
 	dh_installexamples      Examples/*.pl
