@@ -32,17 +32,18 @@ require 5.005;
 
 use strict;
 
-use vars qw($VERSION $TIAACREF_URL %tiaacref_ids);
+use vars qw($VERSION $CREF_URL $TIAA_URL %tiaacref_ids %tiaacref_locs);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use Carp;
 
-$VERSION = '1.00';
+$VERSION = '1.01';
 
 # URLs of where to obtain information.
 
-$TIAACREF_URL = ("http://www.tiaa-cref.org/financials/selection/ann-select.cgi?");
+$CREF_URL = ("http://www.tiaa-cref.org/financials/selection/ann-select.cgi?");
+$TIAA_URL = ("http://www.tiaa-cref.org/financials/selection/pa-select.cgi?");
 
 sub methods { return (tiaacref=>\&tiaacref); }
 
@@ -68,6 +69,10 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date nav price/
 #TIAA Real Estate:		TIAAreal
 #PA Stock Index:		TIAAsndx
 #PA Select Stock:		TIAAsele
+#PA Select Growth Equity:	TIAAgreq
+#PA Select Growth Income:	TIAAgrin
+#PA Select Int'l Equity:	TIAAintl
+#PA Select Social Choice:	TIAAsocl
 
 #
 # This subroutine was written by Brent Neal <brentn@users.sourceforge.net>
@@ -94,32 +99,78 @@ sub tiaacref
     	$tiaacref_ids{"TIAAreal"} = "TIAA Real Estate";
     	$tiaacref_ids{"TIAAsndx"} = "TIAA Teachers Personal Annuity Stock Index";
     	$tiaacref_ids{"TIAAsele"} = "TIAA Teachers Personal Annuity Select Stock"; 
+	$tiaacref_ids{"TIAAgreq"} = "TIAA Teachers Personal Annuity Select Growth Equity";
+        $tiaacref_ids{"TIAAgrin"} = "TIAA Teachers Personal Annuity Select Growth Income";
+        $tiaacref_ids{"TIAAintl"} = "TIAA Teachers Personal Annuity Select International Equity";
+        $tiaacref_ids{"TIAAsocl"} = "TIAA Teachers Personal Annuity Select Social Choice Equity";
+    }
+    if (! %tiaacref_locs) {
+        $tiaacref_locs{"CREFstok"} = 1;
+        $tiaacref_locs{"CREFmony"} = 1;
+        $tiaacref_locs{"CREFequi"} = 1;
+        $tiaacref_locs{"CREFinfb"} = 1;
+        $tiaacref_locs{"CREFbond"} = 1;
+        $tiaacref_locs{"CREFsoci"} = 1;
+        $tiaacref_locs{"CREFglob"} = 1;
+        $tiaacref_locs{"CREFgrow"} = 1;
+        $tiaacref_locs{"TIAAreal"} = 1;
+        $tiaacref_locs{"TIAAsndx"} = 2;
+        $tiaacref_locs{"TIAAsele"} = 2;
+        $tiaacref_locs{"TIAAgreq"} = 2;
+        $tiaacref_locs{"TIAAgrin"} = 2;
+        $tiaacref_locs{"TIAAintl"} = 2;
+        $tiaacref_locs{"TIAAsocl"} = 2;
     }
     my(@funds) = @_;
     return unless @funds;
     my(@line);		#holds the return from parse_csv
     my(%info);
     my(%check);		#holds success value if data returned	
-    my($ua,$url);   #useragent and target url
-    my($reply);		#the reply from TIAA-CREF's cgi
+    my($ua,$urlc,$urlt);   #useragent and target urls
+    my($cntc,$cntt); #counters for each of the two url containers
+    my($reply,$qdata);		#the reply from TIAA-CREF's cgi and a buffer for the data
 
-    $url = $TIAACREF_URL;
+#    $url = $TIAACREF_URL;
+    $urlc = $CREF_URL;
+    $urlt = $TIAA_URL;
+#Initialize counters for the two types of URL. If either counter is zero, then
+# that URL will not be retrieved. This is less technically clever than testing
+#the URL string itself with m/yes/, but its faster.
+    $cntc = 0;
+    $cntt = 0;
     foreach my $fund (@funds) {
 	if ($tiaacref_ids{$fund}) {
-		$url .=  $fund . "=yes&";
+        	if ($tiaacref_locs{$fund} == 1) {
+			$urlc .=  $fund . "=yes&";
+			$cntc++;
+		} else {
+			$urlt .= $fund . "=yes&";
+			$cntt++;
+		}
 		$check{$fund} = 0;
 	} else {
 		$info{$fund,"success"} = 0;
 		$info{$fund,"errormsg"} = "Bad symbol";
 	}
     }
-    $url .=  "selected=1";
-
+    $urlc .=  "selected=1";
+    $urlt .=  "selected=1";
+    $qdata ="";
     $ua = $quoter->user_agent;
-    $reply = $ua->request(GET $url);
-    if ($reply ->is_success) {
-
-       foreach (split('\012',$reply->content) ){
+    if ($cntc) {
+    	$reply = $ua->request(GET $urlc);
+        if ($reply ->is_success) {
+            $qdata .= $reply->content;
+	}
+    }
+    if ($cntt) {
+        $reply = $ua->request(GET $urlt);
+        if ($reply ->is_success) {
+            $qdata .= $reply->content;
+	}
+    }
+    if (length($qdata)) {
+       foreach (split('\012',$qdata) ){
            @line = $quoter->parse_csv($_);
            if (exists $check{$line[0]}) {   #did we ask for this data?
 		  $info{$line[0],"symbol"} = $line[0]; #in case the caller needs this in the hash
@@ -145,7 +196,7 @@ sub tiaacref
 		$info{$_,"errormsg"} = "HTTP error";
 	} # foreach
 	
-    } #if $reply->is_success else
+    } #if $length(qdata) else
     
     
     #now check to make sure a value was returned for every symbol asked for
@@ -180,17 +231,21 @@ This module obtains information about TIAA-CREF managed funds.
 
 The following symbols can be used:
 
-    Stock: 			CREFstok
-    Money Market:		CREFmony
-    Equity Index:		CREFequi
-    Inf-Linked Bond:		CREFinfb
-    Bond Market:		CREFbond
-    Social Choice:		CREFsoci
-    Global Equities:		CREFglob
-    Growth:			CREFgrow
-    TIAA Real Estate:		TIAAreal
-    PA Stock Index:		TIAAsndx
-    PA Select Stock:		TIAAsele
+    Stock: 				CREFstok
+    Money Market:			CREFmony
+    Equity Index:			CREFequi
+    Inf-Linked Bond:			CREFinfb
+    Bond Market:			CREFbond
+    Social Choice:			CREFsoci
+    Global Equities:			CREFglob
+    Growth:				CREFgrow
+    TIAA Real Estate:			TIAAreal
+    PA Stock Index:			TIAAsndx
+    PA Select Stock:			TIAAsele
+    PA Select Growth Equity:      	TIAAgreq
+    PA Select Growth Income:       	TIAAgrin
+    PA Select Int'l Equity:        	TIAAintl
+    PA Select Social Choice:       	TIAAsocl
 
 This module is loaded by default on a Finance::Quote object.  It's
 also possible to load it explicitly by passing "Tiaacref" in to the
