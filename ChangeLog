@@ -363,3 +363,6 @@
 	* Added Trustnet regression testing program.
 
 	* CVSTAG: finance_quote_1_02
+
+2000-09-27	Paul Fenwick	<pjf@cpan.org>
+	* Updated Trustnet module with patch from Keith Refson.
