@@ -251,6 +251,12 @@ sub yahoo_europe
       $aa {$sym, "success"} = ($aa{$sym,"date"} eq "N/A") ? 0 : 1;
     }
 
+    # Return undef's rather than N/As.  This makes things more suitable
+    # for insertion into databases, etc.
+    foreach my $key (%aa) {
+      undef $aa{$key} if (defined($aa{$key}) and $aa{$key} eq "N/A");
+    }
+
     # return wantarray() ? @qr : \@qr;
     return %aa;
 }

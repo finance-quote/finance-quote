@@ -84,3 +84,5 @@
 
 	* Updated documentation to include fetch and list of known
 	  bugs.
+
+	* Updated yahoo_europe to return undef's instead of N/As.
