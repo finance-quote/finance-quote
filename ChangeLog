@@ -590,3 +590,8 @@
 	* Accepted David Hampton's patch to Yahoo currencies.
 	  The correct currency will now be flagged on stocks regardless
 	  of the module used to grab them. (#666361)
+
+	* Added Keith Refson's module to obtain quotes from
+	  First Trust Portfolios L.P.  Thanks to David Hampton
+	  (again!) for supplying this. (#670202)
+
