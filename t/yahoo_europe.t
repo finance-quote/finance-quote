@@ -2,7 +2,7 @@
 use strict;
 use Test;
 use Data::Dumper;
-BEGIN {plan tests => 6};
+BEGIN {plan tests => 8};
 
 use Finance::Quote;
 
@@ -22,3 +22,7 @@ ok($quotes{"12150.PA", "currency"} eq "EUR");
 
 # Check that a bogus stock returns no-success.
 ok(! $quotes{"BOGUS","success"});
+
+my %londonquotes = $q->fetch("yahoo_europe","BT.A.L");
+ok($londonquotes{"BT.A.L","success"});
+ok($londonquotes{"BT.A.L","currency"} eq "GBP");
