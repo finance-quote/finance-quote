@@ -127,7 +127,7 @@ one of the following:
 	ST - Stockholm
 	SG - Stuttgart
 	VA - Valence
-	FX - Xetra
+	DE - Xetra (was FX)
 
 This module provides both the "europe" and "yahoo_europe" methods.
 The "europe" method should be used if failover methods are desirable.
