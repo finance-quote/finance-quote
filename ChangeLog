@@ -466,7 +466,7 @@
 
 2001-05-09	Paul Fenwick	<pjf@cpan.org>
 	* Fixed strange behaviour which could occur when using
-	  FQ_LOAD_QUOTELETS environment variable.  This now works
+	  FQ_LOAD_QUOTELET environment variable.  This now works
 	  as intened.
 
 	* Added Jasmin Bertovic's Cdnfundlibrary module.
@@ -681,3 +681,62 @@
 	* Fixed bug #916966, TASE prices were 100 times their true
 	  price.  Thanks to Eldad Zack for the patch.
 
+2005-01-14  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/Cdnfundlibrary.pm: Got the module working again.
+
+2005-02-06  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/BMONesbittBurns.pm: Got the modules working again.
+
+2005-02-09  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/Fidelity.pm:
+	* lib/Finance/Quote/Union.pm: Got the modules working again.
+	
+	* lib/Finance/Quote/Yahoo/Base.pm: Extract the currency directly
+	from Yahoo, instead of looking it up in an exchange/currency
+	mapping table.
+
+	* t/*: Various new test and updated modules.
+	
+2005-03-01  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote.pm: New modules.  New function to parse files
+	separated by semicolons instead of commas.
+
+	* lib/Finance/Quote/AEX.pm: Worked over modules from Johan van
+	Oostrum.  Most of the old AEX data has migrated elsewhere.
+
+	* lib/Finance/Quote/ASX.pm:
+	* lib/Finance/Quote/Trustnet.pm: Got the modules working again.
+	
+	* lib/Finance/Quote/ManInvestments.pm:
+	* lib/Finance/Quote/Platinum.pm: New modules for Australian
+	investment price sources from Ian Dall <iandall at
+	users.sourceforge.net>.
+
+	* lib/Finance/Quote/NZX.pm: New modules for fetching quotes the
+	from the New Zealand stock exchange. Provided by Michael Curtis.
+	
+	* lib/Finance/Quote/SEB.pm: New modules for fetching quotes from
+	the Swedish Bank.  Submitted by Tomas Carlsson.
+	
+	* lib/Finance/Quote/TSP.pm: New modules for fetching quotes from
+	the US Govt. Thrift Service Plan.  Submitted by Frank Mori Hess.
+
+	* lib/Finance/Quote/Yahoo/Base.pm: Corrected currency tags for Vienna and Valence.  
+
+	* lib/Finance/Quote/Yahoo/Brasil.pm: Add new Yahoo Brasil module
+	from Ismael Orenstein <perdig at users.sourceforge.net>.
+
+	* t/*: Various new test modules.
+	
+2005-03-19  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/AEX.pm: Spelling correcting from Frank Mori
+	Hess.
+
+	* lib/Finance/Quote.pm: Documentation correction from Trent
+	Piepho.
+	
