@@ -427,16 +427,16 @@
 
 	* Thanks to Jan Willamowius for the above two changes.
 
-2000-12-05	Paul Fenwick	<pjf@cpan.org>
+2001-12-05	Paul Fenwick	<pjf@cpan.org>
 	* Updated the Yahoo::USA source to finance.yahoo.com as
 	  the quote.yahoo.com may become depreciated in the future.
 	  Thanks to Iain Lea for spotting this.
 
-2000-01-22	Paul Fenwick	<pjf@cpan.org>
+2001-01-22	Paul Fenwick	<pjf@cpan.org>
 	* Updated to respect the FQ_LOAD_QUOTELET environment variable
 	  to auto-load custom Quotelet.
 
-2000-02-16	Paul Fenwick	<pjf@cpan.org>
+2001-02-16	Paul Fenwick	<pjf@cpan.org>
 	* Updated to repsect formatting changes in data fed to the
 	  currency function.
 
@@ -444,4 +444,3 @@
 	  FQ_LOAD_QUOTELET
 
 	* CVSTAG: finance_quote_1_05
-
