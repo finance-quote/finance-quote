@@ -11,10 +11,13 @@ Install instructions
 
 % perl Makefile.PL
 % make
-% make test
+% make test		(optional)
 # make install		(as root)
 
 Couldn't be easier, could it?
+
+The tests do take some time to run (especially the currency test), so
+please be patient.
 
 What if my tests fail?
 ----------------------
