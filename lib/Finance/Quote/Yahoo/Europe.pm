@@ -60,7 +60,7 @@ sub yahoo_europe
 	return unless @symbols;	# Nothing if no symbols.
 
 	# This does all the hard work.
-	my %info = yahoo_request($quoter,$YAHOO_EUROPE_URL,@symbols);
+	my %info = yahoo_request($quoter,$YAHOO_EUROPE_URL,\@symbols);
 
 	foreach my $symbol (@symbols) {
 		if ($info{$symbol,"success"}) {

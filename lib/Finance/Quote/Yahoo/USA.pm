@@ -70,7 +70,7 @@ sub yahoo
 	return unless @symbols;	# Nothing if no symbols.
 
 	# This does all the hard work.
-	my %info = yahoo_request($quoter,$YAHOO_URL,@symbols);
+	my %info = yahoo_request($quoter,$YAHOO_URL,\@symbols);
 
 	foreach my $symbol (@symbols) {
 		# Yahoo indexes all start with a hat, so don't
