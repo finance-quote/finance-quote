@@ -11,7 +11,7 @@ my $q      = Finance::Quote->new();
 my @funds = qw/FGRIX FNMIX FASGX FCONX/;
 
 my %quotes = $q->fidelity(@funds);
-ok(defined(%quotes));
+ok(%quotes);
 
 # Check that the name and nav are defined for all of the funds.
 foreach my $fund (@funds) {
@@ -23,7 +23,7 @@ foreach my $fund (@funds) {
 
 # Some funds have yields instead of navs.  Check one of them too.
 %quotes = $q->fidelity("FGRXX");
-ok(defined(%quotes));
+ok(%quotes);
 ok(length($quotes{"FGRXX","name"}));
 ok($quotes{"FGRXX","yield"} != 0);
 ok($quotes{"FGRXX","success"});

@@ -11,7 +11,7 @@ my $q      = Finance::Quote->new();
 my @funds = qw/VBINX VIVAX VWINX VFIIX/;
 
 my %quotes = $q->vanguard(@funds);
-ok(defined(%quotes));
+ok(%quotes);
 
 # Check that the name and last are defined for all of the funds.
 foreach my $fund (@funds) {

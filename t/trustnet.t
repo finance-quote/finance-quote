@@ -14,7 +14,7 @@ my @stocks = ("ABBEY AMERICAN GROWTH","PERPETUAL GLOBAL BOND");
 
 my %quotes = $q->fetch("trustnet",@stocks);
 
-ok(defined(%quotes));
+ok(%quotes);
 
 # For each of our stocks, check to make sure we got back some
 # useful information.

@@ -375,3 +375,5 @@
 
 	* Updated ASX testing.
 
+	* Updated all test scripts to remove spurious warnings under
+	  Perl 5.6.
