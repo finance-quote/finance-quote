@@ -147,7 +147,8 @@ sub new {
 		shift if (scalar(@_));
 		# Default modules
 		 @modules = qw/Yahoo::Australia Fidelity ASX Troweprice
-                               Tiaacref Yahoo::USA Yahoo::Europe/;
+                               Tiaacref Yahoo::USA Yahoo::Europe
+			       DWS VWD Trustnet/;
 	}
 
 	$this->_load_modules(@modules,@_);
