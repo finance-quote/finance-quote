@@ -65,7 +65,7 @@ sub trustnet
     
     return unless @symbols;
     my(@q,%aa,$ua,$url,$sym,$ts,$price,$currency,$reply,$trust,$trusto,$unittype,$suffix);
-    my ($row, $datarow, $matches);
+    my ($row, $datarow, $matches, $encoded);
     my %curr_iso = (GBP => "GBP", "£" => "GBP", "\$" => "USD");
     
     my %symbolhash;
@@ -84,7 +84,9 @@ sub trustnet
 	$unittype = "acc" if ($suffix =~ /\(ACC\)/i);
       }
       $trusto =~ s/\s+$//;
-      $url = "$TRUSTNET_URL$unittype&txtS=$trusto";
+      $encoded = $trusto;
+      $encoded =~ s/&/%26/g;
+      $url = "$TRUSTNET_URL$unittype&txtS=$encoded";
 
       # print STDERR "Retrieving \"$trust\" from $url\n";
       $ua = $quoter->user_agent;
@@ -133,8 +135,8 @@ sub trustnet
 	  $aa {$trust, "exchange"} = "Trustnet";
 	  $aa {$trust, "method"} = "trustnet";
 	  $aa {$trust, "source"} = "http://www.trustnet.co.uk/";
-	  # ($aa {$trust, "name"} = $$datarow[0]) =~ s/^ +//;
-	  $aa {$trust, "name"} = $trust; # no name supplied ... 
+	  ($aa {$trust, "name"} = $$datarow[0]) =~ s/^ +//;
+	  $aa {$trust, "symbol"} = $trust;
 	  ($price = $$datarow[2]) =~ s/\s*\((.*)\)//;
 	  $currency=$1||"GBP";
 	  $aa {$trust, "currency"} = $curr_iso{"$currency"};
