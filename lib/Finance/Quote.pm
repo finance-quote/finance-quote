@@ -49,7 +49,7 @@ use Exporter ();
 @EXPORT_OK   = qw/yahoo yahoo_europe fidelity troweprice vanguard asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK] );
 
-$VERSION = '0.17';
+$VERSION = '0.18';
 
 # URLs of where to obtain information.
 
@@ -118,6 +118,7 @@ sub yahoo
 {
     shift if (ref $_[0]);	# Shift off the object if there is one.
     my @symbols = @_;
+    return undef unless @symbols;
     my($x,@q,%aa,$ua,$url,$sym);
 
     $x = $";
@@ -163,6 +164,7 @@ sub yahoo_europe
 {
     shift if (ref $_[0]);	# Shift off the object if there is one.
     my @symbols = @_;
+    return undef unless @symbols;
     my($x,@q,%aa,$ua,$url,$sym);
 
     $x = $";
@@ -203,6 +205,7 @@ sub fidelity
 {
     shift if (ref $_[0]);	# Shift off the object if there is one.
     my @symbols = @_;
+    return undef unless @symbols;
     my(%aa,%cc,$sym, $k);
 
     # rather irritatingly, fidelity sorts its funds into different groups.
@@ -242,42 +245,42 @@ sub fidelity
     for (@symbols) {
        if ($agandi {$_} ) {
           if (0 == $dgandi ) {
-             %cc = &fidelity_nav ($FIDELITY_GANDI_URL);
+             %cc = &_fidelity_nav ($FIDELITY_GANDI_URL);
              $dgandi = 1;
              foreach $k (keys %cc) { $aa{$k} = $cc{$k}; }
           }
        }
        if ($agrowth {$_} ) {
           if (0 ==  $dgrowth ) {
-             %cc = &fidelity_nav ($FIDELITY_GROWTH_URL);
+             %cc = &_fidelity_nav ($FIDELITY_GROWTH_URL);
              $dgrowth = 1;
              foreach $k (keys %cc) { $aa{$k} = $cc{$k}; }
           }
        }
        if ($acorpbond {$_} ) {
           if (0 ==  $dcorpbond ) {
-             %cc = &fidelity_nav ($FIDELITY_CORPBOND_URL);
+             %cc = &_fidelity_nav ($FIDELITY_CORPBOND_URL);
              $dcorpbond = 1;
              foreach $k (keys %cc) { $aa{$k} = $cc{$k}; }
           }
        }
        if ($aglbnd {$_} ) {
           if (0 ==  $dglbnd ) {
-             %cc = &fidelity_nav ($FIDELITY_GLBND_URL);
+             %cc = &_fidelity_nav ($FIDELITY_GLBND_URL);
              $dglbnd = 1;
              foreach $k (keys %cc) { $aa{$k} = $cc{$k}; }
           }
        }
        if ($amm {$_} ) {
           if (0 ==  $dmm ) {
-             %cc = &fidelity_mm ($FIDELITY_MM_URL);
+             %cc = &_fidelity_mm ($FIDELITY_MM_URL);
              $dmm = 1;
              foreach $k (keys %cc) { $aa{$k} = $cc{$k}; }
           }
        }
        if ($aasset {$_} ) {
           if (0 ==  $dasset ) {
-             %cc = &fidelity_nav ($FIDELITY_ASSET_URL);
+             %cc = &_fidelity_nav ($FIDELITY_ASSET_URL);
              $dasset = 1;
              foreach $k (keys %cc) { $aa{$k} = $cc{$k}; }
           }
@@ -288,8 +291,9 @@ sub fidelity
 }
 
 # =======================================================================
+# Private function used by fidelity.
 
-sub fidelity_nav
+sub _fidelity_nav
 {
     shift if (ref $_[0]);	# Shift off the object if there is one.
     my(@q,%aa,$ua,$url,$sym, $dayte);
@@ -304,11 +308,11 @@ sub fidelity_nav
     $ua->env_proxy();
     foreach (split('\015?\012',$ua->request(GET $url)->content))
     {
-        @q = _parse_csv($_);
+        @q = _parse_csv($_) or next;
 
         # extract the date which is usually on the second line fo the file.
         if (! defined ($dayte)) {
-           if ( $days {$q[0]} ) {          
+           if ($days {$q[0]} ) {          
               ($dayte = $q[1]) =~ s/^ +//;
            }
         }
@@ -330,8 +334,9 @@ sub fidelity_nav
 }
 
 # =======================================================================
+# Private function used by fidelity.
 
-sub fidelity_mm
+sub _fidelity_mm
 {
     shift if (ref $_[0]);	# Shift off the object if there is one.
     my(@q,%aa,$ua,$url,$sym, $dayte);
@@ -346,11 +351,11 @@ sub fidelity_mm
     $ua->env_proxy();
     foreach (split('\015?\012',$ua->request(GET $url)->content))
     {
-        @q = _parse_csv($_);
+        @q = _parse_csv($_) or next;
 
         # extract the date which is usually on the second line fo the file.
         if (! defined ($dayte)) {
-           if ( $days {$q[0]} ) {          
+           if ($days {$q[0]} ) {          
               ($dayte = $q[1]) =~ s/^ +//;
            }
         }
@@ -507,6 +512,7 @@ sub vanguard
     }
 
     my @symbols = @_;
+    return undef unless @symbols;
     my($url, $sym, $i, $fid, $reply, $ua, @q, %aa);
 
     # convert ticker symbols into fund numbers; build first url
@@ -586,6 +592,7 @@ sub vanguard
 sub asx {
     shift if (ref $_[0]);	# Shift off the object if there is one.
     my @stocks = @_;
+    return undef unless @stocks;
     my %info;
 
     my $ua = LWP::UserAgent->new;
@@ -731,11 +738,12 @@ sub tiaacref
     	$tiaacref_ids{"TIAAsndx"} = "TIAA Teachers Personal Annuity Stock Index";
     	$tiaacref_ids{"TIAAsele"} = "TIAA Teachers Personal Annuity Select Stock"; 
     }
+    my(@funds) = @_;
+    return undef unless @funds;
     my(@line);		#holds the return from _parse_csv
     my(%info);		
     my($ua,$url);   #useragent and target url
     my($data);		#the reply from TIAA-CREF's cgi
-    my(@funds) = @_;
 
     $url = $TIAACREF_URL;
     foreach my $fund (@funds) {
@@ -779,7 +787,7 @@ Finance::Quote - Get stock and mutual fund quotes from various exchanges
  %quotes = $q->yahoo(@symbols);	       # NYSE quotes 
  %quotes = $q->yahoo_europe(@symbols); # Europe quotes
  %quotes = $q->fidelity(@symbols);     # Fidelity Investments Quotes
- %quotes = $q->troweprice(@symbols);   # Quotes from T. Rowe Price
+ %quotes = $q->troweprice();           # Quotes from T. Rowe Price
  %quotes = $q->vanguard(@symbols);     # Quotes from Vanguard Group
  %quotes = $q->asx(@symbols);          # Australian quotes from ASX.
  %quotes = $q->tiaacref(@symbols);     # Annuities from TIAA-CREF
@@ -788,10 +796,10 @@ Finance::Quote - Get stock and mutual fund quotes from various exchanges
 =head1 DESCRIPTION
 
 This module gets stock quotes from various internet sources, including
-Yahoo! Finance and Fidelity Investments.  The functions will return a
-quote for each of the stock symbols passed to it.  The return value of
-each of the routines is a hash, which may include one or more of the
-following elements:
+Yahoo!  Finance, Fidelity Investments, and the Australian Stock Exchange.
+The functions will return a quote for each of the stock symbols passed to
+it.  The return value of each of the routines is a hash, which may include
+one or more of the following elements:
 
     name         Company or Mutual Fund Name
     last         Last Price
@@ -828,6 +836,9 @@ Note that prices from the Australian Stock Exchange (ASX) are in
 Australian Dollars.  Prices from Yahoo! Europe are in euros.  All other
 prices are in US Dollars.
 
+The troweprice() function ignores any arguments passed to it.  Instead it
+returns all funds managed by T.RowePrice.
+
 For TIAA and CREF Annuities, you must use TIAA-CREF's pseudosymbols. These
 are as follows:
 
@@ -843,12 +854,18 @@ are as follows:
     Teachers PA Select Stock:		TIAAsele
     Growth:				CREFgrow
 
+=head1 ENVIRONMENT
+
+Finance::Quote respects all environment that your installed
+version of LWP::UserAgent respects.  Most importantly, it
+respects the http_proxy environment variable.
+
 =head1 FAQ
 
-If there's one question I get asked over and over again, it's how did
-I figure out the format string?  Having typed the answer in
-innumerable emails, I figure sticking it directly into the man page
-might help save my fingers a bit...
+If there's one question I get asked over and over again, it's how did I
+figure out the format string for Yahoo! quotes?  Having typed the answer in
+innumerable emails, I figure sticking it directly into the man page might
+help save my fingers a bit...
 
 If you have a My Yahoo! (http://my.yahoo.com) account, go to the
 following URL:
@@ -863,7 +880,7 @@ refers to the string "s" and name refers to the string "l".  Using
 "sl" as the format string, we would get the symbol followed by the
 name of the security.
 
-If you have questions regarding this, play around with $QURL, changing
+If you have questions regarding this, play around with $YAHOO_URL, changing
 the value of the f parameter.
 
 =head1 COPYRIGHT
