@@ -562,4 +562,12 @@
 	* Updated TrustNet documentation, thanks to David Hampton.
 	  (#666349)
 
+2003-07-04	Paul Fenwick	<pjf@cpan.org>
+	* Fixed currency conversion problems. (#232075)
 
+	* Fixed ASX problems whereby quotes were not being obtained.
+	  Thanks to Rik Harris for bringing this issue to light,
+	  and providing a correct URL.  (#653025)
+
+	* Fixed problem where no symbol tag was being defined in ASX.
+	  Thanks again to Rik Harris.  (#653035)
