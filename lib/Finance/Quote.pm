@@ -190,7 +190,31 @@ sub currency {
 	return undef unless $exchange_rate;
 	return ($exchange_rate * $amount);
 }
-	
+
+# =======================================================================
+# set_currency (public object method)
+#
+# set_currency allows information to be requested in the specified
+# currency.  If called with no arguments then information is returned
+# in the default currency.
+#
+# Requesting stocks in a particular currency increases the time taken,
+# and the likelyhood of failure, as additional operations are required
+# to fetch the currency conversion information.
+#
+# This method should only be called from the quote object unless you
+# know what you are doing.
+
+sub set_currency {
+	my $this = shift if (ref $_[0]);
+	$this ||= _dummy();
+
+	unless (defined($_[0])) {
+		delete $this->{"currency"};
+	} else {
+		$this->{"currency"} = $_[0];
+	}
+}
 
 # =======================================================================
 # Timeout code.  If called on a particular object, then it sets

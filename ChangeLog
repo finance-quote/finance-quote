@@ -176,3 +176,8 @@
 	* Re-added currency lookups to Quote.pm
 
 	* Added regression testing script for currency.
+
+	* Added automatic currency conversion stub.
+
+	* Removed TODO file as we now keep track of outstanding jobs
+	  in SourceForge.
