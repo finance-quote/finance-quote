@@ -79,10 +79,14 @@ foreach $f (@funds) {
 print "\n\n";
 
 # Demo for TIAA-CREF.
-@funds = qw/CREFstok TIAAreal CREFmony/;
+@funds = qw/CREFstok BOGOname TIAAreal CREFmony/;
 %quotes = $q->tiaacref(@funds);
 foreach $f (@funds) {
+        if ($quotes{$f,"success"} == 1) {
 	print "TIAA-CREF Price of ".$quotes{$f,"name"}." is ".$quotes{$f,"nav"}.
               " at ".$quotes{$f,"date"}."\n";
+	} else {
+	print "Error: ".$quotes{$f,"errormsg"}." for ".$f."\n";
+	}
 }
 print "\n\n";
