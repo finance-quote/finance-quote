@@ -3,9 +3,9 @@
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
-#    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2001, Leigh Wedding <leigh.wedding@telstra.com>
+#    Copyright (C) 2000-2004, Paul Fenwick <pjf@cpan.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -40,9 +40,8 @@ use HTML::TableExtract;
 
 use vars qw/$ASX_URL $VERSION/;
 
-$VERSION = "1.04";
+$VERSION = "1.05";
 
-#$ASX_URL = 'http://www.asx.com.au/asx/markets/PriceResults.jsp?method=get&template=F1001&ASXCodes=';
 $ASX_URL = 'http://www.asx.com.au/asx/markets/PriceResults.jsp?method=get&template=F1001&ASXCodes=';
 
 sub methods {return (australia => \&asx,asx => \&asx)}
@@ -79,7 +78,7 @@ sub asx {
 	}
 
 	my $te = HTML::TableExtract->new(
-		headers => ["Code","Company Name", "Last", "$ +/-", "Bid", "Offer",
+		headers => ["Code", "Last", "$ +/-", "Bid", "Offer",
 		            "Open", "High", "Low", "Vol"]);
 
 	$te->parse($response->content);
@@ -104,7 +103,7 @@ sub asx {
 
 		$info{$stock,'symbol'} = $stock;
 
-		foreach my $label (qw/name last p_change bid offer open
+		foreach my $label (qw/last p_change bid offer open
 			      high low volume/) {
 			$info{$stock,$label} = shift(@$row);
 
