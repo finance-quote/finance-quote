@@ -105,11 +105,13 @@ sub timeout {
 			tiaacref => \&tiaacref,
 			troweprice => \&troweprice,
 			yahoo => \&yahoo,
-			yahoo_europe => \&yahoo_europe );
+			yahoo_europe => \&yahoo_europe,
+			nasdaq => \&yahoo,
+			nyse => \&yahoo);
 
 	sub fetch {
 		shift if ref ($_[0]);	# Shift off the object if there is one.
-		my $method = shift;
+		my $method = lc(shift);
 		my @stocks = @_;
 
 		unless (exists $methods{$method}) {
