@@ -1,0 +1,465 @@
+#!/usr/bin/perl -w
+#
+# Run perl over this document to get Jon Orwant preferred formatting.  :)
+#
+
+use strict;
+my $code_indent = -1;	# -1 means we're not in code.
+while (<DATA>) {
+	(/(\t*)#!\/\S+\/perl/) and $code_indent = length($1);
+	$code_indent = -1 if (/__END__/);
+	if ($code_indent >= 0) { s/^\t{0,$code_indent}//; } else { s/^\t*//; }
+	print;
+}
+
+__END__
+
+Finance::Quote (for TPJ)
+Paul Fenwick <pjf at cpan dot org>, Aug 2000
+$Revision: 1.1 $
+
+Introduction
+============
+	If you have a reason to watch the world's financial
+	markets, and you know a little about perl, then you
+	may find that the Finance::Quote package comes in handy.
+	I personally use it to remind myself that I should never
+	buy shares, as I have a good history of losing money
+	on the stock exchange.  However, you can use Finance::Quote
+	to help track those tasty stock options you've been offered,
+	or even to help you build dynamic artwork driven by
+	fluctuations in the world markets[1].
+
+	Finance::Quote is a perl module that makes accessing financial
+	information easy.  You can look up stocks and shares, managed
+	funds, currency rates, and all this from a variety of countries
+	and markets.  It's even easy to add your own specialised sources
+	if you find something the module does not do.
+
+	[1] Yes, this actually exists and uses Finance::Quote to
+	    help drive the back-end.  See 
+	    <http://www.terrestrialmap.org/StockPuppets.htm>.
+
+History (or credit where credit is due).
+========================================
+
+	Finance::Quote started as the Quote module which was
+	distributed as part of Gnucash <http://www.gnucash.org>.
+	This module (simple called "Quote") was a modified version
+	of Finance::YahooQuote written by DJ Padzensky
+	<http://www.padz.net/~djpadz/YahooQuote/>.  Linas Vepstas
+	and Yannick LE NY had added extra sources for GnuCash,
+	at which point I asked if anyone had any objections to me
+	breaking it off into a separate project with a range of
+	uses outside of GnuCash.
+
+	Since that time, many people have contributed to Finance::Quote,
+	including Xose Manoel Ramos (for inheritable Yahoo! methods),
+	Brent Neal, Keith Refson, and Volker Stuerzl for writing
+	pluggable modules, and Peter Thatcher, Jacinta Richardson
+	and Steven Murdoch for various bugfixes and improvements.
+	Ben Hemming was kind enough to save the world from my poor
+	web-design skills and supply a web-page look-and-feel.
+
+
+Legality (Or what can I use it for?)
+====================================
+
+	When discussing Finance::Quote, one question which often
+	arises is "how legal is all this"?  Finance::Quote obtains
+	quotes of various organisations who make this information
+	available via the web.  Actually fetching the data is
+	not illegal[2], web-browsers do it all the time, and
+	Finance::Quote is just a rather specialised web-browser.
+	The main problems occur with what you do with that data.
+
+	Each organisation has a different set of restrictions
+	and conditions pertaining to the data you obtain from
+	them.  The most common restriction is that forbidding
+	redistribution, although some of them are as odd to
+	limit the number of copies you can have in memory at
+	any one time!  The Finance::Quote manual pages provide
+	some pointers as to where these licenses can be found,
+	and it would be wise to check those licenses if you
+	wish to be in safe legal waters.
+
+	In general, obtaining information and displaying it or
+	processing it into some useful form for personal
+	use should be okay -- that's what your web-browser does.
+	Obtaining the information and re-badging it as your
+	own is probably a no-no.  If in doubt, check with your
+	lawyer.
+
+	[2] Although there have been a couple of court cases where
+	    "deep linking" into web-page has been cast into legal
+	    shadow.
+
+Terminology
+===========
+
+	Before we begin, it's worth taking the time to explain a
+	few pieces of terminology that may be otherwise a little
+	confusing.  For simplicity, a stock, mutual fund, index,
+	or other parcel of information which can be fetched using
+	Finance::Quote we will refer to as a "stock".
+
+	All stocks have a unique identifier or "symbol" which we
+	can use to look them up, and an "exchange" (or locality)
+	in which they exist.  For example, VA Linux Systems have
+	the symbol "LNUX" on the Nasdaq exchange.  Symbols are
+	traditionally all upper-case, but there exist some symbols
+	(such as the pseudo-symbols used in the TIAA-CREF module)
+	that are mixed case.
+
+	Finance::Quote essentially provides a way of taking a
+	list of symbols for a given exchange, and returning
+	information about those symbols.  Each bit of information
+	has a "label" (such as volume, close, high, low, etc),
+	which identifies what that information is.  All making
+	sense?  Good.  Let's do something fun then.
+
+Using Finance::Quote
+====================
+
+	The Basics
+	----------
+		I'll demonstrate the usage of Finance::Quote by way of
+		a useful example, which will be expanded upon as we
+		go.  For starters, let's just say you're interested in
+		stocks from a single market, and wish to print their
+		current value and volume traded.
+
+#!/usr/bin/perl -w
+use strict;
+use Finance::Quote;
+
+@ARGV >= 2 or die "Usage: $0 exchange symbol symbol symbol ...\n";
+
+my $exchange = shift;	# Where do we fetch our stocks from.
+my @symbols = @ARGV;	# Which stocks are we interested in.
+
+my $quoter = Finance::Quote->new;	# Create the F::Q object.
+
+$quoter->timeout(30);		# Cancel fetch operation if it takes
+				# longer than 30 seconds.
+
+# Grab our information and place it into %info.
+my %info = $quoter->fetch($exchange,@symbols);
+
+foreach my $stock (@symbols) {
+	unless ($info{$stock,"success"}) {
+		warn "Lookup of $stock failed - ".$info{$stock,"errormsg"}.
+		     "\n";
+		next;
+	}
+	print "$stock:\t\t",
+	      "Volume: ",$info{$stock,"volume"},"\t",
+	      "Price: " ,$info{$stock,"price"},"\n";
+}
+__END__
+
+		If our script was called "showstocks", and you were
+		interested in Australian supermarkets, you could call
+		it like this:
+
+			showstocks australia CML WOW
+
+		This will provide you with information about Coles-Myer
+		and Woolworths.
+
+		Alternatively, if you were interested some US
+		technology stocks, you could try this:
+
+			showstocks usa LNUX RHAT MSFT IBM
+
+		which will provide you with information about VA Linux
+		Systems, Red Hat, Microsoft and International Business
+		Machines.
+
+		This script demonstrates a number of capabilities of
+		Finance::Quote.  In particular:
+
+			* Finance::Quote is object-oriented,
+			  and a Finance::Quote object can be
+			  generated using Finance::Quote->new().
+
+			* The fetch() method can be used for
+			  retrieving information.  This method
+			  is very powerful, and will be explained
+			  in some depth later in this article.
+
+			* The fetch method returns a two-dimensional
+			  hash.  This is the topic of our next
+			  section.
+
+	The Return Hash
+	---------------
+		Finance::Quote's most useful function, fetch(),
+		returns a two-dimensional hash.  This contains
+		a variety of information about the stocks you
+		requested, including volume, price, highs and lows,
+		percentage changes, and other information.  Each
+		key in the hash has two parts:
+
+			$info{$symbol,$label}
+
+		The symbol is the symbol that you've requested.  In
+		the examples above, "RHAT" and "LNUX" are examples
+		of symbols.  The label refers to a specific type
+		of information about that stock, such as "volume",
+		"price", "close", "p_change" or "name".  Labels are
+		always lower-case.
+
+		There exists some very special labels that you should
+		be aware of.  The label "success" is used to
+		indicate if the information could be successfully
+		retrieved.  If the value of the success label for a
+		given stock is false, then no useful information could
+		be gained about that symbol at this time.  If a failure
+		did occur, the reason for that failure will be in the
+		label "errormsg".
+
+		The special label "price" is used to indicate the
+		worth or value of the given stock.  This varies a
+		little depending upon what you're fetching information
+		on.  For stocks, it's usually the last price the stock
+		was traded at.  For some investments, it's the current
+		yield (a percentage per-annum).  For currencies
+		it's the exchange rate, and for indexes it's the
+		last value of that index (in points).
+
+		The reason the price label is important is that it
+		allows for applications to track the movement of
+		information without having to know if we're dealing
+		with a stock or a managed fund or an indicator --
+		the price label will provide us with the information
+		that we (usually) want.  This is particularly
+		useful for things such as stock-tickers, allowing
+		them to track things other than just stocks.
+
+		For applications that care about the details, there
+		are a wide range of labels that can be returned.
+		These include the highest and lowest prices for the
+		day, dividend yields and dates, the time and date
+		that the information is current for, the volume
+		traded, the name of the stock, and many others.
+		The standard labels are listed in the side-bar.
+
+		It's important to remember that the information fetched
+		by Finance::Quote is usually delayed, and so is often 30
+		minutes or more behind what's really happening.  If you're
+		doing currency conversions as well, then the currency
+		conversion rate may also be delayed.  You can use the
+		labels "date" and "time" to determine when the data was
+		valid -- it's not unknown for some sources to provide data
+		that is a week old or more.
+
+Advanced Usage
+==============
+
+	Now, the basics of Finance::Quote are pretty simple.  You
+	create yourself a F::Q object, you ask it for some information,
+	and you get that information back in a hash.  For most
+	applications, this is all you really need.  However,
+	Finance::Quote provides a wide range of extra features to
+	help make your life easier.
+
+	Currency Conversion
+	-------------------
+		Finance::Quote has the ability to look up currency
+		rates, and can even automatically convert foreign
+		stocks into local currencies.  Let's say that
+		you live in Australia, but you have some stocks
+		in the USA.  You may be interested in knowing
+		the value of those stocks in Australian dollars,
+		which have more meaning to you than US dollars.
+		Here's how to do it:
+
+		#!/usr/bin/perl -w
+		use strict;
+		use Finance::Quote;
+
+		my $market = shift;
+		my @stocks = @ARGV;
+
+		my $quoter = Finance::Quote->new();
+		$quoter->set_currency("AUD"); # Aussie dollars, thanks.
+		my %info = $quoter->fetch($market,@stocks);
+
+		# Print the info here.
+
+		__END__
+
+		The set_currency() method asks Finance::Quote to
+		convert all values into the given currency before
+		returning them to you.  Finance::Quote knows which
+		things it can convert (like prices and ranges),
+		and which things it cannot (like percentage changes
+		and volumes).  It's even smart enough to (usually)
+		not touch indexes and other abstract indicators
+		that don't have currencies attached to them.
+
+		Be aware that set_currency() can significantly increase
+		the time of a query, as currency lookup information
+		has to be fetched as well as the stock information.
+
+		It's also possible to fetch currency exchange rates
+		directly.  This is done using the currency() method.
+		Eg:
+
+		my $exchange_rate = $quoter->currency("USD","AUD");
+		print "1 US dollar is $exchange_rate Australian dollars.\n";
+
+		The currency() method can also do clever things like
+		take a prefix to the FROM currency.  Hence the following
+		script is a quick'n'dirty command-line utility to
+		convert between currencies:
+
+#!/usr/bin/perl -w
+use strict;
+use Finance::Quote;
+
+# Command-line currency conversion.
+
+die "Usage: $0 FROM TO\n" unless defined($ARGV[1]);
+
+my $quoter = Finance::Quote->new();
+my $exchange_rate = $quoter->currency($ARGV[0],$ARGV[1]);
+
+die "Don't know how to convert $ARGV[0] to $ARGV[1]\n" unless $exchange_rate;
+
+print "$ARGV[0] -> $ARGV[1] = $exchange_rate\n";
+__END__
+
+		If this script were to be called "currency-lookup", you
+		could show the going rate between Australian and American
+		dollars like this:
+
+		currency-lookup AUD USD
+
+		If you wanted to know how much 95 Australian Dollars were
+		in French Francs, you could do this:
+
+		currency-lookup "95 AUD" FRF
+
+		
+	Fail-over Support and Custom Modules
+	-----------------------------------
+		Finance::Quote provides automatic fail-over support
+		if you specify the market that you're interested
+		in and not the actual source from which you want
+		to fetch it.  This means that if you use "nasdaq" instead
+		of "yahoo" as your source, Finance::Quote will
+		automatically try all sources of nasdaq data in
+		case the first one failed.  Fail-over support is
+		on by default in all newly create Finance::Quote
+		objects.
+
+		Fail-over support can increase the time of a query,
+		especially if you're searching for a non-existent
+		stock.  It's possible to (un)set fail-over support
+		explicitly like this:
+
+		$quoter->failover(0);	# Disable failover support.
+
+		Likewise, when you create your Finance::Quote object, it's
+		possible to state which modules you'd like to be
+		able to fetch information from.  For example:
+
+		my $quoter = Finance::Quote->new("Yahoo::Australia");
+
+		will only use the Finance::Quote::Yahoo::Australia 
+		module for queries.  This is particularly useful
+		if you have a deal with a particular information
+		supplier, or otherwise wish to restrict where
+		Finance::Quote can search for information.  Specifying modules
+		to load at creation time can also let you load
+		custom modules that are not part of the standard
+		Finance::Quote distribution.
+
+		my $quoter = Finance::Quote->new("-defaults", "MyBank");
+
+		Here we would load the Finance::Quote::MyBank module,
+		as well as all the default modules that are packaged
+		with Finance::Quote.  Note that "-defaults" as an
+		argument to new is only magical when passed as the
+		first argument (although in the future it MAY be
+		legal to pass it anywhere in the arguments list).
+
+		If you're interested in writing your own modules for
+		Finance::Quote, then you should read the Hacker's Guide
+		that comes with Finance::Quote, or which can be found
+		in the Finance::Quote documentation manager at
+		<http://sourceforge.net/docman/index.php?group_id=4232>.
+
+	Required Labels
+	---------------
+		Fail-over support is a wonderful thing -- the source you're
+		fetching data from may have fallen over and you might never
+		have to worry.  Unfortunately, not all sources provide all
+		the information you're looking for, and having bits of
+		information disappear when you're used to them being there
+		can be a little surprising.
+
+		Rather than having to worry about your fail-over sources not
+		providing the information you're looking for, Finance::Quote
+		allows you to define a list of things that are important
+		to you, using the require_labels() method.  Say that your
+		program relies upon the labels price, date, high, low and
+		volume.  You can express this to your Finance::Quote object
+		like so:
+
+		    $quoter->require_labels(qw/price date high low volume/);
+	
+		If you now use the $quoter->fetch() to obtain information, you
+		can be guaranteed that those fields will be available if they
+		apply to what you've requested.  This means you can use
+		fail-over methods safe in the knowledge that the information
+		you actually care about will not disappear.
+
+	Tricks with the user agent
+	--------------------------
+
+		If you've ever used LWP::UserAgent before, then you'll be
+		pleased to know that you can customise the underlying
+		LWP::UserAgent object in Finance::Quote.  For example:
+
+			$quoter->user_agent->agent("MyTicker/0.1");
+		
+		will cause the $quoter object to identify itself as
+		"MyTicker/0.1" in HTTP sessions.  Likewise, this lets
+		you set your proxy explicitly:
+
+			$quoter->user_agent->proxy('http',$MY_PROXY);
+		
+		Note that the UserAgent that Finance::Quote uses
+		automatically respects proxy environment variables
+		(such as "http_proxy") at creation time.
+
+		For more information on what you can and cannot do
+		here, check out the documentation for LWP::UserAgent.
+
+
+Rolling your own Finance::Quote module
+=======================================
+	As well as using the standard Finance::Quote modules, it's
+	also possible to write your own module that you can ask
+	Finance::Quote to use.  Writing such a module can be a tricky
+	task, and is beyond the scope of this article.
+
+	The Finance::Quote package does come with its own Hacker's Guide
+	explaining how to write a Finance::Quote module.  This can be
+	found with other documentation at
+	<http://finance-quote.sourceforge.net/documentation.html>
+	
+
+Example program -- Stock ticker
+===============================
+	
+	We'll finish off with an example of a useful, real-life program.
+	In this case it's a text-based stock ticker.  The code is
+	intentionally simple to display the features of Finance::Quote,
+	but it provides a very clear and useful display for stocks that
+	you may have your eye on.
+
+	[Example supplied in separate file]
