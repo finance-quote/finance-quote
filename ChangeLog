@@ -333,3 +333,6 @@
 
 	* Updated Yahoo/USA.pm to provide more compatible returns when
 	  called as a fidelity failover.
+
+	* Tweaked DWS.t testing script so that it loads the module
+	  correctly.
