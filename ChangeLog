@@ -531,3 +531,9 @@
 	* Moved cvs tags in debian/* so that finance_quote_1_06
 	  point to the files used in building 1.06, not those building
 	  1.05.
+
+2001-07-23	Paul Fenwick	<pjf@cpan.org>
+	* Updated Yahoo::Europe.pm so that stocks fetched from the
+	  Stockholm exhcnage (.ST) are correctly listed as being in
+	  Swedish Krona (SEK).
+
