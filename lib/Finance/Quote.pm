@@ -165,7 +165,7 @@ sub new {
 		# Default modules
 		@modules = qw/AEX ASX BMONesbittBurns Cdnfundlibrary
 			      DWS FTPortfolios Fidelity Fool IndiaMutual
-			      SEB TSP Tdefunds Tdwaterhouse Tiaacref
+			      NZX SEB TSP Tdefunds Tdwaterhouse Tiaacref
 			      Troweprice Trustnet Union VWD
 			      Yahoo::Asia Yahoo::Australia Yahoo::Brasil
 			      Yahoo::Europe Yahoo::USA/; }
