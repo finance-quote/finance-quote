@@ -168,7 +168,10 @@ sub asx {
 	$info{$stock,"last"} ||= $info{$stock,"close"};
 	$info{$stock,"price"}  = $info{$stock,"last"};
 	$info{$stock,"success"} = 1;
-        $info{$stock, "currency"} = "AUD";
+
+	# Australian indexes all begin with X, so don't tag them
+	# as having currency info.
+        $info{$stock, "currency"} = "AUD" unless ($stock =~ /^X/);
     }
     return %info if wantarray;
     return \%info;
