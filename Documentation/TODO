@@ -36,10 +36,5 @@ in Finance::Quote.
 
 * User-defined failover lists (maybe).
 
-* Methods to register which labels they provide.   Thereby allowing
-  something like this:
-
-  $q->require("date","price","volume");
-  $q->fetch(...);
-
-  Only methods which export the required labels will be called.
+* Yahoo function to be updated to return more reasonable values
+  when being called as a fidelity failover.  (nav, yield, etc)
