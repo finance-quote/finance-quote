@@ -55,10 +55,8 @@ sub methods {return (australia => \&asx,asx => \&asx)}
 # Australian Stock Exchange (ASX)
 # The ASX provides free delayed quotes through their webpage.
 #
-# Maintainer of this section is Paul Fenwick <pjf@schools.net.au>
-#
-# TODO: It's possible to fetch multiple stocks in one operation.  It would
-#       be nice to do this, and should not be hard.
+# Maintainer of this section is Paul Fenwick <pjf@cpan.org>
+
 sub asx {
 	my $quoter = shift;
 	my @stocks = @_;
@@ -124,6 +122,16 @@ sub asx {
 			$value =~ s/&nbsp;//;
 
 			$info{$stock,$label} = $value;
+		}
+
+		# The ASX returns zeros for a number of things if there
+		# has been no trading.  This not only looks silly, but
+		# can break things later.  "correct" zero'd data.
+
+		foreach my $label (qw/open high low/) {
+			if ($info{$stock,$label} == 0) {
+				$info{$stock,$label} = $info{$stock,"last"};
+			}
 		}
 
 		# We get a dollar plus/minus change, rather than a
