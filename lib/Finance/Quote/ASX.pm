@@ -5,6 +5,7 @@
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
 #    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
+#    Copyright (C) 2001, Leigh Wedding <leigh.wedding@telstra.com>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -40,7 +41,7 @@ use vars qw/$ASX_URL $VERSION/;
 
 $VERSION = "1.03";
 
-$ASX_URL = 'http://www.asx.com.au/nd51/nd_ISAPI_50.dll/asx/markets/PriceResults.jsp?method=post&template=F1001&ASXCodes=';
+$ASX_URL = 'http://www.asx.com.au/scripts/nd_ISAPI_50.dll/asx/markets/EquitySearchResults.jsp?method=post&template=F1001&ASXCodes=';
 
 sub methods {return (australia => \&asx,asx => \&asx)}
 
@@ -56,6 +57,7 @@ sub methods {return (australia => \&asx,asx => \&asx)}
 # The ASX provides free delayed quotes through their webpage.
 #
 # Maintainer of this section is Paul Fenwick <pjf@cpan.org>
+# 5-May-2001 Updated by Leigh Wedding <leigh.wedding@telstra.com>
 
 sub asx {
 	my $quoter = shift;
@@ -75,40 +77,54 @@ sub asx {
 	}
 	my $reply = $response->content;
 
-	# These first two steps aren't really needed, but are done for
-	# safety.
-
-	# Remove the bottom part of the page.
-	$reply =~ s#</table>\s*\n<table>.*$##s;
+	# First remove all the junk.
 	# Remove top of page.
-	$reply =~ s#.*Chart</font></a></td></tr><tr><td nowrap valign=top>##s;
+	$reply =~ s#.*Share Price Results">##s;
+	# Grab the table
+	$reply =~ m#(<table.*?>.*?)</table>#s;
+	$reply = $1;
+	# Remove all the '&nbsp;'
+	$reply =~ s#&nbsp;##sg;
+	# Remove all multiple white space.
+	$reply =~ s#\s{2,}##sg;
 
-	# Grab the values
+	# Grab the values by parsing the table
+
 	my @values;
+	my ($i,$j);
+	# First split the table into rows
+	foreach $i (split /<\/tr>/, $reply) {
+	    # Skip the headings row
+	    next if $i =~ m/Code.*Company Name/;
 
-	while ($reply =~ m#<font size='2' face='Arial' color='\#000051'>([^<]*).*?</Font>#g) {
-		push @values, $1;
-	}
-
-	if (@values % 13) { # Wrong number of fields?  Damn!
+	    # Then split the row into fields.
+	    (@values) = split /<\/td>/, $i;
+	    # Get rid of extraneous html tags.
+	    foreach $j (@values)
+	    {
+		$j =~ s/<.+?>//g;
+	    }
+  
+	    if (@values % 13) { # Wrong number of fields?  Damn!
 		warn "Bad number of fields returned from ASX website in ".
 		     "Finance::Quote::ASX.  Aborting query.\n";
-
+	
 		foreach my $stock (@stocks) {
 			$info{$stock,"success"}  = 0;
 			$info{$stock,"errormsg"} = "ASX website corrupted.";
 		}
 		return %info if wantarray;
 		return \%info;
-	}
+	    }
 
-	# Go through all the values and pack them into our structure.
-	# We rely upon the particular ordering of fields at the ASX,
-	# so this is a little dangerous.
+	    # Go through all the values and pack them into our structure.
+	    # We rely upon the particular ordering of fields at the ASX,
+	    # so this is a little dangerous.
 
-	while (@values) {
+	    while (@values) {
 		my $stock = shift @values;
-		$stock =~ s/&nbsp;//;	# Remove guff.
+		# delete the '*' which sometimes appears after the stock
+		$stock =~ tr/*//d;
 
 		foreach my $label (qw/name last p_change bid offer open
 			      high low volume JUNK JUNK JUNK/) {
@@ -117,9 +133,7 @@ sub asx {
 			next if ($label eq "JUNK");
 
 			# Clean the value.
-
 			$value =~ tr/$,%//d;
-			$value =~ s/&nbsp;//;
 
 			$info{$stock,$label} = $value;
 		}
@@ -169,6 +183,7 @@ sub asx {
 		$info{$stock, "exchange"} = "Australian Stock Exchange";
 		$info{$stock, "price"} = $info{$stock,"last"};
 		$info{$stock, "success"} = 1;
+	    }
 	}
 
 	# All done.
@@ -211,13 +226,6 @@ from the Australian Stock Exchange.
 
 Information returned by this module is governed by the Australian
 Stock Exchange's terms and conditions.
-
-Since the ASX tends to often change their layout of their site,
-and their website is not friendly to Netscape under Linux, it
-is VERY strongly recommended that you use the "australia"
-fetch method, or (if knowing your source is consistant is
-important to use) the "yahoo_australia" method, both of which
-are much more reliable.
 
 =head1 LABELS RETURNED
 
