@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 8};
+BEGIN {plan tests => 9};
 
 use Finance::Quote;
 
@@ -17,6 +17,8 @@ ok(%quotes);
 ok($quotes{"IBM","last"} > 0);
 ok($quotes{"IBM","success"});
 ok($quotes{"IBM", "currency"} eq "USD");
+ok(($quotes{"IBM", "currency"} eq "USD") &&
+   !defined($quotes{"IBM","currency_set_by_fq"}));
 
 ok($quotes{"SGI","last"} > 0);
 ok($quotes{"SGI","success"});
