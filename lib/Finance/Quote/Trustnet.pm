@@ -147,7 +147,6 @@ sub trustnet
 	  $aa {$trust, "success"} = 1;
 	  # print STDERR "Trustnet:: Flagging success for $trust\n";
 	  #
-	  # Get date and convert to US format (Ugh!)
 	  # Trustnet no longer seems to include date in reply as of Nov 03
 	  # Perforce we must default to today's date, though last working day may be more accurate.
 	  # Due to the way UK unit trust prices are calculated, assigning an exact date is problematic anyway.
