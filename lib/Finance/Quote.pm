@@ -37,14 +37,39 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
-            $VERSION $TIMEOUT %MODULES %METHODS/;
+            $VERSION $TIMEOUT %MODULES %METHODS $AUTOLOAD/;
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
-@EXPORT_OK = ();
-@EXPORT_TAGS = ();
+@EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
+@EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
 $VERSION = '0.19';
+
+# Autoload method for obsolete methods.  This also allows people to
+# call methods that objects export without having to go through fetch.
+
+sub AUTOLOAD {
+	my $method = $AUTOLOAD;
+	$method =~ s/.*:://;
+
+	# Force the dummy object (and hence default methods) to be loaded.
+	_dummy();
+
+	# If the method we want is in %METHODS, then set up an appropriate
+	# subroutine for it next time.
+
+	if (exists($METHODS{$method})) {
+		eval qq[sub $method {
+			_dummy()->fetch("$method",\@_); 
+		}];
+		carp $@ if $@;
+		no strict 'refs';	# So we can use &$method
+		return &$method(@_);
+	}
+
+	carp "$AUTOLOAD does not refer to a known method.";
+}
 
 # _load_module (private class method)
 # _load_module loads a module(s) and registers its various methods for
@@ -74,10 +99,6 @@ sub _load_modules {
 
 			foreach my $method (keys %methodhash) {
 				push (@{$METHODS{$method}},$methodhash{$method});
-				eval qq[sub $method {
-					_dummy()->fetch("$method",\@_); 
-				}];
-				carp $@ if $@;
 			}
 		}
 	}
@@ -148,11 +169,13 @@ sub timeout {
 # =======================================================================
 # failover (public object method)
 #
-# This sets whether or not it's acceptable to use failover techniques.
+# This sets/gets whether or not it's acceptable to use failover techniques.
 
 sub failover {
 	my $this = shift;
-	return $this->{FAILOVER} = shift;
+	my $value = shift;
+        return $this->{FAILOVER} = $value if (defined($value));
+	return $this->{FAILOVER};
 }
 
 # =======================================================================
@@ -242,6 +265,8 @@ sub parse_csv
        return @new;      # list of values that were comma-separated
 }
 
+# Dummy destroy function to avoid AUTOLOAD catching it.
+sub DESTROY { return; }
 
 1;
 
