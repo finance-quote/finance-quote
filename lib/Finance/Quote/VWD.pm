@@ -28,7 +28,7 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 #
-# $Id: VWD.pm,v 1.4 2001/05/11 04:12:34 pjf Exp $
+# $Id: VWD.pm,v 1.5 2003/02/03 23:27:03 pjf Exp $
 
 # =============================================================
 # Workaround by Matt Sisk for handling newlines in table cells.
@@ -107,11 +107,13 @@ sub vwd
       # strip whitespace and non-printable characters from price and currency
       $rows[2][2] =~ s/\W*//g;
       $rows[2][3] =~ s/[^\d.]*//g;
+      $rows[2][0] =~ s/\W*//g;
 
       # Strip any asterisks and leading/trailing whitespace from name.
       $name[1] =~ tr/*//d;
       $name[1] =~ s/^\s*(.*?)\s*$/$1/;
 
+      $info{$fund, "symbol"}   = $rows[2][0];
       $info{$fund, "exchange"} = $name[2];
       $info{$fund, "name"}     = $name[1];
       $info{$fund, "price"}    = $rows[2][3];

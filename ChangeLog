@@ -554,3 +554,7 @@
 2002-06-25	Paul Fenwick	<pjf@cpan.org>
 	* Added ZI.pm and Union.pm modules.  Thanks to Rainer Dorsch
 	  for providing these.
+
+2003-02-04	Paul Fenwick	<pjf@cpan.org>
+	* Fixed VWD problem whereby no symbol was being returned.
+	  Many thanks to Joachim Breitner for this fix.  (#600698)
