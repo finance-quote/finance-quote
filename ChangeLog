@@ -558,3 +558,8 @@
 2003-02-04	Paul Fenwick	<pjf@cpan.org>
 	* Fixed VWD problem whereby no symbol was being returned.
 	  Many thanks to Joachim Breitner for this fix.  (#600698)
+
+	* Updated TrustNet documentation, thanks to David Hampton.
+	  (#666349)
+
+

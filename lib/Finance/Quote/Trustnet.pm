@@ -165,13 +165,13 @@ though.  :)  http://sourceforge.net/projects/finance-quote
 
     $q = Finance::Quote->new;
 
-    %stockinfo = $q->fetch("unit_trusts","trust-name"); # Can failover to other methods
+    %stockinfo = $q->fetch("uk_unit_trusts","trust-name"); # Can failover to other methods
     %stockinfo = $q->fetch("trustnet","trust-name"); # Use this module only.
 
 =head1 DESCRIPTION
 
 This module obtains information about UK unit trust prices from
-www.trustnet.co.uk.  The information source "unit_trusts" can be used
+www.trustnet.co.uk.  The information source "uk_unit_trusts" can be used
 if the source of prices is irrelevant, and "trustnet" if you
 specifically want to use trustnet.co.uk.
 
