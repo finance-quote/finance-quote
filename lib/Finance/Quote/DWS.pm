@@ -28,7 +28,7 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 #
-# $Id: DWS.pm,v 1.4 2002/02/04 20:37:34 volkers Exp $
+# $Id: DWS.pm,v 1.5 2002/06/18 19:20:06 volkers Exp $
 
 package Finance::Quote::DWS;
 require 5.005;
@@ -88,6 +88,7 @@ sub dwsfunds
 
         $info{$q[0], "exchange"} = "DWS";
         $info{$q[0], "name"}     = $q[0];
+        $info{$q[0], "symbol"}   = $q[0];
         $info{$q[0], "price"}    = $q[1];
         $info{$q[0], "last"}     = $q[1];
         $info{$q[0], "date"}     = $q[2];
