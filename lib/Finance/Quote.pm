@@ -656,7 +656,7 @@ If the failover method is called with no arguments, or with an
 undefined argument, it will return the current failover state
 (true/false).
 
-=head2 user_agent
+=head2 USER_AGENT
 
 my $ua = $q->user_agent;
 
