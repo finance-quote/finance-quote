@@ -78,8 +78,13 @@ sub base_yahoo_labels {
 my %currency_tags = (
 		      # Country		City/Exchange Name
 	US  => "USD", # USA		AMEX, Nasdaq, NYSE
+  	A   => "USD", # USA		American Stock Exchange (ASE)
+  	B   => "USD", # USA		Boston Stock Exchange (BOS)
+  	N   => "USD", # USA		Nasdaq Stock Exchange (NAS)
+  	O   => "USD", # USA		NYSE Stock Exchange (NYS)
   	OB  => "USD", # USA		OTC Bulletin Board
   	PK  => "USD", # USA		Pink Sheets
+  	X   => "USD", # USA		US Options
 	BA  => "ARS", # Argentina	Buenos Aires
 	VA  => "EUR", # Austria		Vienna
   	AX  => "AUD", # Australia
@@ -123,6 +128,7 @@ my %currency_tags = (
 	MC  => "EUR", # 		Madrid SE CATS
 	MA  => "EUR", # 		Madrid
   	ST  => "SEK", # Sweden		Stockholm
+  	S   => "CHF", # Switzerland	Zurich
 	TW  => "TWD", # Taiwan		Taiwan Stock Exchange
 	TWO => "TWD", # 		OTC
 	BK  => "THB", # Thialand	Thailand Stock Exchange
