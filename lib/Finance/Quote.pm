@@ -187,7 +187,12 @@ sub yahoo
       }
     }
 
-    # return wantarray() ? @qr : \@qr;
+    # Return undef's rather than N/As.  This makes things more suitable
+    # for insertion into databases, etc.
+    foreach my $key (%aa) {
+      undef $aa{$key} if (defined($aa{$key}) and $aa{$key} eq "N/A");
+    }
+
     return %aa;
 }
 
