@@ -28,7 +28,7 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 #
-# $Id: DWS.pm,v 1.2 2000/08/21 20:05:03 volkers Exp $
+# $Id: DWS.pm,v 1.3 2002/01/17 21:49:42 volkers Exp $
 
 package Finance::Quote::DWS;
 require 5.005;
@@ -79,8 +79,8 @@ sub dwsfunds
       {
         $fundhash{$q[0]} = 1;
 
-        # convert price from german (0,00) to US format (0.00)
-        $q[1] =~ s/,/\./;
+        # convert price from integer (eecccc) to decimal format (ee.cc)
+        $q[1] /= 10000;
 
         # convert date from german (dd.mm.yyyy) to US format (mm/dd/yyyy)
         @date = split /\./, $q[2];
