@@ -86,3 +86,38 @@ sub troweprice
 }
 
 1;
+
+=head1 NAME
+
+Finance::Quote::Troweprice	- Obtain quotes from T. Rowe Price
+
+=head1 SYNOPSIS
+
+use Finance::Quote;
+
+$q = Finance::Quote->new;
+
+%stockinfo = $q->fetch("troweprice","PRFDX"); # Can failover to other methods
+%stockinfo = $q->fetch("troweprice_direct","PRFDX"); # Use this module only.
+
+=head1 DESCRIPTION
+
+This module obtains information about managed funds from T. Rowe Price.
+Information about T. Rowe Price funds is available from a variety of
+sources.  The information source "troweprice" can be used if you don't
+care which source you obtain information from.  If you wish to be
+guaranteed of fetching information from T. Rowe Price directly,
+then the information source "troweprice_direct" should be used.
+
+=head1 LABELS RETURNED
+
+Information available from T. Rowe Price may include the following
+labels:  exchange, name, nav, date, price.
+
+=head1 SEE ALSO
+
+T. Rowe Price website - http://www.troweprice.com/
+
+Finance::Quote::Yahoo::USA
+
+=cut
