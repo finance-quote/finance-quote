@@ -285,3 +285,6 @@
 2000-07-31	Paul Fenwick	<pjf@cpan.org>
 	* The currency function no longer makes an expensive HTTP
 	  request if both the to and from currencies are identical.
+
+2000-08-04	Paul Fenwick	<pjf@cpan.org>
+	* Patched Yahoo::Base to no longer return spurious percentage signs.
