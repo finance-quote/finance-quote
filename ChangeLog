@@ -646,3 +646,8 @@
 	* AEX module: major update: fetching of stock and index options
 	implemented.  POD and test script updated as well.
 
+2003-08-31  David Hampton  <hampton@employees.org>
+
+	* Yahoo/Base.pm: Added entry for the Lisbon Portugal stock
+	exchange.
+
