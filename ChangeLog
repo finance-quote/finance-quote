@@ -264,3 +264,18 @@
 	* Updated INSTALL documentation.
 
 	* CVSTAG: finance_quote_1_00
+
+2000-07-25	Paul Fenwick	<pjf@cpan.org>
+	* Finance::Quote::Yahoo::Base now removes more HTML-ish guff that
+	  Yahoo tries to place in CSVs.
+
+	* Updated yahoo_europe.t to check that stocks from London are in
+	  GBP.
+
+	* Finance::Quote::Yahoo::Europe now returns London stocks in
+	  GBP.  Previously it was incorrectly returning them in pence
+	  and calling it Euros.
+
+	* Finance::Quote has a new scale_field() function that is used in
+	  currency conversion and by some sub-modules (Yahoo::Europe).  This
+	  may be useful for future module writers.
