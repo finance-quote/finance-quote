@@ -93,7 +93,26 @@ This module fetches information from Yahoo Europe.  Symbols should be
 provided in the format "SYMBOL.EXCHANGE", where the exchange code is
 one of the following:
 
-	XXX - Fill in list here.
+	PA - Paris
+	BC - Barcelona
+	BE - Berlin
+	BI - Bilbao
+	BR - Breme
+	CO - Copenhagen
+	D  - Dusseldorf
+	F  - Frankfurt
+	H  - Hamburg
+	HA - Hanover
+	L  - London
+	MA - Madrid
+	MC - Madrid (M.C.)
+	MI - Milan
+	MU - Munich
+	O  - Oslo
+	ST - Stockholm
+	SG - Stuttgart
+	VA - Valence
+	FX - Xetra
 
 This module provides both the "europe" and "yahoo_europe" methods.
 The "europe" method should be used if failover methods are desirable.
