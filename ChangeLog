@@ -398,3 +398,8 @@
 	  information.  This is capable of doing proxy authentication
 	  and other arbitary http-headers.
 
+2000-11-05	Paul Fenwick	<pjf@cpan.org>
+	* BUG 121557: Fixed bug where the 40th symbol in a Yahoo lookup
+	  would fail.
+
+
