@@ -132,3 +132,9 @@
 2000-05-14	Paul Fenwick	<pjf@cpan.org>
 	* Huge re-write and change of everything so that it should be easy
 	  to plug in new modules without changing any existing code.
+
+2000-05-27	Paul Fenwick	<pjf@cpan.org>
+	* Added Documentation/Hackers-Guide.
+
+	* Tweaked Quote.pm to provide an AUTOLOAD method for those people
+	  who don't want to go through the fetch() methods.
