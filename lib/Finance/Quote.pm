@@ -659,7 +659,7 @@ the empty list may be returned, or undef in a scalar context.
 
 With no arguents, this creates a new Finance::Quote object
 with the default methods.  If the environment variable
-FQ_LOAD_QUOTELETS is set, then the contents of FQ_LOAD_QUOTELETS
+FQ_LOAD_QUOTELET is set, then the contents of FQ_LOAD_QUOTELET
 (split on whitespace) will be used as the argument list.  This allows
 users to load their own custom modules without having to change
 existing code.  If you do not want users to be able to load their own
@@ -671,7 +671,7 @@ only the specified modules loaded.  If the first argument is
 "-defaults", then the default modules will be loaded first, followed
 by any other specified modules.
 
-Note that the FQ_LOAD_QUOTELETS environment variable must begin
+Note that the FQ_LOAD_QUOTELET environment variable must begin
 with "-defaults" if you wish the default modules to be loaded.
 
 Any modules specified will automatically be looked for in the
