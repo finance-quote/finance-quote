@@ -435,3 +435,7 @@
 2000-01-22	Paul Fenwick	<pjf@cpan.org>
 	* Updated to respect the FQ_LOAD_QUOTELET environment variable
 	  to auto-load custom Quotelet.
+
+2000-02-16	Paul Fenwick	<pjf@cpan.org>
+	* Updated to repsect formatting changes in data fed to the
+	  currency function.
