@@ -41,12 +41,14 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.5';
+$VERSION = '1.51';
 
 # URLs of where to obtain information
 
 my $AEX_URL = 'http://www.aex.nl/scripts/pop/kb.asp?taal=en';
 my $AEXOPT_URL = 'http://www.aex.nl/scripts/marktinfo/OptieKoersen.asp?taal=en';
+my $AEXOPT_FRAME_HREF = "/scripts/marktinfo/OptieFrame.asp";
+my $AEXOPT_SUBFRAME_URL = "http://www.aex.nl/scripts/marktinfo/ShowOptie.asp?taal=en";
 
 # Undocumented features:
 # 
@@ -55,13 +57,16 @@ my $AEXOPT_URL = 'http://www.aex.nl/scripts/marktinfo/OptieKoersen.asp?taal=en';
 # 0 - download and search only most active options (faster but some options are not visible)
 our $AEXOPT_FULL = 1;
 
+# Cache made global to allow advanced clients to flush it
+our %AEXOPT_SUBFRAMES_CACHE = ();
+
 sub methods { return (dutch       => \&aex,
                       aex         => \&aex,
                       aex_options => \&aex_options) } 
 
 {
         my @labels = qw/name symbol price last date time p_change bid ask offer open high low close volume currency method exchange/;
-        my @opt_labels = qw/name options price last date time bid ask open high low close currency method exchange/;
+        my @opt_labels = qw/name price last date time bid ask open high low close volume oi trade_volume bid_time bid_volume ask_time ask_volume currency method exchange/;
 
         sub labels { return (dutch       => \@labels,
                              aex         => \@labels,
@@ -206,6 +211,26 @@ sub aex {
 ########################################################################
 # Options
 
+# Input list should be a list of symbols in a form of
+# 'C AEX Jan 2004 300.00' (case-insensitive)
+# or just 'AEX' which fetches all options for the given underlying symbol
+#
+# There are two ways to get option data:
+# 1. All options from one page
+#    Advantages: just one http fetch per one underlying
+#    Disadvantages: no volume, no open interest, parsing takes long
+# 2. Each option data from a separate subframe
+#    Advantages: all data (volume, oi); quick parse
+#    Disadvantages: many fetches if many options requested; cannot be done as first;
+#    date label unavailable
+#
+# Especially the last disadvantage is important: to get the address of the subframe,
+# the main frame has to be fetched and parsed.
+#
+# The algorithm below uses the first possibility when all options for a given underlying
+# are requested, and the second, when individual options are requested.
+# To speed up the second, a cache of urls of subframes is maintained
+
 sub aex_options {
     my $quoter = shift;
     my @symbols = @_;
@@ -213,16 +238,21 @@ sub aex_options {
     return unless @symbols;
 
     # we allow ambiguous input: both underlyings and individual options
-    # so we need to collect a pure list of all underlyings needed
-    my @underlyings = map { uc($_) =~ /(\w+)/; } @symbols;
+    # so we need to collect a list of all underlyings needed for which
+    # main pages have to be fetched.  This is needed when:
+    # 1. Explicity underlying is requested;
+    # 2. Explicit option is not known in subframes cache
+    my @underlyings = grep { /^\w+$/ || !defined($AEXOPT_SUBFRAMES_CACHE{uc $_}); } @symbols;
+
+    # Extract underlying names from this list
+    @underlyings = map { uc($_) =~ /^(\w+)/; } @underlyings;
 
     # we remove the duplicates from @underlyings
-    my %grep;
-    @underlyings = grep { !$grep{$_}++; } @underlyings;
- 
+    { my %grep; @underlyings = grep { !$grep{$_}++; } @underlyings; }
+
     # %lookup will allow quick check whether a given symbol is requested
     my %lookup;
-    foreach (@symbols) { $lookup{uc($_)} = $_; }
+    foreach (@symbols) { $lookup{uc $_} = $_; }
     
     my $ua = $quoter->user_agent;
     $ua->agent('Mozilla/5.0');          # otherwise AEX IIS breaks down
@@ -231,84 +261,70 @@ sub aex_options {
 
         my $req = HTTP::Request->new(GET => $AEXOPT_URL . "&a=" . $AEXOPT_FULL . "&Symbool=" . $underlying);
         my $reply = $ua->request($req);
+
+        # get and convert date from Dutch (dd mmm yyyy) to US format (mmm/dd/yyyy)
         my ($date) = $reply->content =~ m[<OPTION\s+SELECTED>(.*?)</OPTION>]mi;
+        my $dateusa = join "/", (split /\s/, $date)[1,0,2];
 
         unless ($reply->is_success && $date) { 
-            foreach (grep /$underlying\s+([CP]\b)?/i, @symbols) {
+            foreach (grep /^$underlying(\s+[CP]\b)?/i, @symbols) {
                 $info {$_, "success"} = 0;
                 $info {$_, "errormsg"} = "Error retrieving options for underlying $underlying";
             }
             next;
         }
       
-        # convert date from Dutch (dd mmm yyyy) to US format (mmm/dd/yyyy)
-        my $dateusa = join "/", (split /\s/, $date)[1,0,2];
+        cache_subframes( $underlying, $reply->content );
             
-        #print STDERR $reply->content,"\n";
-        my $te = new HTML::TableExtract( depth => 1, count => 0 );
-        $te->parse($reply->content); 
-        
-        my @options;
-        foreach my $row ($te->rows) {
-            my $series = uc $row->[9];
+        if ( defined($lookup{$underlying}) ) {
+            # main page is parsed only when all options are requested
+            # (otherwise it has been fetched only to collect subframes hrefs)
 
-            # skip column headings; we assume that AEX will not change the order
-            next if $series =~ /SERIES/; 
+            #print STDERR $reply->content,"\n";
+            my $te = new HTML::TableExtract( depth => 1, count => 0 );
+            $te->parse($reply->content); 
 
-            # normalize option name: convert YY to YYYY if needed
-            $series =~ s/^(\w+)\s(\d{2}\s.*)$/$1 20$2/;
+            my @options;   # list collecting all existing series
 
-            # remove commas from strike prices
-            $series =~ tr/,//d;
+            foreach my $row ($te->rows) {
+                my $series = uc $row->[9];
 
-            # full option symbol
-            my $symbol;
+                # skip column headings; we assume that AEX will not change the order
+                next if $series =~ /SERIES/; 
 
-            # Call
-            $symbol = $lookup{"$underlying C $series"};
-            if ($lookup{$underlying} || $symbol) {
-                #print "   ", join(',', @$row), "\n";
-                $symbol = "$underlying C $series" unless $symbol;
-                push  @options, $symbol;
+                # normalize option name: convert YY to YYYY if needed
+                $series =~ s/^(\w+)\s(\d{2}\s.*)$/$1 20$2/;
+                # remove commas from strike prices
+                $series =~ tr/,//d;
 
-                $info {$symbol, "success"} = 1;
-                $info {$symbol, "exchange"} = "Amsterdam Euronext eXchange";
-                $info {$symbol, "method"} = "aex_options";
-                $info {$symbol, "name"} = "$underlying C $series";
-                my $pos = 1;
-                foreach my $label (qw/close open high low last time bid ask/) {
-                    ($info {$symbol, $label} = $row->[$pos++]) =~ s/[^\d\.\:]*//g; # Remove garbage
-                    undef $info {$symbol, $label} if $info {$symbol, $label} eq "";
-                }
-                $info {$symbol, "date"} = $dateusa;
-                $info {$symbol, "currency"} = "EUR";
-                $info {$symbol, "price"} = $info {$symbol, "last"} if defined ($info {$symbol, "last"});
-            }
-            
-            # Put
-            $symbol = $lookup{"$underlying P $series"};
-            if ($lookup{$underlying} || $symbol) {
-                #print "   ", join(',', @$row), "\n";
-                $symbol = "$underlying P $series" unless $symbol;
-                push  @options, $symbol;
+                local *parse_option = sub {
+                    my ($type, $pos) = @_;
+                    my $symbol = "$underlying $type $series";
+                    push  @options, $symbol;
+                    #print "   ", join(',', @$row), "\n";
 
-                $info {$symbol, "success"} = 1;
-                $info {$symbol, "exchange"} = "Amsterdam Euronext eXchange";
-                $info {$symbol, "method"} = "aex_options";
-                $info {$symbol, "name"} = "$underlying P $series";
-                my $pos = 11;
-                foreach my $label (qw/close open high low last time bid ask/) {
-                    ($info {$symbol, $label} = $row->[$pos++]) =~ s/[^\d\.\:]*//g; # Remove garbage
-                    undef $info {$symbol, $label} if $info {$symbol, $label} eq "";
-                }
-                $info {$symbol, "date"} = $dateusa;
-                $info {$symbol, "currency"} = "EUR";
-                $info {$symbol, "price"} = $info {$symbol, "last"} if defined ($info {$symbol, "last"});
-            }
-        }
+                    # explicitly requested options will be fetched from subframes later
+                    # so skipping them here
+                    $info {$symbol, "success"} = 1 if !defined $lookup{$symbol};
 
-        # if the underlying is explicitly requested, "success" has to be reported properly
-        if ($lookup{$underlying}) {
+                    $info {$symbol, "exchange"} = "Amsterdam Euronext eXchange";
+                    $info {$symbol, "method"} = "aex_options";
+                    $info {$symbol, "name"} = "$underlying $type $series";
+                    foreach my $label (qw/close open high low last time bid ask/) {
+                        ($info {$symbol, $label} = $row->[$pos++]) =~ s/[^\d\.\:]*//g; # Remove garbage
+                        undef $info {$symbol, $label} if $info {$symbol, $label} eq "";
+                    }
+                    $info {$symbol, "date"} = $dateusa;
+                    $info {$symbol, "currency"} = "EUR";
+                    $info {$symbol, "price"} = $info {$symbol, "last"};
+                };
+
+                parse_option("C", 1);
+                parse_option("P", 11);
+
+            } # foreach $row
+
+            # if the underlying is explicitly requested, "success" has to be reported properly
             if (@options) {
                 $info {$lookup{$underlying}, "success"} = 1;
             } else {
@@ -316,22 +332,119 @@ sub aex_options {
                 $info {$lookup{$underlying}, "errormsg"} = "No options found for underlying $underlying";
             }
 
-            # handy extension of the standard F::Q rules: list of all collected options
+            # handy extension of the standard F::Q rules: list of all existing options series
             # per underlying
             $info { $lookup{$underlying}, "options"} = \@options;
+
+        } # if defined $lookup{$underlying}
+
+    } # foreach $undelying
+        
+    # fetch explict options from subframes
+    foreach my $symbol (@symbols) {
+        if (!defined ($info {$symbol, "success"}) ) {
+
+            unless (defined $AEXOPT_SUBFRAMES_CACHE{uc $symbol} ) {
+                $info {$symbol, "success"} = 0;
+                $info {$symbol, "errormsg"} = "Option series not found";
+                next;
+            }
+
+            my ($underlying, $type, $series) = uc($symbol) =~ /^(\w+) ([CP]) (.*)/;
+
+            # we request always call and put together
+            my $req = HTTP::Request->new(GET => $AEXOPT_SUBFRAME_URL . 
+                "&C=" . $AEXOPT_SUBFRAMES_CACHE{"$underlying C $series"} .
+                "&P=" . $AEXOPT_SUBFRAMES_CACHE{"$underlying P $series"} );
+            my $reply = $ua->request($req);
+
+            unless ($reply->is_success) {
+                $info {$symbol, "success"} = 0;
+                $info {$symbol, "errormsg"} = "Error retrieving option $symbol";
+                next;
+            }
+
+            #print STDERR $reply->content,"\n";
+            my $te = new HTML::TableExtract( depth => 0, count => 0 );
+            $te->parse($reply->content); 
+
+            local *parse_option = sub {
+                my ($type, $col, $symbol) = @_;
+                
+                return if !defined $symbol;
+
+                $info {$symbol, "success"} = 1;
+                $info {$symbol, "exchange"} = "Amsterdam Euronext eXchange";
+                $info {$symbol, "method"} = "aex_options";
+                $info {$symbol, "name"} = "$underlying $type $series";
+                $info {$symbol, "currency"} = "EUR";
+                foreach my $row ($te->rows) {
+
+                    # standard labels
+                    $info {$symbol, 'close'} = $row->[$col]   if $row->[0] =~ /Vorig Slot/i;
+                    $info {$symbol, 'open'}  = $row->[$col]   if $row->[0] =~ /OpenKoers/i;
+                    $info {$symbol, 'high'}  = $row->[$col]   if $row->[0] =~ /HoogsteKoers/i;
+                    $info {$symbol, 'low'}   = $row->[$col]   if $row->[0] =~ /LaagsteKoers/i;
+                    $info {$symbol, 'last'}  = $row->[$col]   if $row->[0] =~ /LaatsteKoers/i;
+                    $info {$symbol, 'time'}  = $row->[$col+1] if $row->[0] =~ /LaatsteKoers/i;
+                    $info {$symbol, 'bid'}   = $row->[$col]   if $row->[0] =~ /^BiedKoers/i;
+                    $info {$symbol, 'ask'}   = $row->[$col]   if $row->[0] =~ /^LaatKoers/i;
+
+                    # additional labels
+                    $info {$symbol, 'volume'}       = $row->[$col+2] if $row->[0] =~ /Naam/i;
+                    $info {$symbol, 'oi'}           = $row->[$col]   if $row->[0] =~ /Open Interest/i;
+                    $info {$symbol, 'trade_volume'} = $row->[$col+2] if $row->[0] =~ /LaatsteKoers/i;
+                    $info {$symbol, 'bid_time'}     = $row->[$col+1] if $row->[0] =~ /^BiedKoers/i;
+                    $info {$symbol, 'bid_volume'}   = $row->[$col+2] if $row->[0] =~ /^BiedKoers/i;
+                    $info {$symbol, 'ask_time'}     = $row->[$col+1] if $row->[0] =~ /^LaatKoers/i;
+                    $info {$symbol, 'ask_volume'}   = $row->[$col+2] if $row->[0] =~ /^LaatKoers/i;
+                }
+                # remove garbage
+                foreach my $label (qw/close open high low last time bid ask 
+                    volume oi trade_volume bid_time bid_volume ask_time ask_volume/) 
+                {
+                    if (defined $info {$symbol, $label}) {
+                        $info {$symbol, $label} =~ s/[^\d\.\:]*//g;
+                        undef $info {$symbol, $label} if $info {$symbol, $label} eq "";
+                    }
+                }
+                $info {$symbol, "price"} = $info {$symbol, "last"};
+            };
+
+            parse_option("C", 1, $lookup{"$underlying C $series"});
+            parse_option("P", 4, $lookup{"$underlying P $series"});
         }
 
-        # find out which options that were explicitly requested are not found
-        foreach (grep /$underlying\s+[CP]\b/i, @symbols) {
-            unless (defined $info {$_, "success"}) {
-                $info {$_, "success"} = 0;
-                $info {$_, "errormsg"} = "Option series not found";
-            }
-        }
-    } 
+    } # foreach $symbol
 
     return wantarray? %info : \%info;
 } 
+
+# cache_subframes: update $AEXOPT_SUBFRAMES_CACHE 
+# with the collected reference numbers for calls and puts
+#
+sub cache_subframes {
+    my $underlying = shift;
+    my @subframes = $_[0] =~ m[<A\s+HREF="$AEXOPT_FRAME_HREF.*?&c=(\d+)&p=(\d+)".*?>(.*?)</A>]sigo;
+
+    while (@subframes) {
+        # @subframes contains n*3 elements
+        my $callref = shift @subframes;
+        my $putref = shift @subframes;
+        my $series = uc shift @subframes;  # fromat like "Oct 07 1,000.00"
+        
+        # normalize option name: convert YY to YYYY if needed
+        $series =~ s/^(\w+)\s(\d{2}\s.*)$/$1 20$2/;
+
+        # remove commas from strike prices
+        $series =~ tr/,//d;
+
+        $AEXOPT_SUBFRAMES_CACHE{"$underlying C $series"} = $callref;
+        $AEXOPT_SUBFRAMES_CACHE{"$underlying P $series"} = $putref;
+    }
+}
+
+
 
 1; 
 
@@ -372,8 +485,9 @@ Specifying which option to fetch can be done in two ways: naming the
 underlying value, or naming a specific option.  In the first case, all
 tradable options for the given underlying will be returned.  In the second
 case, only the requested options will be returned.  When naming an option,
-use a string consisting of the following space-separated fields (case
+use a string consisting of the following single-space-separated fields (case
 insensitive): 
+
     <underlying symbol>
     <call (C) or put (P) letter>
     <three-letter expiration month>
@@ -388,6 +502,13 @@ being traded), a special label 'options' returns a list of all options
 found (fetched) for a given underlying.  This label is only present for the
 underlyings.
 
+When fetching individual options, more labels are returned (see below), 
+because in such case option data is fetched from a subframe. When this is
+not relevant, the following trade-off may be considered: when fetching
+options for a given underlying, all options are returned, what may take
+up to 30s for 300 options; when fetching individual options, it takes
+ca 0.5s per option (on Pentium 75Mhz).
+
 Information obtained by this module may be covered by www.aex.nl 
 terms and conditions See http://www.aex.nl/ for details.
 
@@ -401,9 +522,12 @@ The following labels may be returned by Finance::Quote::AEX "aex_options"
 method: name, options, last, price (=last), date, time, bid, ask, open,
 high, low, close, currency, method, exchange.
 
+The following additional labels may be returned by "aex_options" when 
+fetching individual options: volume oi trade_volume bid_time bid_volume 
+ask_time ask_volume. In such case label date is not returned.
+
 =head1 TO DO
 
-Returning of volume and open interest for options.
 Fetching futures quotes.
 
 =head1 SEE ALSO
