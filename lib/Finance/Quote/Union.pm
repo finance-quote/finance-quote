@@ -32,7 +32,7 @@
 # Known problems:
 # - Date is not yet working. It is definied as first entry in the last line.
 #
-# $Id: Union.pm,v 1.1 2002/06/25 03:12:59 pjf Exp $
+# $Id: Union.pm,v 1.2 2005/02/10 01:15:38 hampton Exp $
 
 package Finance::Quote::Union;
 require 5.005;
@@ -76,7 +76,7 @@ sub unionfunds
   my $response = $ua->request(GET &unionurl);
   if ($response->is_success)
   {
-    # retrive date
+    # Retrive date.  This comes from the last line of the CSV file.
     foreach (split('\015?\012',$response->content))
     {
       @q = split(/,/) or next;
@@ -91,6 +91,7 @@ sub unionfunds
     {
 #      @q = $quoter->parse_csv($_) or next;
       @q = split(/,/) or next;
+      next unless (defined $q[1]);
       if (exists $fundhash{$q[1]})
       {
         $fundhash{$q[1]} = 1;
@@ -150,7 +151,7 @@ Finance::Quote::UNION	- Obtain quotes from UNION (Zurich Financial Services Grou
 
     $q = Finance::Quote->new;
 
-    %stockinfo = $q->fetch("unionfunds","847402");
+    %stockinfo = $q->fetch("unionfunds","975788");
 
 =head1 DESCRIPTION
 
