@@ -229,3 +229,6 @@
 2000-07-02	Paul Fenwick	<pjf@cpan.org>
 	* Many more documentation improvements in both the Finance::Quote
 	  POD and the sub-modules.
+
+2000-07-08	Paul Fenwick	<pjf@cpan.org>
+	* Added POD for TIAA-CREF and T. Rowe Price sub-modules.

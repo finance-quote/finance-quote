@@ -159,3 +159,51 @@ sub tiaacref
 }
 
 1;
+
+=head1 NAME
+
+Finance::Quote::Tiaacref	- Obtain quote from TIAA-CREF.
+
+=head1 SYNOPSIS
+
+use Finance::Quote;
+
+$q = Finance::Quote->new;
+
+%stockinfo = $q->fetch("tiaacref","TIAAreal");
+
+=head1 DESCRIPTION
+
+This module obtains information about TIAA-CREF managed funds.
+
+The following symbols can be used:
+
+ Stock: 			CREFstok
+ Money Market:			CREFmony
+ Equity Index:			CREFequi
+ Inf-Linked Bond:		CREFinfb
+ Bond Market:			CREFbond
+ Social Choice:			CREFsoci
+ Global Equities:		CREFglob
+ Growth:			CREFgrow
+ TIAA Real Estate:		TIAAreal
+ PA Stock Index:		TIAAsndx
+ PA Select Stock:		TIAAsele
+
+This module is loaded by default on a Finance::Quote object.  It's
+also possible to load it explicitly by passing "Tiaacref" in to the
+argument argument list of Finance::Quote->new().
+
+Information returned by this module is governed by TIAA-CREF's terms
+and conditions.
+
+=head1 LABELS RETURNED
+
+The following labels may be returned by Finance::Quote::Tiaacref:
+symbol, exchange, name, date, nav, price.
+
+=head1 SEE ALSO
+
+TIAA-CREF, http://www.tiaa-cref.org/
+
+=cut
