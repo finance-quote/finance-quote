@@ -6,10 +6,12 @@ Paul Fenwick <pjf@cpan.org>, May 2000
 
 	1. Introduction
 	2. How to write a Finance::Quote module.
-		2.1 The package name.
-		2.2 The methods() subroutine.
-		2.3 The functions specified by methods().
-		2.4 Using your new module.
+		2.1. The package name.
+		2.2. The methods() subroutine.
+		2.3. The functions specified by methods().
+		2.4. Currency.
+		2.5. Thngs to avoid.
+		2.6. Using your new module.
 	3. How to contribute your module to the world.
 	4. How to find out more?
 	5. How to join the mailing lists?
@@ -160,7 +162,61 @@ It is also very very strongly recommended that you place your module's
 name in the {$stock,"source"} field.  This allows others to check where
 information was obtained, and to use it appropriately.
 
-2.4. Using your new module
+2.4. Currency
+-------------
+Finance::Quote has support for multiple currencies and for currency
+conversion.  As long as you provide a little bit of information about
+the information you are returning, the Finance::Quote framework can
+do all the hard stuff for you.
+
+If you are returning information on a stock in a particular currency,
+then you can enter the ISO currency code into the "currency" field
+associated with the stock.  Eg:
+
+	$info{$stock,"currency"} = "AUD";  # Australian Dollars
+
+If the information you are returning does not have a currency
+(because it's an index like the Dow Jones Industrial or the
+All Oridinaries, or because you're returning percentages) then
+you should not set the currency field for that stock.  Finance::Quote
+knows not to attempt currency conversion for stocks without
+a currency field.
+
+If you do have a currency field, then by default Finance::Quote will
+arrange for the automatic conversion of a number of fields.  By
+default, these fields are (XXX - PJF to fill in list).  Of course,
+there may be some cases where this is not appropriate, or where there
+are extra fields that should be converted.  This can be indicated
+by writing a function called "currency_fields()" in your module,
+that returns a list of fields that can undergo currency conversion.
+Eg:
+
+	sub currency_fields {
+		return qw/high low price bid/;
+	}
+
+currency_fields() will be passed a Finance::Quote object as its
+first argument, and a method called default_currency_fields()
+is available through this object.  This is useful if you want
+to use the defaults, but also add some of your own:
+
+	sub currency_fields {
+		my $quoter = shift;
+		return ($quoter->default_currency_fields, "commission");
+	}
+
+In the example above, the default fields would be available for currency
+conversion, but the "commission" field would also be converted.
+
+2.5. Things to avoid
+--------------------
+Some sources of information will provide more stock information than
+requested.  Some code may rely upon your code only returning information
+about the stocks that the caller requested.  As such, you should
+never return information about stocks that were not requested, even
+if you fetch and/or process that information.
+
+2.6. Using your new module
 --------------------------
 Using your new module is easy.  Normally when using Finance::Quote you'd
 do something like the following:
