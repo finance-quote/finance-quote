@@ -86,3 +86,7 @@
 	  bugs.
 
 	* Updated yahoo_europe to return undef's instead of N/As.
+
+	* Removed HTML from returns from yahoo_europe.
+
+	* Fixed logic bug in process yahoo_* N/As into undefs.
