@@ -76,4 +76,11 @@
         * Updated t/tiaacref.t and Examples/Quote_example.pl for
                the changes
 
+2000-04-23	Paul Fenwick	<pjf@cpan.org>
+	* Added success/fail tests to asx, fidelity, troweprice, yahoo
+	  and yahoo_europe.
 
+	* Updated appropriate testing functions.
+
+	* Updated documentation to include fetch and list of known
+	  bugs.
