@@ -667,3 +667,8 @@
 	* AEX module: major update: fetching of futures quotes
 	implemented.  POD and test script updated as well.
 
+2004-02-08  David Hampton  <hampton@employees.org>
+
+	* Yahoo/Base.pm: Added suffixes for the Brussels and Dublin
+	exchanges.
+ 
