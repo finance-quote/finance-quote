@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 13};
+BEGIN {plan tests => 17};
 
 use Finance::Quote;
 
@@ -18,4 +18,5 @@ foreach my $fund (@funds) {
 	ok($quotes{$fund,"last"} > 0);
 	ok(length($quotes{$fund,"name"}));
 	ok($quotes{$fund,"success"});
+        ok($quotes{$fund, "currency"} eq "USD");
 }

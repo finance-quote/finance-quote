@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 18};
+BEGIN {plan tests => 23};
 
 use Finance::Quote;
 
@@ -18,6 +18,7 @@ foreach my $fund (@funds) {
 	ok($quotes{$fund,"nav"} > 0);
 	ok(length($quotes{$fund,"name"}));
 	ok($quotes{$fund,"success"});
+        ok($quotes{$fund, "currency"} eq "USD");
 }
 
 # Some funds have yields instead of navs.  Check one of them too.
@@ -26,6 +27,7 @@ ok(defined(%quotes));
 ok(length($quotes{"FGRXX","name"}));
 ok($quotes{"FGRXX","yield"} != 0);
 ok($quotes{"FGRXX","success"});
+ok($quotes{"FGRXX", "currency"} eq "USD");
 
 # Check that a bogus fund returns no-success.
 %quotes = $q->fidelity("BOGUS");
