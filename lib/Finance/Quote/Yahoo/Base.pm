@@ -74,13 +74,22 @@ sub base_yahoo_labels {
 # yahoo_request (restricted function)
 #
 # This function expects a Finance::Quote object, a base URL to use,
-# and a list of symbols to lookup.  It relies upon the fact that
-# the various Yahoo's all work the same way.
+# a refernece to a list of symbols to lookup.  If a fourth argument is
+# used then it will act as a suffix that needs to be appended to the stocks
+# in order to obtain the correct information.  This function relies upon 
+# the fact that the various Yahoo's all work the same way.
 
 sub yahoo_request {
 	my $quoter = shift;
 	my $base_url = shift;
-	my @symbols;
+
+	# We tack an extra empty symbol on the end such that when we
+	# join all the symbols up later, the suffixes will all be
+	# added happily.
+	my @orig_symbols = (@{shift()}, "");
+
+	my $suffix = shift || "";
+	
 	my %info;
 	my $ua = $quoter->user_agent;
 
@@ -88,8 +97,9 @@ sub yahoo_request {
 	# ticker symbols.
 	$base_url .= "?f=".join("",@FIELD_ENCODING)."&e=.csv&s=";
 
-	while (@symbols = splice(@_,0,$MAX_REQUEST_SIZE)) {
-		my $url = $base_url . join("+",@symbols);
+	while (my @symbols = splice(@orig_symbols,0,$MAX_REQUEST_SIZE)) {
+		my $url = $base_url . join("$suffix+",@symbols);
+		chop $url;	# Chop off the final +
 		my $response = $ua->request(GET $url);
 		return unless $response->is_success;
 
@@ -99,6 +109,9 @@ sub yahoo_request {
 		foreach (split('\015?\012',$response->content)) {
 			my @q = $quoter->parse_csv($_);
 			my $symbol = $q[0];
+
+			# Strip out suffixes.  Mmmm, functions as lvalues.
+			substr($symbol,-length($suffix),length($suffix)) = "";
 
 			# If we weren't using a two dimesonal
 			# hash, we could do the following with
