@@ -14,3 +14,6 @@
 
 2000-04-10	Paul Fenwick	<pjf@cpan.org>
 	* Changed Examples/chkshares.pl to print a pretty table.
+
+	* Incorporated Cooper Vertz's patch to add high, low and net change
+	  to quotes obtained from Yahoo!
