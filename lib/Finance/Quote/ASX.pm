@@ -38,7 +38,7 @@ use LWP::UserAgent;
 
 use vars qw/$ASX_URL $VERSION/;
 
-$VERSION = "1.01";
+$VERSION = "1.02";
 
 $ASX_URL = 'http://www.asx.com.au/nd50/nd_ISAPI_50.dll/asx/markets/EquitySearchResults.jsp?method=post&template=F1001&ASXCodes=';
 
@@ -124,6 +124,17 @@ sub asx {
 			$info{$stock,$label} = $value;
 		}
 
+		# If that stock does not exist, it will have a empty
+		# string for all the fields.  The "last" price should
+		# always be defined (even if zero), if we see an empty
+		# string here then we know we've found a bogus stock.
+
+		if ($info{$stock,'last'} eq '') {
+			$info{$stock,'success'} = 0;
+			$info{$stock,'errormsg'}="Stock does not exist on ASX.";
+			next;
+		}
+
 		# The ASX returns zeros for a number of things if there
 		# has been no trading.  This not only looks silly, but
 		# can break things later.  "correct" zero'd data.
@@ -136,12 +147,18 @@ sub asx {
 
 		# We get a dollar plus/minus change, rather than a
 		# percentage change, so we convert this into a
-		# percentage change, as required.
+		# percentage change, as required.  We should never have
+		# zero opening price, but if we do warn about it.
 
-		$info{$stock,"p_change"} = sprintf("%.2f",
+		if ($info{$stock,"open"} == 0) {
+			warn "Zero opening price in p_change calcuation for ".
+			     "stock $stock.  P_change set to zero.";
+			$info{$stock,"p_change"} = 0;
+		} else {
+			$info{$stock,"p_change"} = sprintf("%.2f",
 		                           ($info{$stock,"p_change"}*100)/
 				             $info{$stock,"open"});
-		   
+		}
 
 		# Australian indexes all begin with X, so don't tag them
 		# as having currency info.
