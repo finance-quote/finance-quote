@@ -580,7 +580,9 @@
 	  These are no longer supported due to a change in the
 	  lookups provided by Yahoo.
 
-	* Updated Fidelity and Trowprice.pm to indicate their current
-	  non-working status.
+	* Updated Fidelity.pm to indicate its current non-working status.
 
-	* CVSTAG: finance_quote_1_08
+	* Added T. Rowe Price patches by David Hampton, which provide
+	  a troweprice_direct method.  (#666351)
+
+	* As above, for the Fidelity module.  (#666353)
