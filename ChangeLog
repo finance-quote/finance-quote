@@ -296,3 +296,12 @@
 2000-08-14	Paul Fenwick	<pjf@cpan.org>
 	* Updated chkshares script so that it can deal with any market,
 	  not just the ASX.
+
+2000-08-16	Paul Fenwick	<pjf@cpan.org>
+	* Added DWS.pm module to the CVS repository, courtesy of
+	  Volker Stuerzl.  This module fetches information from the
+	  Deutsche Bank Gruppe.
+
+	* Updated asx.t script because it really hurts the entire
+	  "make test" thing when ASX is unhappy.  Now it still hurts
+	  (because the ASX module sucks), but less.
