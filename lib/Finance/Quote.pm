@@ -194,7 +194,7 @@ sub currency {
 	$from = uc($from);
 
 	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}s=$from&t=$to")->content;
-	my ($exchange_rate) = $data =~ m#$from$to=X</a></td><td>1</td><td>\d\d?:\d\d\w\w</td><td>(\d+\.\d+)</td>#;
+	my ($exchange_rate) = $data =~ m#$from$to=X</a></td><td>1</td><td>[^<]+</td><td>(\d+\.\d+)</td>#;
 
 	return undef unless $exchange_rate;
 	return ($exchange_rate * $amount);
@@ -290,7 +290,7 @@ sub default_currency_fields {
 			# yucky, but it works.
 
 			foreach my $field (@$convert_fields) {
-				next unless (exists $info->{$stock,$field});
+				next unless (defined $info->{$stock,$field});
 
 				my @chunks = split(/([^0-9.])/,$info->{$stock,$field});
 				for (my $i=0; $i < @chunks; $i++) {
