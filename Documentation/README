@@ -1,15 +1,19 @@
 Welcome to Finance::Quote
 =========================
+Written by: pjf@cpan.org
 
-This project is currently under deevlopment, and currently only contains
+This project is currently under development, and currently only contains
 a few files.  Those files are:
 
-Finance/Quote.pm	- The Quote fetching module.
-Quote_example.pl	- A script which demonstrates the features of
-			  Finance::Quote.
+lib/Finance/Quote.pm		- The Quote fetching module.
+Examples/Quote_example.pl	- A script which demonstrates the features of
+				  Finance::Quote.
+Examples/chkshares.pl		- A script which can be used to fetch ASX
+				  share prices quickly.
 
 The repository will shortly contain better documentation, installation
 scripts, and more examples.
 
-Try running `perldoc' over Finance/Quote.pm for more information on
-how things work.
+Try running `perldoc' over lib/Finance/Quote.pm for more information on
+how to use the library, or `perldoc Finance::Quote' once things have been
+installed.

@@ -1,0 +1,26 @@
+Finance::Quote 
+==============
+
+IMPORTANT
+=========
+This code is still in development, and as such some features may be broken,
+buggy, or unimplemented.
+
+Read Documentation/License for the license (GPL) covering this code.
+
+Install instructions
+--------------------
+
+% perl Makefile.PL
+% make
+# make install		(as root)
+
+Couldn't be easier, could it?
+
+More information?
+-----------------
+Try visiting http://finance-quote.sourceforge.net/
+
+Maintainer
+----------
+Paul Fenwick <pjf@cpan.org>
