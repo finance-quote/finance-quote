@@ -407,3 +407,5 @@
 	  $Finance::Quote::USE_EXPERIMENTAL_UA = 1;
 
 	* Updated the FAQ.
+
+	* Added MANIFEST file.
