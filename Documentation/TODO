@@ -35,3 +35,11 @@ in Finance::Quote.
 * Labels to indicate which sources data came from.
 
 * User-defined failover lists (maybe).
+
+* Methods to register which labels they provide.   Thereby allowing
+  something like this:
+
+  $q->require("date","price","volume");
+  $q->fetch(...);
+
+  Only methods which export the required labels will be called.
