@@ -1,0 +1,11 @@
+libfinance-quote-perl (1.05-1) frozen unstable; urgency=low
+
+  * Initial Debian release. 
+
+ -- Ross Peachey <rcp@users.sourceforge.net>  Wed, 14 Feb 2001 15:24:49 +1100
+
+Local variables:
+mode: debian-changelog
+user-mail-address: "rcp@users.sourceforge.net"
+End:
+
