@@ -125,3 +125,6 @@
 	* Updated the INSTALL file.
 
 	* Tagged files as finance_quote_0_18 for release.
+
+2000-05-13	Paul Fenwick	<pjf@cpan.org>
+	* Added Documentation/FAQ file.
