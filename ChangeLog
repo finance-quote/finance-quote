@@ -154,3 +154,12 @@
 	* Provided a failover method for fidelity via Yahoo.
 
 	* Added failover functionality.
+
+2000-06-03	Jacinta Richardson	<jarich@users.sourceforge.net>
+	* Changed modules so they return undef in scalar context,
+	  empty list in list context, on failure.
+
+	* Changed modules so they return a hashref when in scalar
+	  context, and a hash in list context.
+
+	* Reviewed/corrected hackers guide.
