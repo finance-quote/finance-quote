@@ -35,13 +35,11 @@ use strict;
 
 package Finance::Quote::AEX;
 
-use vars qw($VERSION $AEX_URL $AEXOPT_URL $AEXOPT_FULL);
-
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '2.00';
+our $VERSION = '2.00';
 
 # URLs of where to obtain information
 
@@ -57,8 +55,8 @@ my $AEXFUT_URL = 'http://www.aex.nl/scripts/marktinfo/Futures.asp?taal=en';
 # 1 - download and search all traded options for a given underlying
 # 0 - download and search only most active options (faster but some options are not visible)
 our $AEXOPT_FULL = 1;
-
-# Cache made global to allow advanced clients to flush it
+#
+# %AEXOPT_SUBFRAMES_CACHE: Cache made global to allow advanced clients to flush it
 our %AEXOPT_SUBFRAMES_CACHE = ();
 
 sub methods { return (dutch       => \&aex,
