@@ -44,7 +44,7 @@ use vars qw/$VERSION @FIELDS @FIELD_ENCODING $MAX_REQUEST_SIZE @ISA
 @EXPORT = qw//;
 @EXPORT_OK = qw/yahoo_request base_yahoo_labels/;
 
-$VERSION = '1.01';
+$VERSION = '1.02';
 
 # This is the maximum number of stocks we'll batch into one operation.
 # If this gets too big (>50 or thereabouts) things will break because
@@ -115,13 +115,12 @@ sub yahoo_request {
 
 			# If we weren't using a two dimesonal
 			# hash, we could do the following with
-			# a hash-slice.  Alas, we can't.
+			# a hash-slice.  Alas, we can't.  This just
+			# loads all the returned fields into our hash.
 
 			for (my $i=0; $i < @FIELDS; $i++) {
 				$info{$symbol,$FIELDS[$i]} = $q[$i];
 			}
-
-			$info{$symbol,"price"} = $info{$symbol,"last"};
 
 			# Yahoo returns a line filled with N/A's if we
 			# look up a non-existant symbol.  AFAIK, the
@@ -133,9 +132,16 @@ sub yahoo_request {
 			if ($info{$symbol,"date"} eq "N/A") {
 				$info{$symbol,"success"} = 0;
 				$info{$symbol,"errormsg"} = "Stock lookup failed";
+				next;
 			} else {
 				$info{$symbol,"success"} = 1;
 			}
+
+			$info{$symbol,"price"} = $info{$symbol,"last"};
+
+			# Remove spurious percentage signs in p_change.
+
+			$info{$symbol,"p_change"} =~ s/%//;
 
 			# Extract the high and low values from the
 			# day-range, if available
