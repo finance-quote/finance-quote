@@ -48,7 +48,7 @@ my(%currencies) = (
 
 sub methods { return (tdefunds => \&tdefunds); }
 
-sub labels { return (tdefunds => [qw/method exchange name nav date price/]); }
+sub labels { return (tdefunds => [qw/method exchange name nav date isodate price/]); }
 
 # =======================================================================
 
@@ -118,7 +118,7 @@ sub tdefunds
 	    $price =~ s/\$//;
             $price =~ s/^ +//;
 	    $aa {$sym, "last"} = $price;
-	    ($aa {$sym, "date"} = $q[2]) =~ s/^ +//;
+	    $quoter->store_date(\%aa, $sym, {usdate => $q[2]});
 	    $aa {$sym, "nav"} = $aa{$sym,"last"};
 	    $aa {$sym, "success"} = 1;
 	    $aa {$sym, "currency"} = &tdefunds_get_currency($q[4]);

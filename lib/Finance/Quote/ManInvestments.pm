@@ -62,8 +62,6 @@ sub maninv {
     my @stocks = @_;
     return unless @stocks;
     my %info;
-    my $date;
-    my $isodate;
 
     my $ua = $quoter->user_agent;
 
@@ -104,6 +102,7 @@ sub maninv {
 #	}
 
 	# Pack the resulting data into our structure.
+	my $date_list;
 	foreach my $row (@rows) {
 	    my $name = shift(@$row);
 	    $name =~ tr/\000-\040\200-\377/ /s;
@@ -125,31 +124,12 @@ sub maninv {
 		       'OM-IP Strategic Series 2 Ltd' => 'OMIPS2S',
 		       'OM-IP Hedge Plus Ltd' => 'OMIPHP');
 	    
-
-	    {
+	    if (!defined($date_list)) {
 		local $_ = $$row[0];
 		tr/\000-\040\200-\377/ /s;
-		if (/Net Asset Value as at (.*)$/) {
-		    my @date_list = split(' ', $1);
-		    $date_list[1] = { January => 1,
-				      February => 2,
-				      March => 3,
-				      April => 4,
-				      May => 5,
-				      June => 6,
-				      July => 7,
-				      August => 8,
-				      September => 9,
-				      October => 10,
-				      November => 11,
-				      December => 12
-				      }->{$date_list[1]};
-		    $date = "$date_list[1]/$date_list[0]/$date_list[2]";
-		    $isodate = sprintf "%4d-%02d-%02d", $date_list[2], $date_list[0], $date_list[1];
-#		    print "US Date: $date\n";
-#		    print "ISO Date: $date\n";
-		}
+		($date_list) = /Net Asset Value as at (.*)$/;
 	    }
+
 	    # Delete spaces and '*' which sometimes appears after the code.
 	    # Also delete high bit characters.
 	    my $stock = $map{$name};
@@ -159,12 +139,11 @@ sub maninv {
 	    $info{$stock,'nav'} = shift(@$row);
 	    $info{$stock,'nav'} =~ tr/ $\000-\037\200-\377//d; 
 	    $info{$stock,'last'} = $info{$stock,'nav'};
-	    $info{$stock,'date'} = $date;
-	    $info{$stock,'isodate'} = $isodate;
 	    $info{$stock, "currency"} = "AUD";
 	    $info{$stock, "method"} = "maninv";
 	    $info{$stock, "exchange"} = "Man Investments Australia";
 	    $info{$stock, "success"} = 1;
+	    $quoter->store_date(\%info, $stock, {eurodate => $date_list}) if defined($date_list);
 #	    print $info{$stock,'symbol'};
 #	    foreach my $label (qw/name nav last date currency method exchange success/) {
 #		print ", ", $info{$stock,$label};

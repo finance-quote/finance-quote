@@ -2,13 +2,14 @@
 use strict;
 use Test;
 
-BEGIN {plan tests => 8 };
+BEGIN {plan tests => 12};
 
 use Finance::Quote;
 
 # Test trustnet functions.
 
 my $q = Finance::Quote->new();
+my $year = (localtime())[5] + 1900;
 
 my @stocks = ("ABBEY GROWTH RETAIL","MARLBORO INTERNATIONAL EQUITY");
 
@@ -23,6 +24,8 @@ foreach my $stock (@stocks) {
 	ok($quotes{$stock,"success"});
 	ok($quotes{$stock,"price"});
 	ok($quotes{$stock,"date"});
+	ok(substr($quotes{$stock,"isodate"},0,4) == $year);
+	ok(substr($quotes{$stock,"date"},6,4) == $year);
 }
 
 # Test that a bogus stock gets no success.

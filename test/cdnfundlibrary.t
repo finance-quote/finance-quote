@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 5};
+BEGIN {plan tests => 8};
 
 use Finance::Quote;
 
@@ -17,6 +17,11 @@ ok(%quotes);
 ok($quotes{"19001","last"} > 0);
 ok($quotes{"19001","success"});
 ok($quotes{"19001", "currency"} eq "CAD");
+ok(length($quotes{"19001","date"}) > 0);
+
+my $year = (localtime())[5] + 1900;
+ok(substr($quotes{"19001","isodate"},0,4) == $year);
+ok(substr($quotes{"19001","date"},6,4) == $year);
 
 # Check that bogus stocks return failure:
 

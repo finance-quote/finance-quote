@@ -2,7 +2,7 @@
 use strict;
 use Test;
 use Data::Dumper;
-BEGIN {plan tests => 6};
+BEGIN {plan tests => 8};
 
 use Finance::Quote;
 
@@ -19,6 +19,10 @@ ok($quotes{"SEB Cancerfonden","price"} > 0);
 ok(length($quotes{"SEB Cancerfonden","name"}) > 0);
 ok($quotes{"SEB Cancerfonden","success"});
 ok($quotes{"SEB Cancerfonden", "currency"} eq "SEK");
+
+my $year = (localtime())[5] + 1900;
+ok(substr($quotes{"SEB Cancerfonden","isodate"},0,4) == $year);
+ok(substr($quotes{"SEB Cancerfonden","date"},6,4) == $year);
 
 # Check that a bogus stock returns no-success.
 ok(! $quotes{"BOGUS","success"});

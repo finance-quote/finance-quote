@@ -41,7 +41,7 @@ $VERSION = '0.9';
 my $BMO_URL = 'http://bmonesbittburns.com/QuickQuote/QuickQuote.asp?Symbol=';
 
 sub methods { return (bmonesbittburns => \&bmonesbittburns) } 
-sub labels  { return (bmonesbittburns => [qw/name last p_change bid offer open high low volume currency method exchange date time/]) };
+sub labels  { return (bmonesbittburns => [qw/name last p_change bid offer open high low volume currency method exchange date isodate time/]) };
 			
 # ==============================================================================
 sub bmonesbittburns {
@@ -130,20 +130,15 @@ sub bmonesbittburns {
             $rows[9][5] =~ s/[^\d\.]*//g;
             $info {$symbol, "year_range"} = $rows[9][5] . " - " . $rows[9][2];
 
-            # We'll use today's date as default, in case we only have
-	    # a time.
-            my($month, $day, $year) = (localtime())[4,3,5];
-	    $month++;
-	    $year += 1900;
-
+	    # This site appears to provide either a date or a time but not both
             my($dt) = $rows[3][2];
             if ($dt =~ /:/) {
                 ($info {$symbol, "time"} = "$dt:00") =~ s/\s*//g; 
-                $info {$symbol, "date"} = "$month/$day/$year";
+		$quoter->store_date(\%info, $symbol, {today => 1});
             }
             else {
-                ($day, $month) = ($dt =~ /([0-9]+)\/([0-9]+)/);
-                ($info {$symbol, "date"} = "$month/$day/$year") =~ s/\s*//g;
+                my ($day, $month) = ($dt =~ /([0-9]+)\/([0-9]+)/);
+		$quoter->store_date(\%info, $symbol, {day => $day, month => $month});
                 $info {$symbol, "time"} = "00:00:00";
             }
 

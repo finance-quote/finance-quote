@@ -740,3 +740,17 @@
 	* lib/Finance/Quote.pm: Documentation correction from Trent
 	Piepho.
 	
+	* lib/Finance/Quote/Yahoo/Base.pm (yahoo_request): Fix an
+	undefined reference when Yahoo ocassionally returns an empty
+	field.
+
+2005-03-19  David Hampton  <hampton@employees.org>
+
+	* almost all files: Collapsed all date parsing code into a single
+	function.  This function handles the date formats provided by all
+	current quote sources and converts them all into the F::Q standard
+	of a US date format.  It also adds an ISO format date to all
+	quotes in the new isodate field.  Added lots of test functions to
+	check date formats.
+
+

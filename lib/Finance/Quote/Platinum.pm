@@ -120,10 +120,7 @@ sub platinum {
 		
 		$info{$stock,'last'} = $info{$stock,'bid'};
 
-		# Mangle date into US (MM/DD/YY) format
-		my ($day, $month, $year) = split '/', $info{$stock,'date'};
-		$info{$stock,'date'} = "$month/$day/20$year";
-		$info{$stock,'isodate'} = sprintf "%4d-%02d-%02d", $year + 2000, $month, $day;
+		$quoter->store_date(\%info, $stock, {eurodate => $info{$stock,'date'}});
 		$info{$stock, "currency"} = "AUD";
 		$info{$stock, "method"} = "platinum";
 		$info{$stock, "exchange"} = "Platinum Asset Management";

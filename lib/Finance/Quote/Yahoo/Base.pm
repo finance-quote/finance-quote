@@ -221,6 +221,10 @@ sub yahoo_request {
 				$info{$symbol,"success"} = 1;
 			}
 
+			# Whack the dates.  This will add an isodate,
+			# and regularize the us date.
+			$quoter->store_date(\%info, $symbol, {usdate => $info{$symbol,"date"}});
+
 			$info{$symbol,"price"} = $info{$symbol,"last"};
 
 			# Remove spurious percentage signs in p_change.
@@ -277,6 +281,11 @@ sub yahoo_request {
 	# place, don't you think?
 
 	foreach my $key (keys %info) {
+	  if (!defined $info{$key}) {
+	    printf STDERR "\n";
+	    printf STDERR "$key points to undefined value\n";
+	    printf STDERR "\n";
+	  }
 		$info{$key} =~ s/<[^>]*>//g;
 		$info{$key} =~ s/&nbsp;.*$//;
 		undef $info{$key} if (defined($info{$key}) and 

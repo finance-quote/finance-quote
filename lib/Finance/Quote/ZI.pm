@@ -27,7 +27,7 @@
 # This code derived from Voler Stuerzl's work on package Finace::Quote::DWS,
 # but extends its capabilites to encompas a greater number of data sources.
 #
-# $Id: ZI.pm,v 1.1 2002/06/25 03:12:59 pjf Exp $
+# $Id: ZI.pm,v 1.2 2005/03/20 01:44:13 hampton Exp $
 
 package Finance::Quote::ZI;
 require 5.005;
@@ -41,7 +41,7 @@ use vars qw/$VERSION/;
 $VERSION = '1.00';
 
 sub methods { return (zifunds => \&zifunds); }
-sub labels { return (zifunds => [qw/exchange name date price method/]); }
+sub labels { return (zifunds => [qw/exchange name date isodate price method/]); }
 
 # =======================================================================
 # The zifunds routine gets quotes of ZI funds (Zurich Financial Services Group)
@@ -83,16 +83,12 @@ sub zifunds
         # convert price from german (0,00) to US format (0.00)
         $q[4] =~ s/,/\./;
 
-        # convert date from german (dd.mm.yyyy) to US format (mm/dd/yyyy)
-        @date = split /\./, $q[0];
-        $q[0] = $date[1]."/".$date[0]."/".$date[2];
-
         $info{$q[6], "exchange"} = "ZI";
         $info{$q[6], "name"}     = $q[6];
         $info{$q[6], "symbol"}   = $q[6];
         $info{$q[6], "price"}    = $q[4];
         $info{$q[6], "last"}     = $q[4];
-        $info{$q[6], "date"}     = $q[0];
+	$quoter->store_date(\%info, $q[6], {eurodate => $q[0]});
         $info{$q[6], "method"}   = "zifunds";
         $info{$q[6], "currency"} = $q[2];
         $info{$q[6], "success"}  = 1;

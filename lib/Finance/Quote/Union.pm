@@ -29,10 +29,7 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 #
-# Known problems:
-# - Date is not yet working. It is definied as first entry in the last line.
-#
-# $Id: Union.pm,v 1.2 2005/02/10 01:15:38 hampton Exp $
+# $Id: Union.pm,v 1.3 2005/03/20 01:44:13 hampton Exp $
 
 package Finance::Quote::Union;
 require 5.005;
@@ -46,7 +43,7 @@ use vars qw/$VERSION/;
 $VERSION = '1.00';
 
 sub methods { return (unionfunds => \&unionfunds); }
-sub labels { return (unionfunds => [qw/exchange name date price method/]); }
+sub labels { return (unionfunds => [qw/exchange name date isodate price method/]); }
 
 # =======================================================================
 # The unionfunds routine gets quotes of UNION funds (Union Invest)
@@ -64,7 +61,7 @@ sub unionfunds
   my @funds = @_;
   return unless @funds;
   my $ua = $quoter->user_agent;
-  my (%fundhash, @q, @date, %info,$tempdate);
+  my (%fundhash, @q, %info, $tempdate);
 
   # create hash of all funds requested
   foreach my $fund (@funds)
@@ -82,9 +79,6 @@ sub unionfunds
       @q = split(/,/) or next;
       $tempdate=$q[0];
     }
-    # convert date from german (dd.mm.yyyy) to US format (mm/dd/yyyy)
-    @date = split /\./, $tempdate;
-    $tempdate = $date[1]."/".$date[0]."/".$date[2];
 
     # process csv data
     foreach (split('\015?\012',$response->content))
@@ -102,7 +96,7 @@ sub unionfunds
         $info{$q[1], "symbol"}   = $q[1];
         $info{$q[1], "price"}    = $q[3];
         $info{$q[1], "last"}     = $q[3];
-        $info{$q[1], "date"}     = $tempdate;
+	$quoter->store_date(\%info, $q[1], {eurodate => $tempdate});
         $info{$q[1], "method"}   = "unionfunds";
         $info{$q[1], "currency"} = "EUR";
         $info{$q[1], "success"}  = 1;

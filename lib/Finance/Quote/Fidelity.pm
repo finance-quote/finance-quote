@@ -45,7 +45,7 @@ sub methods {return (fidelity        => \&fidelity,
 
 {
 	my @labels = qw/exchange name number nav change ask
-                        date yield price method/;
+                        date isodate yield price method/;
 
 	sub labels { return (fidelity        => \@labels,
 	                     fidelity_direct => \@labels); }
@@ -93,10 +93,10 @@ sub fidelity
 	($aa {$sym, "p_change"} = $q[8]) =~ s/^\s+// 	if defined($q[8]);
 	($aa {$sym, "yield"}    = $q[9]) =~ s/^\s+// 	if defined($q[9]);
 	($aa {$sym, "yield"}    = $q[17]) =~ s/^\s+// 	if defined($q[17]);
-	($aa {$sym, "date"}     = $q[19]) =~ s/^\s+//;
 	 $aa {$sym, "price"}    = $aa{$sym, "nav"} 	if defined($q[4]);
 	 $aa {$sym, "success"}  = 1;
 	 $aa {$sym, "currency"} = "USD";
+	 $quoter->store_date(\%aa, $sym, {usdate => $q[19]});
       }
     }
 

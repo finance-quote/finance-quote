@@ -1,13 +1,14 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 9};
+BEGIN {plan tests => 11};
 
 use Finance::Quote;
 
 # Test Yahoo functions.
 
 my $q      = Finance::Quote->new();
+my $year   = (localtime())[5] + 1900;
 
 my %quotes = $q->yahoo("IBM","SGI","BOGUS");
 ok(%quotes);
@@ -19,6 +20,8 @@ ok($quotes{"IBM","success"});
 ok($quotes{"IBM", "currency"} eq "USD");
 ok(($quotes{"IBM", "currency"} eq "USD") &&
    !defined($quotes{"IBM","currency_set_by_fq"}));
+ok(substr($quotes{"IBM","isodate"},0,4) == $year);
+ok(substr($quotes{"IBM","date"},6,4) == $year);
 
 ok($quotes{"SGI","last"} > 0);
 ok($quotes{"SGI","success"});

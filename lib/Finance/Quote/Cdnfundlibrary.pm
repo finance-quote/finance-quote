@@ -32,7 +32,7 @@ sub methods { return (canadamutual => \&fundlibrary,
                        fundlibrary => \&fundlibrary); }
 
 {
-    my @labels = qw/method source link name currency last date nav yield
+    my @labels = qw/method source link name currency last date isodate nav yield
 price/;
     sub labels { return (canadamutual => \@labels,
                           fundlibrary => \@labels); }
@@ -88,7 +88,7 @@ add later##
           $fundquote {$mutual, "last"} = $1;
 
           $$row[0] =~ /(\d{1,2})\/(\d{1,2})\/(\d{4})/g;
-          $fundquote {$mutual, "date"} =  $1.' '.$2.', '.$3;
+	  $quoter->store_date(\%fundquote, $mutual, {month => $1, day => $2, year => $3});
 
           # Assume things are fine here.
           $fundquote {$mutual, "success"} = 1;
