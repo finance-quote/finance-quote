@@ -786,8 +786,14 @@ conversion rates.
  Copyright 1998, Dj Padzensky
  Copyright 1998, 1999 Linas Vepstas
  Copyright 2000, Yannick LE NY (update for Yahoo Europe and YahooQuote)
- Copyright 2000, Paul Fenwick (updates for ASX, maintainence and release)
- Copyright 2000, Brent Neal (update for TIAA-CREF)
+ Copyright 2000-2001, Paul Fenwick (updates for ASX, maintainence and release)
+ Copyright 2000-2001, Brent Neal (update for TIAA-CREF)
+ Copyright 2000 Volker Stuerzl (DWS and VWD support)
+ Copyright 2000 Keith Refson (Trustnet support)
+ Copyright 2001 Rob Sessink (AEX support)
+ Copyright 2001 Leigh Wedding (ASX updates)
+ Copyright 2001 Tobias Vancura (Fool support)
+ Copyright 2001 James Treacy (TD Waterhouse support)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -809,6 +815,10 @@ module.  Please refer to the sub-modules for further information.
   Brent Neal (C<brentn@users.sourceforge.net>)
   Volker Stuerzl (C<volker.stuerzl@gmx.de>)
   Keith Refson (C<Keith.Refson#earth.ox.ac.uk>)
+  Rob Sessink (C<rob_ses@users.sourceforge.net>)
+  Leigh Wedding (C<leigh.wedding@telstra.com>)
+  Tobias Vancura (C<tvancura@altavista.net>)
+  James Treacy (C<treacy@debian.org>)
 
 The Finance::Quote home page can be found at
 http://finance-quote.sourceforge.net/
@@ -821,9 +831,13 @@ http://www.gnucash.org/
 
 =head1 SEE ALSO
 
-Finance::Quote::Yahoo, Finance::Quote::ASX, Finance::Quote::Fidelity,
-Finance::Quote::Tiaacref, Finance::Quote::Troweprice, LWP::UserAgent,
-Finance::Quote::DWS, Finance::Quote::VWD, Finance::Quote::Trustnet
+Finance::Quote::AEX, Finance::Quote::ASX, Finance::Quote::Cdnfundlibrary,
+Finance::Quote::DWS, Finance::Quote::Fidelity, Finance::Quote::Fool,
+Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
+Finance::Quote::Troweprice, Finance::Quote::Trustnet,
+Finance::Quote::VWD, Finance::Quote::Yahoo::Australia,
+Finance::Quote::Yahoo::Europe, Finance::Quote::Yahoo::USA,
+LWP::UserAgent
 
 You should have also received the Finance::Quote hacker's guide with
 this package.  Please read it if you are interested in adding extra

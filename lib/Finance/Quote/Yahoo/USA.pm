@@ -184,6 +184,6 @@ does not exist on the NYSE but exists on a different exchange.
 
 Yahoo Finance, http://finance.yahoo.com/
 
-Finance::Quote::Base
+Finance::Quote::Yahoo::Base
 
 =cut
