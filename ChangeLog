@@ -411,3 +411,10 @@
 	* Added MANIFEST file.
 
 	* CVSTAG: finance_quote_1_04
+
+2000-11-21	Paul Fenwick	<pjf@cpan.org>
+	* Extra code to ensure that currency-fields returned by a
+	  Quotelet are unique.  This prevents the potential bug of
+	  a field undergoing currency conversion multiple times and
+	  hence being quite off-track.
+
