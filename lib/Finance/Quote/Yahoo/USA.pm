@@ -3,7 +3,7 @@
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
-#    Copyright (C) 2000, Paul Fenwick <pjf@schools.net.au>
+#    Copyright (C) 2000, Paul Fenwick <pjf@cpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -49,6 +49,19 @@ sub methods {return (canada   => \&yahoo,
 		     nasdaq   => \&yahoo,
 		     vanguard => \&yahoo)};
 
+{
+	my @labels = qw/name last date time net p_change volume avg_vol
+	                bid ask close open day_range year_range eps pe
+			div_date div div_yield cap ex_div price low high/;
+
+	sub labels { return (canada	=> \@labels,
+			     usa	=> \@labels,
+			     yahoo	=> \@labels,
+			     nyse	=> \@labels,
+			     nasdaq	=> \@labels,
+			     vanguard	=> \@labels); }
+}
+
 sub yahoo
 {
     my $quoter = shift;
@@ -90,6 +103,7 @@ sub yahoo
       $aa {$sym, "div_yield"} = $q[19];
       $aa {$sym, "cap"} = $q[20];
       $aa {$sym, "ex_div"} = $q[21];
+      $aa {$sym, "price"} = $aa {$sym, "last"};
 
       # Yahoo returns a line filled with N/A's if we look up a
       # non-existant symbol.  AFAIK, the date flag will /never/
