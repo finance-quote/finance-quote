@@ -663,3 +663,7 @@
 	substantial speedup for repeating (intraday) requests of individual 
 	options.
 
+2003-09-20	Pawel Konieczny <konieczp@users.sourceforge.net>
+	* AEX module: major update: fetching of futures quotes
+	implemented.  POD and test script updated as well.
+
