@@ -634,3 +634,6 @@
 	  (Ocassionally, the http fetch & parse will return garbage for
 	  some values).
 
+2003-07-07	Pawel Konieczny	<konieczp@users.sourceforge.net>
+	* AEX module: added label 'symbol'
+
