@@ -506,4 +506,4 @@
 	* Updated Trustnet test because one of the funds we were looking
 	  for had changed its name, causing the test to fail.
 
-
+	* Added AEX test suite to repository.
