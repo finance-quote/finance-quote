@@ -3,7 +3,7 @@
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
-#    Copyright (C) 2000, Paul Fenwick <pjf@schools.net.au>
+#    Copyright (C) 2000, Paul Fenwick <pjf@cpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -74,6 +74,7 @@ sub AUTOLOAD {
 # _load_module (private class method)
 # _load_module loads a module(s) and registers its various methods for
 # use.
+
 sub _load_modules {
 	my $class = shift;
 	my $baseclass = ref $class || $class;
@@ -96,9 +97,12 @@ sub _load_modules {
 			# Methodhash will continue method-name, function ref
 			# pairs.
 			my %methodhash = $modpath->methods;
+			my %labelhash = $modpath->labels;
 
 			foreach my $method (keys %methodhash) {
-				push (@{$METHODS{$method}},$methodhash{$method});
+				push (@{$METHODS{$method}},
+					{ function => $methodhash{$method},
+					  labels   => $labelhash{$method} });
 			}
 		}
 	}
@@ -179,6 +183,27 @@ sub failover {
 }
 
 # =======================================================================
+# require_labels (public object method)
+#
+# Require_labels indicates which labels are required for lookups.  Only methods
+# that have registered all the labels specified in the list passed to
+# require_labels() will be called.
+#
+# require_labels takes a list of required labels.  When called with no
+# arguments, the require list is cleared.
+#
+# This method always succeeds.
+
+sub require_labels {
+	my $this = shift;
+	my @labels = @_;
+	$this->{REQUIRED} = \@labels;
+	return;
+}
+
+# =======================================================================
+# fetch (public object method)
+#
 # Fetch is a wonderful generic fetcher.  It takes a method and stuff to
 # fetch.  It's a nicer interface for when you have a list of stocks with
 # different sources which you wish to deal with.
@@ -202,7 +227,8 @@ sub fetch {
 	if ($this->{FAILOVER}) {
 		my %returnhash = ();
 
-		foreach my $funcref (@{$METHODS{$method}}) {
+		foreach my $methodinfo (@{$METHODS{$method}}) {
+			my $funcref = $methodinfo->{"function"};
 			my @failed_stocks = ();
 			%returnhash = (%returnhash,&$funcref($this,@stocks));
 
