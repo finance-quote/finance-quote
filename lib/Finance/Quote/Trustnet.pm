@@ -154,6 +154,11 @@ sub trustnet
 
 Finance::Quote::Trustnet	- Obtain unit trust prices from trustnet.co.uk
 
+=head1 NOTE NOTE NOTE NOTE NOTE
+
+This module is currently non-functional.  Feel free to submit patches,
+though.  :)  http://sourceforge.net/projects/finance-quote
+
 =head1 SYNOPSIS
 
     use Finance::Quote;

@@ -172,6 +172,11 @@ sub asx {
 
 Finance::Quote::ASX	- Obtain quotes from the Australian Stock Exchange.
 
+=head1 NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+
+This module is currently non-functional.  For Australian stock prices,
+please use the "australian" quote source instead.
+
 =head1 SYNOPSIS
 
     use Finance::Quote;
