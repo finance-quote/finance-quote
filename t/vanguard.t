@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 17};
+BEGIN {plan tests => 18};
 
 use Finance::Quote;
 
@@ -20,3 +20,7 @@ foreach my $fund (@funds) {
 	ok($quotes{$fund,"success"});
         ok($quotes{$fund, "currency"} eq "USD");
 }
+
+# Make sure we're not getting spurious percentage signs.
+
+ok($quotes{"VBINX","p_change"} !~ /%/);
