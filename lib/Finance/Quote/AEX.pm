@@ -81,13 +81,14 @@ sub methods { return (dutch       => \&aex,
 # Some ticker symbols have to be translated to a different symbol for fetch() call
 # The problem is that the AEX url does not (not always) use the official ticker
 # to their CGI query 
-# The list is complete for Big Caps and Mid Caps as on 29-Jun-2003
+# The list is complete for Big Caps and Mid Caps as on 07-Jun-2004
 
 sub aex_webticker {
     my %aex_webtickers = (
         'DRAK', 'DRAKA',
         'ORDI', 'ORDINA',
         'VRSA', 'VTEL',
+        'VRS',  'VTEL',
         'REN',  'ELS',
         'ASM',  'ASIN',
         'AMX',  'MIDKAP',
@@ -101,6 +102,9 @@ sub aex_webticker {
         'WH',   'WB',
         'RASA', 'RASAA',
         'VAST', 'VASTN',
+        'AFA',  '965',
+        'BAM',  'BAMNB',
+        'CRS',  'COS',
     );
     $aex_webtickers{uc $_[0]} || $_[0];
 }
