@@ -164,7 +164,7 @@ sub new {
 		shift(@reqmodules) if (@reqmodules);
 		# Default modules
 		@modules = qw/AEX ASX BMONesbittBurns Cdnfundlibrary
-			      DWS FTPortfolios Fidelity Fool IndiaMutual
+			      DWS FTPortfolios Fidelity FinanceCanada Fool IndiaMutual
 			      ManInvestments NZX Platinum SEB TSP Tdefunds
 			      Tdwaterhouse Tiaacref Troweprice Trustnet Union
 			      VWD
@@ -945,7 +945,7 @@ http://www.gnucash.org/
 =head1 SEE ALSO
 
 Finance::Quote::AEX, Finance::Quote::ASX, Finance::Quote::Cdnfundlibrary,
-Finance::Quote::DWS, Finance::Quote::Fidelity, Finance::Quote::Fool,
+Finance::Quote::DWS, Finance::Quote::Fidelity, Finance::Quote::FinanceCanada, Finance::Quote::Fool,
 Finance::Quote::FTPortfolios, Finance::Quote::Tdefunds,
 Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice, Finance::Quote::Trustnet,
