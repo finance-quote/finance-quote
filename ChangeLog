@@ -163,3 +163,9 @@
 	  context, and a hash in list context.
 
 	* Reviewed/corrected hackers guide.
+
+        * Added currency tags to existing modules to signal currency type
+          (AUD, EUR, USD)
+
+        * Added tests to check currency tags.
+
