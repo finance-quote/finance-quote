@@ -432,3 +432,6 @@
 	  the quote.yahoo.com may become depreciated in the future.
 	  Thanks to Iain Lea for spotting this.
 
+2000-01-22	Paul Fenwick	<pjf@cpan.org>
+	* Updated to respect the FQ_LOAD_QUOTELET environment variable
+	  to auto-load custom Quotelet.
