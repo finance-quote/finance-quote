@@ -58,10 +58,10 @@ sub methods { return (unit_trusts => \&trustnet, trustnet => \&trustnet); }
 # =======================================================================
 
 sub trustnet
-{
+  {
     my $quoter = shift;
     my @symbols = @_;
-
+    
     return unless @symbols;
     my(@q,%aa,$ua,$url,$sym,$ts,$date,$price,$currency,$reply,$trust);
     my ($row, $datarow, $matches);
@@ -71,7 +71,7 @@ sub trustnet
                    "Apr" => "04", "May" => "05", "Jun" => "06",
 		   "Jul" => "07", "Aug" => "08", "Sep" => "09",
 		   "Oct" => "10", "Nov" => "11", "Dec" => "12");
-
+    
     my %symbolhash;
     @symbolhash{@symbols} = map(1,@symbols);
     # 
@@ -79,19 +79,19 @@ sub trustnet
       my $te = new HTML::TableExtract( headers => [("Fund Name", "Group Name", "Bid Price", "Offer Price", "Yield")]);
       $trust = $_;
       $url = "$TRUSTNET_URL$trust";
-
+      
       # print STDERR "Retrieving \"$trust\" from $url\n";
       $ua = $quoter->user_agent;
       $reply = $ua->request(GET $url);
       return unless ($reply->is_success);
-
+      
       # print STDERR $reply->content,"\n";
-
+      
       $te->parse($reply->content);
       $ts  = ($te->table_states)[0];
-
+      
       if( defined ($ts)) {
-
+	
 	$matches = 0;
 	foreach $row ($ts->rows) {
 	  ($sym = $$row[0]) =~ s/^ +//;
@@ -103,12 +103,12 @@ sub trustnet
 	if ($matches > 1 ) {
 	  $aa {$trust, "success"} = 0;
 	  $aa {$trust, "errormsg"} = "Fund name $trust is not unique.  See \"$TRUSTNET_ALL\"";
-	  return wantarray ? %aa : \%aa;
+	  next;
 	} elsif ($matches < 1 ) {
 	  $aa {$trust, "success"} = 0;
 	  #$aa {$trust, "errormsg"} = "Fund name $trust is not found.  See \"$TRUSTNET_ALL\"";
 	  $aa {$trust, "errormsg"} = "Error retrieving  $trust -- unexpected input";
-	  return wantarray ? %aa : \%aa;
+	  next;
 	} else {
 	  $aa {$trust, "exchange"} = "Trustnet";
 	  $aa {$trust, "method"} = "trustnet";
@@ -140,7 +140,7 @@ sub trustnet
       } else {
 	$aa {$trust, "success"} = 0;
 	$aa {$trust, "errormsg"} = "Fund name $trust is not found.  See \"$TRUSTNET_ALL\"";
-	return wantarray ? %aa : \%aa;
+	next;
       }
     }
     return %aa if wantarray;
