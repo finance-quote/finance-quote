@@ -4,9 +4,7 @@ use lib '../lib';
 use Finance::Quote;
 
 # This script demonstrates how currencies can be converted using
-# Finance::Quote.  At the moment the currency function is under
-# development.  If you use it, you should expect its syntax and
-# semantics to change.
+# Finance::Quote.
 
 # Example usage:   currency-lookup.pl USD AUD
 # (Converts from US Dollars to Australian Dollars)
