@@ -216,7 +216,7 @@ sub currency {
 	my $ua = $this->user_agent;
 
 	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}s=$from&t=$to")->content;
-	my ($exchange_rate) = $data =~ m#$from$to=X</a></td><td>1</td><td>[^<]+</td><td>(\d+\.\d+)</td>#;
+	my ($exchange_rate) = $data =~ m#$from$to=X</a></td><td>1</td><td(?: nowrap)?>[^<]+</td><td>(\d+\.\d+)</td>#;
 
 	return undef unless $exchange_rate;
 	return ($exchange_rate * $amount);
