@@ -47,7 +47,7 @@ $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/m5?";
 @EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.07';
+$VERSION = '1.08';
 
 $USE_EXPERIMENTAL_UA = 0;
 
