@@ -54,8 +54,6 @@ sub fundlibrary   {
     my(%fundquote, $mutual);
     my($ua, $url, $reply, $ts, $row, $rowhd, $te, @rows, @ts);
 
-#    my $te = new HTML::TableExtract();
-
     $ua = $quoter->user_agent;
 
     foreach (@symbols) {
@@ -63,18 +61,16 @@ sub fundlibrary   {
       $mutual = $_;
       $url = "$FUNDLIB_URL$mutual";
       $reply = $ua->request(GET $url);
-      $te = new HTML::TableExtract();
+      $te = new HTML::TableExtract(headers => ["Date", "NAVPS"]);
 
-      # Make sure something is returned  ##CAN exit more gracefully -
-add later##
+      # Make sure something is returned  ##CAN exit more gracefully - add later##
       return unless ($reply->is_success);
 
       $te->parse($reply->content);
 
       # Fund name
-      $ts = $te->table_state(1,2);
-      if($ts) {
-	@rows = $ts->rows;
+      @rows = $te->rows;
+      if(@rows) {
           $fundquote {$mutual, "currency"} = "CAD";
           $fundquote {$mutual, "source"} = $FUNDLIB_MAIN_URL;
           $fundquote {$mutual, "link"} = $url;
