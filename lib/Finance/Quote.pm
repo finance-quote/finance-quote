@@ -163,7 +163,7 @@ sub new {
 	if (!@reqmodules or $reqmodules[0] eq "-defaults") {
 		shift(@reqmodules) if (@reqmodules);
 		# Default modules
-		@modules = qw/AEX ASX BMONesbittBurns Cdnfundlibrary
+		@modules = qw/AEX ASEGR ASX BMONesbittBurns Cdnfundlibrary
 			      DWS FTPortfolios Fidelity FinanceCanada Fool IndiaMutual
 			      ManInvestments NZX Platinum SEB TSP Tdefunds
 			      Tdwaterhouse Tiaacref Troweprice Trustnet Union
