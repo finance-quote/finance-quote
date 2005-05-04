@@ -78,6 +78,7 @@ sub asx {
 	}
 
 	my $te = HTML::TableExtract->new(
+		automap => 0,
 		headers => ["Code", "Last", '\+/-', "Bid", "Offer",
 		            "Open", "High", "Low", "Vol"]);
 
@@ -96,6 +97,9 @@ sub asx {
 	# Pack the resulting data into our structure.
 	foreach my $row (@rows) {
 		my $stock = shift(@$row);
+
+		# Skip any blank lines.
+		next unless $stock;
 
 		# Delete spaces and '*' which sometimes appears after the code.
 		# Also delete high bit characters.
