@@ -76,7 +76,7 @@ sub platinum {
 	}
 
 	my $te = HTML::TableExtract->new(
-		headers => ["product", "date", "application", "withdrawal"]);
+		headers => ["product", "date", "entry", "exit"]);
 
 	$te->parse($response->content);
 
