@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 12};
+BEGIN {plan tests => 15};
 
 use Finance::Quote;
 
@@ -9,7 +9,7 @@ use Finance::Quote;
 
 my $quoter = Finance::Quote->new();
 
-my %quotes = $quoter->tsp("c","s","BOGUS");
+my %quotes = $quoter->tsp("c","s","TSPgfund","BOGUS");
 ok(%quotes);
 
 # Check that some values are defined.
@@ -18,6 +18,9 @@ ok($quotes{"c","nav"} > 0);
 ok($quotes{"s","date"});
 ok($quotes{"s","currency"});
 ok($quotes{"s","name"});
+ok($quotes{"TSPgfund","success"});
+ok($quotes{"TSPgfund","nav"} > 0);
+ok($quotes{"TSPgfund","date"});
 
 # Check that some values are undefined.
 ok( !defined($quotes{"c","exchange"}) );
