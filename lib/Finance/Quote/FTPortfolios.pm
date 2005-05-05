@@ -43,7 +43,7 @@ $VERSION = '1.00';
 
 # URLs of where to obtain information.
 
-$FTPORTFOLIOS_URL = ('http://www.ftportfolios.com/indiv/quicksearch.aspx?QuickSearch=');
+$FTPORTFOLIOS_URL = ('http://www.ftportfolios.com/retail/productsearch.aspx');
 
 $FTPORTFOLIOS_ALL="http://www.ftportfolios.com";
 
@@ -72,13 +72,13 @@ sub ftportfolios
     @symbolhash{@symbols} = map(1,@symbols);
     # 
     for (@symbols) {
-      my $te = new HTML::TableExtract( headers => [("Name 5", "Ticker", "POP", "NAV")]);
+      my $te = new HTML::TableExtract( headers => [("Name", "Ticker", "Price", "Net Asset", "Date")]);
       $trust = $_;
-      $url = "$FTPORTFOLIOS_URL$trust";
+      $url = "$FTPORTFOLIOS_URL";
       
       # print STDERR "Retrieving \"$trust\" from $url\n";
       $ua = $quoter->user_agent;
-      $reply = $ua->request(GET $url);
+      $reply = $ua->request(POST $url, [searchfor => $trust]);
       return unless ($reply->is_success);
       
       # print STDERR $reply->content,"\n";
@@ -127,15 +127,10 @@ sub ftportfolios
 	  # print STDERR "nav ",$aa {$trust, "nav"},"\n";
 	  $aa {$trust, "price"} = $aa{$trust,"pop"};
 	  # print STDERR "price ",$aa {$trust, "price"},"\n";
+	  $quoter->store_date(\%aa, $trust, {usdate => $$datarow[5]});
+	  # print STDERR "date ",$aa {$trust, "date"},"\n";
 	  $aa {$trust, "success"} = 1;
 	  # print STDERR "Ftportfolios:: Flagging success for $trust\n";
-	  #
-	  # Get date
-	  $date= "notfound";
-	  if ( $reply->content =~ /\(Pricing as of ([\d\/]+)\)/m) {
-	    $date = $1;
-	  }
-	  $aa {$trust, "date"} = $date;
 	}
       } else {
 	$aa {$trust, "success"} = 0;
