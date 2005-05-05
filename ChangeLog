@@ -1,3 +1,15 @@
+2005-05-04  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/Cdnfundlibrary.pm: Find table by headers
+	instead of by index.
+
+	* test/asegr.t: New module
+	* lib/Finance/Quote/ASEGR.pm: New module
+
+	* lib/Finance/Quote/ASX.pm: Skip any blank lines in the table.
+	Pass an extra parameter to TableExtract to keep it from doing
+	unnecessary work that produces warnings.
+
 2000-04-06	Paul Fenwick	<pjf@cpan.org>
 	* CVSTAG: finance_quote_0_16
 
