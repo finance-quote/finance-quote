@@ -7,6 +7,7 @@
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2001, Rob Sessink <rob_ses@users.sourceforge.net>
 #    Copyright (C) 2004, Frank Mori Hess <fmhess@users.sourceforge.net>
+#                        Trent Piepho <xyzzy@spekeasy.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,7 +33,7 @@ use strict;
 
 package Finance::Quote::TSP;
 
-use vars qw($VERSION $TSP_URL); 
+use vars qw($VERSION $TSP_URL $TSP_MAIN_URL %TSP_FUND_COLUMNS %TSP_FUND_NAMES);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
@@ -42,7 +43,22 @@ $VERSION = '0.2';
 
 # URLs of where to obtain information
 
-my $TSP_URL = 'http://www.tsp.gov/rates/share-prices.html';
+$TSP_URL = 'http://www.tsp.gov/rates/share-prices.html';
+$TSP_MAIN_URL=("http://www.tsp.gov");
+
+%TSP_FUND_COLUMNS = (
+    TSPGFUND => "G",
+    TSPFFUND => "F",
+    TSPCFUND => "C",
+    TSPSFUND => "S",
+    TSPIFUND => "I");
+
+%TSP_FUND_NAMES = (
+    TSPGFUND => 'Government Securities Investment Fund',
+    TSPFFUND => 'Fixed Income Index Investment Fund',
+    TSPCFUND => 'Common Stock Index Investment Fund',
+    TSPSFUND => 'Small Capitalization Stock Index Investment Fund',
+    TSPIFUND => 'International Stock Index Investment Fund' );
 
 sub methods { return (tsp => \&tsp) }
  
@@ -56,75 +72,55 @@ sub methods { return (tsp => \&tsp) }
 sub tsp {
 	my $quoter = shift;
 	my @symbols = @_;
-	return unless @symbols;
-	
-	my (%info,$url,$reply,$te);
-	my ($row, $datarow, $matches);
-	
-	my $ua = $quoter->user_agent; 	# user_agent
-	$url = $TSP_URL;    		# base url 
- 
-	$reply = $ua->request(GET $url); 
-	
-	if ($reply->is_success) { 
-	
-		#print STDERR $reply->content,"\n";
-	
-		$te = new HTML::TableExtract(headers => [qw(Date G F C S I)]);
-		
-		# parse table
-		$te->parse($reply->content); 
-	}
-	foreach my $symbol (@symbols) {
-		# check for a page without tables.
-		unless ( $te->tables ) 
-		{
-			$info {$symbol,"success"} = 0;
-			$info {$symbol,"errormsg"} = "Fund name $symbol not found, bad symbol name";
-			next;
-		} 
-		# extract table contents
-		my @rows; 
-		unless (@rows = $te->rows)
-		{
-			$info {$symbol,"success"} = 0;
-			$info {$symbol,"errormsg"} = "Parse error";
-			next;
-		}
-	
-		if($reply->is_success == 0)
-		{
-			$info {$symbol, "success"} = 0;
-			$info {$symbol, "errormsg"} = "Error retreiving $symbol ";
-			next;
-		}
-		$info {$symbol, "success"} = 1;
-		$info {$symbol, "method"} = "tsp";
-		$info {$symbol, "name"} = $symbol;
-		if(lc $symbol eq "g" || lc $symbol eq "g fund")
-		{
-			($info {$symbol, "nav"} = $rows[0][1]) =~ s/\s*//g; # Remove spaces
-		}elsif(lc($symbol) eq "f" || lc($symbol) eq "f fund")
-		{
-			($info {$symbol, "nav"} = $rows[0][2]) =~ s/\s*//g; # Remove spaces
-		}elsif(lc($symbol) eq "c" || lc($symbol) eq "c fund")
-		{
-			($info {$symbol, "nav"} = $rows[0][3]) =~ s/\s*//g; # Remove spaces
-		}elsif(lc($symbol) eq "s" || lc($symbol) eq "s fund")
-		{
-			($info {$symbol, "nav"} = $rows[0][4]) =~ s/\s*//g; # Remove spaces
-		}elsif(lc($symbol) eq "i" || lc($symbol) eq "i fund")
-		{
-			($info {$symbol, "nav"} = $rows[0][5]) =~ s/\s*//g; # Remove spaces
-		}else
-		{
-			$info {$symbol,"success"} = 0;
-			$info {$symbol,"errormsg"} = "Unrecognized fund";
-		}
 
-		$quoter->store_date(\%info, $symbol, {usdate => $rows[0][0]});
-		$info {$symbol, "currency"} = "USD";
-	} 
+	# Make sure symbols are requested  
+	##CAN exit more gracefully - add later##
+
+	return unless @symbols;
+
+	# Local Variables
+	my(%info, %fundrows);
+	my($ua, $reply, $row, $te);
+
+	$ua = $quoter->user_agent;
+	$reply = $ua->request(GET $TSP_URL);
+	return unless ($reply->is_success);
+	$te = new HTML::TableExtract( headers => 
+		["Date", values %TSP_FUND_COLUMNS] );
+
+	$te->parse($reply->content);
+
+	# First row is newest data, older data follows, maybe there
+	# should be some way to get it?
+	$row = ($te->rows())[0];
+
+	# Make a hash that maps the order the columns are in
+	for(my $i=1; my $key = each %TSP_FUND_COLUMNS ; $i++) {
+	    $fundrows{$key} = $i;
+	}
+
+	foreach (@symbols) {
+	    # Ignore case when looking up the data.  Preserve case
+	    # when storing the symbol name in the info array.
+	    my $tmp = uc $_;
+	    $tmp = uc sprintf("TSP%sfund", substr($tmp,0,1))
+	      if (index("GFCSI", substr($tmp,0,1)) >= 0);
+
+	    if(exists $fundrows{$tmp}) {
+		$info{$_, 'success'} = 1;
+
+		$info{$_, 'method'} = 'tsp';
+		$info{$_, 'currency'} = 'USD';
+		$info{$_, 'source'} = $TSP_MAIN_URL;
+		$info{$_, 'symbol'} = $_;
+		$info{$_, 'name'} = $TSP_FUND_NAMES{$tmp};
+		$info{$_, 'nav'} = $info{$_, 'last'} = $$row[$fundrows{$tmp}];
+		$quoter->store_date(\%info, $_, {usdate => $$row[0]});
+	    } else {
+		$info{$_, 'success'} = 0;
+		$info{$_, 'errormsg'} = "Fund name unknown";
+	    }
+	}
 	return %info if wantarray;
 	return \%info;
 } 
