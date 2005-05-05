@@ -1,15 +1,3 @@
-2005-05-04  David Hampton  <hampton@employees.org>
-
-	* lib/Finance/Quote/Cdnfundlibrary.pm: Find table by headers
-	instead of by index.
-
-	* test/asegr.t: New module
-	* lib/Finance/Quote/ASEGR.pm: New module
-
-	* lib/Finance/Quote/ASX.pm: Skip any blank lines in the table.
-	Pass an extra parameter to TableExtract to keep it from doing
-	unnecessary work that produces warnings.
-
 2000-04-06	Paul Fenwick	<pjf@cpan.org>
 	* CVSTAG: finance_quote_0_16
 
@@ -766,8 +754,29 @@
 	check date formats.
 
 
-2005-03-19  David Hampton  <david@hampton-pc.rainbolthampton.net>
+2005-03-19  David Hampton  <hampton@employees.org>
 
 	* lib/Finance/Quote/Trustnet.pm: Encode the '&' character before
 	calling the user agent GET function.  Fixes bug 747080.
+
+2005-05-04  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/FTPortfolios.pm: Update for changes in the
+	website.
+
+	* t/ftportfolios.t: New test module.
+
+	* TSP.pm: Replace core parsing with tighter code.  Support the
+	symbols used by both Frank Mori Hess' and Trent Piepho's TSP
+	modules.  Make the symbols case insensitive.
+
+	* lib/Finance/Quote/Cdnfundlibrary.pm: Find table by headers
+	instead of by index.
+
+	* test/asegr.t: New module
+	* lib/Finance/Quote/ASEGR.pm: New module
+
+	* lib/Finance/Quote/ASX.pm: Skip any blank lines in the table.
+	Pass an extra parameter to TableExtract to keep it from doing
+	unnecessary work that produces warnings.
 
