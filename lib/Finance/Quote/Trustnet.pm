@@ -45,7 +45,7 @@ $VERSION = '1.02';
 
 $TRUSTNET_URL = ('http://www.trustnet.com/ut/funds/perf.asp?reg=all&sec=all&type=all&sort=5&ss=0&booAutif=0&unit=');
 
-$TRUSTNET_ALL="http://www.trustnet.co.uk/ut/funds/perf.asp";
+$TRUSTNET_ALL="http://www.trustnet.com/ut/funds/perf.asp";
 
 sub methods { return (uk_unit_trusts => \&trustnet, trustnet => \&trustnet); }
 
