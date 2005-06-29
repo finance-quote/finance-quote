@@ -6,6 +6,7 @@
 #    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2000, Volker Stuerzl <volker.stuerzl@gmx.de>
+#    Copyright (C) 2003,2005 Jörg Sommer <joerg@alea.gnuu.de>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,13 +28,6 @@
 # but extends its capabilites to encompas a greater number of data sources.
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
-#
-# $Id: VWD.pm,v 1.6 2005/03/20 01:44:13 hampton Exp $
-
-# =============================================================
-# Workaround by Matt Sisk for handling newlines in table cells.
-# Remove when fix of HTML::TableExtract is available.
-package HTML::TableExtract::Workaround;
 
 use HTML::TableExtract;
 @ISA = qw( HTML::TableExtract );
@@ -54,77 +48,112 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-use vars qw/$VERSION $VWD_FUNDS_URL/;
+# use vars qw/$VERSION $VWD_FUNDS_URL/;
 
-$VERSION = '1.00';
-
-$VWD_FUNDS_URL = "http://www.vwd.gfa-fonds.de/fondspreise/liste.hbs?suchtext=";
+# $VERSION = '1.00';
 
 sub methods { return (vwd => \&vwd); }
-sub labels { return (vwd => [qw/exchange name date isodate price method/]); }
+sub labels { return (vwd => [qw/ask bid currency date isodate exchange last
+				name net p_change price symbol time year_range/]); }
 
 # =======================================================================
 # The vwd routine gets quotes of funds from the website of
 # vwd Vereinigte Wirtschaftsdienste GmbH.
 #
 # This subroutine was written by Volker Stuerzl <volker.stuerzl@gmx.de>
+# and adjusted to match the new vwd interface by Jörg Sommer
+
+# Trim leading and tailing whitespaces (also non-breakable whitespaces)
+sub trim
+{
+    $_ = shift();
+    s/^\s*//;
+    s/\s*$//;
+    s/&nbsp;//g;
+    return $_;
+}
+
+# Trim leading and tailing whitespaces, leading + and tailing % and
+# translate german separators into english separators
+sub trimtr
+{
+    $_ = shift();
+    s/&nbsp;//g;
+    s/^\s*\+?//;
+    s/\%?\s*$//;
+    tr/,./.,/;
+    return $_;
+}
 
 sub vwd
 {
   my $quoter = shift;
+  my $ua = $quoter->user_agent();
   my @funds = @_;
-  return unless @funds;
-  my $ua = $quoter->user_agent;
+  return unless (@funds);
   my %info;
 
   foreach my $fund (@funds)
   {
-    my $response = $ua->request(GET $VWD_FUNDS_URL.$fund);
+    $info{$fund, "source"} = "VWD";
+    $info{$fund, "success"} = 0;
+    $info{$fund, "errormsg"} = "Parse error";
+    
+    my $response = $ua->get("http://www.finanztreff.de/ftreff/".
+	"kurse_einzelkurs_uebersicht.htm?s=".$fund);
     if ($response->is_success)
     {
-      # parse table
-      my $te = new HTML::TableExtract::Workaround
-        (headers => [qw/WKN Name Whrg Rückn Rückn Ausgabe/]);
-      $te->parse($response->content);
-
-      # extract table contents
-      my @rows;
-      unless (@rows = $te->rows)
-      {
-        $info{$fund, "success"} = 0;
-        $info{$fund, "errormsg"} = "Parse error";
-        next;
+      # Sometimes a table is before our tables, but we must use absolute
+      # addressing, because colspan in table head hides columns in all rows
+      my $table = new HTML::TableExtract
+	  (decode=>0, headers=>["Stammdaten"])->parse($response->content);
+      unless ($table->first_table_state_found()) {
+	print "table doesn't exist 2\n";
+	$info{$fund, "success"}  = 0;
+	$info{$fund, "errormsg"} = "Parse error";
+	next;
       }
+      my $tabOffset = $table->first_table_state_found()->count() - 2;
 
-      # split fund and company name
-      my @name = split(/\n/, $rows[2][1]);
+      # parse table "Stammdaten" and extract its contents
+      my @rows = new HTML::TableExtract
+	  (decode=>0, depth=>2, count=>2+$tabOffset)->parse($response->content)->rows();
 
-      # grab date which is contained within table header
-      my $date;
-      $response->content =~ /Fonds Preise vom (\d{1,2})\.(\d{1,2})\.(\d{4})/;
-      $date = $2."/".$1."/".$3;
+      next unless (@rows);
+      $info{$fund, "symbol"}   = trim( $rows[4][1] );
+      $info{$fund, "name"}     = trim( $rows[1][1] );
+      $info{$fund, "currency"} = trim( $rows[8][1] );
+	
+      # parse table "Jahreschart" and extract its contents
+      @rows = new HTML::TableExtract
+	  (depth => 2, count => 3+$tabOffset)->parse($response->content)->rows();
 
-      # strip whitespace and non-printable characters from price and currency
-      $rows[2][2] =~ s/\W*//g;
-      $rows[2][3] =~ s/[^\d.]*//g;
-      $rows[2][0] =~ s/\W*//g;
+      next unless (@rows);
+      $quoter->store_date(\%info, $fund, {eurodate => $rows[0][1]});
+	  
+      # parse table "Kursdaten" and extract its contents
+      @rows = new HTML::TableExtract
+	  (decode=>0, depth=>2, count=>4+$tabOffset)->parse($response->content)->rows();
 
-      # Strip any asterisks and leading/trailing whitespace from name.
-      $name[1] =~ tr/*//d;
-      $name[1] =~ s/^\s*(.*?)\s*$/$1/;
+      next unless (@rows);
+      $info{$fund, "price"} = $info{$fund, "last"} = trimtr( $rows[4][1] );
+      $info{$fund, "net"} = trimtr( $rows[2][2] );
+      ($info{$fund, "time"}) = ($rows[1][0] =~ /(\d{1,2}:\d{1,2}:\d{1,2})/);
+      $info{$fund, "p_change"} = trimtr( $rows[1][2] );
+      $info{$fund, "year_range"} = trimtr($rows[8][1])." - ".trimtr($rows[8][2]);
+      $info{$fund, "bid"} = trimtr( $rows[4][1] );
+      $info{$fund, "ask"} = trimtr( $rows[5][1] );
+	
+      # parse table "Fondsdaten" and extract its contents
+      @rows = new HTML::TableExtract
+	  (decode=>0, depth=>2, count=>5+$tabOffset)->parse($response->content)->rows();
 
-      $info{$fund, "symbol"}   = $rows[2][0];
-      $info{$fund, "exchange"} = $name[2];
-      $info{$fund, "name"}     = $name[1];
-      $info{$fund, "price"}    = $rows[2][3];
-      $info{$fund, "last"}     = $rows[2][3];
-      $quoter->store_date(\%info, $fund, {usdate => $date});
-      $info{$fund, "method"}   = "vwd";
-      $info{$fund, "currency"} = $rows[2][2];
+      next unless (@rows);
+      $info{$fund, "exchange"} = trimtr( $rows[2][1] );
+	
       $info{$fund, "success"}  = 1;
-    }
-    else
-    {
+      $info{$fund, "errormsg"} = "";
+    } else {
       $info{$fund, "success"}  = 0;
       $info{$fund, "errormsg"} = "HTTP error";
     }
@@ -159,7 +188,8 @@ and conditions.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::vwd:
-exchange, name, date, price, last.
+ask, bid, currency, date, isodate, exchange, last, name, net,
+p_change, price, symbol, time, year_range.
 
 =head1 SEE ALSO
 
