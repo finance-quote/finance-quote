@@ -23,10 +23,10 @@ ok(substr($quotes{"AAB 93-08 7.5","isodate"},0,4) == $year);
 ok(substr($quotes{"AAB 93-08 7.5","date"},6,4) == $year);
 
 # Exercise the fetch function 
-%quotes = $quoter->fetch("aex","AAB C Jun 05 20.00");
+%quotes = $quoter->fetch("aex","AAB AAB TL 16");
 ok(%quotes);
-ok($quotes{"AAB C Jun 05 20.00","success"});
-ok($quotes{"AAB C Jun 05 20.00","last"} > 0);
+ok($quotes{"AAB AAB TL 16","success"});
+ok($quotes{"AAB AAB TL 16","last"} > 0);
 
 
 # Check that a bogus fund returns no-success.
