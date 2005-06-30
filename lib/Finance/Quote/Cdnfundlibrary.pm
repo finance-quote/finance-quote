@@ -2,6 +2,7 @@
 
 #  Cdnfundlibrary.pm
 #
+#  Version 0.6 retrieve more data via different fundlibrary.com url
 #  Version 0.5 made functional again
 #  Version 0.4 fixed up multiple lookup  (March 3, 2001)
 #  Version 0.3 fixed up yield lookup
@@ -20,12 +21,12 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '0.2';
+$VERSION = '0.6';
 
 # URLs of where to obtain information.
 
 $FUNDLIB_URL =
-("http://www.fundlibrary.com/funds/db/_fundcard.asp?t=7&id=");
+("http://www.fundlibrary.com/funds/db/_fundcard.asp?t=2&id=");
 $FUNDLIB_MAIN_URL=("http://www.fundlibrary.com");
 
 sub methods { return (canadamutual => \&fundlibrary,
@@ -33,7 +34,7 @@ sub methods { return (canadamutual => \&fundlibrary,
 
 {
     my @labels = qw/method source link name currency last date isodate nav yield
-price/;
+		    price net p_change/;
     sub labels { return (canadamutual => \@labels,
                           fundlibrary => \@labels); }
 }
@@ -61,7 +62,8 @@ sub fundlibrary   {
       $mutual = $_;
       $url = "$FUNDLIB_URL$mutual";
       $reply = $ua->request(GET $url);
-      $te = new HTML::TableExtract(headers => ["Date", "NAVPS"]);
+      $te = new HTML::TableExtract(headers => ["Date", "NAVPS"],
+				   slice_columns => 0);
 
       # Make sure something is returned  ##CAN exit more gracefully - add later##
       return unless ($reply->is_success);
@@ -69,8 +71,12 @@ sub fundlibrary   {
       $te->parse($reply->content);
 
       # Fund name
+      $reply->content =~ m#<div\s+class="tSmallTitle">([^<]+)</div>#;
+      $fundquote {$mutual, "name"} = $1;
+
       @rows = $te->rows;
       if(@rows) {
+          $fundquote {$mutual, "symbol"} = $mutual;
           $fundquote {$mutual, "currency"} = "CAD";
           $fundquote {$mutual, "source"} = $FUNDLIB_MAIN_URL;
           $fundquote {$mutual, "link"} = $url;
@@ -78,21 +84,19 @@ sub fundlibrary   {
 
           # Fund price and date
 	  $row = $rows[1];
-          $$row[1] =~ /(\d+\.\d+)/g;
-          $fundquote {$mutual, "price"} =  $1;
-          $fundquote {$mutual, "nav"} = $1;
-          $fundquote {$mutual, "last"} = $1;
+          $fundquote {$mutual, "price"} =  $$row[2];
+          $fundquote {$mutual, "nav"} = $$row[2];
+          $fundquote {$mutual, "last"} = $$row[2];
+          $fundquote {$mutual, "net"} = $$row[3];
+          $fundquote {$mutual, "p_change"} = $$row[4];
 
-          $$row[0] =~ /(\d{1,2})\/(\d{1,2})\/(\d{4})/g;
-	  $quoter->store_date(\%fundquote, $mutual, {month => $1, day => $2, year => $3});
+	  $quoter->store_date(\%fundquote, $mutual, {usdate => $$row[0]});
 
           # Assume things are fine here.
           $fundquote {$mutual, "success"} = 1;
 
           # Performance yield
-          ### Fix up by looking for headers instead
-
-          $fundquote {$mutual, "yield"} = "NA";
+          $fundquote {$mutual, "yield"} = $$row[5] if ($$row[5] ne "--");
       }
       else {
           $fundquote {$mutual, "success"} = 0;
