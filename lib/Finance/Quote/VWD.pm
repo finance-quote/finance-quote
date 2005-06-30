@@ -50,7 +50,9 @@ use HTML::TableExtract;
 
 # use vars qw/$VERSION $VWD_FUNDS_URL/;
 
-# $VERSION = '1.00';
+use vars qw/$VERSION/;
+
+$VERSION = '1.01';
 
 sub methods { return (vwd => \&vwd); }
 sub labels { return (vwd => [qw/ask bid currency date isodate exchange last
