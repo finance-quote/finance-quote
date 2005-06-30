@@ -796,3 +796,20 @@
 	to get quotes for New Zealand Stocks (use method nz).
 
 	* CVSTAG: finance_quote_1_09
+
+2005-05-30  Paul Fenwick  <pjf@cpan.org>
+
+	* MANIFEST: Updated with files intended for distribution.
+
+	* lib/Finance/Quote.pm: Updated $VERSION to 1.09
+
+	* CVSTAG: Updated finance_quote_1_09 tag on MANIFEST and
+	  lib/Finace/Quote.pm
+
+	* Released updated version 1.09 with new MANIFEST and Quote.pm
+	  to Sourceforge.
+
+	* lib/Finance/Quote/VWD.pm: Re-enabled $VERSION and bumped
+	  to 1.01 to allow correct indexing on CPAN, however the
+	  older version currently remains in the 1.09 release.
+
