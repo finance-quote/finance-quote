@@ -794,3 +794,5 @@
 
 	* lib/Finance/Quote/NZX.pm: Tweak to allow both NZX and Yahoo:NZ
 	to get quotes for New Zealand Stocks (use method nz).
+
+	* CVSTAG: finance_quote_1_09
