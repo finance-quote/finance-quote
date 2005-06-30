@@ -780,3 +780,17 @@
 	Pass an extra parameter to TableExtract to keep it from doing
 	unnecessary work that produces warnings.
 
+2005-06-29  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/VWD.pm: Updated module from Jörg Sommer
+	<joerg@alea.gnuu.de>.
+
+	* lib/Finance/Quote/cdnfundlibrary.pm: Changes inspired by
+	kalaleq@users.sourceforge.net allow retrieval of more data.
+
+	* lib/Finance/Quote.pm:
+	* lib/Finance/Quote/Yahoo/NZ.pm: New module from Stephen Judd
+	<saniac@users.sourceforge.net>.
+
+	* lib/Finance/Quote/NZX.pm: Tweak to allow both NZX and Yahoo:NZ
+	to get quotes for New Zealand Stocks (use method nz).
