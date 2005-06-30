@@ -41,8 +41,12 @@ use vars qw/$VERSION/;
 
 $VERSION = '1.00';
 
-sub methods { return (nzx => \&nzx); }
-sub labels { return (nzx => [qw/exchange name price last date isodate method/]); }
+sub methods { return (nz => \&nzx, nzx => \&nzx); }
+sub labels {
+	my @labels = qw/exchange name price last date isodate method/;
+
+	return (nz => \@labels, nzx => \@labels);
+}
 
 
 

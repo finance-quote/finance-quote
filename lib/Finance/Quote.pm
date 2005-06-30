@@ -169,7 +169,7 @@ sub new {
 			      Tdwaterhouse Tiaacref Troweprice Trustnet Union
 			      VWD
 			      Yahoo::Asia Yahoo::Australia Yahoo::Brasil
-			      Yahoo::Europe Yahoo::USA/; }
+			      Yahoo::Europe Yahoo::NZ Yahoo::USA/; }
 
 	$this->_load_modules(@modules,@reqmodules);
 
