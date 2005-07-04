@@ -813,3 +813,9 @@
 	  to 1.01 to allow correct indexing on CPAN, however the
 	  older version currently remains in the 1.09 release.
 
+2005-06-04  Paul Fenwick  <pjf@cpan.org>
+
+	* lib/Finance/Quote.pm: Bumped $VERSION to 1.10, primarily
+	  to work around a problem with CPAN distributions.
+
+	* CVSTAG: finance_quote_1_10

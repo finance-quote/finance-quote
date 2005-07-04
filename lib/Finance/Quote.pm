@@ -47,7 +47,7 @@ $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/m5?";
 @EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.09';
+$VERSION = '1.10';
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -945,7 +945,8 @@ http://www.gnucash.org/
 =head1 SEE ALSO
 
 Finance::Quote::AEX, Finance::Quote::ASX, Finance::Quote::Cdnfundlibrary,
-Finance::Quote::DWS, Finance::Quote::Fidelity, Finance::Quote::FinanceCanada, Finance::Quote::Fool,
+Finance::Quote::DWS, Finance::Quote::Fidelity, Finance::Quote::FinanceCanada,
+Finance::Quote::Fool,
 Finance::Quote::FTPortfolios, Finance::Quote::Tdefunds,
 Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice, Finance::Quote::Trustnet,
