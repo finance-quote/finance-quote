@@ -109,8 +109,8 @@ sub vwd
       # addressing, because colspan in table head hides columns in all rows
       my $table = new HTML::TableExtract
 	  (decode=>0, headers=>["Stammdaten"])->parse($response->content);
-      unless ($table->first_table_state_found()) {
-	print "table doesn't exist 2\n";
+      unless (ref($table->first_table_state_found()) eq "HTML::TableExtract::TableState") {
+	#print STDERR  "table doesn't exist 2\n"; #  in WEB-Appl. störende Ausgabe
 	$info{$fund, "success"}  = 0;
 	$info{$fund, "errormsg"} = "Parse error";
 	next;

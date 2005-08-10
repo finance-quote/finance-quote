@@ -819,3 +819,9 @@
 	  to work around a problem with CPAN distributions.
 
 	* CVSTAG: finance_quote_1_10
+
+2005-08-10  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/VWD.pm: Handle invalid ISINs better. VWD
+	delivers a 404 error instead of a blank page.  Fix suggested by 
+	Uwe Simon <uwe.simon.koeln at t-online dot de>
