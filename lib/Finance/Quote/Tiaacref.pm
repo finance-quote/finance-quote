@@ -43,7 +43,7 @@ $VERSION = '1.02';
 
 # URLs of where to obtain information.
 # This used to be different for the CREF and TIAA annuities, but this changed.
-$CREF_URL = ("http://www5.tiaa-cref.org/ddata/DownloadData?");
+$CREF_URL = ("https://www3.tiaa-cref.org/ddata/DownloadData?");
 
 sub methods { return (tiaacref=>\&tiaacref); }
 
