@@ -35,12 +35,13 @@ use Exporter ();
 use Carp;
 use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
+use HTML::TableExtract;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $VERSION $TIMEOUT %MODULES %METHODS $AUTOLOAD
 	    $YAHOO_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
 
-$YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/m5?";
+$YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/currency/convert?amt=1&submit=Convert&";
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
@@ -235,8 +236,11 @@ sub currency {
 
 	my $ua = $this->user_agent;
 
-	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}s=$from&t=$to")->content;
-	my ($exchange_rate) = $data =~ m#$from$to=X</a></th><th>1</th><th(?: nowrap)?>[^<]+</th><t[dh]>(\d+\.\d+)</t[dh]>#;
+	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}from=$from&to=$to")->content;
+	my $te = HTML::TableExtract->new( headers => ['Symbol', 'Bid', 'Ask'] );
+	$te->parse($data);
+	my $row = ($te->rows())[0];
+	my ($exchange_rate) = $$row[1];
 
 	{
 		local $^W = 0;	# Avoid undef warnings.
