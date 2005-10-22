@@ -42,6 +42,7 @@ lib/Finance/Quote/Yahoo/Brasil.pm
 lib/Finance/Quote/Yahoo/Europe.pm
 lib/Finance/Quote/Yahoo/NZ.pm
 lib/Finance/Quote/Yahoo/USA.pm
+lib/Finance/Quote/ZA.pm
 test/Use.t
 test/aex.t
 test/asegr.t
@@ -72,3 +73,4 @@ test/yahoo_australia.t
 test/yahoo_brasil.t
 test/yahoo_europe.t
 test/yahoo_nz.t
+test/za.t

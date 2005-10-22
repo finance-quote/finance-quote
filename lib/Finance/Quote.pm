@@ -168,7 +168,7 @@ sub new {
 			      DWS FTPortfolios Fidelity FinanceCanada Fool IndiaMutual
 			      ManInvestments NZX Platinum SEB TSP Tdefunds
 			      Tdwaterhouse Tiaacref Troweprice Trustnet Union
-			      VWD
+			      VWD ZA
 			      Yahoo::Asia Yahoo::Australia Yahoo::Brasil
 			      Yahoo::Europe Yahoo::NZ Yahoo::USA/; }
 
