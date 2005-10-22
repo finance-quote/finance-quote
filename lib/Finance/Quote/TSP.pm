@@ -47,13 +47,23 @@ $TSP_URL = 'http://www.tsp.gov/rates/share-prices.html';
 $TSP_MAIN_URL=("http://www.tsp.gov");
 
 %TSP_FUND_COLUMNS = (
-    TSPGFUND => "G",
-    TSPFFUND => "F",
-    TSPCFUND => "C",
-    TSPSFUND => "S",
-    TSPIFUND => "I");
+    TSPL2040FUND => "L 2040",
+    TSPL2030FUND => "L 2030",
+    TSPL2020FUND => "L 2020",
+    TSPL2010FUND => "L 2010",
+    TSPLINCOMEFUND => "L INCOME",
+    TSPGFUND => "G FUND",
+    TSPFFUND => "F FUND",
+    TSPCFUND => "C FUND",
+    TSPSFUND => "S FUND",
+    TSPIFUND => "I FUND" );
 
 %TSP_FUND_NAMES = (
+    TSPL2040 => 'Lifecycle 2040 Fund',
+    TSPL2030 => 'Lifecycle 2030 Fund',
+    TSPL2020 => 'Lifecycle 2020 Fund',
+    TSPL2010 => 'Lifecycle 2010 Fund',
+    TSPLINCOME => 'Lifecycle Income Fund',
     TSPGFUND => 'Government Securities Investment Fund',
     TSPFFUND => 'Fixed Income Index Investment Fund',
     TSPCFUND => 'Common Stock Index Investment Fund',
@@ -105,6 +115,12 @@ sub tsp {
 	    my $tmp = uc $_;
 	    $tmp = uc sprintf("TSP%sfund", substr($tmp,0,1))
 	      if (index("GFCSI", substr($tmp,0,1)) >= 0);
+		if (index("LINCOME", substr($tmp,0,7)) >= 0)
+		{
+			$tmp = uc sprintf("TSP%sfund", substr($tmp,0,7));
+		} elsif (index("L", substr($tmp,0,1)) >= 0) {
+			$tmp = uc sprintf("TSP%sfund", substr($tmp,0,5));
+		}
 
 	    if(exists $fundrows{$tmp}) {
 		$info{$_, 'success'} = 1;

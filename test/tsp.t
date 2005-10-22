@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 15};
+BEGIN {plan tests => 16};
 
 use Finance::Quote;
 
@@ -9,13 +9,13 @@ use Finance::Quote;
 
 my $quoter = Finance::Quote->new();
 
-my %quotes = $quoter->tsp("c","s","TSPgfund","BOGUS");
+my %quotes = $quoter->tsp("c","s","TSPgfund","BOGUS","l2040fund");
 ok(%quotes);
 
 # Check that some values are defined.
 ok($quotes{"c","success"});
 ok($quotes{"c","nav"} > 0);
-ok($quotes{"s","date"});
+ok($quotes{"l2040fund","date"});
 ok($quotes{"s","currency"});
 ok($quotes{"s","name"});
 ok($quotes{"TSPgfund","success"});
@@ -29,9 +29,10 @@ ok( !defined($quotes{"c","exchange"}) );
 ok( ! $quotes{"BOGUS","success"});
 
 # Exercise the fetch function 
-%quotes = $quoter->fetch("tsp","g","f","i");
+%quotes = $quoter->fetch("tsp","g","f","i","tsplincomefund");
 ok(%quotes);
 ok($quotes{"g","success"});
 ok($quotes{"f","nav"} > 0);
 ok($quotes{"i","date"});
+ok($quotes{"tsplincomefund","nav"} > 0);
 
