@@ -239,6 +239,10 @@ sub currency {
 	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}from=$from&to=$to")->content;
 	my $te = HTML::TableExtract->new( headers => ['Symbol', 'Bid', 'Ask'] );
 	$te->parse($data);
+
+	# Make sure there's a table to parse.
+	return undef unless ($te->tables);
+
 	my $row = ($te->rows())[0];
 	my ($exchange_rate) = $$row[1];
 
