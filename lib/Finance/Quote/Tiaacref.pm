@@ -58,24 +58,43 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 #       ..etc.
 # where bogus_symbol takes on the following values for the various annuities:
 #
-#Stock: 			CREFstok
-#Money Market:			CREFmony
-#Equity Index:			CREFequi
-#Inf-Linked Bond:		CREFinfb
-#Bond Market:			CREFbond
-#Social Choice:			CREFsoci
-#Global Equities:		CREFglob
-#Growth:			CREFgrow
-#TIAA Real Estate:		TIAAreal
-#PA Stock Index:		TIAAsndx
-#PA Select Stock:		TLSIX
-#PA Select Growth Equity:	TLGEX
-#PA Select Growth Income:	TLGIX
-#PA Select Int'l Equity:	TLIEX
-#PA Select Social Choice:	TLSCX
-#PA Select Large Cap Value: TLLCX
-#PA Select Small Cap Equity: TLCEX
-#PA Select Real Estate:	TLREX
+# Stock: 				CREFstok
+# Money Market:				CREFmony
+# Equity Index:				CREFequi
+# Inf-Linked Bond:			CREFinfb
+# Bond Market:				CREFbond
+# Social Choice:			CREFsoci
+# Global Equities:			CREFglob
+# Growth:				CREFgrow
+# TIAA Real Estate:			TIAAreal
+# PA Stock Index:			TIAAsndx
+# PA Select Stock:			TLSIX
+# PA Select Growth Equity:		TLGEX
+# PA Select Growth Income:		TLGIX
+# PA Select Int'l Equity:		TLIEX
+# PA Select Social Choice:		TLSCX
+# PA Select Large Cap Value:		TLLCX
+# PA Select Small Cap Equity:		TLCEX
+# PA Select Real Estate:		TLREX
+
+# TIAA-CREF Money Market:		TIAXX
+# TIAA-CREF Bond Plus:			TIPBX
+# TIAA-CREF High-Yield Bond:		TCHYX
+# TIAA-CREF Inflation-Linked Bond:	TCILX
+# TIAA-CREF Short-Term Bond:		TCSTX
+# TIAA-CREF Tax-Exempt Bond:		TCTEX
+# TIAA-CREF Real Estate Securities:	TCREX
+# TIAA-CREF Equity Index:		TCEIX
+# TIAA-CREF Growth Equity:		TIGEX
+# TIAA-CREF Growth & Income:		TIGIX
+# TIAA-CREF International Equity:	TIINX
+# TIAA-CREF Large-Cap Value:		TCLCX
+# TIAA-CREF Mid-Cap Growth:		TCMGX
+# TIAA-CREF Mid-Cap Value:		TCMVX
+# TIAA-CREF Small-Cap Equity:		TCSEX
+# TIAA-CREF Social Choice Equity:	TCSCX
+# TIAA-CREF Managed Allocation:		TIMAX
+
 
 #
 # This subroutine was written by Brent Neal <brentn@users.sourceforge.net>
@@ -103,8 +122,8 @@ sub tiaacref
     	$tiaacref_ids{"CREFgrow"} = "CREF Growth";
     	$tiaacref_ids{"TIAAreal"} = "TIAA Real Estate";
     	$tiaacref_ids{"TIAAsndx"} = "TIAA Teachers Personal Annuity Stock Index";
-	    $tiaacref_ids{"TLSIX"} = "TIAA Personal Annuity Select Stock Index";
-		$tiaacref_ids{"TLGEX"} = "TIAA Personal Annuity Select Growth Equity";
+        $tiaacref_ids{"TLSIX"} = "TIAA Personal Annuity Select Stock Index";
+        $tiaacref_ids{"TLGEX"} = "TIAA Personal Annuity Select Growth Equity";
         $tiaacref_ids{"TLGIX"} = "TIAA Personal Annuity Select Growth & Income";
         $tiaacref_ids{"TLIEX"} = "TIAA Personal Annuity Select International Equity";
         $tiaacref_ids{"TLSCX"} = "TIAA Personal Annuity Select Social Choice Equity";
@@ -112,10 +131,35 @@ sub tiaacref
         $tiaacref_ids{"TLCEX"} = "TIAA Personal Annuity Select Small Cap Equity";
         $tiaacref_ids{"TLREX"} = "TIAA Personal Annuity Select Real Estate Securities";
 
+	# Money Market
+	$tiaacref_ids{"TIAXX"} = "TIAA-CREF Money Market";
+
+	# Bonds
+	$tiaacref_ids{"TIPBX"} = "TIAA-CREF Bond Plus";
+	$tiaacref_ids{"TCHYX"} = "TIAA-CREF High-Yield Bond";
+	$tiaacref_ids{"TCILX"} = "TIAA-CREF Inflation-Linked Bond";
+	$tiaacref_ids{"TCSTX"} = "TIAA-CREF Short-Term Bond";
+	$tiaacref_ids{"TCTEX"} = "TIAA-CREF Tax-Exempt Bond";
+
+	# Real Estate
+	$tiaacref_ids{"TCREX"} = "TIAA-CREF Real Estate Securities";
+
+	# Equities
+	$tiaacref_ids{"TCEIX"} = "TIAA-CREF Equity Index";
+	$tiaacref_ids{"TIGEX"} = "TIAA-CREF Growth Equity";
+	$tiaacref_ids{"TIGIX"} = "TIAA-CREF Growth & Income";
+	$tiaacref_ids{"TIINX"} = "TIAA-CREF International Equity";
+	$tiaacref_ids{"TCLCX"} = "TIAA-CREF Large-Cap Value";
+	$tiaacref_ids{"TCMGX"} = "TIAA-CREF Mid-Cap Growth";
+	$tiaacref_ids{"TCMVX"} = "TIAA-CREF Mid-Cap Value";
+	$tiaacref_ids{"TCSEX"} = "TIAA-CREF Small-Cap Equity";
+	$tiaacref_ids{"TCSCX"} = "TIAA-CREF Social Choice Equity";
+
+	$tiaacref_ids{"TIMAX"} = "TIAA-CREF Managed Allocation";
     }
     
     if (! %tiaacref_vals) {
-    $tiaacref_vals{"CREFstok"} = "1001";
+        $tiaacref_vals{"CREFstok"} = "1001";
 	$tiaacref_vals{"CREFmony"} = "1008";
 	$tiaacref_vals{"CREFequi"} = "1004";
 	$tiaacref_vals{"CREFinfb"} = "1007";
@@ -133,6 +177,28 @@ sub tiaacref
 	$tiaacref_vals{"TLLCX"}    = "1016";
 	$tiaacref_vals{"TLCEX"}    = "1017";
 	$tiaacref_vals{"TLREX"}    = "1018";
+
+	$tiaacref_vals{"TIAXX"} = "76";
+
+        $tiaacref_vals{"TIPBX"} = "75";
+        $tiaacref_vals{"TCHYX"} = "82";
+        $tiaacref_vals{"TCILX"} = "90";
+        $tiaacref_vals{"TCSTX"} = "81";
+        $tiaacref_vals{"TCTEX"} = "80";
+
+        $tiaacref_vals{"TCREX"} = "89";
+
+        $tiaacref_vals{"TCEIX"} = "84";
+        $tiaacref_vals{"TIGEX"} = "72";
+        $tiaacref_vals{"TIGIX"} = "73";
+        $tiaacref_vals{"TIINX"} = "71";
+        $tiaacref_vals{"TCLCX"} = "85";
+        $tiaacref_vals{"TCMGX"} = "86";
+        $tiaacref_vals{"TCMVX"} = "87";
+        $tiaacref_vals{"TCSEX"} = "88";
+        $tiaacref_vals{"TCSCX"} = "83";
+
+        $tiaacref_vals{"TIMAX"} = "74";
     }
     
 #The location doesn't matter anymore. 
@@ -150,14 +216,36 @@ sub tiaacref
         $tiaacref_locs{"CREFgrow"} = 1;
         $tiaacref_locs{"TIAAreal"} = 1;
         $tiaacref_locs{"TIAAsndx"} = 1;
-		$tiaacref_locs{"TLSIX"}    = 1;
-		$tiaacref_locs{"TLGEX"}    = 1;
-		$tiaacref_locs{"TLGIX"}    = 1;
-		$tiaacref_locs{"TLIEX"}    = 1;
-		$tiaacref_locs{"TLSCX"}    = 1;
-		$tiaacref_locs{"TLLCX"}    = 1;
-		$tiaacref_locs{"TLCEX"}    = 1;
-		$tiaacref_locs{"TLREX"}    = 1;
+        $tiaacref_locs{"TLSIX"}    = 1;
+        $tiaacref_locs{"TLGEX"}    = 1;
+        $tiaacref_locs{"TLGIX"}    = 1;
+        $tiaacref_locs{"TLIEX"}    = 1;
+        $tiaacref_locs{"TLSCX"}    = 1;
+        $tiaacref_locs{"TLLCX"}    = 1;
+        $tiaacref_locs{"TLCEX"}    = 1;
+        $tiaacref_locs{"TLREX"}    = 1;
+
+	$tiaacref_locs{"TIAXX"} = 1;
+
+        $tiaacref_locs{"TIPBX"} = 1;
+        $tiaacref_locs{"TCHYX"} = 1;
+        $tiaacref_locs{"TCILX"} = 1;
+        $tiaacref_locs{"TCSTX"} = 1;
+        $tiaacref_locs{"TCTEX"} = 1;
+
+        $tiaacref_locs{"TCREX"} = 1;
+
+        $tiaacref_locs{"TCEIX"} = 1;
+        $tiaacref_locs{"TIGEX"} = 1;
+        $tiaacref_locs{"TIGIX"} = 1;
+        $tiaacref_locs{"TIINX"} = 1;
+        $tiaacref_locs{"TCLCX"} = 1;
+        $tiaacref_locs{"TCMGX"} = 1;
+        $tiaacref_locs{"TCMVX"} = 1;
+        $tiaacref_locs{"TCSEX"} = 1;
+        $tiaacref_locs{"TCSCX"} = 1;
+
+        $tiaacref_locs{"TIMAX"} = 1;
     }
     my(@funds) = @_;
     return unless @funds;
@@ -194,6 +282,7 @@ sub tiaacref
     $urlc .=  "days=1";
     $urlt .=  "selected=1";
     $qdata ="";
+
     $ua = $quoter->user_agent;
     if ($cntc) {
     	$reply = $ua->request(GET $urlc);
@@ -278,15 +367,35 @@ The following symbols can be used:
     Global Equities:			CREFglob
     Growth:				CREFgrow
     TIAA Real Estate:			TIAAreal
-	PA Stock Index:		TIAAsndx
-	PA Select Stock:		TLSIX
-	PA Select Growth Equity:	TLGEX
-	PA Select Growth Income:	TLGIX
-	PA Select Int'l Equity:	TLIEX
-	PA Select Social Choice:	TLSCX
-	PA Select Large Cap Value: TLLCX
-	PA Select Small Cap Equity: TLCEX
-	PA Select Real Estate:	TLREX
+
+    PA Stock Index:			TIAAsndx
+    PA Select Stock:			TLSIX
+    PA Select Growth Equity:		TLGEX
+    PA Select Growth Income:		TLGIX
+    PA Select Int'l Equity:		TLIEX
+    PA Select Social Choice:		TLSCX
+    PA Select Large Cap Value:		TLLCX
+    PA Select Small Cap Equity:		TLCEX
+    PA Select Real Estate:		TLREX
+
+    TIAA-CREF Money Market:             TIAXX
+    TIAA-CREF Bond Plus:                TIPBX
+    TIAA-CREF High-Yield Bond:          TCHYX
+    TIAA-CREF Inflation-Linked Bond:    TCILX
+    TIAA-CREF Short-Term Bond:          TCSTX
+    TIAA-CREF Tax-Exempt Bond:          TCTEX
+    TIAA-CREF Real Estate Securities:   TCREX
+    TIAA-CREF Equity Index:             TCEIX
+    TIAA-CREF Growth Equity:            TIGEX
+    TIAA-CREF Growth & Income:          TIGIX
+    TIAA-CREF International Equity:     TIINX
+    TIAA-CREF Large-Cap Value:          TCLCX
+    TIAA-CREF Mid-Cap Growth:           TCMGX
+    TIAA-CREF Mid-Cap Value:            TCMVX
+    TIAA-CREF Small-Cap Equity:         TCSEX
+    TIAA-CREF Social Choice Equity:     TCSCX
+    TIAA-CREF Managed Allocation:       TIMAX
+
 
 This module is loaded by default on a Finance::Quote object.  It's
 also possible to load it explicitly by passing "Tiaacref" in to the
