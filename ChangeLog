@@ -847,3 +847,13 @@
 	* lib/Finance/Quote/ZA.pm:
 	* test/za.t: Add a new South African stock quote module from
 	Stephen Langenhoven <langenhoven at users.sourceforge.net>.
+	
+2005-10-22  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/Deka.pm: Add a new module to retrieve German
+	investment fund prices from Deka.  Module from Knut Franke
+	<Knut.Franke at gmx.de>
+
+	* lib/Finance/Quote/USFedBonds.pm: 
+	* test/usfedbonds.t: Add a new US Federal Bonds stock quote module
+	from Stephen Langenhoven <langenhoven at users.sourceforge.net>.
