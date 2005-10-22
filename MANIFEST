@@ -42,7 +42,6 @@ lib/Finance/Quote/Yahoo/Brasil.pm
 lib/Finance/Quote/Yahoo/Europe.pm
 lib/Finance/Quote/Yahoo/NZ.pm
 lib/Finance/Quote/Yahoo/USA.pm
-lib/Finance/Quote/ZI.pm
 test/Use.t
 test/aex.t
 test/asegr.t
