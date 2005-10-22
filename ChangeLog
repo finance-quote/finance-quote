@@ -825,3 +825,25 @@
 	* lib/Finance/Quote/VWD.pm: Handle invalid ISINs better. VWD
 	delivers a 404 error instead of a blank page.  Fix suggested by 
 	Uwe Simon <uwe.simon.koeln at t-online dot de>
+
+2005-10-21  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote.pm: Updated to work with new Yahoo currency
+	conversion pages.
+
+	* lib/Finance/Quote/Tiaacref.pm: New URL from Kevin Foss.  Uses
+	https, so the Crypt::SSLeay module is now required for TIAA-CREF
+	quotes.
+
+	* lib/Finance/Quote/ZI.pm: Zürich Invest has been purchased by
+	Deutsche Bank and integrated into DWS.  The DWS.pm module should
+	now be used in place of the ZI.pm module.
+
+	* lib/Finance/Quote/VWD.pm: Patch from Rainer Dorsch to return the
+	current price as 'last'.  The HTML::TableExtract
+	first_table_state_found() function has been deprecated.  Accept
+	both the old and new values as correct answers.
+
+	* lib/Finance/Quote/ZA.pm:
+	* test/za.t: Add a new South African stock quote module from
+	Stephen Langenhoven <langenhoven at users.sourceforge.net>.
