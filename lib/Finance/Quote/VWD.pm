@@ -76,7 +76,8 @@ sub trim
 }
 
 # Trim leading and tailing whitespaces, leading + and tailing % and
-# translate german separators into english separators
+# translate german separators into english separators. Also removes
+# the thousands separator in returned values.
 sub trimtr
 {
     $_ = shift();
@@ -84,6 +85,7 @@ sub trimtr
     s/^\s*\+?//;
     s/\%?\s*$//;
     tr/,./.,/;
+    s/,//g;
     return $_;
 }
 
