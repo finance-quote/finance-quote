@@ -43,7 +43,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
 
 $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/currency/convert?amt=1&submit=Convert&";
 # If the above URL ever fails, try rewriting this module to use the URL below.
-$YAHOO_CURRENCY_URL2 = "http://uk.finance.yahoo.com/q?s=USDCAD%3DX";
+# $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/q?s=USDCAD%3DX";
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
