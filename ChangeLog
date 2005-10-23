@@ -1,5 +1,10 @@
 2005-10-23  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote/VWD.pm: Put back the call to the
+	HTML::TableExtract first_table_state_found() function for now.  At
+	some point this should be removed and the 2.0 version of
+	HTML::TableExtract required.
+
 	* lib/Finance/Quote.pm: Make note of an alternate yahoo URL that
 	can be used to obtain currency quotes. From Gerry Barksdale <gbark
 	at barksys.com>.
