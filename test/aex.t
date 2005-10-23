@@ -28,6 +28,31 @@ ok(%quotes);
 ok($quotes{"AAB AAB TL 16","success"});
 ok($quotes{"AAB AAB TL 16","last"} > 0);
 
+# Test options fetching
+# the following tests will fail after Dec 2009:-(
+%quotes = $quoter->fetch("aex_options", "aex c dec 2009 400.00", "phi");
+ok(%quotes);
+
+ok($quotes{"aex c dec 2009 400.00","success"});
+ok($quotes{"aex c dec 2009 400.00","close"} > 0);
+ok($quotes{"aex c dec 2009 400.00","bid"});
+ok($quotes{"aex c dec 2009 400.00","ask"});
+
+ok($quotes{"phi","success"});
+ok($quotes{"phi","options"});
+ok($quotes{ $quotes{"phi","options"}->[0],"close"});
+ok($quotes{ $quotes{"phi","options"}->[0],"date"});
+
+# Test futures fetching
+%quotes = $quoter->fetch("aex_futures", "fti");
+ok(%quotes);
+
+# Check that some values are defined.
+ok($quotes{"fti","success"});
+ok($quotes{"fti","futures"});
+ok($quotes{ $quotes{"fti","futures"}->[0],"last"} > 0);
+ok($quotes{ $quotes{"fti","futures"}->[0],"date"});
+ok($quotes{ $quotes{"fti","futures"}->[0],"time"});
 
 # Check that a bogus fund returns no-success.
 %quotes = $quoter->aex("BOGUS");
