@@ -1,4 +1,21 @@
+2005-10-23  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote.pm: Make note of an alternate yahoo URL that
+	can be used to obtain currency quotes. From Gerry Barksdale <gbark
+	at barksys.com>.
+
 2005-10-22  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/Tiaacref.pm:
+	* test/tiaacref.t: Add Support for TIAA-CREF mutual funds from
+	Brandon <brandon2 at users.sourceforge.net>.
+
+	* lib/Finance/Quote/VWD.pm: Remove the thousands separator
+	character from quote values.
+
+	* lib/Finance/Quote/TSP.pm: 
+	* test/tsp.t: Frank Mori Hess's <fmhess at speakeasy.net> change
+	to add support for the TSP lifecycle L funds.
 
 	* ChangeLog: Archive pre-2005 data into a separate file.
 
