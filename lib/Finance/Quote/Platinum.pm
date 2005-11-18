@@ -93,6 +93,7 @@ sub platinum {
 	# Pack the resulting data into our structure.
 	foreach my $row (@rows) {
 	    	my $name = shift(@$row);
+		next if !defined($name);
 		# Map between Names and APIR codes
 		my %map = ('Platinum European Fund' => 'PLA0001AU',
 			   'Platinum International Fund' => 'PLA0002AU',

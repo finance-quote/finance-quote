@@ -86,7 +86,7 @@ sub asx {
 
 	# Extract table contents.
 	my @rows;
-	unless (@rows = $te->rows) {
+	unless (($te->tables > 0) && ( @rows = $te->rows)) {
 		foreach my $stock (@stocks) {
 			$info{$stock,"success"} = 0;
 			$info{$stock,"errormsg"} = "Failed to parse HTML table.";

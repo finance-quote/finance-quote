@@ -281,15 +281,16 @@ sub yahoo_request {
 	# place, don't you think?
 
 	foreach my $key (keys %info) {
-	  if (!defined $info{$key}) {
-	    printf STDERR "\n";
-	    printf STDERR "$key points to undefined value\n";
-	    printf STDERR "\n";
+	  #if (!defined $info{$key}) {
+	  #  printf STDERR "\n";
+	  #  printf STDERR "$key points to undefined value\n";
+	  #  printf STDERR "\n";
+	  #}
+	  if (defined $info{$key}) {
+	    $info{$key} =~ s/<[^>]*>//g;
+	    $info{$key} =~ s/&nbsp;.*$//;
+	    undef $info{$key} if ($info{$key} eq "N/A");
 	  }
-		$info{$key} =~ s/<[^>]*>//g;
-		$info{$key} =~ s/&nbsp;.*$//;
-		undef $info{$key} if (defined($info{$key}) and 
-                                      $info{$key} eq "N/A");
 	}
 	return %info if wantarray;
 	return \%info;
