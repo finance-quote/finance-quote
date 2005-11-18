@@ -10,7 +10,7 @@ use Finance::Quote;
 my $q      = Finance::Quote->new();
 my $year   = (localtime())[5] + 1900;
 
-my %quotes = $q->yahoo("IBM","SGI","BOGUS");
+my %quotes = $q->yahoo("IBM","CSCO","BOGUS");
 ok(%quotes);
 
 # Check the last values are defined.  These are the most
@@ -23,12 +23,12 @@ ok(($quotes{"IBM", "currency"} eq "USD") &&
 ok(substr($quotes{"IBM","isodate"},0,4) == $year);
 ok(substr($quotes{"IBM","date"},6,4) == $year);
 
-ok($quotes{"SGI","last"} > 0);
-ok($quotes{"SGI","success"});
+ok($quotes{"CSCO","last"} > 0);
+ok($quotes{"CSCO","success"});
 
 # Make sure there are no spurious % signs.
 
-ok($quotes{"SGI","p_change"} !~ /%/);
+ok($quotes{"CSCO","p_change"} !~ /%/);
 
 # Check that bogus stocks return failure:
 

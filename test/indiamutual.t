@@ -9,7 +9,7 @@ use Finance::Quote;
 
 my $q      = Finance::Quote->new();
 my @funds = ("1#176#170", "1#134", "1#129#122", "1#173", "1#187#196",
-	     "1#15#487", "1#1#2");
+	     "1#15#487", "1#1414#1962");
 my $year = (localtime())[5] + 1900;
 
 my %quotes = $q->fetch("indiamutual", @funds);
