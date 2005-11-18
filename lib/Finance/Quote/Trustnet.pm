@@ -102,6 +102,8 @@ sub trustnet
 	# check the trust name - first look for an exact match trimming trailing spaces
 	$matches = 0;
 	foreach $row ($ts->rows) {
+	    # Try to weed out extraneous rows.
+	    next if !defined($$row[1]);
 	  ($sym = $$row[0]) =~ s/^ +//;
 	  $sym =~ s/ +\xA0.+//;
 	  

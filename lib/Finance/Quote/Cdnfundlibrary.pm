@@ -70,6 +70,15 @@ sub fundlibrary   {
 
       $te->parse($reply->content);
 
+      # Check for a page without tables
+      # This gets returned when a bad symbol name is given
+      unless ( $te->tables > 0 ) 
+      {
+	$fundquote {$mutual,"success"} = 0;
+	$fundquote {$mutual,"errormsg"} = "Fund name $mutual not found";
+	next;
+      } 
+     
       # Fund name
       $reply->content =~ m#<div\s+class="tSmallTitle">([^<]+)</div>#;
       $fundquote {$mutual, "name"} = $1;
