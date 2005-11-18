@@ -1,3 +1,30 @@
+2005-11-18  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/AEX.pm: Use the store_date function.
+
+	* lib/Finance/Quote/ASX.pm:
+	* lib/Finance/Quote/Cdnfundlibrary.pm:
+	* lib/Finance/Quote/Platinum.pm:
+	* lib/Finance/Quote/Trustnet.pm:
+	* lib/Finance/Quote/Yahoo/Base.pm: Add code to protect against
+	empty tables, data fields, etc.
+
+	* test/aex.t: Correct the number of test cases.  Changed test
+	stock to one that is still on the exchange.  Site no longer
+	provides time (date only) so remove tests for time of quote.
+	Futures quotes don't always have bid/ask values so comment out
+	those tests.
+	
+	* test/indiamutual.t:
+	* test/trustnet.t:
+	* test/union.t:
+	* test/yahoo.t: Changed test stock to one that is still on the
+	exchange.
+	
+	* test/yahoo_brasil.t: All returned prices (for all stocks I
+	tried) return a price of zero, so comment out the test for
+	non-zero.
+
 2005-10-23  David Hampton  <hampton@employees.org>
 
 	* lib/Finance/Quote/VWD.pm: Put back the call to the
