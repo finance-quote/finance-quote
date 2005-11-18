@@ -9,18 +9,18 @@ use Finance::Quote;
 
 my $q      = Finance::Quote->new();
 
-my %quotes = $q->unionfunds("975788","12345");
+my %quotes = $q->unionfunds("975792","12345");
 ok(%quotes);
 
 # Check the last values are defined.  These are the most
 #  used and most reliable indicators of success.
-ok($quotes{"975788","last"} > 0);
-ok($quotes{"975788","success"});
-ok($quotes{"975788", "currency"} eq "EUR");
+ok($quotes{"975792","last"} > 0);
+ok($quotes{"975792","success"});
+ok($quotes{"975792", "currency"} eq "EUR");
 
 my $year = (localtime())[5] + 1900;
-ok(substr($quotes{"975788","isodate"},0,4) eq $year);
-ok(substr($quotes{"975788","date"},6,4) eq $year);
+ok(substr($quotes{"975792","isodate"},0,4) eq $year);
+ok(substr($quotes{"975792","date"},6,4) eq $year);
 
 
 # Check that bogus stocks return failure:

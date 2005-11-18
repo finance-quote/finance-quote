@@ -11,7 +11,7 @@ use Finance::Quote;
 my $q = Finance::Quote->new();
 my $year = (localtime())[5] + 1900;
 
-my @stocks = ("ABBEY GROWTH R","MARLBORO INTERNATIONAL EQUITY");
+my @stocks = ("ABBEY NATIONAL INTERNATIONAL","MARLBOROUGH INTERNATIONAL EQUITY");
 
 my %quotes = $q->fetch("trustnet",@stocks);
 
