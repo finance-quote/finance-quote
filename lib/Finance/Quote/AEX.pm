@@ -267,9 +267,8 @@ sub aex_options {
         my $req = HTTP::Request->new(GET => $AEXOPT_URL . "&a=" . $AEXOPT_FULL . "&Symbool=" . $underlying);
         my $reply = $ua->request($req);
 
-        # get and convert date from Dutch (dd mmm yyyy) to US format (mmm/dd/yyyy)
+        # get date in Dutch (dd mmm yyyy)
         my ($date) = $reply->content =~ m[<OPTION\s+SELECTED>(.*?)</OPTION>]mi;
-        my $dateusa = join "/", (split /\s/, $date)[1,0,2];
 
         unless ($reply->is_success && $date) {
             foreach (grep /^$underlying(\s+[CP]\b)?/i, @symbols) {
@@ -323,7 +322,7 @@ sub aex_options {
                         ($info {$symbol, $label} = $row->[$pos++]) =~ tr/0-9.://cd; # Remove garbage
                         undef $info {$symbol, $label} if $info {$symbol, $label} eq "";
                     }
-                    $info {$symbol, "date"} = $dateusa;
+		    $quoter->store_date(\%info, $symbol, {eurodate => $date});
                     $info {$symbol, "currency"} = "EUR";
                     $info {$symbol, "price"} = $info {$symbol, "last"};
                 };
@@ -502,9 +501,6 @@ sub aex_futures {
             next;
         }
 
-        # convert date from Dutch (dd mmm yyyy) to US format (mmm/dd/yyyy)
-        my $dateusa = join "/", (split /\s/, $date)[1,0,2];
-
         my $te = new HTML::TableExtract(
             headers => ['Stock','Current','Dif.','Date / Time','Bid','Ask','Volume','High','Low','Open']
         );
@@ -533,7 +529,7 @@ sub aex_futures {
                     undef $info {$symbol, $label} if $info {$symbol, $label} eq "";
                 }
                 $info {$symbol, "close"} = $info {$symbol, "last"} - ($info {$symbol, "change"} || 0);
-                $info {$symbol, "date"} = $dateusa;
+		$quoter->store_date(\%info, $symbol, {eurodate => $date});
                 $info {$symbol, "currency"} = "EUR";
                 $info {$symbol, "price"} = $info {$symbol, "last"};
             }
