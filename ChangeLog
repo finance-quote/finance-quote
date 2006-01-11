@@ -1,5 +1,7 @@
 2006-01-10  David Hampton  <hampton@employees.org>
 
+	* test/aex.t: Change test currency to one still on the exchange.
+
 	* lib/Finance/Quote/VWD.pm: Jörg Sommer's patch to work better
 	with invalid WKNs and to extract the exchange information from its
 	new location.
