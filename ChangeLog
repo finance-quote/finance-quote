@@ -100,6 +100,13 @@
 	delivers a 404 error instead of a blank page.  Fix suggested by 
 	Uwe Simon <uwe.simon.koeln at t-online dot de>
 
+2005-07-04  Paul Fenwick  <pjf@cpan.org>
+
+	* lib/Finance/Quote.pm: Bumped $VERSION to 1.10, primarily
+	  to work around a problem with CPAN distributions.
+
+	* CVSTAG: finance_quote_1_10
+
 2005-06-29  David Hampton  <hampton@employees.org>
 
 	* lib/Finance/Quote/VWD.pm: Updated module from Jörg Sommer
@@ -116,13 +123,6 @@
 	to get quotes for New Zealand Stocks (use method nz).
 
 	* CVSTAG: finance_quote_1_09
-
-2005-06-04  Paul Fenwick  <pjf@cpan.org>
-
-	* lib/Finance/Quote.pm: Bumped $VERSION to 1.10, primarily
-	  to work around a problem with CPAN distributions.
-
-	* CVSTAG: finance_quote_1_10
 
 2005-05-30  Paul Fenwick  <pjf@cpan.org>
 
