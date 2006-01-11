@@ -20,4 +20,4 @@ ok($quotes{"847402","currency"} eq "EUR");
 
 # Check that a bogus fund returns no-success.
 ok($quotes{"BOGUS","success"} == 0);
-ok($quotes{"BOGUS","errormsg"} eq "Parse error");
+ok($quotes{"BOGUS","errormsg"} eq "Invalid symbol: BOGUS");
