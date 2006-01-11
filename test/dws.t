@@ -19,8 +19,11 @@ ok(length($quotes{"847402","date"}) > 0);
 ok($quotes{"847402","currency"} eq "EUR");
 
 my $year = (localtime())[5] + 1900;
-ok(substr($quotes{"847402","isodate"},0,4) == $year);
-ok(substr($quotes{"847402","date"},6,4) == $year);
+my $lastyear = $year - 1;
+ok((substr($quotes{"847402","isodate"},0,4) == $year) ||
+   (substr($quotes{"847402","isodate"},0,4) == $lastyear));
+ok((substr($quotes{"847402","date"},6,4) == $year) ||
+   (substr($quotes{"847402","date"},6,4) == $lastyear));
 
 # Check that a bogus fund returns no-success.
 ok(! $quotes{"BOGUS","success"});
