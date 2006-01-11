@@ -1,4 +1,5 @@
 ChangeLog
+ChangeLog.1
 Documentation/FAQ
 Documentation/Hackers-Guide
 Documentation/License
@@ -78,3 +79,4 @@ test/yahoo_brasil.t
 test/yahoo_europe.t
 test/yahoo_nz.t
 test/za.t
+META.yml                                 Module meta-data (added by MakeMaker)
