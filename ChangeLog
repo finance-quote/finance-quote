@@ -1,5 +1,10 @@
 2006-01-10  David Hampton  <hampton@employees.org>
 
+	* test/dws.t: 
+	* test/maninvestments.t: 
+	* test/yahoo_brasil.t: Accept dates in both the previous and
+	current year as valid responses.
+
 	* test/aex.t: Change test currency to one still on the exchange.
 
 	* lib/Finance/Quote/VWD.pm: Jörg Sommer's patch to work better
