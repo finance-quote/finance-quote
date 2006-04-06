@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -W
 #
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
@@ -75,13 +75,15 @@ sub trim
     return $_;
 }
 
-# Trim leading and tailing whitespaces, leading + and tailing % and
-# translate german separators into english separators. Also removes
-# the thousands separator in returned values.
+# Trim leading and tailing whitespaces, leading + and tailing %, leading
+# and tailing &plusmn; (plus minus) and translate german separators into
+# english separators. Also removes the thousands separator in returned
+# values.
 sub trimtr
 {
     $_ = shift();
     s/&nbsp;//g;
+    s/&plusmn;//g;
     s/^\s*\+?//;
     s/\%?\s*$//;
     tr/,./.,/;
@@ -107,39 +109,42 @@ sub vwd
 	"kurse_einzelkurs_uebersicht.htm?s=".$fund);
     if ($response->is_success)
     {
-      # Sometimes a table is before our tables, but we must use absolute
-      # addressing, because colspan in table head hides columns in all rows
-      my $table = new HTML::TableExtract
-	  (decode=>0, headers=>["Stammdaten"])->parse($response->content);
-
-      unless ($table->tables) {
+      # parse only the part with the relevant informations; sometimes
+      # tables are inserted before which displace the table numbers and
+      # make parsing difficult. But there are marks in the source code and
+      # HTML::TableExtract as really tolerant with HTML.
+      my $html = $response->content;
+      my $offset = index($html, "<!-- Stammdaten -->");
+      if ($offset == -1) {
 	$info{$fund, "success"}  = 0;
 	$info{$fund, "errormsg"} = "Invalid symbol: $fund";
 	next;
       }
-      my $tabOffset = $table->first_table_state_found()->count() - 2;
+      my $len = rindex($html, "<!-- /Vergleich -->") - $offset;
+      if ($len > 0) {
+          $html = substr($html, $offset, $len);
+      } else {
+          $html = substr($html, $offset);
+      }
 
-      # parse table "Stammdaten" and extract its contents
-      my @rows = new HTML::TableExtract
-	  (decode=>0, depth=>2, count=>2+$tabOffset)->parse($response->content)->rows();
+      my $table = new HTML::TableExtract(decode=>0)->parse($html);
 
-      next unless (@rows);
-      $info{$fund, "symbol"}   = trim( $rows[4][1] );
+      # we expect at least five tables: Stammdaten, Jahreschart,
+      # Kursdaten, "Ihre Kurseinschätzung", Vergleich
+      next if ( scalar($table->table_states) < 5);
+
+      # extract the contents of "Stammdaten"
+      my @rows = ($table->table_states)[0]->rows();
       $info{$fund, "name"}     = trim( $rows[1][1] );
+      $info{$fund, "symbol"}   = trim( $rows[4][1] );
       $info{$fund, "currency"} = trim( $rows[8][1] );
 
-      # parse table "Jahreschart" and extract its contents
-      @rows = new HTML::TableExtract
-	  (depth => 2, count => 3+$tabOffset)->parse($response->content)->rows();
-
-      next unless (@rows);
+      # extract the contents of "Jahreschart"
+      @rows = ($table->table_states)[1]->rows();
       $quoter->store_date(\%info, $fund, {eurodate => $rows[0][1]});
-	  
-      # parse table "Kursdaten" and extract its contents
-      @rows = new HTML::TableExtract
-	  (decode=>0, depth=>2, count=>4+$tabOffset)->parse($response->content)->rows();
 
-      next unless (@rows);
+      # extract the contents of "Kursdaten"
+      @rows = ($table->table_states)[2]->rows();
       $info{$fund, "exchange"} = trimtr( $rows[0][1] );
       $info{$fund, "price"} = $info{$fund, "last"} = trimtr( $rows[1][1] );
       $info{$fund, "net"} = trimtr( $rows[2][2] );
@@ -149,11 +154,9 @@ sub vwd
       $info{$fund, "bid"} = trimtr( $rows[4][1] );
       $info{$fund, "ask"} = trimtr( $rows[5][1] );
 
-      # parse table "Fondsdaten" and extract its contents
-      @rows = new HTML::TableExtract
-	  (decode=>0, depth=>2, count=>5+$tabOffset)->parse($response->content)->rows();
-
-      next unless (@rows);
+      # extract the contents of "Vergleich"
+      @rows = ($table->table_states)[4]->rows();
+      $info{$fund, "close"} = trimtr( $rows[1][1] );
 
       $info{$fund, "success"}  = 1;
       $info{$fund, "errormsg"} = "";
