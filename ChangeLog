@@ -1,5 +1,12 @@
 2006-04-06  David Hampton  <hampton@employees.org>
 
+
+	* lib/Finance/Quote.pm:
+	* lib/Finance/Quote/Bourso.pm:
+	* test/bourso.t: New module from Dominique Corbex
+	<domcox@sourceforge.net> to fetch information from the "Paris
+	Stock Exchange", http://www.boursorama.com.
+
 	* lib/Finance/Quote/VWD.pm: Updated module from Jörg Sommer that
 	is more tolerant of the advertising added to the web page.
 
