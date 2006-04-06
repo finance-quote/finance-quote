@@ -16,6 +16,7 @@ lib/Finance/Quote/AEX.pm
 lib/Finance/Quote/ASEGR.pm
 lib/Finance/Quote/ASX.pm
 lib/Finance/Quote/BMONesbittBurns.pm
+lib/Finance/Quote/Bourso.pm
 lib/Finance/Quote/Cdnfundlibrary.pm
 lib/Finance/Quote/Deka.pm
 lib/Finance/Quote/DWS.pm
