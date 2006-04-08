@@ -214,7 +214,26 @@ to use the defaults, but also add some of your own:
 In the example above, the default fields would be available for currency
 conversion, but the "commission" field would also be converted.
 
-2.5. Things to avoid
+2.5. Dates
+----------
+
+Do not parse dates directly in your module.  Instead you should use
+the function $q->store_date(), which handles a variety of date
+formats.  In its simplest form, you simply tell the function what
+format the date is in and it handles all the parsing.  The code should
+look similar to this:
+
+  $quoter->store_date(\%info, $stock, {eurodate => @$row[1]});
+
+If the web site doesn't have a data available, somply call the
+function this way:
+
+  $quoter->store_date(\%info, $stock, {today => 1});
+
+See the documentation in Quote.pm for more information.
+
+
+2.6. Things to avoid
 --------------------
 Some sources of information will provide more stock information than
 requested.  Some code may rely upon your code only returning information
@@ -222,7 +241,7 @@ about the stocks that the caller requested.  As such, you should
 never return information about stocks that were not requested, even
 if you fetch and/or process that information.
 
-2.6. Using your new module
+2.7. Using your new module
 --------------------------
 Using your new module is easy.  Normally when using Finance::Quote you'd
 do something like the following:
