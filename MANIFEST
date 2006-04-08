@@ -24,8 +24,9 @@ lib/Finance/Quote/FTPortfolios.pm
 lib/Finance/Quote/Fidelity.pm
 lib/Finance/Quote/FinanceCanada.pm
 lib/Finance/Quote/Fool.pm
+lib/Finance/Quote/HEX.pm
 lib/Finance/Quote/IndiaMutual.pm
-lib/Finance/Quote/LeRevenue.pm
+lib/Finance/Quote/LeRevenu.pm
 lib/Finance/Quote/ManInvestments.pm
 lib/Finance/Quote/NZX.pm
 lib/Finance/Quote/Platinum.pm
