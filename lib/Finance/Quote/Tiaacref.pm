@@ -29,6 +29,7 @@
 
 package Finance::Quote::Tiaacref;
 require 5.005;
+require Crypt::SSLeay;
 
 use strict;
 
