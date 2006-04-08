@@ -1,5 +1,8 @@
 2006-04-08  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote/Trustnet.pm: Work around the fact that gnucash
+	escapes the ampersand character when passing stock names to F::Q.
+
 	* lib/Finance/Quote/DWS.pm: Updated module from Klaus Dahlke
 	<klaus.dahlke@gmx.de> to retrieve quotes from the new DWS web
 	page.

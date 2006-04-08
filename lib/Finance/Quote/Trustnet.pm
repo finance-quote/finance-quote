@@ -84,6 +84,7 @@ sub trustnet
 	$unittype = "acc" if ($suffix =~ /\(ACC\)/i);
       }
       $trusto =~ s/\s+$//;
+      $trusto =~ s/&amp;/&/g;
       $encoded = $trusto;
       $encoded =~ s/&/%26/g;
       $url = "$TRUSTNET_URL$unittype&txtS=$encoded";
