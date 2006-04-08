@@ -6,6 +6,7 @@
 #    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2000, Volker Stuerzl <volker.stuerzl@gmx.de>
+#    Copyright (C) 2006, Klaus Dahlke <klaus.dahlke@gmx.de>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,18 +29,24 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 #
-# $Id: DWS.pm,v 1.6 2005/03/20 01:44:13 hampton Exp $
+# $Id: DWS.pm,v 1.7 2006/04/08 19:54:55 hampton Exp $
 
 package Finance::Quote::DWS;
 require 5.005;
+require Crypt::SSLeay;
 
-use strict;
 use LWP::UserAgent;
 use HTTP::Request::Common;
+use HTML::TableExtract;
+use Data::Dumper;
+use LWP::Simple;
+use strict;
+use warnings;
+
 
 use vars qw/$VERSION/;
 
-$VERSION = '1.00';
+$VERSION = '2.00';
 
 sub methods { return (dwsfunds => \&dwsfunds); }
 sub labels { return (dwsfunds => [qw/exchange name date isodate price method/]); }
@@ -52,6 +59,12 @@ sub labels { return (dwsfunds => [qw/exchange name date isodate price method/]);
 #    ...
 #
 # This subroutine was written by Volker Stuerzl <volker.stuerzl@gmx.de>
+# 
+# Version 2.0 as new webpage provides the data
+# 2006-03-19: Klaus Dahlke
+# Since DWS has changed its format and the data are not available via
+# csv-file download, the respective web-page is avaluated. There are
+# some limitations currently, especially with the name
 
 sub dwsfunds
 {
@@ -59,7 +72,8 @@ sub dwsfunds
   my @funds = @_;
   return unless @funds;
   my $ua = $quoter->user_agent;
-  my (%fundhash, @q, @date, %info);
+  my (%fundhash, @q, %info);
+  my ($html_string, $te, $ts, $row, @cells, $ce, @ce1, @ce2, @ce22, @ce4, $last, $wkn, $date, $name);
 
   # create hash of all funds requested
   foreach my $fund (@funds)
@@ -67,89 +81,88 @@ sub dwsfunds
     $fundhash{$fund} = 0;
   }
 
-  # get csv data
-  my $response = $ua->request(GET &dwsurl);
-  if ($response->is_success)
-  {
-    # process csv data
-    foreach (split('\015?\012',$response->content))
-    {
-      @q = $quoter->parse_csv($_) or next;
-      if (exists $fundhash{$q[0]})
-      {
-        $fundhash{$q[0]} = 1;
+  # get page containing the tables with prices etc
+  my $DWS_URL = "https://www.deami.de/dps/ff/prices.aspx";
+  my $response = $ua->request(GET $DWS_URL);
+ if ($response->is_success)
+ {
+  $html_string =$response->content;
+	  #
+  $te = new HTML::TableExtract->new( depth => 3, count => 1 );
+  $te->parse($html_string);
+  $ts=$te->table_state(3,1); 
+  foreach $row ($ts->rows) {
+     @cells =@$row;
+#
+# replace line breaks and change from German decimal seperator to intl. decimal seperator
+#
+     foreach $ce (@cells) {
+	next unless $ce;
+        $ce =~ s/\n/:/g;
+        $ce =~ s/,/\./g;
+     }
 
-        # convert price from german (0,00) to US format (0.00)
-        $q[1] =~ s/,/\./;
-
-        # convert date from german (dd.mm.yyyy) to US format (mm/dd/yyyy)
-        @date = split /\./, $q[2];
-	$quoter->store_date(\%info, $q[0], {month => $date[1], day => $date[0], year => $date[2]});
-
-        $info{$q[0], "exchange"} = "DWS";
-        $info{$q[0], "name"}     = $q[0];
-        $info{$q[0], "symbol"}   = $q[0];
-        $info{$q[0], "price"}    = $q[1];
-        $info{$q[0], "last"}     = $q[1];
-        $info{$q[0], "method"}   = "dwsfunds";
-        $info{$q[0], "currency"} = "EUR";
-        $info{$q[0], "success"}  = 1;
-      }
-    }
+# get fond name, the last 50 characters are either blanks or fond classification
+# 
+     @ce1=split(/:/, $cells[1]);
+     $name=substr($ce1[0],0,length($ce1[0])-50);
+#
+# extract the date from the page
+#
+     @ce2=split(/:/, $cells[2]);
+     $date = $ce2[0];
+#
+# get last price (return value) and remove additional thousand seperator
+#
+     $last=$ce2[2];
+     if ( $last =~ /\d\d.\d\d\d.\d\d/ ) {
+        $last =~ s/\.//;
+     }
+# 
+# wkn is the source
+#
+     @ce4=split(/:/, $cells[4]);
+     $wkn=$ce4[1]; 
+     foreach my $fund (@funds) {
+     if ( $wkn eq $fund ) {
+       $info{$fund,"exchange"} = "DWS";
+       $info{$fund,"symbol"} = $wkn;
+       $quoter->store_date(\%info, $fund, {eurodate => $date});
+       $info{$fund,"name"} = $name;
+       $info{$fund,"last"} = $last;
+       $info{$fund,"price"} = $last;
+       $info{$fund,"method"} = "dwsfunds";
+       $info{$fund,"currency"} = "EUR";
+       $info{$fund,"success"} = 1;
+       $fundhash{$fund} = 1;
+     }
+     }
+  }
+					   #
 
     # check to make sure a value was returned for every fund requested
-    foreach my $fund (keys %fundhash)
-    {
-      if ($fundhash{$fund} == 0)
-      {
-        $info{$fund, "success"}  = 0;
-        $info{$fund, "errormsg"} = "No data returned";
-      }
-    }
-  }
-  else
+     foreach my $fund (keys %fundhash)
+     {
+       if ($fundhash{$fund} == 0)
+       {
+         $info{$fund, "success"}  = 0;
+         $info{$fund, "errormsg"} = "No data returned";
+       }
+     }
+}
+else
   {
-    foreach my $fund (@funds)
-    {
-      $info{$fund, "success"}  = 0;
-      $info{$fund, "errormsg"} = "HTTP error";
+   foreach my $fund (@funds)
+   {
+    $info{$fund, "success"}  = 0;
+    $info{$fund, "errormsg"} = "HTTP error";
     }
-  }
+    }
+
 
   return wantarray() ? %info : \%info;
 }
 
-# DWS provides csv files containing the prices of all their funds for the 5
-# most recent business days. The file names are ordered numerically, that is
-# dws1.csv contains prices for monday, dws2.csv those for tuesday and so on.
-# The files are updated until 6:00pm on every business day. Before that time
-# the file of the previous day has to be used.
-sub dwsurl
-{
-  # Since DWS is located at Frankfurt/Germany, this code only works for
-  # central european time zone
-  my @time = localtime;
-  my $hour = $time[2];
-  my $wday = $time[6];
-
-  # during weekend use file of friday
-  if ($wday == 6 || $wday == 0)
-  {
-    $wday = 5;
-  }
-  
-  # on business days before 6:00pm use file of previous day
-  else
-  {
-    if ($hour < 18)
-    {
-      $wday--;
-      if ($wday == 0) { $wday = 5; };
-    }
-  }
-
-  return "http://www.dws.de/aktuell/dws".$wday.".csv";
-}
 
 1;
 
@@ -163,7 +176,7 @@ Finance::Quote::DWS	- Obtain quotes from DWS (Deutsche Bank Gruppe).
 
     $q = Finance::Quote->new;
 
-    %stockinfo = $q->fetch("dwsfunds","847402");
+    %fundinfo = $q->fetch("dwsfunds","847402");
 
 =head1 DESCRIPTION
 
