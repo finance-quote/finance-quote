@@ -38,7 +38,7 @@ ok($londonquotes{"BAY.L","currency"} eq "GBP");
 ok(($londonquotes{"BAY.L","currency"} eq "GBP") &&
    !defined($londonquotes{"BAY.L","currency_set_by_fq"}));
 
-my %londonquotes = $q->fetch("yahoo_europe","CCR.L");
+%londonquotes = $q->fetch("yahoo_europe","CCR.L");
 ok($londonquotes{"CCR.L","success"});
 ok($londonquotes{"CCR.L","currency"} eq "EUR");
 ok(($londonquotes{"CCR.L","currency"} eq "EUR") &&
