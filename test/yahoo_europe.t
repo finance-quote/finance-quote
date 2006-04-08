@@ -30,13 +30,19 @@ ok($quotes{"12150.PA","p_change"} !~ /%/);
 # Check that a bogus stock returns no-success.
 ok(! $quotes{"BOGUS","success"});
 
-# London stocks should be returned in British Pounds (GBP).
+# London stocks can be returned in a variety of currencies
 
 my %londonquotes = $q->fetch("yahoo_europe","BAY.L");
 ok($londonquotes{"BAY.L","success"});
 ok($londonquotes{"BAY.L","currency"} eq "GBP");
 ok(($londonquotes{"BAY.L","currency"} eq "GBP") &&
    !defined($londonquotes{"BAY.L","currency_set_by_fq"}));
+
+my %londonquotes = $q->fetch("yahoo_europe","CCR.L");
+ok($londonquotes{"CCR.L","success"});
+ok($londonquotes{"CCR.L","currency"} eq "EUR");
+ok(($londonquotes{"CCR.L","currency"} eq "EUR") &&
+   !defined($londonquotes{"CCR.L","currency_set_by_fq"}));
 
 # Copenhangen stocks should be returned in Danisk Krone (DKK).
 
@@ -48,14 +54,10 @@ ok(($copenhagenquotes{"TDC.CO","currency"} eq "DKK") &&
 
 # Two stocks from the German XETRA.  One in EUR and one in USD.
 
-my %xetraquotes = $q->fetch("yahoo_europe","632034.DE", "973348.DE");
-ok($xetraquotes{"632034.DE","success"});
-ok($xetraquotes{"632034.DE","currency"} eq "EUR");
-ok(($xetraquotes{"632034.DE","currency"} eq "EUR") &&
-   !defined($xetraquotes{"632034.DE","currency_set_by_fq"}));
-ok($xetraquotes{"973348.DE","success"});
-ok($xetraquotes{"973348.DE","currency"} eq "USD");
-ok(($xetraquotes{"973348.DE","currency"} eq "USD") &&
-   !defined($xetraquotes{"973348.DE","currency_set_by_fq"}));
+my %xetraquotes = $q->fetch("yahoo_europe","DBK.DE", "ERM.DE");
+ok($xetraquotes{"DBK.DE","success"});
+ok($xetraquotes{"DBK.DE","currency"} eq "EUR");
+ok(($xetraquotes{"DBK.DE","currency"} eq "EUR") &&
+   !defined($xetraquotes{"DBK.DE","currency_set_by_fq"}));
 
 
