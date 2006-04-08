@@ -1,5 +1,9 @@
 2006-04-08  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote/DWS.pm: Updated module from Klaus Dahlke
+	<klaus.dahlke@gmx.de> to retrieve quotes from the new DWS web
+	page.
+
 	* lib/Finance/Quote/Tiaacref.pm: Explicitly state in the code that
 	this module requires ssl support (it uses an https:// url).  This
 	prevents perl from trying to run the code when ssl support isn't
