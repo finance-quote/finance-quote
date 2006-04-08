@@ -167,7 +167,7 @@ sub new {
 		shift(@reqmodules) if (@reqmodules);
 		# Default modules
 		@modules = qw/AEX ASEGR ASX BMONesbittBurns Bourso Cdnfundlibrary Deka
-			      DWS FTPortfolios Fidelity FinanceCanada Fool IndiaMutual
+			      DWS FTPortfolios Fidelity FinanceCanada Fool HEX IndiaMutual
 			      LeRevenu ManInvestments NZX Platinum SEB TSP Tdefunds
 			      Tdwaterhouse Tiaacref Troweprice Trustnet Union
 			      USFedBonds VWD ZA

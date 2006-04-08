@@ -1,3 +1,18 @@
+2006-04-08  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote.pm:
+	* lib/Finance/Quote/HEX.pm: 
+	* test/hex.t: New module from Mika Laari
+	<mikalaari@users.sourceforge.net> to fetch quote information from
+	the Helsinki stock exchange.
+
+	* Documentation/Hackers-Guide: Add a section on the q->store_date()
+	function.  All modules should use this function to set the 'date'
+	and 'isodate' fields based on the retrieved textual date (or lack
+	thereof).
+	
+	* test/lerevenu.t: Test the right module.
+
 2006-04-07  David Hampton  <hampton@employees.org>
 
 	* lib/Finance/Quote.pm:
