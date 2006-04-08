@@ -1,5 +1,10 @@
 2006-04-08  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote/Tiaacref.pm: Explicitly state in the code that
+	this module requires ssl support (it uses an https:// url).  This
+	prevents perl from trying to run the code when ssl support isn't
+	present.
+
 	* lib/Finance/Quote.pm:
 	* lib/Finance/Quote/HEX.pm: 
 	* test/hex.t: New module from Mika Laari
