@@ -1,5 +1,14 @@
-2006-04-06  David Hampton  <hampton@employees.org>
+2006-04-07  David Hampton  <hampton@employees.org>
 
+	* t/yahoo_europe.t: New test cases for non-GBP London exchange
+	stocks.  Use new stock for test of the XETRA exchange.  (Can't
+	find a non-Euro stock there, so remove those tests.)
+
+	* lib/Finance/Quote/Yahoo/Base.pm: Patch from p1n0@sourceforge.net
+	to only divide London exchange values by 100 if they are
+	denominated in pence.
+
+2006-04-06  David Hampton  <hampton@employees.org>
 
 	* lib/Finance/Quote.pm:
 	* lib/Finance/Quote/Bourso.pm:
