@@ -1,5 +1,11 @@
 2006-04-07  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote.pm:
+	* lib/Finance/Quote/LeRevenu.pm:
+	* test/lefrevenu.t: New module from Dominique Corbex
+	<domcox@sourceforge.net> to fetch information from the
+	LeRevenu.com site in France.
+
 	* t/yahoo_europe.t: New test cases for non-GBP London exchange
 	stocks.  Use new stock for test of the XETRA exchange.  (Can't
 	find a non-Euro stock there, so remove those tests.)
