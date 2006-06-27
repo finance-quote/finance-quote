@@ -44,6 +44,7 @@ use vars qw/$MANINV_URL $VERSION/;
 $VERSION = "0.1";
 
 $MANINV_URL = 'http://www.maninvestments.com.au/index.cfm?action=productprices&cat_id=5';
+$MANINV_URL = 'http://www.maninvestments.com.au/netassetvalues-print.cfm';
 
 sub methods {return (maninv => \&maninv)}
 
@@ -76,7 +77,7 @@ sub maninv {
 	return wantarray() ? %info : \%info;
     }
 
-    my $tel = HTML::TableExtract->new(headers => [qw(Fund Net Rising)]);
+    my $tel = HTML::TableExtract->new(headers => [qw(Product Net Rising)]);
     $tel->parse($response->content);
 
     foreach my $ts ($tel->table_states) {

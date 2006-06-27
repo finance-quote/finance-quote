@@ -1,5 +1,8 @@
 2006-06-27  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote/ManInvestments.pm: The url for updating
+	quotes has changed, as has the table header.
+
 	* lib/Finance/Quote/Bourso.pm:
 	* lib/Finance/Quote/LeRevenu.pm:
 	* test/bourso.t:
