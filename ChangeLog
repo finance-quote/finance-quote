@@ -1,5 +1,7 @@
 2006-06-27  David Hampton  <hampton@employees.org>
 
+	* test/aex.t: Update the test cases to use currently listed funds.
+
 	* lib/Finance/Quote/ManInvestments.pm: The url for updating
 	quotes has changed, as has the table header.
 

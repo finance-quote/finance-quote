@@ -9,24 +9,24 @@ use Finance::Quote;
 
 my $quoter = Finance::Quote->new();
 
-my %quotes = $quoter->aex("AAB AEX TL 440");
+my %quotes = $quoter->aex("AAB A NEDERLANDCRT");
 ok(%quotes);
 
 # Check that some values are defined.
-ok($quotes{"AAB AEX TL 440","success"});
-ok($quotes{"AAB AEX TL 440","last"} > 0);
-ok($quotes{"AAB AEX TL 440","date"});
-ok($quotes{"AAB AEX TL 440","volume"} > 0);
+ok($quotes{"AAB A NEDERLANDCRT","success"});
+ok($quotes{"AAB A NEDERLANDCRT","last"} > 0);
+ok($quotes{"AAB A NEDERLANDCRT","date"});
+ok($quotes{"AAB A NEDERLANDCRT","volume"} > 0);
 
 my $year = (localtime())[5] + 1900;
-ok(substr($quotes{"AAB AEX TL 440","isodate"},0,4) == $year);
-ok(substr($quotes{"AAB AEX TL 440","date"},6,4) == $year);
+ok(substr($quotes{"AAB A NEDERLANDCRT","isodate"},0,4) == $year);
+ok(substr($quotes{"AAB A NEDERLANDCRT","date"},6,4) == $year);
 
 # Exercise the fetch function 
-%quotes = $quoter->fetch("aex","AAB AAB TL 19");
+%quotes = $quoter->fetch("aex","AAB AEX Click Perp.");
 ok(%quotes);
-ok($quotes{"AAB AAB TL 19","success"});
-ok($quotes{"AAB AAB TL 19","last"} > 0);
+ok($quotes{"AAB AEX Click Perp.","success"});
+ok($quotes{"AAB AEX Click Perp.","last"} > 0);
 
 # Test options fetching
 # the following tests will fail after Dec 2009:-(
