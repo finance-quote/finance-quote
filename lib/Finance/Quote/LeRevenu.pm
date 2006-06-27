@@ -7,7 +7,7 @@
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2001, Rob Sessink <rob_ses@users.sourceforge.net>
 #    Copyright (C) 2005, Morten Cools <morten@cools.no>
-#    Copyright (C) 2006, Dominique Corbex <domcox@sourceforge.net
+#    Copyright (C) 2006, Dominique Corbex <domcox@sourceforge.net>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION='1.01';
+$VERSION='1.2';
 
 my $LR_URL = 'http://bourse.lerevenu.com/recherchenom.hts';
 
@@ -90,6 +90,15 @@ sub lerevenu {
 				next;
 			}
 
+			# debug
+#			foreach $ts ($te->table_states) {
+#				print "Table (", join(',', $ts->coords), "):\n";
+#				foreach $row ($ts->rows) {
+#					print join(',', @$row), "\n";
+#      				}
+#    			}
+
+
 			# style
 			foreach $ts ($te->table_state(2, 10)){
 				@rows=$ts->rows;
@@ -97,122 +106,134 @@ sub lerevenu {
 			}
 
 			SWITCH: for ($style){
-			        	/Actions/ && do { 
-						foreach $ts ($te->table_state(8, 1)){
-							@rows=$ts->rows;
-							foreach $row ($ts->rows) {
-							ASSIGN:	for ( @$row[0] ){  
-									/Dernier/ && do {
-										($info{$stocks, "last"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										($info{$stocks, "close"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										$info{$stocks, "success"}=1;
-										$info{$stocks, "exchange"}="Euronext Paris";
-										$info{$stocks, "method"}="lerevenu";
-										$info{$stocks,"currency"}="EUR";
-										last ASSIGN;
-									};
-									/Date/ && do {
-										$quoter->store_date(\%info, $stocks, {eurodate => @$row[1]});
-										last ASSIGN;
-									};
-									/Var %/ && do {
-										($info{$stocks, "p_change"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/Volume/ && do {
-										($info{$stocks, "volume"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/Premier/ && do {
-										($info{$stocks, "open"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/ Haut/ && do {
-										($info{$stocks, "high"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/ Bas/ && do {
-										($info{$stocks, "low"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-								}
+				# style=stock
+			        /Actions/ && do {
+					foreach $ts ($te->table_state(5, 1)){
+						@rows=$ts->rows;
+						$info{$stocks, "name"}=$rows[0][0];
+						} 
+					foreach $ts ($te->table_state(8, 1)){
+						@rows=$ts->rows;
+						foreach $row ($ts->rows) {
+						ASSIGN:	for ( @$row[0] ) {  
+								/Dernier/ && do {
+									($info{$stocks, "last"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									($info{$stocks, "close"}=@$row[2]) =~ s/[^0-9.-]*//g;
+									$info{$stocks, "success"}=1;
+									$info{$stocks, "exchange"}="Euronext Paris";
+									$info{$stocks, "method"}="lerevenu";
+									$info{$stocks,"currency"}="EUR";
+									last ASSIGN;
+								};
+								/Date/ && do {
+									$quoter->store_date(\%info, $stocks, {eurodate => @$row[1]});
+									last ASSIGN;
+								};
+								/Var %/ && do {
+									($info{$stocks, "p_change"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/Volume/ && do {
+									($info{$stocks, "volume"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/Premier/ && do {
+									($info{$stocks, "open"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/ Haut/ && do {
+									($info{$stocks, "high"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/ Bas/ && do {
+									($info{$stocks, "low"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
 							}
-						foreach $ts ($te->table_state(6, 5)){
-							@rows=$ts->rows;
-							foreach $row ($ts->rows) {
-							ASSIGN:	for ( @$row[0] ){  
-									/Isin/ && do {
-										$info{$stocks, "name"}=@$row[1];
-										# GnuCash
-										$info{$stocks, "symbol"}=$stocks;
-										last ASSIGN;
-									};
-								}
-							}
-
 						}
+					foreach $ts ($te->table_state(6, 5)){
+						@rows=$ts->rows;
+						foreach $row ($ts->rows) {
+						ASSIGN:	for ( @$row[0] ){  
+								/Isin/ && do {
+									# GnuCash
+									$info{$stocks, "symbol"}=@$row[1];
+									last ASSIGN;
+								};
+							}
+						}
+					    }
 					}
-				last SWITCH; 
-				};
-			       		/Obligations/ && do { 
-						foreach $ts ($te->table_state(8, 0)){
-							@rows=$ts->rows;
-							foreach $row ($ts->rows) {
-								($info{$stocks, "last"}=@$row[1]) =~ s/[^0-9.-]*//g;
-								($info{$stocks, "close"}=@$row[1]) =~ s/[^0-9.-]*//g;
-								$info{$stocks, "success"}=1;
-								$info{$stocks, "exchange"}="Euronext Paris";
-								$info{$stocks, "method"}="lerevenu";
-								$info{$stocks,"currency"}="EUR";
-							}
-						}
- 						foreach $ts ($te->table_state(7, 1)){
-							@rows=$ts->rows;
-							foreach $row ($ts->rows) {
-							ASSIGN:	for ( @$row[0] ){
-									/Date/ && do {
-										$quoter->store_date(\%info, $stocks, {eurodate => @$row[1]});
-										last ASSIGN;
-									};
-									/Var %/ && do {
-										($info{$stocks, "p_change"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/Volume/ && do {
-										($info{$stocks, "volume"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/Premier/ && do {
-										($info{$stocks, "open"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/ haut/ && do {
-										($info{$stocks, "high"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/ bas/ && do {
-										($info{$stocks, "low"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-								}
-							}
-						foreach $ts ($te->table_state(8, 3)){
-							@rows=$ts->rows;
-							foreach $row ($ts->rows) {
-							ASSIGN:	for ( @$row[0] ){  
-									/Isin/ && do {
-										$info{$stocks, "name"}=@$row[1];
-										# GnuCash
-										$info{$stocks, "symbol"}=$stocks;
-										last ASSIGN;
-									};
-								}
-							}
-						   }
-						}
 					last SWITCH; 
 				};
+				# style=bond
+			       	/Obligations/ && do {
+					foreach $ts ($te->table_state(5, 1)){
+						@rows=$ts->rows;
+						$info{$stocks, "name"}=$rows[0][0];
+						}  
+					foreach $ts ($te->table_state(8, 0)){
+						@rows=$ts->rows;
+						foreach $row ($ts->rows) {
+							($info{$stocks, "last"}=@$row[1]) =~ s/[^0-9.-]*//g;
+							($info{$stocks, "close"}=@$row[1]) =~ s/[^0-9.-]*//g;
+							$info{$stocks, "success"}=1;
+							$info{$stocks, "exchange"}="Euronext Paris";
+							$info{$stocks, "method"}="lerevenu";
+							$info{$stocks,"currency"}="EUR";
+						}
+					}
+ 					foreach $ts ($te->table_state(7, 1)){
+						@rows=$ts->rows;
+						foreach $row ($ts->rows) {
+						ASSIGN:	for ( @$row[0] ){
+								/Date/ && do {
+									$quoter->store_date(\%info, $stocks, {eurodate => @$row[1]});
+									last ASSIGN;
+								};
+								/Var %/ && do {
+									($info{$stocks, "p_change"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/Volume/ && do {
+									($info{$stocks, "volume"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/Premier/ && do {
+									($info{$stocks, "open"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/ haut/ && do {
+									($info{$stocks, "high"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/ bas/ && do {
+									($info{$stocks, "low"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+							}
+						}
+					foreach $ts ($te->table_state(8, 3)){
+						@rows=$ts->rows;
+						foreach $row ($ts->rows) {
+						ASSIGN:	for ( @$row[0] ){  
+								/Isin/ && do {
+									# GnuCash
+									$info{$stocks, "symbol"}=@$row[1];
+									last ASSIGN;
+								};
+							}
+						}
+					   }
+					}
+					last SWITCH; 
+				};
+				# style=fund
 			        /SICAVetFCP/ && do { 
+					foreach $ts ($te->table_state(6, 0)){
+						@rows=$ts->rows;
+						$info{$stocks, "name"}=$rows[0][0];
+						}  
  					foreach $ts ($te->table_state(8, 3)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
@@ -233,137 +254,142 @@ sub lerevenu {
 									last ASSIGN;
 								};
 							}
-						foreach $ts ($te->table_state(9, 6)){
-							@rows=$ts->rows;
-							foreach $row ($ts->rows) {
-							ASSIGN:	for ( @$row[0] ){  
-									/ISIN/ && do {
-										($info{$stocks, "name"}=@$row[1]) =~ s/\s*//g;
-										# GnuCash
-										$info{$stocks, "symbol"}=$stocks;
-										last ASSIGN;
-									};
-								}
+					foreach $ts ($te->table_state(9, 6)){
+						@rows=$ts->rows;
+						foreach $row ($ts->rows) {
+						ASSIGN:	for ( @$row[0] ){  
+								/ISIN/ && do {
+									# GnuCash
+									($info{$stocks, "symbol"}=@$row[1]) =~ s/\s*//g;
+									last ASSIGN;
+								};
 							}
-						   }
-						} 
+						}
+					   }
+					}
 					}
 					last SWITCH; 
 				};
-				/Bons&Warrants/ && do{ 
- 						foreach $ts ($te->table_state(7, 1)){
-							@rows=$ts->rows;
-							foreach $row ($ts->rows) {
-							ASSIGN:	for ( @$row[0] ){  
-									/Dernier/ && do {
-										($info{$stocks, "last"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										($info{$stocks, "close"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										$info{$stocks, "success"}=1;
-										$info{$stocks, "exchange"}="Euronext Paris";
-										$info{$stocks, "method"}="lerevenu";
-										$info{$stocks,"currency"}="EUR";
-										last ASSIGN;
-									};
-									/Date/ && do {
-										$quoter->store_date(\%info, $stocks, {eurodate => @$row[1]});
-										last ASSIGN;
-									};
-									/Var %/ && do {
-										($info{$stocks, "p_change"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/Volume/ && do {
-										($info{$stocks, "volume"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/Premier/ && do {
-										($info{$stocks, "open"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/ Haut/ && do {
-										($info{$stocks, "high"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/ Bas/ && do {
-										($info{$stocks, "low"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-								}
+				# style=warrant
+				/Bons&Warrants/ && do { 
+					foreach $ts ($te->table_state(5, 1)){
+						@rows=$ts->rows;
+						$info{$stocks, "name"}=$rows[0][0];
+						}  
+ 					foreach $ts ($te->table_state(7, 1)){
+						@rows=$ts->rows;
+						foreach $row ($ts->rows) {
+						ASSIGN:	for ( @$row[0] ){  
+								/Dernier/ && do {
+									($info{$stocks, "last"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									($info{$stocks, "close"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									$info{$stocks, "success"}=1;
+									$info{$stocks, "exchange"}="Euronext Paris";
+									$info{$stocks, "method"}="lerevenu";
+									$info{$stocks,"currency"}="EUR";
+									last ASSIGN;
+								};
+								/Date/ && do {
+									$quoter->store_date(\%info, $stocks, {eurodate => @$row[1]});
+									last ASSIGN;
+								};
+								/Var %/ && do {
+									($info{$stocks, "p_change"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/Volume/ && do {
+									($info{$stocks, "volume"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/Premier/ && do {
+									($info{$stocks, "open"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/ Haut/ && do {
+									($info{$stocks, "high"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/ Bas/ && do {
+									($info{$stocks, "low"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
 							}
-						foreach $ts ($te->table_state(7, 2)){
-							@rows=$ts->rows;
-							foreach $row ($ts->rows) {
-							ASSIGN:	for ( @$row[0] ){  
-									/Isin/ && do {
-										$info{$stocks, "name"}=@$row[1];
-										# GnuCash
-										$info{$stocks, "symbol"}=$stocks;
-										last ASSIGN;
-									};
-								}
-							}
-
 						}
+					foreach $ts ($te->table_state(7, 2)){
+						@rows=$ts->rows;
+						foreach $row ($ts->rows) {
+						ASSIGN:	for ( @$row[0] ){  
+								/Isin/ && do {
+									# GnuCash
+									$info{$stocks, "symbol"}=@$row[1];
+									last ASSIGN;
+								};
+							}
+						}
+
+					    }
 					}
 					last SWITCH; 
 				};
-			        /Indices/ && do { 
-						foreach $ts ($te->table_state(7, 1)){
-							@rows=$ts->rows;
-							foreach $row ($ts->rows) {
-							ASSIGN:	for ( @$row[0] ){  
-									/Dernier/ && do {
-										($info{$stocks, "last"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										($info{$stocks, "close"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										$info{$stocks, "success"}=1;
-										$info{$stocks, "exchange"}="Euronext Paris";
-										$info{$stocks, "method"}="lerevenu";
-										$info{$stocks,"currency"}="EUR";
-										last ASSIGN;
-									};
-									/Date/ && do {
-										$quoter->store_date(\%info, $stocks, {eurodate => @$row[1]});
-										last ASSIGN;
-									};
-									/Var %/ && do {
-										($info{$stocks, "p_change"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/Premier/ && do {
-										($info{$stocks, "open"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/ Haut/ && do {
-										($info{$stocks, "high"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-									/ Bas/ && do {
-										($info{$stocks, "low"}=@$row[1]) =~ s/[^0-9.-]*//g;
-										last ASSIGN;
-									};
-								}
+				# style=indice
+			        /Indices/ && do {  
+					foreach $ts ($te->table_state(5, 1)){
+						@rows=$ts->rows;
+						$info{$stocks, "name"}=$rows[0][0];
+						}  
+					foreach $ts ($te->table_state(7, 1)){
+						@rows=$ts->rows;
+						foreach $row ($ts->rows) {
+						ASSIGN:	for ( @$row[0] ){  
+								/Dernier/ && do {
+									($info{$stocks, "last"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									($info{$stocks, "close"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									$info{$stocks, "success"}=1;
+									$info{$stocks, "exchange"}="Euronext Paris";
+									$info{$stocks, "method"}="lerevenu";
+									$info{$stocks,"currency"}="EUR";
+									last ASSIGN;
+								};
+								/Date/ && do {
+									$quoter->store_date(\%info, $stocks, {eurodate => @$row[1]});
+									last ASSIGN;
+								};
+								/Var %/ && do {
+									($info{$stocks, "p_change"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/Premier/ && do {
+									($info{$stocks, "open"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/ Haut/ && do {
+									($info{$stocks, "high"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/ Bas/ && do {
+									($info{$stocks, "low"}=@$row[1]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
 							}
-						foreach $ts ($te->table_state(7, 2)){
-							@rows=$ts->rows;
-							foreach $row ($ts->rows) {
-							ASSIGN:	for ( @$row[0] ){  
-									/Isin/ && do {
-										$info{$stocks, "name"}=@$row[1];
-										# GnuCash
-										$info{$stocks, "symbol"}=$stocks;
-										last ASSIGN;
-									};
-								}
-							}
-
 						}
+					foreach $ts ($te->table_state(7, 2)){
+						@rows=$ts->rows;
+						foreach $row ($ts->rows) {
+						ASSIGN:	for ( @$row[0] ){  
+								/Isin/ && do {
+									# GnuCash
+									$info{$stocks, "symbol"}=@$row[1];
+									last ASSIGN;
+								};
+							}
+						}
+					    }
 					}
 					last SWITCH; 
 				};
 			        {
 					$info {$stocks,"success"} = 0;
 					$info {$stocks,"errormsg"} = "Parse error";
-					print "Format=non reconnu\n";
 				}
 			}
 

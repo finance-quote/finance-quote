@@ -1,9 +1,13 @@
 #!/usr/bin/perl -w
-#    This module is based on the Finance::Quote::ASEGR & AEX modules
 #
-#    These codes has been modified by Dominique Corbex <domcox@sourceforge.net>
-#    to be able to retreive stock information from http://www.boursorama.com 
-#    in France.
+#    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
+#    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
+#    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
+#    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
+#    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
+#    Copyright (C) 2001, Rob Sessink <rob_ses@users.sourceforge.net>
+#    Copyright (C) 2005, Morten Cools <morten@cools.no>
+#    Copyright (C) 2006, Dominique Corbex <domcox@sourceforge.net>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -19,6 +23,11 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #    02111-1307, USA
+#
+#
+# This code derived from Padzensky's work on package Finance::YahooQuote,
+# but extends its capabilites to encompas a greater number of data sources.
+
 
 require 5.005;
 
@@ -33,7 +42,7 @@ use HTTP::Request::Common;
 use HTML::TableExtract;
 
 
-$VERSION='0.9.3';
+$VERSION='1.0';
 
 my $Bourso_URL = 'http://www.boursorama.com/recherche/recherche.phtml';
 
@@ -86,13 +95,13 @@ sub bourso {
 				next;
 			}
 
-
-			# date
-			my ($date,$sec,$min,$hour,$mday,$month,$year,$wday,$yday,$isdst);
-			($sec,$min,$hour,$mday,$month,$year,$wday,$yday,$isdst) = localtime(time);
-			$year += 1900;
-			$month += 1;
-			$date=$month."/".$mday."/".$year;
+			# debug
+#			foreach $ts ($te->table_states) {
+#				print "Table (", join(',', $ts->coords), "):\n";
+#				foreach $row ($ts->rows) {
+#					print join(',', @$row), "\n";
+#      				}
+#    			}
 
 
 			# Page style
@@ -102,8 +111,12 @@ sub bourso {
 			}
 
 			SWITCH: for ($style){
-			        /cours-action/ && do { 
-					# page=action
+				# style=stock
+			        /cours-action/ && do {
+					foreach $ts ($te->table_state(3, 0)){
+						@rows=$ts->rows;
+						$info{$stocks, "name"}=$rows[0][0];
+						}
 					foreach $ts ($te->table_state(4, 0)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
@@ -111,9 +124,8 @@ sub bourso {
 								/Cours/ && do {
 									($info{$stocks, "last"}=@$row[2]) =~ s/[^0-9.-]*//g;
 									$info{$stocks, "success"}=1;
-									$info{$stocks, "exchange"}="www.boursorama.com";
+									$info{$stocks, "exchange"}="Euronext Paris";
 									$info{$stocks, "method"}="bourso";
-									$info{$stocks, "name"}=$stocks;
 									$info{$stocks,"currency"}="EUR";
 									$quoter->store_date(\%info, $stocks, {today => 1});
 									# GnuCash
@@ -140,12 +152,15 @@ sub bourso {
 									($info{$stocks, "low"}=@$row[2]) =~ s/[^0-9.-]*//g;
 									last ASSIGN;
 								};
-#								/Cl?t. veille/
-#								/Capital ?chang?/
+								/ veille/ && do {
+									($info{$stocks, "close"}=@$row[2]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
 								/Valorisation/ && do {
-									($info{$stocks, "nav"}=@$row[2]) =~ s/M/000000/g;
-									($info{$stocks, "nav"}=@$row[2]) =~ s/K/000/g;
-									($info{$stocks, "nav"}=$info{$stocks, "nav"}) =~ s/[^0-9.]*//g;
+									my $nav;
+									$nav=@$row[2];
+									$nav =~ s/[^0-9.]*//g;
+									($info{$stocks, "cap"}=($nav * 1000000)) ;
 									last ASSIGN;
 								};
 							}
@@ -153,20 +168,22 @@ sub bourso {
 					}
 					last SWITCH; 
 				};
+				# style=bond
 			        /cours-obligation/ && do { 
-					# page=obligation
- 					foreach $ts ($te->table_state(4, 0)){
+					foreach $ts ($te->table_state(3, 0)){
+						@rows=$ts->rows;
+						$info{$stocks, "name"}=$rows[0][0];
+						}
+  					foreach $ts ($te->table_state(4, 0)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
-
 						ASSIGN:	for ( @$row[0] ){
 
 								/Cours/ && do {
 									($info{$stocks, "last"}=@$row[2]) =~ s/[^0-9.-]*//g;
 									$info{$stocks, "success"}=1;
-									$info{$stocks, "exchange"}="www.boursorama.com";
+									$info{$stocks, "exchange"}="Euronext Paris";
 									$info{$stocks, "method"}="bourso";
-									$info{$stocks, "name"}=$stocks;
 									$info{$stocks,"currency"}="EUR";
 									$quoter->store_date(\%info, $stocks, {today => 1});
 									# GnuCash
@@ -194,9 +211,15 @@ sub bourso {
 					}
 					last SWITCH; 
 				};
+				# style=fund
 			        /opcvm\/opcvm/ && do { 
-					# page=opvcm
- 					foreach $ts ($te->table_state(5, 1)){
+					my @words;
+ 					foreach $ts ($te->table_state(3, 0)){
+						@rows=$ts->rows;
+						@words=split / - /, $rows[0][0];
+						$info{$stocks, "name"}=$words[1];
+						}
+					foreach $ts ($te->table_state(5, 1)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
 
@@ -205,9 +228,8 @@ sub bourso {
 								/Valeur liquidative/ && do {
 									($info{$stocks, "last"}=@$row[2]) =~ s/[^0-9.-]*//g;
 									$info{$stocks, "success"}=1;
-									$info{$stocks, "exchange"}="www.boursorama.com";
+									$info{$stocks, "exchange"}="Euronext Paris";
 									$info{$stocks, "method"}="bourso";
-									$info{$stocks, "name"}=$stocks;
 									$info{$stocks,"currency"}="EUR";
 									$quoter->store_date(\%info, $stocks, {today => 1});
 									# GnuCash
@@ -227,8 +249,12 @@ sub bourso {
 					}
 					last SWITCH; 
 				};
+				# style=warrant
 				/cours-warrant/ && do{ 
-					# page=warrant
+					foreach $ts ($te->table_state(3, 1)){
+						@rows=$ts->rows;
+						$info{$stocks, "name"}=$rows[0][0];
+						}
  					foreach $ts ($te->table_state(4, 0)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
@@ -238,11 +264,10 @@ sub bourso {
 								/Cours/ && do {
 									($info{$stocks, "last"}=@$row[2]) =~ s/[^0-9.-]*//g;
 									$info{$stocks, "success"}=1;
-									$info{$stocks, "exchange"}="www.boursorama.com";
+									$info{$stocks, "exchange"}="Euronext Paris";
 									$info{$stocks, "method"}="bourso";
-									$info{$stocks, "name"}=$stocks;
 									$info{$stocks,"currency"}="EUR";
-									$info{$stocks,"date"}=$date;
+									$quoter->store_date(\%info, $stocks, {today => 1});
 									# GnuCash
 									$info{$stocks, "symbol"}=$stocks;
 									last ASSIGN;
@@ -272,8 +297,12 @@ sub bourso {
 					} 
 					last SWITCH; 
 				};
+				# style=indice
 			        /cours-indice/ && do { 
-					# page=action
+					foreach $ts ($te->table_state(3, 0)){
+						@rows=$ts->rows;
+						$info{$stocks, "name"}=$rows[0][0];
+						}
 					foreach $ts ($te->table_state(4, 0)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
@@ -281,11 +310,10 @@ sub bourso {
 								/Cours/ && do {
 									($info{$stocks, "last"}=@$row[2]) =~ s/[^0-9.-]*//g;
 									$info{$stocks, "success"}=1;
-									$info{$stocks, "exchange"}="www.boursorama.com";
+									$info{$stocks, "exchange"}="Euronext Paris";
 									$info{$stocks, "method"}="bourso";
-									$info{$stocks, "name"}=$stocks;
 									$info{$stocks,"currency"}="EUR";
-									$info{$stocks,"date"}=$date;
+									$quoter->store_date(\%info, $stocks, {today => 1});
 									# GnuCash
 									$info{$stocks, "symbol"}=$stocks;
 									last ASSIGN;

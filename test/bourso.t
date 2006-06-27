@@ -1,22 +1,25 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 14};
+BEGIN {plan tests => 32};
 
 use Finance::Quote;
 
-# Test Fidelity functions.
+# Test Bourso functions.
 
 my $q      = Finance::Quote->new();
-my @stocks = ("AF", "ML");
+
+# my stocks = stock, fund, warrant, bond, indice
+my @stocks = ("AF","FR0000441677","FR0010324475","FR0010112052","FR0003999036");
+
 my $year = (localtime())[5] + 1900;
 
 my %quotes = $q->fetch("bourso", @stocks);
 ok(%quotes);
 
-# Check that the name and nav are defined for all of the stocks.
+# Check that the name, last, currency and date are defined for all of the stocks.
 foreach my $stock (@stocks) {
-	ok($quotes{$stock,"nav"} > 0);
+	ok($quotes{$stock,"last"} > 0);
 	ok(length($quotes{$stock,"name"}));
 	ok($quotes{$stock,"success"});
         ok($quotes{$stock, "currency"} eq "EUR");
