@@ -1,5 +1,9 @@
 2006-06-27  David Hampton  <hampton@employees.org>
 
+	* test/financecanada.t:
+	* test/hex.t: Add new test cases to cover the last untested
+	modules. All modules are now tested.
+
 	* lib/Finance/Quote/FinanceCanada.pm: Don't set the success flag
 	if the lookup failed.
 
