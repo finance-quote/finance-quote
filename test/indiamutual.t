@@ -8,8 +8,8 @@ use Finance::Quote;
 # Test Fidelity functions.
 
 my $q      = Finance::Quote->new();
-my @funds = ("1#176#170", "1#134", "1#129#122", "1#173", "1#187#196",
-	     "1#15#487", "1#1414#1962");
+my @funds = ("102620", "103134", "101599", "103206", "100151",
+	     "102849", "101560");
 my $year = (localtime())[5] + 1900;
 
 my %quotes = $q->fetch("indiamutual", @funds);
