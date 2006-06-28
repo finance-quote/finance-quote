@@ -1,5 +1,8 @@
 2006-06-27  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote/Platinum.pm: Use the new url of the pricing
+	information.
+
 	* lib/Finance/Quote/ManInvestments.pm: Update for the new table
 	format on the web site.
 

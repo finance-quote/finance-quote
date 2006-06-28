@@ -43,7 +43,7 @@ use vars qw/$PLATINUM_URL $VERSION/;
 
 $VERSION = "0.1";
 
-$PLATINUM_URL = 'http://www.platinum.com.au/docs/pricing.htm';
+$PLATINUM_URL = 'http://www.platinum.com.au/Platinum_Trust_Unit_Prices.htm';
 
 sub methods {return (platinum => \&platinum)}
 
