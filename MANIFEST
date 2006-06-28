@@ -49,6 +49,7 @@ lib/Finance/Quote/Yahoo/USA.pm
 lib/Finance/Quote/ZA.pm
 Makefile.PL
 MANIFEST			This list of files
+META.yml
 test/aex.t
 test/asegr.t
 test/asx.t
