@@ -60,7 +60,10 @@ sub financecanada {
             foreach my $row ($ts->rows) {
                 chop $row->[1];
 
-                if ($row->[1] eq $symbol) {
+		if ($row->[0] eq "Invalid Symbol") {
+                    $info{$symbol, "symbol"} = $symbol;
+                    $info{$symbol, "success"} = 0;
+		} elsif ($row->[1] eq $symbol) {
                     $info{$symbol, "method"} = "financecanada";
                     $info{$symbol, "name"} = $row->[0];
                     $info{$symbol, "symbol"} = $symbol;
