@@ -1,5 +1,8 @@
 2006-06-27  David Hampton  <hampton@employees.org>
 
+	* test/yahoo_brasil.t: Update the test module to have more cases
+	and use better stocks.
+
 	* lib/Finance/Quote/Yahoo/Brasil.pm: Update for the change of the
 	data separator from a semicolon to a comma.
 
