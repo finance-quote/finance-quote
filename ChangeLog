@@ -1,5 +1,8 @@
 2006-06-27  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote/Yahoo/Brasil.pm: Update for the change of the
+	data separator from a semicolon to a comma.
+
 	* test/financecanada.t:
 	* test/hex.t: Add new test cases to cover the last untested
 	modules. All modules are now tested.
