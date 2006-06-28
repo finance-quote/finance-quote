@@ -4,13 +4,11 @@ Documentation/FAQ
 Documentation/Hackers-Guide
 Documentation/License
 Documentation/README
-Examples/Quote_example.pl
 Examples/chkshares.pl
 Examples/currency-lookup.pl
+Examples/Quote_example.pl
 Examples/stockdump.pl
 INSTALL
-MANIFEST
-Makefile.PL
 lib/Finance/Quote.pm
 lib/Finance/Quote/AEX.pm
 lib/Finance/Quote/ASEGR.pm
@@ -20,10 +18,10 @@ lib/Finance/Quote/Bourso.pm
 lib/Finance/Quote/Cdnfundlibrary.pm
 lib/Finance/Quote/Deka.pm
 lib/Finance/Quote/DWS.pm
-lib/Finance/Quote/FTPortfolios.pm
 lib/Finance/Quote/Fidelity.pm
 lib/Finance/Quote/FinanceCanada.pm
 lib/Finance/Quote/Fool.pm
+lib/Finance/Quote/FTPortfolios.pm
 lib/Finance/Quote/HEX.pm
 lib/Finance/Quote/IndiaMutual.pm
 lib/Finance/Quote/LeRevenu.pm
@@ -31,12 +29,12 @@ lib/Finance/Quote/ManInvestments.pm
 lib/Finance/Quote/NZX.pm
 lib/Finance/Quote/Platinum.pm
 lib/Finance/Quote/SEB.pm
-lib/Finance/Quote/TSP.pm
 lib/Finance/Quote/Tdefunds.pm
 lib/Finance/Quote/Tdwaterhouse.pm
 lib/Finance/Quote/Tiaacref.pm
 lib/Finance/Quote/Troweprice.pm
 lib/Finance/Quote/Trustnet.pm
+lib/Finance/Quote/TSP.pm
 lib/Finance/Quote/Union.pm
 lib/Finance/Quote/UserAgent.pm
 lib/Finance/Quote/USFedBonds.pm
@@ -49,18 +47,23 @@ lib/Finance/Quote/Yahoo/Europe.pm
 lib/Finance/Quote/Yahoo/NZ.pm
 lib/Finance/Quote/Yahoo/USA.pm
 lib/Finance/Quote/ZA.pm
-test/Use.t
+Makefile.PL
+MANIFEST			This list of files
 test/aex.t
 test/asegr.t
 test/asx.t
 test/bmonesbittburns.t
+test/bourso.t
 test/cdnfundlibrary.t
 test/currency.t
 test/deka.t
 test/dws.t
 test/fidelity.t
+test/financecanada.t
 test/ftportfolios.t
+test/hex.t
 test/indiamutual.t
+test/lerevenu.t
 test/maninvestments.t
 test/nzx.t
 test/platinum.t
@@ -72,6 +75,7 @@ test/troweprice.t
 test/trustnet.t
 test/tsp.t
 test/union.t
+test/Use.t
 test/usfedbonds.t
 test/vanguard.t
 test/vwd.t
@@ -82,4 +86,3 @@ test/yahoo_brasil.t
 test/yahoo_europe.t
 test/yahoo_nz.t
 test/za.t
-META.yml                                 Module meta-data (added by MakeMaker)
