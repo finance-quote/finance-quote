@@ -203,7 +203,8 @@ sub yahoo_request {
 				# Every now and then on a failed
 				# retrieval, Yahoo will drop in an
 				# undefined field
-				$info{$symbol,$FIELDS[$i]} = $q[$i] if defined $q[$i];
+				$info{$symbol,$FIELDS[$i]} = $q[$i]
+				    if (defined $q[$i] && length $q[$i]);
 			}
 
 			# Yahoo returns a line filled with N/A's if we

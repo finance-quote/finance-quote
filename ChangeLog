@@ -1,5 +1,8 @@
 2006-06-27  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote/Yahoo/Base.pm: Don't set fields that are
+	defined but are empty..
+
 	* test/yahoo_brasil.t: Update the test module to have more cases
 	and use better stocks.
 
