@@ -1,3 +1,9 @@
+2006-07-10  David Hampton  <hampton@cisco.com>
+
+	* lib/Finance/Quote.pm: Update version to 1.12.
+
+	* CVSTAG: finance_quote_1_12
+
 2006-06-27  David Hampton  <hampton@employees.org>
 
 	* Makefile.PL: State the dependency on Crypt::SSLeay that several

@@ -50,7 +50,7 @@ $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/currency/convert?amt=1&submit
 @EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.11';
+$VERSION = '1.12';
 
 $USE_EXPERIMENTAL_UA = 0;
 
