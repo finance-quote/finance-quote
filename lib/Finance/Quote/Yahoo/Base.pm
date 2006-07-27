@@ -203,10 +203,8 @@ sub yahoo_request {
 				# Every now and then on a failed
 				# retrieval, Yahoo will drop in an
 				# undefined field
-				next unless (defined $q[$i]);
+				next unless (defined $q[$i] && length $q[$i]);
 				$info{$symbol,$FIELDS[$i]} = $q[$i];
-				$info{$symbol,$FIELDS[$i]} = "N/A"
-				    unless (length $q[$i]);
 			}
 
 			# Yahoo returns a line filled with N/A's if we
@@ -246,7 +244,8 @@ sub yahoo_request {
 			  # Convert the currency to be all uppercase for
 			  # backward compatability.  Needed because Yahoo
 			  # returns GBP as GBp.  There may be others.
-			  $info{$symbol,"currency"} =~ tr/a-z/A-Z/
+			  $info{$symbol,"currency"} =~ tr/a-z/A-Z/;
+#			  printf "Currency %s specified by Yahoo\n", $info{$symbol,"currency"};
 			} else {
 			  # Determine the currency from the exchange name.
 			  # Symbols without an exchange are in USD. Symbols
@@ -254,7 +253,9 @@ sub yahoo_request {
 			  # don't have a currency.
 			  if (defined($exchange)) {
 			    $info{$symbol,"currency"} = $currency_tags{$exchange};
+#			    print "Set currency based on exchange $exchange\n";
 			  } elsif (substr($symbol,0,1) ne "^") {
+#			    print "No exchange, not an index, set currency to USD\n";
 			    $info{$symbol,"currency"} = "USD";
 			  }
 			  $info{$symbol,"currency_set_by_fq"} = 1;
