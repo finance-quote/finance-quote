@@ -1,3 +1,8 @@
+2006-09-10  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/Bourso.pm: Update the URL to track changes on
+	the web site.
+
 2006-07-10  David Hampton  <hampton@cisco.com>
 
 	* lib/Finance/Quote.pm: Update version to 1.12.
