@@ -42,7 +42,7 @@ use HTTP::Request::Common;
 use HTML::TableExtract;
 
 
-$VERSION='1.0';
+$VERSION='1.3';
 
 my $Bourso_URL = 'http://www.boursorama.com/recherche/recherche.phtml';
 
@@ -69,7 +69,7 @@ sub bourso {
 	
 	foreach my $stocks (@stocks)
 	{
-		$reply = $ua->request(GET $url.join('',"?searchKeywords=", $stocks));
+		$reply = $ua->request(GET $url.join('',"?query=", $stocks));
 
 
 		if ($reply->is_success) 
