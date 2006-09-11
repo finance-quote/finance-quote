@@ -1,5 +1,10 @@
 2006-09-10  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote/AIA.pm:
+	* test/aia.pm: New module to access American International
+	Assurance fund information.  Based on perl script from Wouter van
+	Marle <wouter@squirrel-systems.com>.
+
 	* lib/Finance/Quote/Bourso.pm: Update the URL to track changes on
 	the web site.
 
