@@ -26,34 +26,34 @@ require 5.005;
 
 use strict;
 
-package Finance::Quote::AIA;
+package Finance::Quote::AIAHK;
 
-use vars qw($VERSION $AIA_URL);
+use vars qw($VERSION $AIAHK_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
 $VERSION='0.1';
-$AIA_URL = 'http://www.aia.com.hk/daily/fund_mst_rightb.asp?cat=BR_AC';
+$AIAHK_URL = 'http://www.aia.com.hk/daily/fund_mst_rightb.asp?cat=BR_AC';
 
 
-sub methods { return (aia => \&aia); }
+sub methods { return (aiahk => \&aiahk); }
 { 
 	my @labels = qw/name code date isodate price bid offer p_change_3m
 	    p_change_1y p_change_3y currency method exchange/;
 
-	sub labels { return (aia => \@labels); } 
+	sub labels { return (aiahk => \@labels); } 
 }
 
-sub aia {
+sub aiahk {
 
     my $quoter = shift;
     my @funds = @_;
     my (%info,$reply,$url,$te,$fund);
     my $ua = $quoter->user_agent();
 
-    $url=$AIA_URL;
+    $url=$AIAHK_URL;
     $reply = $ua->request(GET $url);
     if (!$reply->is_success) {
 	print("1\n");
@@ -102,8 +102,8 @@ sub aia {
 
 	    my $tmp;
 	    $info{$fund, "success"}=1;
-	    $info{$fund, "exchange"}="AIA";
-	    $info{$fund, "method"}="aia";
+	    $info{$fund, "exchange"}="American International Assurance, Hong Kong";
+	    $info{$fund, "method"}="aiahk";
 	    $info{$fund, "name"}=$$row[0];
 	    $info{$fund, "name"} =~ s/^\s*(.*)\s*$/$1/;
 	    $info{$fund, "symbol"}=$fund;
@@ -147,7 +147,7 @@ Finance::Quote::AIA Obtain quotes from American International Assurance
 
     $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("aia","SCH-HKEQ");
+    %info = Finance::Quote->fetch("aiahk","SCH-HKEQ");
 
 =head1 DESCRIPTION
 
@@ -155,7 +155,7 @@ This module fetches information from the American International
 Assurance http://www.aia.com.hk. All funds are available.
 
 This module is loaded by default on a Finance::Quote object. It's 
-also possible to load it explicity by placing "AIA" in the argument
+also possible to load it explicity by placing "AIAHK" in the argument
 list to Finance::Quote->new().
 
 Information obtained by this module may be covered by www.aia.com.hk 
@@ -163,7 +163,7 @@ terms and conditions See http://www.aia.com.hk/ for details.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::AIA :
+The following labels may be returned by Finance::Quote::AIAHK :
 
 name code date isodate price bid offer p_change_3m p_change_1y
 p_change_3y currency method exchange
