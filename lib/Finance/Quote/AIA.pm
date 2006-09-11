@@ -55,7 +55,6 @@ sub aia {
 
     $url=$AIA_URL;
     $reply = $ua->request(GET $url);
-    print("GET $url\n");
     if (!$reply->is_success) {
 	print("1\n");
 	foreach my $fund (@funds) {
@@ -65,25 +64,13 @@ sub aia {
 	}
 	return wantarray() ? %info : \%info;
     }
-#    print($reply->content, "\n");
-
-
-#    $te= new HTML::TableExtract( headers => [("Fund Name","Fund Abbreviation",
-#					      "Valuation Date","Bid Price",
-#					      "Offer Price")]);
+    #print($reply->content, "\n");
 
     # Now parse the data table contained in the result.  This is the
     # inner of two tables.  There are no headers on this table as they
     # are part of the iframe containing this page.
     $te= new HTML::TableExtract(depth => 1);
     $te->parse($reply->content);
-
-#    open FILE, "results" || die;
-#    my $sep = $/;
-#    undef $/;
-#    my $results = <FILE>;
-#    $/ = $sep;
-#    $te->parse($results);
 
     unless ($te->tables) {
 	foreach $fund (@funds) {
