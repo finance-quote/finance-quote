@@ -11,7 +11,7 @@ Examples/stockdump.pl
 INSTALL
 lib/Finance/Quote.pm
 lib/Finance/Quote/AEX.pm
-lib/Finance/Quote/AIA.pm
+lib/Finance/Quote/AIAHK.pm
 lib/Finance/Quote/ASEGR.pm
 lib/Finance/Quote/ASX.pm
 lib/Finance/Quote/BMONesbittBurns.pm

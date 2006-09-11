@@ -14,7 +14,7 @@ my @stocks = ("ABD-AUS.EQ", "AIG-EUSC.U", "FID-JP.ADV", "SCH-HKEQ");
 
 my $year = (localtime())[5] + 1900;
 
-my %quotes = $q->fetch("aia", @stocks);
+my %quotes = $q->fetch("aiahk", @stocks);
 ok(%quotes);
 
 # Check that the name, last, currency and date are defined for all of the stocks.
@@ -32,5 +32,5 @@ ok($quotes{"FID-JP.ADV", "currency"} eq "JPY");
 ok($quotes{"SCH-HKEQ", "currency"}   eq "HKD");
 
 # Check that a bogus stock returns no-success.
-%quotes = $q->fetch("aia", "BOGUS");
+%quotes = $q->fetch("aiahk", "BOGUS");
 ok(! $quotes{"BOGUS","success"});
