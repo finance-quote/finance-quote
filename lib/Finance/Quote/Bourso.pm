@@ -27,6 +27,26 @@
 #
 # This code derived from Padzensky's work on package Finance::YahooQuote,
 # but extends its capabilites to encompas a greater number of data sources.
+#
+#
+# Changelog
+#
+# 2006-12-26  Dominique Corbex <domcox@sourceforge.net>
+#
+#     * (1.4) changes on web site
+#
+# 2006-09-02  Dominique Corbex <domcox@sourceforge.net>
+#
+#     * (1.3) changes on web site
+# 
+# 2006-06-28  Dominique Corbex <domcox@sourceforge.net>
+#
+#     * (1.2) changes on web site 
+#
+# 2006-02-22  Dominique Corbex <domcox@sourceforge.net>
+#
+#     * (1.0) iniial release 
+#
 
 
 require 5.005;
@@ -42,7 +62,7 @@ use HTTP::Request::Common;
 use HTML::TableExtract;
 
 
-$VERSION='1.3';
+$VERSION='1.4';
 
 my $Bourso_URL = 'http://www.boursorama.com/recherche/recherche.phtml';
 
@@ -74,6 +94,7 @@ sub bourso {
 
 		if ($reply->is_success) 
 		{
+			# print $reply->content;
 
 			$te= new HTML::TableExtract( );
 
@@ -100,12 +121,12 @@ sub bourso {
 #				print "Table (", join(',', $ts->coords), "):\n";
 #				foreach $row ($ts->rows) {
 #					print join(',', @$row), "\n";
-#      				}
-#    			}
-
+#				}
+#			}
+#
 
 			# Page style
-			foreach $ts ($te->table_state(2, 0)){
+			foreach $ts ($te->table_state(3, 1)){
 				@rows=$ts->rows;
 				$style=$rows[0][0];
 			}
@@ -113,7 +134,7 @@ sub bourso {
 			SWITCH: for ($style){
 				# style=stock
 			        /cours-action/ && do {
-					foreach $ts ($te->table_state(3, 0)){
+					foreach $ts ($te->table_state(3, 2)){
 						@rows=$ts->rows;
 						$info{$stocks, "name"}=$rows[0][0];
 						}
@@ -170,7 +191,7 @@ sub bourso {
 				};
 				# style=bond
 			        /cours-obligation/ && do { 
-					foreach $ts ($te->table_state(3, 0)){
+					foreach $ts ($te->table_state(3, 2)){
 						@rows=$ts->rows;
 						$info{$stocks, "name"}=$rows[0][0];
 						}
@@ -214,12 +235,11 @@ sub bourso {
 				# style=fund
 			        /opcvm\/opcvm/ && do { 
 					my @words;
- 					foreach $ts ($te->table_state(3, 0)){
+ 					foreach $ts ($te->table_state(3, 2)){
 						@rows=$ts->rows;
-						@words=split / - /, $rows[0][0];
-						$info{$stocks, "name"}=$words[1];
+						$info{$stocks, "name"}=$rows[0][0];
 						}
-					foreach $ts ($te->table_state(5, 1)){
+					foreach $ts ($te->table_state(4, 1)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
 
@@ -251,7 +271,7 @@ sub bourso {
 				};
 				# style=warrant
 				/cours-warrant/ && do{ 
-					foreach $ts ($te->table_state(3, 1)){
+					foreach $ts ($te->table_state(3, 3)){
 						@rows=$ts->rows;
 						$info{$stocks, "name"}=$rows[0][0];
 						}
@@ -299,7 +319,7 @@ sub bourso {
 				};
 				# style=indice
 			        /cours-indice/ && do { 
-					foreach $ts ($te->table_state(3, 0)){
+					foreach $ts ($te->table_state(3, 2)){
 						@rows=$ts->rows;
 						$info{$stocks, "name"}=$rows[0][0];
 						}
