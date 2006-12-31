@@ -43,7 +43,7 @@ $VERSION = '1.02';
 
 # URLs of where to obtain information.
 
-$TRUSTNET_URL = ('http://www.trustnet.com/ut/funds/perf.asp?reg=all&sec=all&type=all&sort=5&ss=0&booAutif=0&unit=');
+$TRUSTNET_URL = ('http://www.trustnet.com/ut/funds/perf.asp?reg=all&sec=all&type=all&sort=5&ss=0&booAutif=0&columns=13&unit=');
 
 $TRUSTNET_ALL="http://www.trustnet.com/ut/funds/perf.asp";
 
