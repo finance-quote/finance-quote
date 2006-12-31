@@ -107,7 +107,6 @@ sub lerevenu {
 			}
 
 
-			print "***\n***\nStyle is $style.\n***\n***\n";
 			SWITCH: for ($style){
 				# style=stock
 			        /Actions/ && do {
