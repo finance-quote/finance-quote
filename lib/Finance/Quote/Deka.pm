@@ -20,9 +20,11 @@ package Finance::Quote::Deka;
 use strict;
 use HTML::TableExtract;
 
+require Crypt::SSLeay;
+
 use vars qw($VERSION);
 $VERSION = '0.3';
-my $DEKA_URL = "http://www.deka.de/de/produkte/fondsfinder/ergebnis_body_name.html?type=preise";
+my $DEKA_URL = "https://www.deka.de/dn/useCases/fundsearch/UCFundsSearch.shtml?ACTION_FIELD=quickSearch";
 
 sub methods {return (deka        => \&deka);}
 sub labels { return (deka=>[qw/name date price last method/]); }
@@ -37,6 +39,15 @@ sub trim
     return $_;
 }
 
+# Convert number separators to US values
+sub convert_price {
+	$_ = shift;
+	s/\./@/g;
+	s/,/\./g;
+	s/@/,/g;
+	return $_;
+}
+
 sub deka
 {
   my $quoter = shift;     # The Finance::Quote object.
@@ -45,27 +56,35 @@ sub deka
   my %info;
 
   foreach my $stock (@stocks) {
-    my $response = $ua->get($DEKA_URL . "&fcsd=" . $stock);
+    my $response = $ua->get($DEKA_URL . "&isin=" . $stock);
+#    print $response->content, "\n";
     $info{$stock,"success"} = 0;
     if (!$response -> is_success()) {
       $info{$stock,"errormsg"} = "HTTP failure";
     } else {
-      my $te = HTML::TableExtract->new;
+      my @headers = [qw(Name ISIN Whg Datum)];
+      my $te = new HTML::TableExtract(headers => @headers, slice_columns => 0);
       $te->parse($response->content);
-      if ($te->table_state(0,0) && $te->table_state(1,0)) {
-	my $row = ($te->table_state(0,0)->rows)[1];
-	$info{$stock,"name"} = $$row[4];
-	$info{$stock,"currency"} = $$row[6];
-	$quoter->store_date(\%info, $stock, {eurodate => $$row[12]});
-	my $prices = ($te->table_state(1,0)->rows)[0];
-	$info{$stock,"price"} = trim($$prices[0]);
-	$info{$stock,"last"} = trim($$prices[2]);
-	$info{$stock,"success"} = 1;
-	$info{$stock,"method"} = "deka";
-	$info{$stock,"symbol"} = $stock;
-      } else {
-	$info{$stock,"errormsg"} = "Couldn't parse deka website";
+      foreach my $ts ($te->table_states) {
+#        foreach my $row ($ts->rows) {
+#	  next if !defined $$row[0] || !defined $$row[1];
+#	  print "Row: ", join('|', @$row), "\n";
+#	}
+	
+        foreach my $row ($ts->rows) {
+	  next if !defined $$row[0] || !defined $$row[1];
+	  $info{$stock,"name"} = $$row[0];
+	  $info{$stock,"currency"} = $$row[2];
+	  $quoter->store_date(\%info, $stock, {eurodate => $$row[6]});
+	  $info{$stock,"price"} = convert_price(trim($$row[4]));
+	  $info{$stock,"last"} = $info{$stock,"price"};
+	  $info{$stock,"success"} = 1;
+	  $info{$stock,"method"} = "deka";
+	  $info{$stock,"symbol"} = $stock;
+        }
       }
+      $info{$stock,"errormsg"} = "Couldn't parse deka website"
+	  if ($info{$stock,"success"} == 0);
     }
   }
   return wantarray ? %info : \%info;
