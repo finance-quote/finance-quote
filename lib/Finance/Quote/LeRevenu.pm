@@ -27,7 +27,7 @@
 #
 # This code derived from Padzensky's work on package Finance::YahooQuote,
 # but extends its capabilites to encompas a greater number of data sources.
-
+#
 
 require 5.005;
 
@@ -41,7 +41,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION='1.2';
+$VERSION='1.3';
 
 my $LR_URL = 'http://bourse.lerevenu.com/recherchenom.hts';
 
@@ -62,15 +62,16 @@ sub lerevenu {
 	my (%info,$reply,$url,$te,$ts,$row,$style);
 	my $ua = $quoter->user_agent();
 
-	$url=$LR_URL;
-	
 	foreach my $stocks (@stocks)
 	{
-		$reply = $ua->request(POST $url, [ recherchenom => $stocks, p => '20',] );  
-
+		$url="$LR_URL?recherchenom=$stocks&p=20";
+	
+		$reply = $ua->request(GET $url);  
 
 		if ($reply->is_success) 
 		{
+			# print STDERR $reply->content,"\n";
+
 			$te= new HTML::TableExtract( );
 
 			$te->parse($reply->content);
@@ -95,20 +96,22 @@ sub lerevenu {
 #				print "Table (", join(',', $ts->coords), "):\n";
 #				foreach $row ($ts->rows) {
 #					print join(',', @$row), "\n";
-#      				}
+#     				}
 #    			}
 
 
 			# style
-			foreach $ts ($te->table_state(2, 10)){
+			foreach $ts ($te->table_state(2, 0)){
 				@rows=$ts->rows;
 				($style=$rows[1][1]) =~ s/[>\n\s]*//g;
 			}
 
+
+			print "***\n***\nStyle is $style.\n***\n***\n";
 			SWITCH: for ($style){
 				# style=stock
 			        /Actions/ && do {
-					foreach $ts ($te->table_state(5, 1)){
+					foreach $ts ($te->table_state(5, 0)){
 						@rows=$ts->rows;
 						$info{$stocks, "name"}=$rows[0][0];
 						} 
@@ -151,6 +154,7 @@ sub lerevenu {
 								};
 							}
 						}
+					}
 					foreach $ts ($te->table_state(6, 5)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
@@ -161,14 +165,13 @@ sub lerevenu {
 									last ASSIGN;
 								};
 							}
-						}
 					    }
 					}
 					last SWITCH; 
 				};
 				# style=bond
 			       	/Obligations/ && do {
-					foreach $ts ($te->table_state(5, 1)){
+					foreach $ts ($te->table_state(5, 0)){
 						@rows=$ts->rows;
 						$info{$stocks, "name"}=$rows[0][0];
 						}  
@@ -213,10 +216,11 @@ sub lerevenu {
 								};
 							}
 						}
+					}
 					foreach $ts ($te->table_state(8, 3)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
-						ASSIGN:	for ( @$row[0] ){  
+						ASSIGN:	for ( @$row[0] ){ 
 								/Isin/ && do {
 									# GnuCash
 									$info{$stocks, "symbol"}=@$row[1];
@@ -224,37 +228,40 @@ sub lerevenu {
 								};
 							}
 						}
-					   }
 					}
 					last SWITCH; 
 				};
 				# style=fund
-			        /SICAVetFCP/ && do { 
+			        /SICAVetFCP/ && do {
+					my $myquote; my @mycurrency;
 					foreach $ts ($te->table_state(6, 0)){
 						@rows=$ts->rows;
 						$info{$stocks, "name"}=$rows[0][0];
-						}  
- 					foreach $ts ($te->table_state(8, 3)){
+						($info{$stocks, "last"}=$rows[0][2]) =~ s/[^0-9.-]*//g;
+						$info{$stocks, "success"}=1;
+						$info{$stocks, "exchange"}="Euronext Paris";
+						$info{$stocks, "method"}="lerevenu";
+						$myquote=$rows[0][2] ;
+						@mycurrency= split / /, $myquote;
+						($info{$stocks,"currency"}=$mycurrency[1]) =~ s/[\W]*//g ;
+						$quoter->store_date(\%info, $stocks, {eurodate => $rows[0][1]});
+						($info{$stocks, "p_change"}=$rows[2][2])=~ s/[^0-9.-]*//g;
+						}
+					foreach $ts ($te->table_state(9, 7)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
-						ASSIGN:	for ( @$row[0] ){
-								/VL/ && do {
-									($info{$stocks, "last"}=@$row[1]) =~ s/[^0-9.-]*//g;
-									$info{$stocks, "success"}=1;
-									$info{$stocks, "exchange"}="Euronext Paris";
-									$info{$stocks, "method"}="lerevenu";
-									last ASSIGN;
-								};
-								/Devise/ && do {
-									($info{$stocks,"currency"}=@$row[1]) =~ s/\s*//g;
-									last ASSIGN;
-								};
-								/Date/ && do {
-									$quoter->store_date(\%info, $stocks, {eurodate => @$row[1]});
+						ASSIGN:	for ( @$row[0] ){  
+								/Actif/ && do {
+									my $nav;
+									$nav=@$row[1];
+									$nav =~ s/[^0-9.]*//g;
+									($info{$stocks, "nav"}=($nav * 1000000));
 									last ASSIGN;
 								};
 							}
-					foreach $ts ($te->table_state(9, 6)){
+						}
+					}
+					foreach $ts ($te->table_state(9, 9)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
 						ASSIGN:	for ( @$row[0] ){  
@@ -265,14 +272,12 @@ sub lerevenu {
 								};
 							}
 						}
-					   }
-					}
 					}
 					last SWITCH; 
 				};
 				# style=warrant
 				/Bons&Warrants/ && do { 
-					foreach $ts ($te->table_state(5, 1)){
+					foreach $ts ($te->table_state(5, 0)){
 						@rows=$ts->rows;
 						$info{$stocks, "name"}=$rows[0][0];
 						}  
@@ -315,7 +320,7 @@ sub lerevenu {
 								};
 							}
 						}
-					foreach $ts ($te->table_state(7, 2)){
+					foreach $ts ($te->table_state(6, 8)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
 						ASSIGN:	for ( @$row[0] ){  
@@ -333,7 +338,7 @@ sub lerevenu {
 				};
 				# style=indice
 			        /Indices/ && do {  
-					foreach $ts ($te->table_state(5, 1)){
+					foreach $ts ($te->table_state(5, 0)){
 						@rows=$ts->rows;
 						$info{$stocks, "name"}=$rows[0][0];
 						}  
