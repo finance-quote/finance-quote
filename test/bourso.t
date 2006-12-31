@@ -10,7 +10,17 @@ use Finance::Quote;
 my $q      = Finance::Quote->new();
 
 # my stocks = stock, fund, warrant, bond, indice
-my @stocks = ("AF","FR0000441677","FR0010324475","FR0010112052","FR0003999036");
+my @stocks = ("AF","FR0000441677","FR0010324475","FR0010112052","FR0003500008");
+
+# Bourso tests need to cover all the possible cases:
+#
+#    Name		What		Test Case
+#
+#    cours-action	Stock		AF
+#    cours-obligation	Bond		FR0010112052
+#    opcvm/opcvm	Fund		FR0000441677
+#    cours-warrant	Warrant		FR0010324475
+#    cours-indice	Index		FR0003500008
 
 my $year = (localtime())[5] + 1900;
 
