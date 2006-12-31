@@ -25,12 +25,12 @@ foreach my $fund (@funds) {
 }
 
 # Some funds have yields instead of navs.  Check one of them too.
-%quotes = $q->fidelity_direct("FGRXX");
+%quotes = $q->fidelity_direct("FSLXX");
 ok(%quotes);
-ok(length($quotes{"FGRXX","name"}));
-ok($quotes{"FGRXX","yield"} != 0);
-ok($quotes{"FGRXX","success"});
-ok($quotes{"FGRXX", "currency"} eq "USD");
+ok(length($quotes{"FSLXX","name"}));
+ok($quotes{"FSLXX","yield"} > 0);
+ok($quotes{"FSLXX","success"});
+ok($quotes{"FSLXX", "currency"} eq "USD");
 
 # Check that a bogus fund returns no-success.
 %quotes = $q->fidelity_direct("BOGUS");
