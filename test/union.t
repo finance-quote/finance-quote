@@ -19,8 +19,11 @@ ok($quotes{"975792","success"});
 ok($quotes{"975792", "currency"} eq "EUR");
 
 my $year = (localtime())[5] + 1900;
-ok(substr($quotes{"975792","isodate"},0,4) eq $year);
-ok(substr($quotes{"975792","date"},6,4) eq $year);
+my $lastyear = $year - 1;
+ok(substr($quotes{"975792","isodate"},0,4) eq $year ||
+   substr($quotes{"975792","isodate"},0,4) eq $lastyear);
+ok(substr($quotes{"975792","date"},6,4) eq $year ||
+   substr($quotes{"975792","date"},6,4) eq $lastyear);
 
 
 # Check that bogus stocks return failure:

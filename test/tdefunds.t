@@ -14,5 +14,8 @@ ok(%quotes);
 ok($quotes{"TD Canadian Index", "nav"});
 
 my $year = (localtime())[5] + 1900;
-ok(substr($quotes{"TD Canadian Index","isodate"},0,4) == $year);
-ok(substr($quotes{"TD Canadian Index","date"},6,4) == $year);
+my $lastyear = $year - 1;
+ok(substr($quotes{"TD Canadian Index","isodate"},0,4) == $year ||
+   substr($quotes{"TD Canadian Index","isodate"},0,4) == $lastyear);
+ok(substr($quotes{"TD Canadian Index","date"},6,4) == $year ||
+   substr($quotes{"TD Canadian Index","date"},6,4) == $lastyear);

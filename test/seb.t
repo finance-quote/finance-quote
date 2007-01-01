@@ -21,8 +21,11 @@ ok($quotes{"SEB Cancerfonden","success"});
 ok($quotes{"SEB Cancerfonden", "currency"} eq "SEK");
 
 my $year = (localtime())[5] + 1900;
-ok(substr($quotes{"SEB Cancerfonden","isodate"},0,4) == $year);
-ok(substr($quotes{"SEB Cancerfonden","date"},6,4) == $year);
+my $lastyear = $year - 1;
+ok(substr($quotes{"SEB Cancerfonden","isodate"},0,4) == $year ||
+   substr($quotes{"SEB Cancerfonden","isodate"},0,4) == $lastyear);
+ok(substr($quotes{"SEB Cancerfonden","date"},6,4) == $year ||
+   substr($quotes{"SEB Cancerfonden","date"},6,4) == $lastyear);
 
 # Check that a bogus stock returns no-success.
 ok(! $quotes{"BOGUS","success"});

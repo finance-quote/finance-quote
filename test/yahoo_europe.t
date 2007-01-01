@@ -10,6 +10,7 @@ use Finance::Quote;
 
 my $q      = Finance::Quote->new();
 my $year   = (localtime())[5] + 1900;
+my $lastyear = $year - 1;
 
 my %quotes = $q->yahoo_europe("12150.PA","BOGUS.L");
 ok(%quotes);
@@ -20,8 +21,10 @@ ok($quotes{"12150.PA","last"} > 0);
 ok(length($quotes{"12150.PA","name"}) > 0);
 ok($quotes{"12150.PA","success"});
 ok($quotes{"12150.PA", "currency"} eq "EUR");
-ok(substr($quotes{"12150.PA","isodate"},0,4) == $year);
-ok(substr($quotes{"12150.PA","date"},6,4) == $year);
+ok(substr($quotes{"12150.PA","isodate"},0,4) == $year ||
+   substr($quotes{"12150.PA","isodate"},0,4) == $lastyear);
+ok(substr($quotes{"12150.PA","date"},6,4) == $year ||
+   substr($quotes{"12150.PA","date"},6,4) == $lastyear);
 
 # Make sure we don't have spurious % signs.
 

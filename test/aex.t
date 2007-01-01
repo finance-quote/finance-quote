@@ -19,8 +19,11 @@ ok($quotes{"AAB A NEDERLANDCRT","date"});
 ok($quotes{"AAB A NEDERLANDCRT","volume"} > 0);
 
 my $year = (localtime())[5] + 1900;
-ok(substr($quotes{"AAB A NEDERLANDCRT","isodate"},0,4) == $year);
-ok(substr($quotes{"AAB A NEDERLANDCRT","date"},6,4) == $year);
+my $lastyear = $year - 1;
+ok(substr($quotes{"AAB A NEDERLANDCRT","isodate"},0,4) == $year ||
+   substr($quotes{"AAB A NEDERLANDCRT","isodate"},0,4) == $lastyear);
+ok(substr($quotes{"AAB A NEDERLANDCRT","date"},6,4) == $year ||
+   substr($quotes{"AAB A NEDERLANDCRT","date"},6,4) == $lastyear);
 
 # Exercise the fetch function 
 %quotes = $quoter->fetch("aex","AAB AEX Click Perp.");

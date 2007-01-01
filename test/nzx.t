@@ -21,8 +21,11 @@ ok($quotes{"TPW","success"});
 ok($quotes{"TPW", "currency"} eq "NZD");
 
 my $year = (localtime())[5] + 1900;
-ok(substr($quotes{"TPW","isodate"},0,4) == $year);
-ok(substr($quotes{"TPW","date"},6,4) == $year);
+my $lastyear = $year - 1;
+ok(substr($quotes{"TPW","isodate"},0,4) == $year ||
+   substr($quotes{"TPW","isodate"},0,4) == $lastyear);
+ok(substr($quotes{"TPW","date"},6,4) == $year ||
+   substr($quotes{"TPW","date"},6,4) == $lastyear);
 
 # Check that a bogus stock returns no-success.
 ok(! $quotes{"BOGUS","success"});

@@ -1,13 +1,15 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 11};
+BEGIN {plan tests => 13};
 
 use Finance::Quote;
 
 # Test ASEGR functions.
 
 my $q      = Finance::Quote->new();
+my $year   = (localtime())[5] + 1900;
+my $lastyear = $year - 1;
 
 my %quotes = $q->asegr("ALPHA","ELTON");
 ok(%quotes);
@@ -16,8 +18,12 @@ ok(%quotes);
 # reliable indicators of success.
 ok($quotes{"ALPHA","last"} > 0);
 ok($quotes{"ALPHA","success"});
+ok(substr($quotes{"ALPHA","date"},6,4) == $year ||
+   substr($quotes{"ALPHA","date"},6,4) == $lastyear);
 ok($quotes{"ELTON","success"});
 ok($quotes{"ELTON","last"} > 0);
+ok(substr($quotes{"ELTON","date"},6,4) == $year ||
+   substr($quotes{"ELTON","date"},6,4) == $lastyear);
 
 # Exercise the fetch function a little.
 %quotes = $q->fetch("asegr","IKONA");

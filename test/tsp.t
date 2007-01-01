@@ -1,12 +1,14 @@
-#!/usr/bin/perl -w
+p#!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 16};
+BEGIN {plan tests => 22};
 
 use Finance::Quote;
 
 # Test TSP functions.
 
+my $year = (localtime())[5] + 1900;
+my $lastyear = $year - 1;
 my $quoter = Finance::Quote->new();
 
 my %quotes = $quoter->tsp("c","s","TSPgfund","BOGUS","l2040fund");
@@ -16,11 +18,19 @@ ok(%quotes);
 ok($quotes{"c","success"});
 ok($quotes{"c","nav"} > 0);
 ok($quotes{"l2040fund","date"});
+ok(substr($quotes{"l2040fund","isodate"},0,4) == $year ||
+   substr($quotes{"l2040fund","isodate"},0,4) == $lastyear);
+ok(substr($quotes{"l2040fund","date"},0,4) == $year ||
+   substr($quotes{"l2040fund","date"},0,4) == $lastyear);
 ok($quotes{"s","currency"});
 ok($quotes{"s","name"});
 ok($quotes{"TSPgfund","success"});
 ok($quotes{"TSPgfund","nav"} > 0);
 ok($quotes{"TSPgfund","date"});
+ok(substr($quotes{"TSPgfund","isodate"},0,4) == $year ||
+   substr($quotes{"TSPgfund","isodate"},0,4) == $lastyear);
+ok(substr($quotes{"TSPgfund","date"},0,4) == $year ||
+   substr($quotes{"TSPgfund","date"},0,4) == $lastyear);
 
 # Check that some values are undefined.
 ok( !defined($quotes{"c","exchange"}) );
@@ -34,5 +44,9 @@ ok(%quotes);
 ok($quotes{"g","success"});
 ok($quotes{"f","nav"} > 0);
 ok($quotes{"i","date"});
+ok(substr($quotes{"i","isodate"},0,4) == $year ||
+   substr($quotes{"i","isodate"},0,4) == $lastyear);
+ok(substr($quotes{"i","date"},0,4) == $year ||
+   substr($quotes{"i","date"},0,4) == $lastyear);
 ok($quotes{"tsplincomefund","nav"} > 0);
 

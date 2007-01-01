@@ -20,8 +20,11 @@ ok($quotes{"19001", "currency"} eq "CAD");
 ok(length($quotes{"19001","date"}) > 0);
 
 my $year = (localtime())[5] + 1900;
-ok(substr($quotes{"19001","isodate"},0,4) == $year);
-ok(substr($quotes{"19001","date"},6,4) == $year);
+my $lastyear = $year - 1;
+ok(substr($quotes{"19001","isodate"},0,4) == $year ||
+   substr($quotes{"19001","isodate"},0,4) == $lastyear);
+ok(substr($quotes{"19001","date"},6,4) == $year ||
+   substr($quotes{"19001","date"},6,4) == $lastyear);
 
 # Check that bogus stocks return failure:
 

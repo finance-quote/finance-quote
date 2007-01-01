@@ -1,12 +1,14 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 15};
+BEGIN {plan tests => 19};
 
 use Finance::Quote;
 
 # Test usfedbonds functions.
 
+my $year = (localtime())[5] + 1900;
+my $lastyear = $year - 1;
 my $q      = Finance::Quote->new("USFedBonds");
 
 #my %quotes = $q->usfedbonds("E197001.200506");
@@ -17,11 +19,19 @@ ok(%quotes);
 ok($quotes{"E197001.200506","success"});
 ok($quotes{"E197001.200506","price"} > 0);
 ok(length($quotes{"E197001.200506","date"}) > 0);
+ok(substr($quotes{"E197001","isodate"},0,4) eq $year ||
+   substr($quotes{"E197001","isodate"},0,4) eq $lastyear);
+ok(substr($quotes{"E197001","date"},6,4) eq $year ||
+   substr($quotes{"E197001","date"},6,4) eq $lastyear);
 ok($quotes{"E197001.200506","currency"} eq "USD");
 
 ok($quotes{"E194112.200510","success"});
 ok($quotes{"E194112.200510","price"} > 0);
 ok(length($quotes{"E194112.200510","date"}) > 0);
+ok(substr($quotes{"E194112.200510","isodate"},0,4) eq $year ||
+   substr($quotes{"E194112.200510","isodate"},0,4) eq $lastyear);
+ok(substr($quotes{"E194112.200510","date"},6,4) eq $year ||
+   substr($quotes{"E194112.200510","date"},6,4) eq $lastyear);
 ok($quotes{"E194112.200510","currency"} eq "USD");
 
 # Check that a non-existent price returns no-success.
