@@ -1,3 +1,8 @@
+2007-01-01  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/ZA.pm: Update for changes in the display of
+	the web site.
+
 2006-12-31  David Hampton  <hampton@employees.org>
 
 	* lib/Finance/Quote/StockHouseCanada.pm:
