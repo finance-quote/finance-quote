@@ -1,5 +1,9 @@
 2006-12-31  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote/StockHouseCanada.pm:
+	* test/stockhousecanada.t: New module for getting Canadian Mutual
+	fund quotes from Chris Carton <ctcarton@gmail.com>.
+
 	* lib/Finance/Quote/Deka.pm: Update for changes in the display
 	of the web site.  Now uses an https url.
 
