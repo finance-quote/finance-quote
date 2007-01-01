@@ -1,5 +1,8 @@
 2007-01-01  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote/FinanceCanada.pm: Rewrite this module for the
+	new web site design.
+
 	* test/*.t: Some restructuring of tests.  Add a couple more tests
 	on dates.  Replace a couple of test stocks that are no longer
 	valid.
