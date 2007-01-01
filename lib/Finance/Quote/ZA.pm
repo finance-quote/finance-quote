@@ -94,14 +94,14 @@ sub sharenet {
         $info{$symbol, "source"} = $SHARENET_MAINURL;
 
 # NAME
-        $ts = $te->table_state(2,2);
+        $ts = $te->table_state(2,1);
         if($ts) {
           (@rows) = $ts->rows;
           $info{$symbol, "name"} = $rows[2][1];
         }
 
 # DATE AND CLOSING PRICE
-        $ts = $te->table_state(2,4);
+        $ts = $te->table_state(3,1);
 #         print "[debug]: ", "got this far...", "\n";
 #         print "[debug]: (table_state)",$ts, "\n";
         if($ts) {
