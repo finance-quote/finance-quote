@@ -3,7 +3,10 @@
 # FinanceCanada.pm
 #
 # Version 0.1 Initial version
-
+#
+# Version 0.2 Rewrite by David Hampton <hampton@employees.org> for
+# changed web site.
+#
 
 package Finance::Quote::FinanceCanada;
 require 5.004;
@@ -14,8 +17,9 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
+my $VERSION = '0.2';
 my $FINANCECANADA_MAINURL = ("http://finance.canada.com/");
-my $FINANCECANADA_URL = ($FINANCECANADA_MAINURL."bin/quote?Symbol=");
+my $FINANCECANADA_URL = "http://stockgroup.canada.com/sn_overview.asp?symbol=T.";
 
 sub methods {
     return (canada => \&financecanada,
@@ -30,6 +34,7 @@ sub labels {
 }   
 
 
+
 sub financecanada {
     my $quoter = shift;
     my @symbols = @_;
@@ -40,58 +45,111 @@ sub financecanada {
     my $ua = $quoter->user_agent;
 
     foreach my $symbol (@symbols) {
+	my ($day_high, $day_low, $year_high, $year_low);
+
+	$info{$symbol, "success"} = 0;
+	$info{$symbol, "symbol"} = $symbol;
+	$info{$symbol, "method"} = "financecanada";
+	$info{$symbol, "source"} = $FINANCECANADA_MAINURL;
+
+	# Pull the data from the web site
         my $url = $FINANCECANADA_URL.$symbol;
-        #print $url;
+        # print $url;
         my $response = $ua->request(GET $url);
-        #print $response->content;
-       
-        if (!$response->is_success) {
-            $info{$symbol, "success"} = 0;
+        # print $response->content;
+	if (!$response->is_success) {
             $info{$symbol, "errormsg"} = "Error contacting URL";
             next;
         }
 
-        my @headers = [qw(Company Symbol Latest Last)];
-        my $te = new HTML::TableExtract(headers => @headers);
-
+	# Parse the page looking for the table containing the full
+	# name of the stock
+        my $te = new HTML::TableExtract( depth => 2, count => 0);
         $te->parse($response->content);
 
+	# debug
+#	foreach my $ts ($te->table_states) {
+#	    print "\n***\n*** Table (", join(',', $ts->coords), "):\n***\n";
+#	    foreach my $row ($ts->rows) {
+#		print join(',', @$row), "\n";
+#	    }
+#	}
+
+        foreach my $ts ($te->table_states) {
+            my $row = $ts->row(0);
+	    $info{$symbol, "name"} = $row->[0]
+		if ($row->[0] =~ s/^.([\w\s]+).*/$1/);
+	}
+	if (!defined($info{$symbol, "name"})) {
+            $info{$symbol, "errormsg"} = "Invalid symbol";
+	    next;
+	}
+
+	# Parse the page looking for the table containing the quote
+	# details
+        $te = new HTML::TableExtract(headers => [qw(Quote)],
+				     slice_columns => 0);
+        $te->parse($response->content);
+
+	# debug
+#	foreach my $ts ($te->table_states) {
+#	    print "\n***\n*** Table (", join(',', $ts->coords), "):\n***\n";
+#	    foreach my $row ($ts->rows) {
+#		print join(',', @$row), "\n";
+#	    }
+#	}
+
+	# Now parse the quote details.  This method of parsing is
+	# independent of which row contains which data item, so if the
+	# web site reorders these it won't impact this code.
         foreach my $ts ($te->table_states) {
             foreach my $row ($ts->rows) {
-                chop $row->[1];
 
-		if ($row->[0] eq "Invalid Symbol") {
-                    $info{$symbol, "symbol"} = $symbol;
-                    $info{$symbol, "success"} = 0;
-		} elsif ($row->[1] eq $symbol) {
-                    $info{$symbol, "method"} = "financecanada";
-                    $info{$symbol, "name"} = $row->[0];
-                    $info{$symbol, "symbol"} = $symbol;
-                    $info{$symbol, "currency"} = "CAD";
-                    $info{$symbol, "source"} = $FINANCECANADA_MAINURL;
-                    $info{$symbol, "price"} = $row->[2];
-                    $info{$symbol, "nav"} = $row->[2];
-                    $info{$symbol, "last"} = $row->[2];
+		# Remove leading and trailing white space
+		$row->[0] =~ s/^\s*(.+?)\s*$/$1/ if defined($row->[0]);
+		$row->[1] =~ s/^\s*(.+?)\s*$/$1/ if defined($row->[1]);
 
-                    if ($row->[3] =~ /(\d{1,2})\/(\d{1,2})/) {
-                        # returned date is month/day only if a date is given
-                        $quoter->store_date(\%info, $symbol, {month => $1, day => $2});
-                    }
-                    elsif ($row->[3] =~ /\d+:\d+/) {
-                        # default to today if returned time data
-                        $quoter->store_date(\%info, $symbol, {today => ""}); 
-                    }
+		# Map the row into our data array
+		for ($row->[0]) {
+		    /^Last Traded/ && do { s/Last Traded: (.*) ../$1/;
+					   $quoter->store_date(\%info, $symbol, { usdate => $_}); };
+		    /^Last$/	&& do { $info{$symbol, "last"} = $row->[1];
+					$info{$symbol, "price"} = $row->[1];
+					$info{$symbol, "nav"} = $row->[1];
+					last; };
+		    /^Open$/	&& do { $info{$symbol, "open"} = $row->[1]; last; };
+		    /^Bid$/	&& do { $info{$symbol, "bid"} = $row->[1]; last; };
+		    /^Ask$/	&& do { $info{$symbol, "ask"} = $row->[1]; last; };
+		    /^% Change/ && do { $info{$symbol, "p_change"} = $row->[1];
+					$info{$symbol, "p_change"} =~ s/%//;
+					last; };
+		    /^Volume/	&& do { $info{$symbol, "volume"} = $row->[1]; last; };
+		    /^Close/	&& do { $info{$symbol, "close"} = $row->[1]; last; };
 
-                    $info{$symbol, "success"} = 1;
-                }
+		    /^Day High$/  && do { $info{$symbol, "high"} = $row->[1]; last; };
+		    /^Day Low$/	  && do { $info{$symbol, "low"} = $row->[1]; last; };
+		    /^Year High$/ && do { $year_high = $row->[1]; last; };
+		    /^Year  Low$/ && do { $year_low = $row->[1]; last; };
 
-                #print $row->[0]."\n";
-                #print $row->[1]."\n";
-                #print $row->[2]."\n";
-                #print $row->[3]."\n";
+		    $info{$symbol, "success"} = 1;
+		};
+	    }
+	}
 
-            }
-        }
+	if ($info{$symbol, "success"} == 1) {
+	    $info{$symbol, "currency"} = "CAD";
+	    foreach (keys %info) {
+		$info{$_} =~ s/\$//;
+	    }
+	    $info{$symbol, "day_range"} = $info{$symbol, "low"} . " - " . $info{$symbol, "high"}
+	    if (defined($info{$symbol, "high"}) && defined($info{$symbol, "low"}));
+	    
+	    if (defined($year_high) && defined($year_low)) {
+		$info{$symbol, "year_range"} = "$year_low - $year_high";
+	    }
+	} else {
+            $info{$symbol, "errormsg"} = "Cannot parse quote data";
+	}
     }
 
     return wantarray() ? %info : \%info;
