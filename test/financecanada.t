@@ -8,7 +8,7 @@ use Finance::Quote;
 # Test Finance Canada functions.
 
 my $q      = Finance::Quote->new();
-my @stocks = ("CLG*AGI", "PCA*LDB");
+my @stocks = ("CLG", "PCA");
 my $year = (localtime())[5] + 1900;
 
 my %quotes = $q->fetch("financecanada", @stocks);
