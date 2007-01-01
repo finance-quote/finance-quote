@@ -168,8 +168,8 @@ sub new {
 		# Default modules
 		@modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns Bourso Cdnfundlibrary Deka
 			      DWS FTPortfolios Fidelity FinanceCanada Fool HEX IndiaMutual
-			      LeRevenu ManInvestments NZX Platinum SEB TSP Tdefunds
-			      Tdwaterhouse Tiaacref Troweprice Trustnet Union
+			      LeRevenu ManInvestments NZX Platinum SEB StockHouseCanada
+			      TSP Tdefunds Tdwaterhouse Tiaacref Troweprice Trustnet Union
 			      USFedBonds VWD ZA
 			      Yahoo::Asia Yahoo::Australia Yahoo::Brasil
 			      Yahoo::Europe Yahoo::NZ Yahoo::USA/; }
