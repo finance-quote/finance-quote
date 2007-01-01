@@ -1,4 +1,4 @@
-p#!/usr/bin/perl -w
+#!/usr/bin/perl -w
 use strict;
 use Test;
 BEGIN {plan tests => 22};
@@ -20,8 +20,8 @@ ok($quotes{"c","nav"} > 0);
 ok($quotes{"l2040fund","date"});
 ok(substr($quotes{"l2040fund","isodate"},0,4) == $year ||
    substr($quotes{"l2040fund","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"l2040fund","date"},0,4) == $year ||
-   substr($quotes{"l2040fund","date"},0,4) == $lastyear);
+ok(substr($quotes{"l2040fund","date"},6,4) == $year ||
+   substr($quotes{"l2040fund","date"},6,4) == $lastyear);
 ok($quotes{"s","currency"});
 ok($quotes{"s","name"});
 ok($quotes{"TSPgfund","success"});
@@ -29,8 +29,8 @@ ok($quotes{"TSPgfund","nav"} > 0);
 ok($quotes{"TSPgfund","date"});
 ok(substr($quotes{"TSPgfund","isodate"},0,4) == $year ||
    substr($quotes{"TSPgfund","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"TSPgfund","date"},0,4) == $year ||
-   substr($quotes{"TSPgfund","date"},0,4) == $lastyear);
+ok(substr($quotes{"TSPgfund","date"},6,4) == $year ||
+   substr($quotes{"TSPgfund","date"},6,4) == $lastyear);
 
 # Check that some values are undefined.
 ok( !defined($quotes{"c","exchange"}) );
@@ -46,7 +46,7 @@ ok($quotes{"f","nav"} > 0);
 ok($quotes{"i","date"});
 ok(substr($quotes{"i","isodate"},0,4) == $year ||
    substr($quotes{"i","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"i","date"},0,4) == $year ||
-   substr($quotes{"i","date"},0,4) == $lastyear);
+ok(substr($quotes{"i","date"},6,4) == $year ||
+   substr($quotes{"i","date"},6,4) == $lastyear);
 ok($quotes{"tsplincomefund","nav"} > 0);
 

@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 11};
+BEGIN {plan tests => 13};
 
 use Finance::Quote;
 
@@ -11,21 +11,20 @@ my $q      = Finance::Quote->new("Deka");
 
 my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
-my %quotes = $q->deka("DE0008474511","LU0051755006","BOGUS");
+my @stocks = ("DE0008474511","LU0051755006");
+my %quotes = $q->deka(@stocks, "BOGUS");
 ok(%quotes);
 
 # Check that the last and date values are defined.
-ok($quotes{"DE0008474511","success"});
-ok($quotes{"DE0008474511","last"} > 0);
-ok(substr($quotes{"DE0008474511","date"},6,4) == $year ||
-   substr($quotes{"DE0008474511","date"},6,4) == $lastyear);
+foreach my $stock (@stocks) {
+    ok($quotes{$stock,"success"});
+    ok($quotes{$stock,"last"} > 0);
+    ok(substr($quotes{$stock,"isodate"},0,4) == $year ||
+       substr($quotes{$stock,"isodate"},0,4) == $lastyear);
+    ok(substr($quotes{$stock,"date"},6,4) == $year ||
+       substr($quotes{$stock,"date"},6,4) == $lastyear);
+}
 ok($quotes{"DE0008474511","currency"} eq "EUR");
-
-# Check that the last and date values are defined.
-ok($quotes{"LU0051755006","success"});
-ok($quotes{"LU0051755006","last"} > 0);
-ok(substr($quotes{"LU0051755006","date"},6,4) == $year ||
-   substr($quotes{"LU0051755006","date"},6,4) == $lastyear);
 ok($quotes{"LU0051755006","currency"} eq "USD");
 
 # Check that a bogus fund returns no-success.
