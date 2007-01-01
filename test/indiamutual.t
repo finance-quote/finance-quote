@@ -8,7 +8,7 @@ use Finance::Quote;
 # Test Fidelity functions.
 
 my $q      = Finance::Quote->new();
-my @funds = ("102620", "103134", "101599", "103206", "100151",
+my @funds = ("102620", "103134", "101599", "102734", "100151",
 	     "102849", "101560");
 my $year = (localtime())[5] + 1900;
 
@@ -21,8 +21,10 @@ foreach my $fund (@funds) {
 	ok(length($quotes{$fund,"name"}));
 	ok($quotes{$fund,"success"});
         ok($quotes{$fund, "currency"} eq "INR");
-	ok(substr($quotes{$fund,"isodate"},0,4) == $year);
-	ok(substr($quotes{$fund,"date"},6,4) == $year);
+	ok(substr($quotes{$fund,"isodate"},0,4) == $year ||
+	   substr($quotes{$fund,"isodate"},0,4) == $year - 1);
+	ok(substr($quotes{$fund,"date"},6,4) == $year ||
+	   substr($quotes{$fund,"date"},6,4) == $year - 1);
 }
 
 # Check that a bogus fund returns no-success.
