@@ -23,7 +23,7 @@ foreach my $stock (@stocks) {
 	ok(substr($quotes{$stock,"isodate"},0,4) == $year ||
 	   substr($quotes{$stock,"isodate"},0,4) == $lastyear);
 	ok(substr($quotes{$stock,"date"},6,4) == $year ||
-	   substr($quotes{"PLA0001AU","date"},6,4) == $lastyear);
+	   substr($quotes{$stock,"date"},6,4) == $lastyear);
 }
 
 ok($quotes{"CIB497", "currency"} eq "CAD");

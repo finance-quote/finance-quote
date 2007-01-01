@@ -1,6 +1,10 @@
 2007-01-01  David Hampton  <hampton@employees.org>
 
-	* t/*.t: Accept last year as a valid date.  Comes in hand when
+	* test/*.t: Some restructuring of tests.  Add a couple more tests
+	on dates.  Replace a couple of test stocks that are no longer
+	valid.
+
+	* test/*.t: Accept last year as a valid date.  Comes in hand when
 	testing modules at the start of the new year.
 
 	* lib/Finance/Quote/ZA.pm: Update for changes in the display of
