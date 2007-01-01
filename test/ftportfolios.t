@@ -9,6 +9,7 @@ use Finance::Quote;
 
 my $q      = Finance::Quote->new();
 my $year   = (localtime())[5] + 1900;
+my $lastyear = $year - 1;
 
 my %quotes = $q->ftportfolios("FKYMRX");
 ok(%quotes);
@@ -20,8 +21,10 @@ ok($quotes{"FKYMRX","price"} > 0);
 ok($quotes{"FKYMRX","success"});
 ok($quotes{"FKYMRX","currency"} eq "USD");
 ok(length($quotes{"FKYMRX","date"}) > 0);
-ok(substr($quotes{"FKYMRX","isodate"},0,4) == $year);
-ok(substr($quotes{"FKYMRX","date"},6,4) == $year);
+ok(substr($quotes{"FKYMRX","isodate"},0,4) == $year ||
+   substr($quotes{"FKYMRX","isodate"},0,4) == $lastyear);
+ok(substr($quotes{"FKYMRX","date"},6,4) == $year ||
+   substr($quotes{"FKYMRX","date"},6,4) == $lastyear);
 
 
 # Check that a bogus fund returns no-success.

@@ -10,6 +10,7 @@ use Finance::Quote;
 my $q      = Finance::Quote->new();
 my @stocks = ("CIB497", "TDB227", "FID342");
 my $year = (localtime())[5] + 1900;
+my $lastyear = $year - 1;
 
 my %quotes = $q->fetch("stockhousecanada_fund", @stocks);
 ok(%quotes);
@@ -19,8 +20,10 @@ foreach my $stock (@stocks) {
 	ok($quotes{$stock,"price"} > 0);
 	ok(length($quotes{$stock,"name"}));
 	ok($quotes{$stock,"success"});
-	ok(substr($quotes{$stock,"isodate"},0,4) == $year);
-	ok(substr($quotes{$stock,"date"},6,4) == $year);
+	ok(substr($quotes{$stock,"isodate"},0,4) == $year ||
+	   substr($quotes{$stock,"isodate"},0,4) == $lastyear);
+	ok(substr($quotes{$stock,"date"},6,4) == $year ||
+	   substr($quotes{"PLA0001AU","date"},6,4) == $lastyear);
 }
 
 ok($quotes{"CIB497", "currency"} eq "CAD");

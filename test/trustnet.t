@@ -10,6 +10,7 @@ use Finance::Quote;
 
 my $q = Finance::Quote->new();
 my $year = (localtime())[5] + 1900;
+my $lastyear = $year - 1;
 
 my @stocks = ("ABBEY NATIONAL INTERNATIONAL","MARLBOROUGH INTERNATIONAL EQUITY");
 
@@ -24,8 +25,10 @@ foreach my $stock (@stocks) {
 	ok($quotes{$stock,"success"});
 	ok($quotes{$stock,"price"});
 	ok($quotes{$stock,"date"});
-	ok(substr($quotes{$stock,"isodate"},0,4) == $year);
-	ok(substr($quotes{$stock,"date"},6,4) == $year);
+	ok(substr($quotes{$stock,"isodate"},0,4) == $year ||
+	   substr($quotes{$stock,"isodate"},0,4) == $lastyear);
+	ok(substr($quotes{$stock,"date"},6,4) == $year ||
+	   substr($quotes{$stock,"date"},6,4) == $lastyear);
 }
 
 # Test that a bogus stock gets no success.

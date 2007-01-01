@@ -13,6 +13,7 @@ my $q      = Finance::Quote->new();
 my @stocks = ("ABD-AUS.EQ", "AIG-EUSC.U", "FID-JP.ADV", "SCH-HKEQ");
 
 my $year = (localtime())[5] + 1900;
+my $lastyear = $year - 1;
 
 my %quotes = $q->fetch("aiahk", @stocks);
 ok(%quotes);
@@ -23,8 +24,10 @@ foreach my $stock (@stocks) {
 	ok($quotes{$stock,"bid"} > 0);
 	ok($quotes{$stock,"offer"} > 0);
 	ok(length($quotes{$stock,"name"}));
-	ok(substr($quotes{$stock,"isodate"},0,4) == $year);
-	ok(substr($quotes{$stock,"date"},6,4) == $year);
+	ok(substr($quotes{$stock,"isodate"},0,4) == $year ||
+	   substr($quotes{$stock,"isodate"},0,4) == $lastyear);
+	ok(substr($quotes{$stock,"date"},6,4) == $year ||
+	   substr($quotes{$stock,"date"},6,4) == $lastyear);
 }
 ok($quotes{"ABD-AUS.EQ", "currency"} eq "AUD");
 ok($quotes{"AIG-EUSC.U", "currency"} eq "EUR");

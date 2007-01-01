@@ -9,6 +9,7 @@ use Finance::Quote;
 
 my $q      = Finance::Quote->new();
 my $year = (localtime())[5] + 1900;
+my $lastyear = $year - 1;
 my @funds = qw/VBINX VIVAX VWINX VFIIX/;
 
 my %quotes = $q->vanguard(@funds);
@@ -20,8 +21,10 @@ foreach my $fund (@funds) {
 	ok(length($quotes{$fund,"name"}));
 	ok($quotes{$fund,"success"});
         ok($quotes{$fund, "currency"} eq "USD");
-	ok(substr($quotes{$fund,"isodate"},0,4) == $year);
-	ok(substr($quotes{$fund,"date"},6,4) == $year);
+	ok(substr($quotes{$fund,"isodate"},0,4) == $year ||
+	   substr($quotes{$fund,"isodate"},0,4) == $lastyear);
+	ok(substr($quotes{$fund,"date"},6,4) == $year ||
+	   substr($quotes{$fund,"date"},6,4) == $lastyear);
 }
 
 # Make sure we're not getting spurious percentage signs.
