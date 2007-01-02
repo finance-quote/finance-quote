@@ -44,7 +44,6 @@ $VERSION = '1.00';
 # URLs of where to obtain information.
 
 $FTPORTFOLIOS_URL = ('http://www.ftportfolios.com/retail/productsearch.aspx');
-
 $FTPORTFOLIOS_ALL="http://www.ftportfolios.com";
 
 sub methods { return (ftportfolios => \&ftportfolios, ftportfolios_direct => \&ftportfolios); }
@@ -59,7 +58,7 @@ sub methods { return (ftportfolios => \&ftportfolios, ftportfolios_direct => \&f
 # =======================================================================
 
 sub ftportfolios
-  {
+{
     my $quoter = shift;
     my @symbols = @_;
     
@@ -72,70 +71,82 @@ sub ftportfolios
     @symbolhash{@symbols} = map(1,@symbols);
     # 
     for (@symbols) {
-      my $te = new HTML::TableExtract( headers => [("Name", "Ticker", "Price", "Net Asset", "Date")]);
+      my $te = new HTML::TableExtract( );
       $trust = $_;
       $url = "$FTPORTFOLIOS_URL";
       
       # print STDERR "Retrieving \"$trust\" from $url\n";
       $ua = $quoter->user_agent;
+
+      # The web site now redirects to a different page which uses a
+      # fund code number instead of the ticker symbol.
+      push @{ $ua->requests_redirectable }, 'POST';
       $reply = $ua->request(POST $url, [searchfor => $trust]);
       return unless ($reply->is_success);
       
       # print STDERR $reply->content,"\n";
       
+      $te->utf8_mode(1);
       $te->parse($reply->content);
-      $ts  = ($te->table_states)[0];
-      
-      if( defined ($ts)) {
-	
-	$matches = 0;
-	foreach $row ($ts->rows) {
-	  ($sym = $$row[1]) =~ s/^ +//;
-	  if ($sym =~ /$trust/i) {
-	    $matches++;
-	    $datarow = $row;
-	  }
-	}
-	if ($matches > 1 ) {
+
+#      foreach $ts ($te->table_states) {
+#	  print "***\n***Table (", join(',', $ts->coords), "):\n***\n";
+#	  foreach $row ($ts->rows) {
+#	      print join(',', @$row), "\n";
+#	  }
+#      }
+
+      $aa {$trust, "symbol"} = $trust;
+
+      # Parse the fund name and the ticker symbol.
+      $ts = $te->table(2, 2);
+      if( !defined ($ts)) {
 	  $aa {$trust, "success"} = 0;
-	  $aa {$trust, "errormsg"} = "Fund name $trust is not unique.  See \"$FTPORTFOLIOS_ALL\"";
+	  $aa {$trust, "errormsg"} = "Fund name $trust is not found.  See \"$FTPORTFOLIOS_ALL\"";
 	  next;
-	} elsif ($matches < 1 ) {
+      }
+
+      my $row = $ts->row(0);
+      my ($a, $b) = (@$row[0]) =~ /^([-+.,\w\s]+).*Ticker: ([\w]+)/;
+      # print STDERR "name |$a|, ticker |$b|\n";
+      if (!defined($a)) {
 	  $aa {$trust, "success"} = 0;
-	  #$aa {$trust, "errormsg"} = "Fund name $trust is not found.  See \"$FTPORTFOLIOS_ALL\"";
-	  $aa {$trust, "errormsg"} = "Error retrieving  $trust -- unexpected input";
+	  $aa {$trust, "errormsg"} = "Failure parsing fund name.";
 	  next;
-	} else {
-	  $aa {$trust, "exchange"} = "Ftportfolios";
-	  $aa {$trust, "method"} = "ftportfolios";
-	  $aa {$trust, "source"} = "http://www.ftportfolios.com/";
-	  ($aa {$trust, "name"} = $$datarow[0]) =~ s/^\s*(.*?)\s*$/$1/;
-	  # print STDERR "name ",$aa {$trust, "name"},"\n";
-	  ($aa {$trust, "symbol"} = $$datarow[1]) =~ s/^\s*(.*?)\s*$/$1/;
-	  # print STDERR "symbol ",$aa {$trust, "symbol"},"\n";
-	  ($price = $$datarow[2]) =~ s/^\s*(\$)(.*?)\s*$/$2/;
-	  # print STDERR "price ",$price,"\n";
-	  $currency=$1||"USD";
-	  # print STDERR "currency ",$currency,"\n";
-	  $aa {$trust, "currency"} = $curr_iso{"$currency"};
-	  # print STDERR "currency ",$aa {$trust, "currency"},"\n";
-	  $aa {$trust, "pop"} = $price;
-	  # print STDERR "pop ",$aa {$trust, "pop"},"\n";
-	  ($price = $$datarow[3]) =~ s/^\s*(\$)(.*?)\s*$/$2/;
-	  $price = $aa {$trust, "pop"} if  $price eq "";
-	  $aa {$trust, "nav"} = $price;
-	  # print STDERR "nav ",$aa {$trust, "nav"},"\n";
-	  $aa {$trust, "price"} = $aa{$trust,"pop"};
-	  # print STDERR "price ",$aa {$trust, "price"},"\n";
-	  $quoter->store_date(\%aa, $trust, {usdate => $$datarow[5]});
-	  # print STDERR "date ",$aa {$trust, "date"},"\n";
-	  $aa {$trust, "success"} = 1;
-	  # print STDERR "Ftportfolios:: Flagging success for $trust\n";
-	}
+      }
+      $aa {$trust, "name"} = $a;
+
+      # Now parse the NAV and POP values
+      $ts = $te->table(6, 1);
+      foreach $row ($ts->rows) {
+
+	  # Remove leading and trailing white space
+	  $row->[0] =~ s/^\s*(.+?)\s*$/$1/ if defined($row->[0]);
+	  $row->[1] =~ s/^\s*(.+?)\s*$/$1/ if defined($row->[1]);
+
+	  # Map the row into our data array
+	  for ($row->[0]) {
+	      /^NAV/	&& do { $aa{$trust, "nav"} = $row->[1]; last; };
+	      /^POP/	&& do { $aa{$trust, "pop"} = $row->[1];
+				$aa{$trust, "price"} = $row->[1]; last; };
+
+	      $aa{$trust, "success"} = 1;
+	  };
+      }
+
+      $aa {$trust, "exchange"} = "Ftportfolios";
+      $aa {$trust, "method"} = "ftportfolios";
+      $aa {$trust, "source"} = "http://www.ftportfolios.com/";
+      if ($aa{$trust, "success"} == 1) {
+	  $aa{$trust, "currency"} = "USD";
+	  $aa{$_} =~ s/\$// foreach (keys %aa);
+
+	  # Parse out the transaction date.
+	  $reply->content =~ m/Trade Date:[^0-9]+([0-9\/]+)/s;
+	  # print STDERR "Date: $1\n";
+	  $quoter->store_date(\%aa, $trust, {usdate => $1});
       } else {
-	$aa {$trust, "success"} = 0;
-	$aa {$trust, "errormsg"} = "Fund name $trust is not found.  See \"$FTPORTFOLIOS_ALL\"";
-	next;
+	  $aa{$trust, "errormsg"} = "Cannot parse quote data";
       }
     }
     return %aa if wantarray;
