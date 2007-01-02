@@ -9,6 +9,8 @@ use Finance::Quote;
 
 my $q      = Finance::Quote->new("Deka");
 
+$q->timeout(60);		# Deka appears to be hanging today.
+
 my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 my @stocks = ("DE0008474511","LU0051755006");
