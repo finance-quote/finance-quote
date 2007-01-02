@@ -1,5 +1,7 @@
 2007-01-01  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote/TSP.pm: Strip spaces around the dollar values.
+
 	* lib/Finance/Quote/FinanceCanada.pm: Rewrite this module for the
 	new web site design.
 

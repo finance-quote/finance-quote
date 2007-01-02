@@ -130,7 +130,8 @@ sub tsp {
 		$info{$_, 'source'} = $TSP_MAIN_URL;
 		$info{$_, 'symbol'} = $_;
 		$info{$_, 'name'} = $TSP_FUND_NAMES{$tmp};
-		$info{$_, 'nav'} = $info{$_, 'last'} = $$row[$fundrows{$tmp}];
+		($info{$_, 'nav'} = $$row[$fundrows{$tmp}]) =~ s/[^0-9]*([0-9.,]+).*/$1/s;
+		$info{$_, 'last'} = $info{$_, 'nav'};
 		$quoter->store_date(\%info, $_, {usdate => $$row[0]});
 	    } else {
 		$info{$_, 'success'} = 0;
