@@ -1,5 +1,10 @@
 2007-01-07  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote/BMONesbittBurns.pm: Enhance module to support
+	mutual fund quotes (which have less data than stock quotes).
+	Correct date format parsing.  Fix from Christian Lupien <lupien at
+	users.sourceforge.net>.
+
 	* lib/Finance/Quote/StockHouseCanada.pm: The fund name seems to be
 	a moving target. Search all tables of depth one looking for it.
 
