@@ -1,5 +1,12 @@
 2007-01-07  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote.pm: Update the store_date() function for the
+	case when the year isn't explicitly stated.  If the specified
+	month would put the quote in the future, then consider this a
+	quite from last year.  manly intended to handle the rollover from
+	December to January on web sites that don't specify the year.
+	Suggestion from Christian Lupien.
+
 	* lib/Finance/Quote/BMONesbittBurns.pm: Enhance module to support
 	mutual fund quotes (which have less data than stock quotes).
 	Correct date format parsing.  Fix from Christian Lupien <lupien at

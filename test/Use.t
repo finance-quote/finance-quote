@@ -19,7 +19,8 @@ ok($quote);	# Did we get an object okay?
 # Get Today's date
 my ($month, $day, $year2) = (localtime())[4,3,5];
 $month++;
-my $year4 += $year2 + 1900;	# 2005
+my $year4 += $year2 + 1900;	# 2007
+my $year4m += $year2 + 1900 - 1;# 2006
 $year2 -= 100;			# 05
 my $isotoday = sprintf("%04d-%02d-%02d", $year4, $month, $day);
 my $ustoday  = sprintf("%02d/%02d/%04d", $month, $day, $year4);
@@ -63,16 +64,26 @@ ok($info{"test","isodate"} eq "2004-12-31");
 $quote->store_date(\%info, "test", {eurodate => "31 Dec, 2004"});
 ok($info{"test","isodate"} eq "2004-12-31");
 
-# Try some other permutions
+# Try some other permutions.  A recent change to the date handling
+# code changes the behavior if a year is not explicitly provided.  Now
+# it will look at the month and decide if the date is in the current
+# year or is from the previous year.  This code still has to handle
+# being executed on 12/31, thus the dual tests for each date.
 %info = ();
 $quote->store_date(\%info, "test", {day=>"31", month=>"12"});
-ok($info{"test","date"} eq "12/31/$year4");
-ok($info{"test","isodate"} eq "$year4-12-31");
+ok($info{"test","date"} eq "12/31/$year4" ||
+   $info{"test","date"} eq "12/31/$year4m");
+ok($info{"test","isodate"} eq "$year4-12-31" ||
+   $info{"test","isodate"} eq "$year4m-12-31");
 %info = ();
 $quote->store_date(\%info, "test", {day=>"31", month=>"December"});
-ok($info{"test","date"} eq "12/31/$year4");
-ok($info{"test","isodate"} eq "$year4-12-31");
+ok($info{"test","date"} eq "12/31/$year4" ||
+   $info{"test","date"} eq "12/31/$year4m");
+ok($info{"test","isodate"} eq "$year4-12-31" ||
+   $info{"test","isodate"} eq "$year4m-12-31");
 %info = ();
 $quote->store_date(\%info, "test", {day=>"31", month=>"December", year => $year2});
-ok($info{"test","date"} eq "12/31/$year4");
-ok($info{"test","isodate"} eq "$year4-12-31");
+ok($info{"test","date"} eq "12/31/$year4" ||
+   $info{"test","date"} eq "12/31/$year4m");
+ok($info{"test","isodate"} eq "$year4-12-31" ||
+   $info{"test","isodate"} eq "$year4m-12-31");
