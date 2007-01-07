@@ -122,13 +122,15 @@ sub bmonesbittburns {
             ($info {$symbol, "volume"}    = $rows[ 6][5]) =~ s/\s*//g;
             ($info {$symbol, "high"}      = $rows[ 7][2]) =~ s/\s*//g; 
             ($info {$symbol, "low"}       = $rows[ 7][5]) =~ s/\s*//g;
-            ($info {$symbol, "eps"}       = $rows[10][2]) =~ s/\s*//g; 
-            ($info {$symbol, "pe"}        = $rows[10][5]) =~ s/\s*//g;
-            ($info {$symbol, "div_yield"} = $rows[12][5]) =~ s/\s*//g;
+            if ($#rows >= 9) {
+                ($info {$symbol, "eps"}       = $rows[10][2]) =~ s/\s*//g; 
+                ($info {$symbol, "pe"}        = $rows[10][5]) =~ s/\s*//g;
+                ($info {$symbol, "div_yield"} = $rows[12][5]) =~ s/\s*//g;
 
-            $rows[9][2] =~ s/[^\d\.]*//g; # Strip spaces and funky 8-bit characters
-            $rows[9][5] =~ s/[^\d\.]*//g;
-            $info {$symbol, "year_range"} = $rows[9][5] . " - " . $rows[9][2];
+                $rows[9][2] =~ s/[^\d\.]*//g; # Strip spaces and funky 8-bit characters
+                $rows[9][5] =~ s/[^\d\.]*//g;
+                $info {$symbol, "year_range"} = $rows[9][5] . " - " . $rows[9][2];
+            }
 
 	    # This site appears to provide either a date or a time but not both
             my($dt) = $rows[3][2];
@@ -137,7 +139,7 @@ sub bmonesbittburns {
 		$quoter->store_date(\%info, $symbol, {today => 1});
             }
             else {
-                my ($day, $month) = ($dt =~ /([0-9]+)\/([0-9]+)/);
+                my ($month, $day) = ($dt =~ /([0-9]+)\/([0-9]+)/);
 		$quoter->store_date(\%info, $symbol, {day => $day, month => $month});
                 $info {$symbol, "time"} = "00:00:00";
             }

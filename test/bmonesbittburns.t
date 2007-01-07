@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test;
-BEGIN {plan tests => 11};
+BEGIN {plan tests => 23};
 
 use Finance::Quote;
 
@@ -11,19 +11,21 @@ my $q      = Finance::Quote->new();
 my $year   = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my %quotes = $q->bmonesbittburns("NT,T");
+my @stocks = ("NT,T", "BBD.A,T","MFC598,MF");
+my %quotes = $q->bmonesbittburns(@stocks);
 ok(%quotes);
 
 # Check that last and date are defined as our tests.
-ok($quotes{"NT,T","last"} > 0);
-ok($quotes{"NT,T","success"});
-ok($quotes{"NT,T","currency"} eq "CAD");
-ok(length($quotes{"NT,T","date"}) > 0);
-ok(substr($quotes{"NT,T","isodate"},0,4) == $year ||
-   substr($quotes{"NT,T","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"NT,T","date"},6,4) == $year ||
-   substr($quotes{"NT,T","date"},6,4) == $lastyear);
-
+foreach my $stock (@stocks) {
+    ok($quotes{$stock,"last"} > 0);
+    ok($quotes{$stock,"success"});
+    ok($quotes{$stock,"currency"} eq "CAD");
+    ok(length($quotes{$stock,"date"}) > 0);
+    ok(substr($quotes{$stock,"isodate"},0,4) == $year ||
+       substr($quotes{$stock,"isodate"},0,4) == $lastyear);
+    ok(substr($quotes{$stock,"date"},6,4) == $year ||
+       substr($quotes{$stock,"date"},6,4) == $lastyear);
+}
 
 # Exercise the fetch function
 %quotes = $q->fetch("bmonesbittburns", "NT,X");
