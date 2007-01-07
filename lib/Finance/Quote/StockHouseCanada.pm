@@ -55,6 +55,7 @@ sub stockhouse_fund  {
 		my $mutual = $_;
 		my $url = $STOCKHOUSE_URL.$mutual;
 		my $reply = $ua->request(GET $url);
+		# print "Retrieving $url\n";
 
 		$fundquote {$mutual, "success"} = 0;
 
@@ -64,8 +65,18 @@ sub stockhouse_fund  {
 
 		# Parse out the complete fund name.
 
-		my $te= new HTML::TableExtract( depth => 1, count => 6 );
+		# debug
+#		my $te2= new HTML::TableExtract(depth => 1);
+#		$te2->parse($reply->content);
+#		foreach my $ts ($te2->table_states) {
+#		    print "\n***\n*** Table (", join(',', $ts->coords), "):\n***\n";
+#		    foreach my $row ($ts->rows) {
+#			print join(',', @$row), "\n";
+#		    }
+#		}
 
+		# Search all tables of depth 1 looking for the fund name.
+		my $te= new HTML::TableExtract( depth => 1 );
 		$te->parse($reply->content);
 		unless ( $te->tables)
 		{
@@ -83,7 +94,11 @@ sub stockhouse_fund  {
 
 		foreach my $ts ($te->table_states) {
 			my ($a) = ($ts->rows);
-			$fundquote {$mutual, "name"} = substr($$a[0],1);
+			next unless defined $$a[0];
+			$$a[0] =~ s/.([A-Za-z0-9() ]+).*/$1/;
+			next unless defined $1;
+			$fundquote {$mutual, "name"} = $1;
+			last;
 		}
 
 		# Parse out the rest of the fund data.
