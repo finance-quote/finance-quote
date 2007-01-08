@@ -1,5 +1,9 @@
 2007-01-07  David Hampton  <hampton@employees.org>
 
+	* CVSTAG: finance_quote_1_13
+
+	* lib/Finance/Quote.pm: Update version to 1.13.
+
 	* lib/Finance/Quote.pm: Update the store_date() function for the
 	case when the year isn't explicitly stated.  If the specified
 	month would put the quote in the future, then consider this a
