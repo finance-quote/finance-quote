@@ -33,6 +33,7 @@ use vars qw($VERSION $SEB_FUNDS_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
+use utf8;
 
 $VERSION = '1.0';
 $SEB_FUNDS_URL = 'http://taz.vv.sebank.se/cgi-bin/pts3/pow/fmk/2100/Senaste_fondkurserna.TXT';
@@ -68,6 +69,7 @@ sub seb_funds {
     # Format:
     # 2003-08-11;SEB Aktiesparfond;5,605;387
     my ($date, $name, $price, $hmm) = split ';', $line;
+    utf8::encode($name);
     if (grep {$_ eq $name} @symbols) {
       $price =~ s/,/\./; # change decimal point from , to .
       $funds{$name, 'symbol'}   = $name;
