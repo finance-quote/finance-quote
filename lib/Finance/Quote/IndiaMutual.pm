@@ -71,7 +71,7 @@ sub amfiindia   {
 	next if !/\;/;
 	chomp;
 	s/\r//;
-	my ($symbol, @data) = split /\;/;
+        my ($symbol, @data) = split /\s*\;\s*/;
 	$allquotes{$symbol} = \@data;
     }
     close(NAV);

@@ -1,3 +1,9 @@
+2007-05-13  David Hampton  <hampton@employees.org>
+
+	* lib/Finance/Quote/IndiaMutual.pm: Patch from Devendra Gera <gera0ul
+	at yahoo.com> to remove white space when splitting the results in the
+	AMFI data file.
+
 2007-01-07  David Hampton  <hampton@employees.org>
 
 	* CVSTAG: finance_quote_1_13
