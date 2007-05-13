@@ -1,5 +1,9 @@
 2007-05-13  David Hampton  <hampton@employees.org>
 
+	* lib/Finance/Quote/SEB.pm: Patch from Henrik Riomar <henrik.riomar at
+	gmail.com> to fix a problem finding quotes for funds with the Swedish
+	chars åäö in the name.
+
 	* lib/Finance/Quote/IndiaMutual.pm: Patch from Devendra Gera <gera0ul
 	at yahoo.com> to remove white space when splitting the results in the
 	AMFI data file.
