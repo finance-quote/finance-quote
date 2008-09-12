@@ -281,6 +281,7 @@ sub tiaacref
 	}
     }
     $urlc .=  "days=1";
+    $urlc .=  "&dldformat=1";
     $urlt .=  "selected=1";
     $qdata ="";
 
