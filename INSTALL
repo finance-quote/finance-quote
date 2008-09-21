@@ -76,7 +76,8 @@ that Finance::Quote depends upon.  See the section on dependancies
 above.
 
 If you believe you've found a bug, please report it using our
-bugtracking system at http://sourceforge.net/bugs/?group_id=4232
+bugtracking system at
+http://rt.cpan.org/Public/Dist/Display.html?Status=Active&Name=Finance-Quote
 or send mail to <finance-quote-devel@lists.sourceforge.net>.
 
 More information?
