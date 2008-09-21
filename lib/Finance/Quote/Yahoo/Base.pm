@@ -204,6 +204,11 @@ sub yahoo_request {
 				# retrieval, Yahoo will drop in an
 				# undefined field
 				next unless (defined $q[$i] && length $q[$i]);
+                                # remove trailing spaces added for
+                                # yahoo::europe quotes, since currency
+                                # is returned with a trailing white
+                                # space
+                                $q[$i] =~ s/\s*$// ;
 				$info{$symbol,$FIELDS[$i]} = $q[$i];
 			}
 
