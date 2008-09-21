@@ -58,7 +58,8 @@ sub yahoo_brasil
 	return unless @symbols;	# Nothing if no symbols.
 
 	# This does all the hard work.
-	my %info = yahoo_request($quoter,$YAHOO_BRASIL_URL,\@symbols,".SA", 0);
+        # Enabled the $uses_semicolon param
+        my %info = yahoo_request($quoter,$YAHOO_BRASIL_URL,\@symbols,".SA", 1);
 
 	foreach my $symbol (@symbols) {
 		next unless $info{$symbol,"success"};
