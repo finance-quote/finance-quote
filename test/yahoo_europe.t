@@ -12,23 +12,23 @@ my $q      = Finance::Quote->new();
 my $year   = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my %quotes = $q->yahoo_europe("12150.PA","BOGUS.L");
+my %quotes = $q->yahoo_europe("UG.PA","BOGUS.L");
 ok(%quotes);
 
 # Check the nav values are defined.  These are the most
 #  used and most reliable indicators of success.
-ok($quotes{"12150.PA","last"} > 0);
-ok(length($quotes{"12150.PA","name"}) > 0);
-ok($quotes{"12150.PA","success"});
-ok($quotes{"12150.PA", "currency"} eq "EUR");
-ok(substr($quotes{"12150.PA","isodate"},0,4) == $year ||
-   substr($quotes{"12150.PA","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"12150.PA","date"},6,4) == $year ||
-   substr($quotes{"12150.PA","date"},6,4) == $lastyear);
+ok($quotes{"UG.PA","last"} > 0);
+ok(length($quotes{"UG.PA","name"}) > 0);
+ok($quotes{"UG.PA","success"});
+ok($quotes{"UG.PA", "currency"} eq "EUR");
+ok(substr($quotes{"UG.PA","isodate"},0,4) == $year ||
+   substr($quotes{"UG.PA","isodate"},0,4) == $lastyear);
+ok(substr($quotes{"UG.PA","date"},6,4) == $year ||
+   substr($quotes{"UG.PA","date"},6,4) == $lastyear);
 
 # Make sure we don't have spurious % signs.
 
-ok($quotes{"12150.PA","p_change"} !~ /%/);
+ok($quotes{"UG.PA","p_change"} !~ /%/);
 
 # Check that a bogus stock returns no-success.
 ok(! $quotes{"BOGUS","success"});
