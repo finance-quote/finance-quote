@@ -1,7 +1,7 @@
 ul { font-family: Verdana, Arial, Helvetica, sans-serif;
 font-size: 12pt;
 font-style: normal; color: #FFFFFF}
-p { font-family: Verdana, Arial, Helvetica, sans-serif; 
+p,li { font-family: Verdana, Arial, Helvetica, sans-serif; 
 font-size: 12pt; 
 font-style: normal; color: #FFFFFF}
 h1 { font-family: Verdana, Arial, Helvetica, sans-serif; 
@@ -21,3 +21,4 @@ color: #FFFFFF}
 a {  font-family: Verdana, Arial, Helvetica, sans-serif; 
 font-size: 12pt; 
 color: #AAAA77}
+h2[class^=new], p[class^=new], li[class^=new] { color : red }
