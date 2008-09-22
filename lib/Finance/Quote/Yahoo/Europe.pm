@@ -42,6 +42,18 @@ $VERSION = '1.03';
 
 $YAHOO_EUROPE_URL = ("http://uk.finance.yahoo.com/d/quotes.csv");
 
+# Yahoo Europe switched date and time. sending t1d1 or d1t1
+# returns the same : Time followed by date. This is a short
+# bug fix until yahoo changes back again.
+#
+# Yahoo Europe doens't return values for r1 (div_date) and q (ex_div)
+# Another solution might be to change Base.pm FIELDS labels to this
+# string + div_date and ex_div. Code would be nicier, but this will
+# need more testing for other yahoo modules and can be done later.
+our @YH_EUROPE_FIELDS = qw/symbol name last time date net p_change volume bid ask
+                           close open day_range year_range eps pe div div_yield
+                           cap avg_vol currency/;
+
 sub methods {return (europe => \&yahoo_europe,yahoo_europe => \&yahoo_europe)};
 
 {
@@ -58,16 +70,10 @@ sub yahoo_europe
 	my @symbols = @_;
 	return unless @symbols;	# Nothing if no symbols.
 
-        # Yahoo Europe switched date and time. sending t1d1 or d1t1
-        # returns the same : Time followed by date. This is a short
-        # bug fix until yahoo changes back again.
-        #
-        # Yahoo Europe doens't return values for r1 (div_date) and q
-        # (ex_div) 
-        @Finance::Quote::Yahoo::Base::FIELDS = 
-          qw/symbol name last time date net p_change volume bid ask 
-             close open day_range year_range eps pe div div_yield 
-             cap avg_vol currency/;
+        # put the original FIELDS array into a dummy reference
+        # somewhere here this might not be thread safe !
+        my $dummy_Fields_ref = \@Finance::Quote::Yahoo::Base::FIELDS ;
+        @Finance::Quote::Yahoo::Base::FIELDS = @YH_EUROPE_FIELDS ;
 
 	# This does all the hard work.
 	my %info = yahoo_request($quoter,$YAHOO_EUROPE_URL,\@symbols);
@@ -76,6 +82,9 @@ sub yahoo_europe
 		next unless $info{$symbol,"success"};
 		$info{$symbol,"method"} = "yahoo_europe";
 	}
+
+        # restore the FIELDS array
+        @Finance::Quote::Yahoo::Base::FIELDS = $dummy_Fields_ref ;
 
 	return %info if wantarray;
 	return \%info;
