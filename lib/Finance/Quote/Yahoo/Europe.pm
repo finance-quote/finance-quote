@@ -70,10 +70,9 @@ sub yahoo_europe
 	my @symbols = @_;
 	return unless @symbols;	# Nothing if no symbols.
 
-        # put the original FIELDS array into a dummy reference
-        # somewhere here this might not be thread safe !
-        my $dummy_Fields_ref = \@Finance::Quote::Yahoo::Base::FIELDS ;
-        @Finance::Quote::Yahoo::Base::FIELDS = @YH_EUROPE_FIELDS ;
+        # localise the Base.FIELDS array. Perl restores the array at
+        # the end of this sub.
+        local @Finance::Quote::Yahoo::Base::FIELDS = @YH_EUROPE_FIELDS ;
 
 	# This does all the hard work.
 	my %info = yahoo_request($quoter,$YAHOO_EUROPE_URL,\@symbols);
@@ -82,9 +81,6 @@ sub yahoo_europe
 		next unless $info{$symbol,"success"};
 		$info{$symbol,"method"} = "yahoo_europe";
 	}
-
-        # restore the FIELDS array
-        @Finance::Quote::Yahoo::Base::FIELDS = $dummy_Fields_ref ;
 
 	return %info if wantarray;
 	return \%info;
