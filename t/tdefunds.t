@@ -1,9 +1,12 @@
 #!/usr/bin/perl -w
-use Test;
+use Test::More;
 use Finance::Quote;
-use strict;
 
-BEGIN { plan tests => 5 }
+if (not $ENV{ONLINE_TEST}) {
+    plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
+}
+
+plan tests => 5;
 
 my $q = Finance::Quote->new;
 ok($q);

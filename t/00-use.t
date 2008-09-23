@@ -1,8 +1,6 @@
 #!/usr/bin/perl -w
 
 # Test to see if Finance::Quote can at least be loaded and used.
-# This file gets a capital name so it will be run before any other
-# test.
 
 use strict;
 use Test;
