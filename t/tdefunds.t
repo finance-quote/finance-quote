@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+use strict;
 use Test::More;
 use Finance::Quote;
 
