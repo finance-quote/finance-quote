@@ -8,6 +8,14 @@ Examples/chkshares.pl
 Examples/currency-lookup.pl
 Examples/Quote_example.pl
 Examples/stockdump.pl
+inc/Module/Install.pm
+inc/Module/Install/Base.pm
+inc/Module/Install/Can.pm
+inc/Module/Install/Fetch.pm
+inc/Module/Install/Makefile.pm
+inc/Module/Install/Metadata.pm
+inc/Module/Install/Win32.pm
+inc/Module/Install/WriteAll.pm
 INSTALL
 lib/Finance/Quote.pm
 lib/Finance/Quote/AEX.pm
