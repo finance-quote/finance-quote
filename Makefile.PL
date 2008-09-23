@@ -40,7 +40,6 @@ requires(       'Crypt::SSLeay'             => 0);
 requires(       'HTTP::Request::Common'     => 0);
 requires(       'HTML::TableExtract'        => 0);
 
-test_requires(  'Test'                      => 0);
 test_requires(  'Test::More'                => 0);
 
 # Lowercase resource names have special meanings in the META.yml spec.

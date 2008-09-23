@@ -1,10 +1,13 @@
 #!/usr/bin/perl -w
 use strict;
-use Test;
-use Data::Dumper;
-BEGIN {plan tests => 8};
-
+use Test::More;
 use Finance::Quote;
+
+if (not $ENV{ONLINE_TEST}) {
+    plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
+}
+
+plan tests => 8;
 
 # Test ManInvestments functions.
 

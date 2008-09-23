@@ -1,9 +1,13 @@
 #!/usr/bin/perl -w
 use strict;
-use Test;
-BEGIN {plan tests => 18};
-
+use Test::More;
 use Finance::Quote;
+
+if (not $ENV{ONLINE_TEST}) {
+    plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
+}
+
+plan tests => 18;
 
 # Test FTPortfolios functions.
 
