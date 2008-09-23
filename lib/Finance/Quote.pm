@@ -942,7 +942,7 @@ module.  Please refer to the sub-modules for further information.
   Dj Padzensky (C<djpadz@padz.net>), PadzNet, Inc.
   Linas Vepstas (C<linas@linas.org>)
   Yannick LE NY (C<y-le-ny@ifrance.com>)
-  Paul Fenwick (C<pjf@schools.net.au>)
+  Paul Fenwick (C<pjf@cpan.org>)
   Brent Neal (C<brentn@users.sourceforge.net>)
   Volker Stuerzl (C<volker.stuerzl@gmx.de>)
   Keith Refson (C<Keith.Refson#earth.ox.ac.uk>)
