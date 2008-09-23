@@ -2,3 +2,5 @@ Finance-Quote-*
 MANIFEST.bak
 META.yml
 Makefile
+blib
+pm_to_blib
