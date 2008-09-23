@@ -1,3 +1,4 @@
+2008-09-22  Paul Fenwick  <pjf@cpan.org>
 
         * BUILD: Module::Install 0.77 is now used for building
         and installation.  (PJF)
@@ -5,6 +6,10 @@
         * TESTING: Finance::Quote's test system has been restructured.
         Tests are now run during installation, but online and author
         tests are skipped by default.  (PJF)
+
+2008-09-21  Erik Colson <eco@ecocode.net>
+
+	* lib/Finance/Quote/Yahoo/Brasil.pm: Enable semicolon.
 
 2007-05-13  David Hampton  <hampton@employees.org>
 
