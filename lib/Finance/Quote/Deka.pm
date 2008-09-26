@@ -1,5 +1,5 @@
 # Finance::Quote Perl module to retrieve prices of Deka funds
-#    Copyright (C) 2005  Knut Franke <Knut.Franke@gmx.de>
+#    Copyright (C) 2005,2007  Knut Franke <Knut.Franke@gmx.de>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,11 +23,11 @@ use HTML::TableExtract;
 require Crypt::SSLeay;
 
 use vars qw($VERSION);
-$VERSION = '0.3';
-my $DEKA_URL = "https://www.deka.de/dn/useCases/fundsearch/UCFundsSearch.shtml?ACTION_FIELD=quickSearch";
+$VERSION = '0.4';
+my $DEKA_URL = "https://www.deka.de/decontent/dekaTrading.jsp?ACTION_FIELD=quickSearch&depot=fondsuche";
 
 sub methods {return (deka        => \&deka);}
-sub labels { return (deka=>[qw/name date price last method/]); }
+sub labels { return (deka=>[qw/price last method/]); }
 
 # Trim leading and tailing whitespaces (also non-breakable whitespaces)
 sub trim
@@ -62,29 +62,29 @@ sub deka
     if (!$response -> is_success()) {
       $info{$stock,"errormsg"} = "HTTP failure";
     } else {
-      my @headers = [qw(Name ISIN Whg Datum)];
-      my $te = new HTML::TableExtract(headers => @headers, slice_columns => 0);
+      my $te = new HTML::TableExtract->new;
       $te->parse($response->content);
-      foreach my $ts ($te->table_states) {
-#        foreach my $row ($ts->rows) {
-#	  next if !defined $$row[0] || !defined $$row[1];
-#	  print "Row: ", join('|', @$row), "\n";
-#	}
-	
-        foreach my $row ($ts->rows) {
-	  next if !defined $$row[0] || !defined $$row[1];
-	  $info{$stock,"name"} = $$row[0];
-	  $info{$stock,"currency"} = $$row[2];
-	  $quoter->store_date(\%info, $stock, {eurodate => $$row[6]});
-	  $info{$stock,"price"} = convert_price(trim($$row[4]));
-	  $info{$stock,"last"} = $info{$stock,"price"};
-	  $info{$stock,"success"} = 1;
-	  $info{$stock,"method"} = "deka";
-	  $info{$stock,"symbol"} = $stock;
-        }
+      foreach my $ts ($te->tables) {
+         # check we have the right table and layout is as expected
+         my @rows = $ts->rows;
+         my @cols = $ts->columns;
+         next unless $#rows >= 1;
+         next unless $#cols >= 2;
+         my $table_ok = 
+            trim($ts->cell(0,2)) == "Anteilpreis Aktuell:"
+            && trim($ts->cell(1,0)) == "W&auml;hrung:"
+            && trim($ts->cell(1,2)) == "Anteilpreis Vortag:";
+         next unless $table_ok;
+         # extract the price information
+         $info{$stock,"currency"} = $ts->cell(1,1);
+         $info{$stock,"price"} = convert_price(trim($ts->cell(0,3)));
+         $info{$stock,"last"} = convert_price(trim($ts->cell(1,3)));
+         $info{$stock,"success"} = 1;
+         $info{$stock,"method"} = "deka";
+         $info{$stock,"symbol"} = $stock;
       }
       $info{$stock,"errormsg"} = "Couldn't parse deka website"
-	  if ($info{$stock,"success"} == 0);
+          if ($info{$stock,"success"} == 0);
     }
   }
   return wantarray ? %info : \%info;
@@ -102,7 +102,7 @@ Finance::Quote::Deka - Obtain fonds quotes from DekaBank.
 
     $q = Finance::Quote->new("Deka");
 
-    %info = Finance::Quote->fetch("deka","DE0008474511");
+    %info = $q->fetch("deka","DE0008474511");
 
 =head1 DESCRIPTION
 
@@ -112,7 +112,7 @@ http://www.deka.de/. Deka website supports retrieval by name, WKN or ISIN.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::Deka:
-name, date, price, last, method.
+price, last, method.
 
 =head1 SEE ALSO
 
