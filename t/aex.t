@@ -40,6 +40,9 @@ ok($quotes{"AAB AEX Click Perp.","last"} > 0);
 %quotes = $quoter->fetch("aex_options", "aex c dec 2009 400.00", "phi");
 ok(%quotes);
 
+# if next test fails look at following link if there's still a call
+# option at the queried price available.
+# http://www.aex.nl/scripts/marktinfo/OptieKoersen.asp?taal=en&a=1&Symbool=aex
 ok($quotes{"aex c dec 2009 400.00","success"});
 ok($quotes{"aex c dec 2009 400.00","close"} > 0);
 #ok($quotes{"aex c dec 2009 400.00","bid"});	# May or may not exist
