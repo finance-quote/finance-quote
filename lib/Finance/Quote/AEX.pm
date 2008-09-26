@@ -359,7 +359,7 @@ sub aex_options {
 
             unless (defined $AEXOPT_SUBFRAMES_CACHE{uc $symbol} ) {
                 $info {$symbol, "success"} = 0;
-                $info {$symbol, "errormsg"} = "Option series not found";
+                $info {$symbol, "errormsg"} = "Option series for $symbol not found";
                 next;
             }
 
