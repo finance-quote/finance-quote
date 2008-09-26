@@ -169,6 +169,9 @@ sub aex {
        next;
      }
 
+     # convert decimal comma's into points
+     $rows[$i][$_] =~ s/,/./g foreach (1,4,5,7,8,9,2,6);
+
 #    print STDOUT "nr rows: ", $max;
 #    print STDOUT "$found,\n rows[", $i, "][0]: $rows[$i][0], symbol: $symbol\n";
 
@@ -299,8 +302,7 @@ sub aex_options {
 
                 # normalize option name: convert YY to YYYY if needed
                 $series =~ s/^(\w+)\s(\d{2}\s.*)$/$1 20$2/;
-                # remove commas from strike prices
-                $series =~ tr/,//d;
+                $series =~ s/,/./g; #we need those comma's changed in decimal point
 
                 local *parse_option = sub {
                     my ($type, $pos) = @_;
@@ -319,7 +321,8 @@ sub aex_options {
                     $info {$symbol, "method"} = "aex_options";
                     $info {$symbol, "name"} = "$underlying $type $series";
                     foreach my $label (qw/close open high low last time bid ask/) {
-                        ($info {$symbol, $label} = $row->[$pos++]) =~ tr/0-9.://cd; # Remove garbage
+                        ($info {$symbol, $label} = $row->[$pos++]) =~ tr/0-9.,://cd; # Remove garbage
+                        $info {$symbol, $label} =~ s/,/./;
                         undef $info {$symbol, $label} if $info {$symbol, $label} eq "";
                     }
 		    $quoter->store_date(\%info, $symbol, {eurodate => $date});
