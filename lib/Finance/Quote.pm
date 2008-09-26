@@ -939,17 +939,17 @@ module.  Please refer to the sub-modules for further information.
 
 =head1 AUTHORS
 
-  Dj Padzensky (C<djpadz@padz.net>), PadzNet, Inc.
-  Linas Vepstas (C<linas@linas.org>)
-  Yannick LE NY (C<y-le-ny@ifrance.com>)
-  Paul Fenwick (C<pjf@cpan.org>)
-  Brent Neal (C<brentn@users.sourceforge.net>)
-  Volker Stuerzl (C<volker.stuerzl@gmx.de>)
-  Keith Refson (C<Keith.Refson#earth.ox.ac.uk>)
-  Rob Sessink (C<rob_ses@users.sourceforge.net>)
-  Leigh Wedding (C<leigh.wedding@telstra.com>)
-  Tobias Vancura (C<tvancura@altavista.net>)
-  James Treacy (C<treacy@debian.org>)
+  Dj Padzensky <djpadz@padz.net>, PadzNet, Inc.
+  Linas Vepstas <linas@linas.org>
+  Yannick LE NY <y-le-ny@ifrance.com>
+  Paul Fenwick <pjf@cpan.org>
+  Brent Neal <brentn@users.sourceforge.net>
+  Volker Stuerzl <volker.stuerzl@gmx.de>
+  Keith Refson <Keith.Refson#earth.ox.ac.uk>
+  Rob Sessink <rob_ses@users.sourceforge.net>
+  Leigh Wedding <leigh.wedding@telstra.com>
+  Tobias Vancura <tvancura@altavista.net>
+  James Treacy <treacy@debian.org>
 
 The Finance::Quote home page can be found at
 http://finance-quote.sourceforge.net/

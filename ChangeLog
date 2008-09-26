@@ -1,3 +1,8 @@
+2008-09-27  Paul Fenwick  <pjf@cpan.org>
+
+        * DOCUMENTATION: Fixed malformed formatting in authors
+          email addresses in Fiannce/Quote.pm.
+
 2008-09-22  Paul Fenwick  <pjf@cpan.org>
 
         * BUILD: Module::Install 0.77 is now used for building
