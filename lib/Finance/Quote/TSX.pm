@@ -7,7 +7,7 @@
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2001, Leigh Wedding <leigh.wedding@telstra.com>
 #    Copyright (C) 2006, Mika Laari <mika.laari@iki.fi>
-#    Copyright (C) 2008, Emmauel Rodriguez <potyl@cpan.org>
+#    Copyright (C) 2008, Emmanuel Rodriguez <potyl@cpan.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
