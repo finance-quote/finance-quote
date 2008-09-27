@@ -21,7 +21,9 @@ ok(%quotes);
 
 # Check that the name and nav are defined for all of the stocks.
 foreach my $stock (@stocks) {
+#  print "----------->PRICE: ".$quotes{$stock,"price"}."\n";
 	ok($quotes{$stock,"price"} > 0);
+#  print "----------->NAME: ".$quotes{$stock,"name"}."\n";
 	ok(length($quotes{$stock,"name"}));
 	ok($quotes{$stock,"success"});
 	ok(substr($quotes{$stock,"isodate"},0,4) == $year ||
