@@ -7,6 +7,7 @@
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2000, Volker Stuerzl <volker.stuerzl@gmx.de>
 #    Copyright (C) 2003,2005,2006 Jörg Sommer <joerg@alea.gnuu.de>
+#    Copyright (C) 2008 Martin Kompf (skaringa at users.sourceforge.net)
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,15 +30,6 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 
-use HTML::TableExtract;
-@ISA = qw( HTML::TableExtract );
-
-sub start {
-  # Fool ourselves into translating <br> to "\n"
-  my $self = shift;
-  $self->text("\n") if $_[0] eq 'br';
-  $self->SUPER::start(@_);
-}
 # =============================================================
 
 package Finance::Quote::VWD;
@@ -46,17 +38,17 @@ require 5.005;
 use strict;
 use LWP::UserAgent;
 use HTTP::Request::Common;
-use HTML::TableExtract;
+use HTML::TreeBuilder;
 
 # use vars qw/$VERSION $VWD_FUNDS_URL/;
 
 use vars qw/$VERSION/;
 
-$VERSION = '1.01';
+$VERSION = '1.14';
 
 sub methods { return (vwd => \&vwd); }
-sub labels { return (vwd => [qw/ask bid currency date isodate exchange last
-				name net p_change price symbol time year_range/]); }
+sub labels { return (vwd => [qw/currency date isodate 
+            name price last symbol time/]); }
 
 # =======================================================================
 # The vwd routine gets quotes of funds from the website of
@@ -105,61 +97,79 @@ sub vwd
     $info{$fund, "success"} = 0;
     $info{$fund, "errormsg"} = "Parse error";
 
-    my $response = $ua->get("http://www.finanztreff.de/ftreff/".
-	"kurse_einzelkurs_uebersicht.htm?s=".$fund);
+    my $response = $ua->get("http://www.finanztreff.de/".
+   "kurse_einzelkurs_uebersicht.htn?s=".$fund);
     if ($response->is_success)
     {
-      # parse only the part with the relevant informations; sometimes
-      # tables are inserted before which displace the table numbers and
-      # make parsing difficult. But there are marks in the source code and
-      # HTML::TableExtract as really tolerant with HTML.
       my $html = $response->content;
-      my $offset = index($html, "<!-- Stammdaten -->");
-      if ($offset == -1) {
-	$info{$fund, "success"}  = 0;
-	$info{$fund, "errormsg"} = "Invalid symbol: $fund";
-	next;
+
+      my $tree = HTML::TreeBuilder->new;
+      $tree->parse($html);
+
+      # date from the top of the page
+      my $date_time = $tree->look_down(
+         "_tag", "span",
+         "class", "time");
+      next if not $date_time;
+      if ($date_time->as_text =~ /(\d\d)\.(\d\d)\. \d\d:\d\d/) {
+         $quoter->store_date(\%info, $fund, {day => $1, month => $2});
       }
-      my $len = rindex($html, "<!-- /Vergleich -->") - $offset;
-      if ($len > 0) {
-          $html = substr($html, $offset, $len);
-      } else {
-          $html = substr($html, $offset);
+
+      # all other info below <div class=contentContainer>
+      my $content = $tree->look_down(
+         "_tag", "div",
+         "class", "contentContainer"
+      );
+      next if not $content;
+
+      # <h1> contains price, time, name, and symbol
+      my $head = $content->find("h1");
+      next if not $head;
+
+      my $wpkurs = $head->look_down(
+         "_tag", "div",
+         "class", "wpKurs"
+      );
+      next if not $wpkurs;
+      my $time = $wpkurs->look_down(
+         "_tag", "div",
+         "class", "datum"
+      );
+      if ($time) {
+         $info{$fund, "time"} = $time->as_trimmed_text;
+      }
+      my $kurs = $wpkurs->look_down(
+         "_tag", "div",
+         "class", "kurs");
+      next if not $kurs;
+      $info{$fund, "price"} = $info{$fund, "last"} = trimtr($kurs->as_text);
+
+      foreach ($head->descendants) {
+         $_->delete;
       }
 
-      my $table = new HTML::TableExtract(decode=>0)->parse($html);
+      if ($head->as_trimmed_text =~ /^(.*) \((.+)\)$/) {
+         $info{$fund, "name"} = $1;
+         $info{$fund, "symbol"} = $2;
+      }
 
-      # we expect at least five tables: Stammdaten, Jahreschart,
-      # Kursdaten, "Ihre Kurseinschätzung", Vergleich
-      next if ( scalar($table->table_states) < 5);
+      # <ul> contains currency as 3rd <li>
+      my $wpinfo = $content->look_down(
+         "_tag", "ul",
+         "class", "wpInfo"
+      );
+      if ($wpinfo) {
+         my @li = $wpinfo->find("li");
+         if ($li[2]->as_text =~ /Währung:(\w+)/) {
+            $info{$fund, "currency"} = substr($1, 0, 3);
+         }
+      }
 
-      # extract the contents of "Stammdaten"
-      my @rows = ($table->table_states)[0]->rows();
-      $info{$fund, "name"}     = trim( $rows[1][1] );
-      $info{$fund, "symbol"}   = trim( $rows[4][1] );
-      $info{$fund, "currency"} = trim( $rows[8][1] );
-
-      # extract the contents of "Jahreschart"
-      @rows = ($table->table_states)[1]->rows();
-      $quoter->store_date(\%info, $fund, {eurodate => $rows[0][1]});
-
-      # extract the contents of "Kursdaten"
-      @rows = ($table->table_states)[2]->rows();
-      $info{$fund, "exchange"} = trimtr( $rows[0][1] );
-      $info{$fund, "price"} = $info{$fund, "last"} = trimtr( $rows[1][1] );
-      $info{$fund, "net"} = trimtr( $rows[2][2] );
-      ($info{$fund, "time"}) = ($rows[1][0] =~ /(\d{1,2}:\d{1,2}:\d{1,2})/);
-      $info{$fund, "p_change"} = trimtr( $rows[1][2] );
-      $info{$fund, "year_range"} = trimtr($rows[8][1])." - ".trimtr($rows[8][2]);
-      $info{$fund, "bid"} = trimtr( $rows[4][1] );
-      $info{$fund, "ask"} = trimtr( $rows[5][1] );
-
-      # extract the contents of "Vergleich"
-      @rows = ($table->table_states)[4]->rows();
-      $info{$fund, "close"} = trimtr( $rows[1][1] );
-
+      # fund ok
       $info{$fund, "success"}  = 1;
       $info{$fund, "errormsg"} = "";
+
+      $tree->delete;
     } else {
       $info{$fund, "success"}  = 0;
       $info{$fund, "errormsg"} = "HTTP error";
@@ -173,7 +183,7 @@ sub vwd
 
 =head1 NAME
 
-Finance::Quote::vwd	- Obtain quotes from vwd Vereinigte Wirtschaftsdienste GmbH.
+Finance::Quote::vwd  - Obtain quotes from vwd Vereinigte Wirtschaftsdienste GmbH.
 
 =head1 SYNOPSIS
 
@@ -195,11 +205,12 @@ and conditions.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::vwd:
-ask, bid, currency, date, isodate, exchange, last, name, net,
-p_change, price, symbol, time, year_range.
+currency date isodate name price last symbol time.
 
 =head1 SEE ALSO
 
 vwd Vereinigte Wirtschaftsdienste GmbH, http://www.vwd.de/
 
 =cut
+
+ 	  	 
