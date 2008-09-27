@@ -1,10 +1,14 @@
 #!/usr/bin/perl -w
 use strict;
-use Test;
+use Test::More;
 use Data::Dumper;
-BEGIN {plan tests => 26};
-
 use Finance::Quote;
+
+if (not $ENV{ONLINE_TEST}) {
+    plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
+}
+
+plan tests => 26 ;
 
 # Test TSX functions.
 
