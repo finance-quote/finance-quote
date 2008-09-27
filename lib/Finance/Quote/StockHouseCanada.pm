@@ -38,7 +38,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '0.2';
+$VERSION = '1.14';
 
 $STOCKHOUSE_LOOKUP_URL="http://www.stockhouse.com/mutualFunds/index.asp?asp=1&lang=&item=searchresult&country=CAN&by=symbol&searchtext=";
 $STOCKHOUSE_URL="http://www.stockhouse.com/MutualFunds/index.asp?item=snapshot&page=1&Lang=EN&fundkey=%s&source=Fundata&Symbol=%s&FundName=&CompanyName=&asp=1";
@@ -50,7 +50,7 @@ sub methods { return (stockhousecanada_fund => \&stockhouse_fund,
 		      canadamutual => \&stockhouse_fund); }
 
 {
-    my @labels = qw/currency last date isodate price source/;
+    my @labels = qw/name currency last date isodate price source/;
     sub labels { return (stockhousecanada_fund => \@labels,
 			 canadamutual => \@labels); }
 }
@@ -131,7 +131,15 @@ sub stockhouse_fund  {
 		my $nav;
 		my $currency;
 		my $navdate;
+                my $name;
 		
+                # Find name by simple regexp
+                if ($reply->content =~ m/<td class=ft_h1>(.*) \($mutual\)<\/td>/ ) {
+                  $name = $1 ;
+                  #print ">>>$name<<<<\n";
+                }
+		$fundquote {$mutual, "name"} = $name;
+
 		# Find NAV and Currency via table header
 		my $te= new HTML::TableExtract( headers => [qw(NAVPS CURRENCY)] );
 		$te->parse($reply->content);
@@ -172,8 +180,11 @@ sub stockhouse_fund  {
 		{
 			$navdate = $1;
 		}
-		
-		# print "Date = $navdate\n";
+
+                # normalize $navdate to format mm/dd/yyyy by adding zeros where needed
+                $navdate =~ s|^(\d)/|0$1/| ; #month
+                $navdate =~ s|/(\d)/|/0$1/| ; #day
+		#print "Date = $navdate\n";
 		
 		if (!defined($navdate))
 		{
@@ -182,6 +193,8 @@ sub stockhouse_fund  {
 			next;
 		}
 		$fundquote {$mutual, "date"} = $navdate;
+                ($fundquote {$mutual, "isodate"} = $navdate) =~ s|(\d+)/(\d+)/(\d+)|$3/$1/$2| ;
+                #print "isodate = $fundquote{$mutual,'isodate'}\n";
 
 		$fundquote {$mutual, "success"} = 1;
 	}
