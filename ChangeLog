@@ -1,7 +1,17 @@
+2008-09-27  Erik Colson <eco@ecocode.net>
+
+	* VWD.pm updated to new site layout
+
+	* TSX.pm added
+
 2008-09-27  Paul Fenwick  <pjf@cpan.org>
 
         * DOCUMENTATION: Fixed malformed formatting in authors
           email addresses in Fiannce/Quote.pm.
+
+2008-09-26  Erik Colson <eco@ecocode.net>
+
+	* AEX.pm updated to new site layout (comma used in numbers)
 
 2008-09-22  Paul Fenwick  <pjf@cpan.org>
 
