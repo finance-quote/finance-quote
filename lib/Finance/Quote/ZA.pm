@@ -2,6 +2,17 @@
 #
 # ZA.pm
 #
+
+# Version 0.1.1 - 
+# This version corrects the data downloaded by removing spaces and converting
+# cent values into Rand values – this ensures that the Price Editor in GNUCash 
+# can import the data. The rest of the module and all the hard work 
+# remains that of Stephen Langenhoven!
+# Rolf Endres
+# 2008.02.18
+
+
+#
 # Version 0.1 - Download of South African (ZA) stocks from sharenet
 # This version based largely upon FinanceCanada.pm module [any errors
 # are my own of course ;-) ]
@@ -98,7 +109,10 @@ sub sharenet {
         if($ts) {
           (@rows) = $ts->rows;
           $info{$symbol, "name"} = $rows[2][1];
-        }
+        };
+
+          $info{$symbol, "name"} =~ tr/ //d;
+
 
 # DATE AND CLOSING PRICE
         $ts = $te->table_state(3,1);
@@ -113,10 +127,23 @@ sub sharenet {
 
 	  $quoter->store_date(\%info, $symbol, {eurodate => $rows[0][0]});
           $info{$symbol, "last"}  = $rows[1][1];
-          $info{$symbol, "high"}  = $rows[2][1];
-          $info{$symbol, "low"}   = $rows[3][1];
-	  $info{$symbol, "p_change"} = $rows[6][1];
+          $info{$symbol, "last"} =~ tr/ //d;
+          $info{$symbol, "last"} =  0.01 * $info{$symbol, "last"};
+      
 
+          $info{$symbol, "high"}  = $rows[2][1];
+          $info{$symbol, "high"} =~ tr/ //d;
+          $info{$symbol, "high"} =  0.01 * $info{$symbol, "high"};
+
+          $info{$symbol, "low"}   = $rows[3][1];
+          $info{$symbol, "low"} =~ tr/ //d;
+          $info{$symbol, "low"} =  0.01 * $info{$symbol, "low"};
+
+
+
+          $info{$symbol, "p_change"} = $rows[6][1];
+          $info{$symbol, "p_change"} =~ tr/ //d;
+ 
        }
 
     }
