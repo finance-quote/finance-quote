@@ -247,6 +247,9 @@ sub currency {
 
 	my $row = ($te->rows())[0];
 	my ($exchange_rate) = $$row[1];
+        $exchange_rate =~ s/,// ; # solve a bug when conversion rate
+                                  # involves thousands. yahoo inserts
+                                  # a comma when thousands occur
 
 	{
 		local $^W = 0;	# Avoid undef warnings.
