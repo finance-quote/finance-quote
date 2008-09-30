@@ -1,3 +1,8 @@
+2008-09-30  Paul Fenwick <pjf@cpan.org>
+
+        * BUGFIX: Applied patch from Bill Carlson to fix Tiaacref.pm.
+          Thanks Bill, you rock!
+
 2008-09-28  Erik Colson <eco@ecocode.net>
 
 	* StockHouseCanada.pm updated to new site layout
