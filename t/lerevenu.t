@@ -14,7 +14,7 @@ plan tests => 32;
 my $q      = Finance::Quote->new();
 
 # my stocks = stock, fund, warrant, bond, indice
-my @stocks = ("AF","FR0000441677","FR0010324475","FR0010112052","FR0003999036");
+my @stocks = ("AF","FR0000441677","FR0010324475","FR0010112052","FR0003500008");
 
 # LeRevenu tests need to cover all the possible cases:
 #
