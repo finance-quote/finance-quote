@@ -15,13 +15,13 @@ my $q      = Finance::Quote->new();
 
 $q->timeout(120);	# ASX is broken regularly, so timeouts are good.
 
-my %quotes = $q->asx("CGJ","BHP");
+my %quotes = $q->asx("WES","BHP");
 ok(%quotes);
 
 # Check the last values are defined.  These are the most used and most
 # reliable indicators of success.
-ok($quotes{"CGJ","last"} > 0);
-ok($quotes{"CGJ","success"});
+ok($quotes{"WES","last"} > 0);
+ok($quotes{"WES","success"});
 ok($quotes{"BHP","last"} > 0);
 ok($quotes{"BHP","success"});
 
