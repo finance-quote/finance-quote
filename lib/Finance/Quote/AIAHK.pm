@@ -34,7 +34,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION='0.1';
+$VERSION='1.13_01';
 $AIAHK_URL = 'http://www.aia.com.hk/daily/fund_mst_rightb.asp?cat=BR_AC';
 
 

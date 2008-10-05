@@ -29,8 +29,9 @@ use strict;
 use LWP::UserAgent;
 use HTTP::Headers;
 
-use vars qw/@ISA/;
+use vars qw/@ISA $VERSION/;
 
+$VERSION='1.13_01';
 @ISA = qw/LWP::UserAgent/;
 
 # A very simple extension.  When we generate a LWP::UserAgent object,

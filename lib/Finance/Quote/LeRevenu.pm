@@ -41,7 +41,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION='1.3';
+$VERSION='1.13_01';
 
 my $LR_URL = 'http://bourse.lerevenu.com/recherchenom.hts';
 
