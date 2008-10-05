@@ -14,10 +14,13 @@ package Finance::Quote::ZA;
 require 5.004;
 
 use strict;
+use vars qw /$VERSION/ ;
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
+
+$VERSION='1.13_01';
 
 my $SHARENET_MAINURL = ("http://www.sharenet.co.za/");
 my $SHARENET_URL = ($SHARENET_MAINURL."jse/");
