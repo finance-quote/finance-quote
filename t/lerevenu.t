@@ -24,7 +24,7 @@ my @stocks = ("AF","FR0000441677","FR0010324475","FR0010112052","FR0003500008");
 #    Obligations	Bond		FR0010112052
 #    SICAVetFCP		Fund		FR0000441677
 #    Bons&Warrants	Warrant		FR0010324475
-#    Indices		Index		FR0003999036
+#    Indices		Index		FR0003500008
 
 
 my $year = (localtime())[5] + 1900;
