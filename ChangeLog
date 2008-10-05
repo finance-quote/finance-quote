@@ -1,3 +1,19 @@
+2008-10-05  Erik Colson <eco@ecocode.net>
+
+        * Added Cominvest module from Stephan Ebelt
+
+2008-10-04  Erik Colson <eco@ecocode.net>
+
+        * Failing tests moved to todo-state for trustnet, usfedbonds,
+          bourso, deka, union
+        * BUGFIX: currency.t
+        * BUGFIX: lerevenu.t - index ID corrected
+
+2008-10-02  Erik Colson <eco@ecocode.net>
+
+        * Failing tests moved to todo-state for ftportfolios, aiahk, nzx,
+          maninvestments.
+	
 2008-09-30  Paul Fenwick <pjf@cpan.org>
 
         * BUGFIX: Applied patch from Bill Carlson to fix Tiaacref.pm.
