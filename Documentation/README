@@ -17,8 +17,8 @@ I've found a bug / written a patch / have an idea.  What do I do?
 =================================================================
 Well, you could always mail it to <finance-quote-devel@lists.sourceforge.net>,
 which is read by all the active developers.  Alternatively, you
-might wish to visit <http://sourceforge.net/project/?group_id=4232>
-and make use of the patch manager, bug tracker, or public forums.
+might wish to visit 
+<http://rt.cpan.org/Dist/Display.html?Queue=Finance-Quote>.
 
 How do I download the most recent copy of Finance::Quote?
 =========================================================
@@ -30,8 +30,12 @@ which can be done from: <http://sourceforge.net/mail/?group_id=4232>.
 
 How can I get a copy of the current CVS development tree?
 =========================================================
-Check out the instructions at <http://sourceforge.net/cvs/?group_id=4232>.
-You can also browse the repository using your web-browser at this site.
+You can't. The CVS repo has been ported to GIT as of version 1.13_01.
+
+How can I get a copy of the current GIT development tree?
+=========================================================
+The GIT repository is available at:
+<http://github.com/pfenwick/finance-quote/tree/master>.
 
 Where can I find more information?
 ==================================
