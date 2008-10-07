@@ -915,7 +915,7 @@ more flexible $hash{$stock}{$label} style format.
 There is no way to override the default behaviour to cache currency
 conversion rates.
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT & LICENSE
 
  Copyright 1998, Dj Padzensky
  Copyright 1998, 1999 Linas Vepstas
