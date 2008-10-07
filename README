@@ -1,0 +1,80 @@
+NAME
+
+    Finance::Quote - Get stock and mutual fund quotes from various exchanges
+
+
+DESCRIPTION
+
+    This module gets stock quotes from various internet sources, including
+    Yahoo! Finance, Fidelity Investments, and the Australian Stock Exchange.
+    There are two methods of using this module -- a functional interface
+    that is depreciated, and an object-orientated method that provides
+    greater flexibility and stability.
+
+
+INSTALLATION
+
+    To install this module, run the following commands:
+
+        perl Makefile.PL
+        make
+        make test
+        make install
+
+    For more detailed instructions, please see the INSTALL file.
+
+
+SUPPORT AND DOCUMENTATION
+
+    After installing, you can find documentation for this module with the
+    perldoc command.
+
+        perldoc Finance::Quote
+
+    You can also look for information at:
+
+        RT, CPAN's request tracker
+            http://rt.cpan.org/NoAuth/Bugs.html?Dist=Finance-Quote
+
+        AnnoCPAN, Annotated CPAN documentation
+            http://annocpan.org/dist/Finance-Quote
+
+        CPAN Ratings
+            http://cpanratings.perl.org/d/Finance-Quote
+
+        Search CPAN
+            http://search.cpan.org/dist/Finance-Quote
+
+        The Finance::Quote home page
+            http://finance-quote.sourceforge.net/
+
+        The Finance::YahooQuote home page
+            http://www.padz.net/~djpadz/YahooQuote/
+
+        The GnuCash home page
+            http://www.gnucash.org/
+
+
+COPYRIGHT & LICENSE
+     Copyright 1998, Dj Padzensky
+     Copyright 1998, 1999 Linas Vepstas
+     Copyright 2000, Yannick LE NY (update for Yahoo Europe and YahooQuote)
+     Copyright 2000-2001, Paul Fenwick (updates for ASX, maintainence and release)
+     Copyright 2000-2001, Brent Neal (update for TIAA-CREF)
+     Copyright 2000 Volker Stuerzl (DWS and VWD support)
+     Copyright 2000 Keith Refson (Trustnet support)
+     Copyright 2001 Rob Sessink (AEX support)
+     Copyright 2001 Leigh Wedding (ASX updates)
+     Copyright 2001 Tobias Vancura (Fool support)
+     Copyright 2001 James Treacy (TD Waterhouse support)
+
+    This program is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    Currency information fetched through this module is bound by Yahoo!'s
+    terms and conditons.
+
+    Other copyrights and conditions may apply to data fetched through this
+    module. Please refer to the sub-modules for further information.
