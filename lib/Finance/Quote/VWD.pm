@@ -183,7 +183,7 @@ sub vwd
 
 =head1 NAME
 
-Finance::Quote::vwd  - Obtain quotes from vwd Vereinigte Wirtschaftsdienste GmbH.
+Finance::Quote::VWD  - Obtain quotes from vwd Vereinigte Wirtschaftsdienste GmbH.
 
 =head1 SYNOPSIS
 
