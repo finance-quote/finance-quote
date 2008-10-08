@@ -73,7 +73,7 @@ sub yahoo_nz
 
 =head1 NAME
 
-Finance::Quote::Yahoo::nz - Fetch nzn stock quotes via Yahoo.
+Finance::Quote::Yahoo::NZ - Fetch nzn stock quotes via Yahoo.
 
 =head1 SYNOPSIS
 
