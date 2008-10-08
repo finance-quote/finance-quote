@@ -137,7 +137,7 @@ sub unionurl
 
 =head1 NAME
 
-Finance::Quote::UNION	- Obtain quotes from UNION (Zurich Financial Services Group).
+Finance::Quote::Union	- Obtain quotes from UNION (Zurich Financial Services Group).
 
 =head1 SYNOPSIS
 
