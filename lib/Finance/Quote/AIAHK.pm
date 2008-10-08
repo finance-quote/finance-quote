@@ -139,7 +139,7 @@ sub aiahk {
 
 =head1 NAME
 
-Finance::Quote::AIA Obtain quotes from American International Assurance 
+Finance::Quote::AIAHK Obtain quotes from American International Assurance 
 
 =head1 SYNOPSIS
 
