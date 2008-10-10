@@ -38,7 +38,6 @@ require Crypt::SSLeay;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
-use Data::Dumper;
 use LWP::Simple;
 use strict;
 use warnings;
