@@ -11,3 +11,5 @@ blib
 Makefile$
 Makefile\.old
 Finance-Quote-.*
+\.orig$
+\.eml$
