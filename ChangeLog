@@ -1,7 +1,33 @@
 2008-10-10  Paul Fenwick <pjf@cpan.org>
-
         * TEST: Ensure Data::Dumper is not accidently left in
           F::Q code.
+
+2008-10-07  Erik Colson <eco@ecocode.net>
+
+        * Root README added
+        * BUGFIX: asx.t
+
+2008-10-05  Erik Colson <eco@ecocode.net>
+
+        * Added Cominvest module from Stephan Ebelt
+
+2008-10-04  Erik Colson <eco@ecocode.net>
+
+        * Failing tests moved to todo-state for trustnet, usfedbonds,
+          bourso, deka, union
+        * BUGFIX: currency.t
+        * BUGFIX: lerevenu.t - index ID corrected
+
+2008-10-02  Erik Colson <eco@ecocode.net>
+
+        * Failing tests moved to todo-state for ftportfolios, aiahk, nzx,
+          maninvestments.
+	
+2008-09-30  Paul Fenwick <pjf@cpan.org>
+
+        * BUGFIX: Applied patch from Bill Carlson to fix Tiaacref.pm.
+          Thanks Bill, you rock!
+>>>>>>> df0214728d0dc1ace3f1c5b0f52a361ead90768b:ChangeLog
 
 2008-09-28  Erik Colson <eco@ecocode.net>
 

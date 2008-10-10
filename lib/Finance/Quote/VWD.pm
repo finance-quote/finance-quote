@@ -44,7 +44,7 @@ use HTML::TreeBuilder;
 
 use vars qw/$VERSION/;
 
-$VERSION = '1.14';
+$VERSION = '1.13_01';
 
 sub methods { return (vwd => \&vwd); }
 sub labels { return (vwd => [qw/currency date isodate 
@@ -183,7 +183,7 @@ sub vwd
 
 =head1 NAME
 
-Finance::Quote::vwd  - Obtain quotes from vwd Vereinigte Wirtschaftsdienste GmbH.
+Finance::Quote::VWD  - Obtain quotes from vwd Vereinigte Wirtschaftsdienste GmbH.
 
 =head1 SYNOPSIS
 

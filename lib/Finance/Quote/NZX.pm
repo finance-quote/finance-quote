@@ -39,7 +39,7 @@ use HTTP::Request::Common;
 
 use vars qw/$VERSION/; 
 
-$VERSION = '1.00';
+$VERSION = '1.13_01';
 
 sub methods { return (nz => \&nzx, nzx => \&nzx); }
 sub labels {

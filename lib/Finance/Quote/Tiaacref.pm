@@ -40,7 +40,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use Carp;
 
-$VERSION = '1.02';
+$VERSION = '1.13_01';
 
 # URLs of where to obtain information.
 # This used to be different for the CREF and TIAA annuities, but this changed.
@@ -281,6 +281,7 @@ sub tiaacref
 	}
     }
     $urlc .=  "days=1";
+    $urlc .=  "&dldformat=1";
     $urlt .=  "selected=1";
     $qdata ="";
 

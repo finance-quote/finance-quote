@@ -16,12 +16,14 @@ package Finance::Quote::USFedBonds;
 require 5.004;
 
 use strict;
+use vars qw /$VERSION/ ;
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 use HTML::Parser;
 
+$VERSION = '1.13_01' ;
 my $TREASURY_MAINURL = ("http://www.publicdebt.treas.gov/");
 my $TREASURY_URL = ($TREASURY_MAINURL."sav/");
 
