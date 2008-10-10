@@ -27,12 +27,12 @@ ok(($q->currency("10 AUD","AUD")) == (10 * ($q->currency("AUD","AUD"))));
 # converting correctly.
 
 # Test 5
-my %baseinfo = $q->fetch("europe","12150.PA");
-ok($baseinfo{"12150.PA","success"});
+my %baseinfo = $q->fetch("europe","UG.PA");
+ok($baseinfo{"UG.PA","success"});
 
 $q->set_currency("AUD");	# All new requests in Aussie Dollars.
 
-my %info = $q->fetch("europe","12150.PA");
-ok($info{"12150.PA","success"});		# Test 6
-ok($info{"12150.PA","currency"} eq "AUD");	# Test 7
-ok($info{"12150.PA","price"} > 0);		# Test 8
+my %info = $q->fetch("europe","UG.PA");
+ok($info{"UG.PA","success"});		# Test 6
+ok($info{"UG.PA","currency"} eq "AUD");	# Test 7
+ok($info{"UG.PA","price"} > 0);		# Test 8

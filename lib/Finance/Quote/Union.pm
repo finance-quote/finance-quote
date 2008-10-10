@@ -40,7 +40,7 @@ use HTTP::Request::Common;
 
 use vars qw/$VERSION/;
 
-$VERSION = '1.00';
+$VERSION = '1.13_01';
 
 sub methods { return (unionfunds => \&unionfunds); }
 sub labels { return (unionfunds => [qw/exchange name date isodate price method/]); }
@@ -137,7 +137,7 @@ sub unionurl
 
 =head1 NAME
 
-Finance::Quote::UNION	- Obtain quotes from UNION (Zurich Financial Services Group).
+Finance::Quote::Union	- Obtain quotes from UNION (Zurich Financial Services Group).
 
 =head1 SYNOPSIS
 
