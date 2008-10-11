@@ -250,6 +250,9 @@ sub yahoo_request {
 			  # backward compatability.  Needed because Yahoo
 			  # returns GBP as GBp.  There may be others.
 			  $info{$symbol,"currency"} =~ tr/a-z/A-Z/;
+                          # yahoo started to return GBX instead of GBP
+                          # somewhere arround 9 oct 2008.
+                          $info{$symbol,"currency"} =~ s/GBX/GBP/;
 #			  printf "Currency %s specified by Yahoo\n", $info{$symbol,"currency"};
 			} else {
 			  # Determine the currency from the exchange name.
