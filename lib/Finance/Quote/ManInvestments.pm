@@ -41,7 +41,7 @@ use HTML::TableExtract;
 
 use vars qw/$MANINV_URL $VERSION/;
 
-$VERSION = "1.13_01";
+$VERSION = "1.13_02";
 
 $MANINV_URL = 'http://www.maninvestments.com.au/index.cfm?action=productprices&cat_id=5';
 $MANINV_URL = 'http://www.maninvestments.com.au/netassetvalues-print.cfm';

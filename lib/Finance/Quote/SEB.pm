@@ -35,7 +35,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use utf8;
 
-$VERSION = '1.13_01';
+$VERSION = '1.13_02';
 $SEB_FUNDS_URL = 'http://taz.vv.sebank.se/cgi-bin/pts3/pow/fmk/2100/Senaste_fondkurserna.TXT';
 
 sub methods { return (seb_funds => \&seb_funds); }

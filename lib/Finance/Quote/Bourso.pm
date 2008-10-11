@@ -62,7 +62,7 @@ use HTTP::Request::Common;
 use HTML::TableExtract;
 
 
-$VERSION='1.13_01';
+$VERSION='1.13_02';
 
 my $Bourso_URL = 'http://www.boursorama.com/recherche/recherche.phtml';
 
