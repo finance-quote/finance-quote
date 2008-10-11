@@ -18,10 +18,7 @@ ok(%quotes);
 
 # Check the last values are defined.  These are the most
 #  used and most reliable indicators of success.
-TODO: {
-  local $TODO="This test probably only fails on non-business days since quotes are then set to 0 on the source";
-  ok($quotes{"975792","last"} > 0);
-}
+ok($quotes{"975792","last"} > 0);
 ok($quotes{"975792","success"});
 ok($quotes{"975792", "currency"} eq "EUR");
 
