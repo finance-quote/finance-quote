@@ -667,6 +667,7 @@ sub store_date
 sub isoTime {
   my ($self,$timeString) = @_ ;
   $timeString =~ tr/ //d ;
+  $timeString = uc $timeString ;
   my $retTime = "00:00"; # return zero time if unparsable input
   if ($timeString=~m/^(\d+)[\.:uh](\d+)(AM|PM)?/) {
     my ($hours,$mins)= ($1,$2) ;
