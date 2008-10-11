@@ -20,7 +20,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION='1.13_01';
+$VERSION='1.13_02';
 
 my $SHARENET_MAINURL = ("http://www.sharenet.co.za/");
 my $SHARENET_URL = ($SHARENET_MAINURL."jse/");

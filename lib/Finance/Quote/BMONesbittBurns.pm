@@ -35,7 +35,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.13_01';
+$VERSION = '1.13_02';
 
 # URLs of where to obtain information
 my $BMO_URL = 'http://bmonesbittburns.com/QuickQuote/QuickQuote.asp?Symbol=';
