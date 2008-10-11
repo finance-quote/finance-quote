@@ -1,3 +1,8 @@
+2008-10-11  Erik Colson <eco@ecocode.net>
+
+        * added prerequisite for HTML::TreeBuilder
+        * union.t from todo
+
 2008-10-10  Paul Fenwick <pjf@cpan.org>
         * TEST: Ensure Data::Dumper is not accidently left in
           F::Q code.
