@@ -669,7 +669,7 @@ sub isoTime {
   $timeString =~ tr/ //d ;
   $timeString = uc $timeString ;
   my $retTime = "00:00"; # return zero time if unparsable input
-  if ($timeString=~m/^(\d+)[\.:uh](\d+)(AM|PM)?/) {
+  if ($timeString=~m/^(\d+)[\.:UH](\d+)(AM|PM)?/) {
     my ($hours,$mins)= ($1,$2) ;
     $hours+=12 if ($3 && ($3 eq "PM")) ;
     if ($hours>=0 && $hours<=23 && $mins>=0 && $mins<=59 ) {
