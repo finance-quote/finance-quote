@@ -245,6 +245,11 @@ sub yahoo_request {
 				$info{$symbol, "high"} = $2;
 			}
 
+                        if (defined($info{$symbol,"time"})) {
+                          # uniform time output
+                          $info{$symbol,"time"} = $quoter->isoTime($info{$symbol,"time"});
+                        }
+
 			if (defined($info{$symbol,"currency"})) {
 			  # Convert the currency to be all uppercase for
 			  # backward compatability.  Needed because Yahoo
