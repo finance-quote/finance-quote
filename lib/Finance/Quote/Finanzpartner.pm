@@ -21,7 +21,8 @@ use strict;
 use HTML::TableExtract;
 
 use vars qw($VERSION);
-$VERSION = '0.1';
+$VERSION = '1.13_02';
+
 my $FINANZPARTNER_URL = "http://www.finanzpartner.de/fi/";
 
 sub methods {return (finanzpartner        => \&finanzpartner);}
@@ -40,9 +41,7 @@ sub trim
 # Convert number separators to US values
 sub convert_price {
 	$_ = shift;
-	s/\./@/g;
-	s/,/\./g;
-	s/@/,/g;
+        tr/.,/,./ ;
 	return $_;
 }
 
