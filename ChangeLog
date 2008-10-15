@@ -1,3 +1,11 @@
+2008-10-15  Erik Colson <eco@ecocode.net>
+
+        * Release 1.14
+
+2008-10-13  Erik Colson <eco@ecocode.net>
+
+        * Finanzpartner.pm added by Jan Willamowius
+
 2008-10-12  Erik Colson <eco@ecocode.net>
 
         * isoTime function added
