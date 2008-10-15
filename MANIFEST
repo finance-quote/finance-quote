@@ -30,6 +30,7 @@ lib/Finance/Quote/Deka.pm
 lib/Finance/Quote/DWS.pm
 lib/Finance/Quote/Fidelity.pm
 lib/Finance/Quote/FinanceCanada.pm
+lib/Finance/Quote/Finanzpartner.pm
 lib/Finance/Quote/Fool.pm
 lib/Finance/Quote/FTPortfolios.pm
 lib/Finance/Quote/HEX.pm
@@ -82,6 +83,7 @@ t/deka.t
 t/dws.t
 t/fidelity.t
 t/financecanada.t
+t/finanzpartner.t
 t/ftportfolios.t
 t/hex.t
 t/indiamutual.t
@@ -89,6 +91,7 @@ t/lerevenu.t
 t/maninvestments.t
 t/nzx.t
 t/platinum.t
+t/quote.t
 t/seb.t
 t/stockhousecanada.t
 t/tdefunds.t
