@@ -40,7 +40,7 @@ use HTTP::Request::Common;
 
 use vars qw/$VERSION/;
 
-$VERSION = '1.13_02';
+$VERSION = '1.14';
 
 sub methods { return (unionfunds => \&unionfunds); }
 sub labels { return (unionfunds => [qw/exchange name date isodate price method/]); }
