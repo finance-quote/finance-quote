@@ -38,7 +38,7 @@ use Finance::Quote::Yahoo::Base qw/yahoo_request base_yahoo_labels/;
 
 use vars qw($VERSION $YAHOO_ASIA_URL);
 
-$VERSION = '1.13_02';
+$VERSION = '1.14';
 
 # URLs of where to obtain information.
 
