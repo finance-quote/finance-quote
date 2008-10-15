@@ -110,7 +110,7 @@ one of the following:
 	BC - Barcelona
 	BE - Berlin
 	BI - Bilbao
-	BR - Breme
+	BR - Brussels
 	CO - Copenhagen
 	D  - Dusseldorf
 	F  - Frankfurt
