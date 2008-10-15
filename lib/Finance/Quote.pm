@@ -170,7 +170,7 @@ sub new {
 			      DWS FTPortfolios Fidelity FinanceCanada Fool HEX IndiaMutual
 			      LeRevenu ManInvestments NZX Platinum SEB StockHouseCanada
 			      TSP TSX Tdefunds Tdwaterhouse Tiaacref Troweprice Trustnet Union
-			      USFedBonds VWD ZA Cominvest
+			      USFedBonds VWD ZA Cominvest Finanzpartner
 			      Yahoo::Asia Yahoo::Australia Yahoo::Brasil
 			      Yahoo::Europe Yahoo::NZ Yahoo::USA/; }
 
