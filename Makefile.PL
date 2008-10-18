@@ -7,6 +7,7 @@ use inc::Module::Install;
 
 name(           'Finance-Quote');
 all_from(       'lib/Finance/Quote.pm');
+license(        'gpl');
 
 # We'd like to have multiple authors listed.  See future_use below.
 
