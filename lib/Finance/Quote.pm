@@ -673,8 +673,7 @@ sub isoTime {
     my ($hours,$mins)= ($1-0,$2-0) ;
     $hours+=12 if ($3 && ($3 eq "PM")) ;
     if ($hours>=0 && $hours<=23 && $mins>=0 && $mins<=59 ) {
-      $retTime = $hours>=10 ? "$hours:" : "0$hours:" ;
-      $retTime.= $mins>=10 ? "$mins" :"0$mins" ;
+      $retTime = sprintf ("%02d:%02d", $hours, $mins) ;
     }
   }
   return $retTime;
