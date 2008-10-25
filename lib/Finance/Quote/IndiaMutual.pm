@@ -77,7 +77,8 @@ sub amfiindia   {
     close(NAV);
 
     foreach my $symbol (@symbols) {
-	$fundquote{$symbol, "currency"} = "INR";
+        $fundquote{$symbol, "symbol"} = $symbol;
+        $fundquote{$symbol, "currency"} = "INR";
 	$fundquote{$symbol, "source"} = $AMFI_MAIN_URL;
 	$fundquote{$symbol, "link"} = $url;
 	$fundquote{$symbol, "method"} = "amfitable";
