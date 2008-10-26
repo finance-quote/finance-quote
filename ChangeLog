@@ -1,3 +1,8 @@
+2008-10-26  Erik Colson <eco@ecocode.net>
+
+	* BUG correction : IndiaMutual.pm: symbol not set it module.
+	* Release 1.15
+
 2008-10-21  Erik Colson <eco@ecocode.net>
 
         * BUG correction : function isoTime - make sure $hours and $mins are treated as numbers
