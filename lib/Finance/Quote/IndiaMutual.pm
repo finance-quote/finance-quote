@@ -14,7 +14,7 @@ use HTTP::Request::Common;
 use HTTP::Status;
 use HTML::TableExtract;
 
-$VERSION = '1.14';
+$VERSION = '1.15';
 
 # URLs of where to obtain information.
 

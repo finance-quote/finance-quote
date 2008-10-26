@@ -34,7 +34,7 @@ use Finance::Quote::Yahoo::Base qw/yahoo_request base_yahoo_labels/;
 
 use vars qw/$VERSION $YAHOO_NZ_URL/;
 
-$VERSION = '1.14';
+$VERSION = '1.15';
 
 # URLs of where to obtain information.
 
