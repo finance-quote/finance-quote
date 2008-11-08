@@ -62,7 +62,7 @@ use HTTP::Request::Common;
 use HTML::TableExtract;
 
 
-$VERSION='1.15';
+$VERSION='1.4';
 
 my $Bourso_URL = 'http://www.boursorama.com/recherche/recherche.phtml';
 
@@ -84,6 +84,8 @@ sub bourso {
 	my @stocks = @_;
 	my (%info,$reply,$url,$te,$ts,$row,$style);
 	my $ua = $quoter->user_agent();
+	my $toto = "";
+	my $ligne = "";
 
 	$url=$Bourso_URL;
 	
@@ -91,11 +93,8 @@ sub bourso {
 	{
 		$reply = $ua->request(GET $url.join('',"?query=", $stocks));
 
-
 		if ($reply->is_success) 
 		{
-			# print $reply->content;
-
 			$te= new HTML::TableExtract( );
 
 			$te->parse($reply->content);
@@ -116,43 +115,77 @@ sub bourso {
 				next;
 			}
 
-			# debug
-#			foreach $ts ($te->table_states) {
-#				print "Table (", join(',', $ts->coords), "):\n";
-#				foreach $row ($ts->rows) {
-#					print join(',', @$row), "\n";
-#				}
-#			}
-#
-
 			# Page style
 			foreach $ts ($te->table_state(3, 1)){
 				@rows=$ts->rows;
-				$style=$rows[0][0];
+				$style= $rows[0][0];
 			}
 
-			SWITCH: for ($style){
-				# style=stock
-			        /cours-action/ && do {
-					foreach $ts ($te->table_state(3, 2)){
-						@rows=$ts->rows;
-						$info{$stocks, "name"}=$rows[0][0];
+			if ($style =~ /opcvm\/opcvm/) {
+				# style=fund
+				foreach $ts ($te->table_state(3, 2)){
+					@rows=$ts->rows;
+					$info{$stocks, "name"}=$rows[0][0];
+					}
+				foreach $ts ($te->table_state(4, 2)){
+					@rows=$ts->rows;
+					foreach $row ($ts->rows) {
+
+						ASSIGN:	for ( @$row[0] ) {
+
+								/Valeur liquidative/ && do {
+									($info{$stocks, "last"}=@$row[2]) =~ s/[^0-9.-]*//g;
+									$info{$stocks, "price"}=$info{$stocks, "last"};
+									$info{$stocks, "success"}=1;
+									$info{$stocks, "method"}="bourso";
+									($info{$stocks, "currency"}=@$row[2]) =~ s/[^A-Z]//g;
+									# GnuCash
+									$info{$stocks, "symbol"}=$stocks;
+									$quoter->store_date(\%info, $stocks, {today => 1});
+									last ASSIGN;
+								};
+								/Variation Veille/ && do {
+									($info{$stocks, "p_change"}=@$row[2]) =~ s/[^0-9.-]*//g;
+									last ASSIGN;
+								};
+								/Date/ && do {
+									#($info{$stocks, "date"}=@$row[2])=~ s/ (.*)//g;
+									$quoter->store_date(\%info, $stocks, {eurodate => @$row[2]});
+									last ASSIGN;
+								};
+							}
 						}
-					foreach $ts ($te->table_state(4, 0)){
-						@rows=$ts->rows;
-						foreach $row ($ts->rows) {
+					} 
+			} elsif ($style =~ /cours-action/ or $style =~ /cours-obligation/ or $style =~ /cours-warrant/) {
+				# style=stock, bond and warrant
+
+				foreach $ts ($te->table_state(3, 2)){
+					@rows=$ts->rows;
+					}
+					($info{$stocks, "name"}=$rows[0][0]) =~ s/\s*//;
+
+				foreach $ts ($te->table_state(5, 0)){
+					@rows=$ts->rows;
+					}
+					($info{$stocks, "last"}=$rows[0][1]) =~ s/[^0-9.-]//g;
+					$info{$stocks, "price"}=$info{$stocks, "last"};
+					($info{$stocks, "currency"}=$rows[0][1]) =~ s/[^A-Z]//g;
+				
+				foreach $ts ($te->table_state(4, 1)){
+					@rows=$ts->rows;
+					foreach $row ($ts->rows) {
 						ASSIGN:	for ( @$row[0] ){  
 								/Cours/ && do {
-									($info{$stocks, "last"}=@$row[2]) =~ s/[^0-9.-]*//g;
 									$info{$stocks, "success"}=1;
-									$info{$stocks, "exchange"}="Euronext Paris";
 									$info{$stocks, "method"}="bourso";
-									$info{$stocks,"currency"}="EUR";
-									$quoter->store_date(\%info, $stocks, {today => 1});
 									# GnuCash
 									$info{$stocks, "symbol"}=$stocks;
 									last ASSIGN;
 								};
+								/Dernier/ && do {
+									$quoter->store_date(\%info, $stocks, {eurodate => @$row[2]});
+								};
+
 								/Variation/ && do {
 									($info{$stocks, "p_change"}=@$row[2]) =~ s/[^0-9.-]*//g;
 									last ASSIGN;
@@ -184,194 +217,15 @@ sub bourso {
 									($info{$stocks, "cap"}=($nav * 1000000)) ;
 									last ASSIGN;
 								};
-							}
-						}
-					}
-					last SWITCH; 
-				};
-				# style=bond
-			        /cours-obligation/ && do { 
-					foreach $ts ($te->table_state(3, 2)){
-						@rows=$ts->rows;
-						$info{$stocks, "name"}=$rows[0][0];
-						}
-  					foreach $ts ($te->table_state(4, 0)){
-						@rows=$ts->rows;
-						foreach $row ($ts->rows) {
-						ASSIGN:	for ( @$row[0] ){
-
-								/Cours/ && do {
-									($info{$stocks, "last"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									$info{$stocks, "success"}=1;
-									$info{$stocks, "exchange"}="Euronext Paris";
-									$info{$stocks, "method"}="bourso";
-									$info{$stocks,"currency"}="EUR";
-									$quoter->store_date(\%info, $stocks, {today => 1});
-									# GnuCash
-									$info{$stocks, "symbol"}=$stocks;
-									last ASSIGN;
-								};
-								/Variation/ && do {
-									($info{$stocks, "p_change"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/Ouverture/ && do {
-									($info{$stocks, "open"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/Haut/ && do {
-									($info{$stocks, "high"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/ Bas/ && do {
-									($info{$stocks, "low"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-							}
-						}
-					}
-					last SWITCH; 
-				};
-				# style=fund
-			        /opcvm\/opcvm/ && do { 
-					my @words;
- 					foreach $ts ($te->table_state(3, 2)){
-						@rows=$ts->rows;
-						$info{$stocks, "name"}=$rows[0][0];
-						}
-					foreach $ts ($te->table_state(4, 1)){
-						@rows=$ts->rows;
-						foreach $row ($ts->rows) {
-
-						ASSIGN:	for ( @$row[0] ) {
-
-								/Valeur liquidative/ && do {
-									($info{$stocks, "last"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									$info{$stocks, "success"}=1;
-									$info{$stocks, "exchange"}="Euronext Paris";
-									$info{$stocks, "method"}="bourso";
-									$info{$stocks,"currency"}="EUR";
-									$quoter->store_date(\%info, $stocks, {today => 1});
-									# GnuCash
-									$info{$stocks, "symbol"}=$stocks;
-									last ASSIGN;
-								};
-								/Variation Veille/ && do {
-									($info{$stocks, "p_change"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/Date/ && do {
-								        $quoter->store_date(\%info, $stocks, {eurodate => @$row[2]});
-									last ASSIGN;
-								};
+								}
 							}
 						} 
-					}
-					last SWITCH; 
-				};
-				# style=warrant
-				/cours-warrant/ && do{ 
-					foreach $ts ($te->table_state(3, 3)){
-						@rows=$ts->rows;
-						$info{$stocks, "name"}=$rows[0][0];
-						}
- 					foreach $ts ($te->table_state(4, 0)){
-						@rows=$ts->rows;
-						foreach $row ($ts->rows) {
-
-						ASSIGN:	for ( @$row[0] ) {
-
-								/Cours/ && do {
-									($info{$stocks, "last"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									$info{$stocks, "success"}=1;
-									$info{$stocks, "exchange"}="Euronext Paris";
-									$info{$stocks, "method"}="bourso";
-									$info{$stocks,"currency"}="EUR";
-									$quoter->store_date(\%info, $stocks, {today => 1});
-									# GnuCash
-									$info{$stocks, "symbol"}=$stocks;
-									last ASSIGN;
-								};
-								/Variation/ && do {
-									($info{$stocks, "p_change"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/Ouverture/ && do {
-									($info{$stocks, "open"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/Haut/ && do {
-									($info{$stocks, "high"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/ Bas/ && do {
-									($info{$stocks, "low"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/Volume/ && do {
-									($info{$stocks, "volume"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-							}
-						}
-					} 
-					last SWITCH; 
-				};
-				# style=indice
-			        /cours-indice/ && do { 
-					foreach $ts ($te->table_state(3, 2)){
-						@rows=$ts->rows;
-						$info{$stocks, "name"}=$rows[0][0];
-						}
-					foreach $ts ($te->table_state(4, 0)){
-						@rows=$ts->rows;
-						foreach $row ($ts->rows) {
-						ASSIGN:	for ( @$row[0] ){  
-								/Cours/ && do {
-									($info{$stocks, "last"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									$info{$stocks, "success"}=1;
-									$info{$stocks, "exchange"}="Euronext Paris";
-									$info{$stocks, "method"}="bourso";
-									$info{$stocks,"currency"}="EUR";
-									$quoter->store_date(\%info, $stocks, {today => 1});
-									# GnuCash
-									$info{$stocks, "symbol"}=$stocks;
-									last ASSIGN;
-								};
-								/Variation/ && do {
-									($info{$stocks, "p_change"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/Volume/ && do {
-									($info{$stocks, "volume"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/Ouverture/ && do {
-									($info{$stocks, "open"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/ Haut/ && do {
-									($info{$stocks, "high"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/ Bas/ && do {
-									($info{$stocks, "low"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-							}
-						}
-					}
-					last SWITCH; 
-				};
-			        {
-					$info {$stocks,"success"} = 0;
-					$info {$stocks,"errormsg"} = "Error retreiving $stocks ";
-				}
+			}  else {
+				$info {$stocks,"success"} = 0;
+				$info {$stocks,"errormsg"} = "Error retreiving $stocks ";
 			}
 
-
-		} 
-		else {
+		} else {
      			$info{$stocks, "success"}=0;
 			$info{$stocks, "errormsg"}="Error retreiving $stocks ";
    		}
