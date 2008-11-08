@@ -95,6 +95,8 @@ sub bourso {
 
 		if ($reply->is_success) 
 		{
+			# print $reply->content;
+
 			$te= new HTML::TableExtract( );
 
 			$te->parse($reply->content);
@@ -115,10 +117,19 @@ sub bourso {
 				next;
 			}
 
+			# debug
+#			foreach $ts ($te->table_states) {
+#				print "Table (", join(',', $ts->coords), "):\n";
+#				foreach $row ($ts->rows) {
+#					print join(',', @$row), "\n";
+#				}
+#			}
+#
+
 			# Page style
 			foreach $ts ($te->table_state(3, 1)){
 				@rows=$ts->rows;
-				$style= $rows[0][0];
+				$style=$rows[0][0];
 			}
 
 			if ($style =~ /opcvm\/opcvm/) {
