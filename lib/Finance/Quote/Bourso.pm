@@ -8,6 +8,7 @@
 #    Copyright (C) 2001, Rob Sessink <rob_ses@users.sourceforge.net>
 #    Copyright (C) 2005, Morten Cools <morten@cools.no>
 #    Copyright (C) 2006, Dominique Corbex <domcox@sourceforge.net>
+#    Copyright (C) 2008, Bernard Fuentes
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,6 +31,10 @@
 #
 #
 # Changelog
+#
+# 2008-11-09  Bernard Fuentes
+#
+#     *       changes on website
 #
 # 2006-12-26  Dominique Corbex <domcox@sourceforge.net>
 #
@@ -167,8 +172,9 @@ sub bourso {
 							}
 						}
 					} 
-			} elsif ($style =~ /cours-action/ or $style =~ /cours-obligation/ or $style =~ /cours-warrant/) {
-				# style=stock, bond and warrant
+			} elsif ( $style =~ /cours-action/ or $style =~ /cours-obligation/ or
+                                  $style =~ /cours-warrant/ or $style =~ /cours-indice/) {
+				# style=stock, bond, warrant, index
 
 				foreach $ts ($te->table_state(3, 2)){
 					@rows=$ts->rows;
