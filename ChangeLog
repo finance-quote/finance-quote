@@ -1,3 +1,7 @@
+2008-11-09  Erik Colson <eco@ecocode.net>
+
+	* Bourso.pm updated due to website update. By Bernard Fuentes
+
 2008-10-26  Erik Colson <eco@ecocode.net>
 
 	* BUG correction : IndiaMutual.pm: symbol not set it module.
