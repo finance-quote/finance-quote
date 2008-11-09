@@ -89,8 +89,6 @@ sub bourso {
 	my @stocks = @_;
 	my (%info,$reply,$url,$te,$ts,$row,$style);
 	my $ua = $quoter->user_agent();
-	my $toto = "";
-	my $ligne = "";
 
 	$url=$Bourso_URL;
 	
