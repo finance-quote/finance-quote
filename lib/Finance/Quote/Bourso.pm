@@ -8,7 +8,7 @@
 #    Copyright (C) 2001, Rob Sessink <rob_ses@users.sourceforge.net>
 #    Copyright (C) 2005, Morten Cools <morten@cools.no>
 #    Copyright (C) 2006, Dominique Corbex <domcox@sourceforge.net>
-#    Copyright (C) 2008, Bernard Fuentes
+#    Copyright (C) 2008, Bernard Fuentes <bernard.fuentes@gmail.com>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
