@@ -1,88 +1,117 @@
-#!/usr/bin/perl -w
-
-# Module for morningstar.co.uk
+package Finance::Quote::Ftest;
+require 5.004;
 
 use strict;
 
-use Encode;
+use vars qw($VERSION $MORNINGSTAR_SE_FUNDS_URL);
 
-package Finance::Quote::Morningstar;
+use LWP::UserAgent;
+use HTTP::Request::Common;
+use HTML::TableExtract;
 
-my $MORNINGSTAR_BASE_URL = 'http://www.morningstar.co.uk/UK/snapshot/snapshot.aspx?id=';
+$VERSION = '1.0';
+$MORNINGSTAR_SE_FUNDS_URL = 'http://morningstar.se/funds/overview.asp?cid=';
 
-sub methods
+sub methods { return (ftest_funds => \&ftest_funds); }
+
 {
-	return (morningstar => \&morningstar);
+  my @labels = qw/date isodate method source name currency price/;
+	
+  sub labels { return (fredrik_funds => \@labels); }
 }
 
-sub labels
-{
-	return (morningstar => ['symbol', 'date', 'isodate', 'nav', 'currency']);
-}
+sub ftest_funds {
+  my $quoter  = shift;
+  my @symbols = @_;
 
-sub _scrape($$$$)
-{
-	my ($quoter, $i, $sym, $html) = @_;
+  return unless @symbols;
+  my ($ua, $reply, $url, %funds, $te, $table, $row, @value_currency, $name);
 
-	if (my ($isin, $d, $m, $y, $currency, $nav) =
-		$html =~ />ISIN<.*>((?:GB|LU)\d+)<.*>NAV<span class="heading">.*(\d{2})\/(\d{2})\/(\d{4})<[^0-9]*([A-Z]{3}).(\d+\.\d+)</s)
-	{
-		$i->{$sym, 'success'} = 1;
+  foreach my $symbol (@symbols) {
+      $name = $symbol;
+      $url = $MORNINGSTAR_SE_FUNDS_URL;
+      $url = $url . $name;
+      $ua    = $quoter->user_agent;
+      $reply = $ua->request(GET $url);
+      unless ($reply->is_success) {
+	  foreach my $symbol (@symbols) {
+	      $funds{$symbol, "success"}  = 0;
+	      $funds{$symbol, "errormsg"} = "HTTP failure";
+	  }
+	  return wantarray ? %funds : \%funds;
+      }
 
-		$i->{$sym, 'symbol'} = $isin;
+      $te = new HTML::TableExtract();
+      $te->parse($reply->content);
+      #print "Tables: " . $te->tables_report() . "\n";
+      my $counter = 0;
+      my $dateset = 0;
+      for my $table ($te->tables()) {
+	  for my $row ($table->rows()) {
+	      if (defined(@$row[0])) {
+		  if ('Senaste NAV' eq substr(@$row[0],0,11)) {
+		      @value_currency = split(/ /, $$row[2]);
+		      $funds{$name, 'method'}   = 'fredrik_funds';
+		      $funds{$name, 'price'}    = $value_currency[0];
+		      $funds{$name, 'currency'} = $value_currency[1];
+		      $funds{$name, 'success'}  = 1;
+		      $funds{$name, 'symbol'}  = $name;
+		      $funds{$name, 'source'}   = 'Finance::Quote::Ftest';
+		      $funds{$name, 'name'}   = $name;
+		  }
+		  if ($counter == 7 && $dateset == 0) {
+		      my $date = substr($$row[1],0,10);
+		      $quoter->store_date(\%funds, $name, {isodate => $date});
+		      $dateset = 1;
+		  }
+	      }
+	  }
+	  $counter++;
+      }
 
-		$quoter->store_date($i, $sym,
-			{year => $y, month => $m, day => $d});
-
-		$i->{$sym,'currency'} = $currency;
-		$i->{$sym, 'nav'} = $nav;
-	} else {
- 		$i->{$sym, 'success'} = 0;
-		$i->{$sym, 'errormsg'} = 'Unable to screen-scrape HTML content';
-	}
-}
-
-sub morningstar
-{
-	my $quoter = shift;
-	my @stocks = @_;
-
-	my $ua = $quoter->user_agent;
-
-	my %info;
-
-	foreach my $sym (@stocks) {
-		my $url = $MORNINGSTAR_BASE_URL . $sym;
-
-		my $resp = $ua->get($url);
-
-		if ($resp->is_success) {
-			my $contentType = $resp->headers->header('Content-Type');
-			 $contentType =~ s/;.*//;
-
-			 if ($contentType eq 'text/html') {
-			 	my $dat = $resp->content;
-
-				$dat = Encode::decode('utf-8', $dat);
-				_scrape($quoter, \%info, $sym, $dat);
-			 } else {
-			 	$info{$sym, 'success'} = 0;
-				$info{$sym, 'errormsg'} = 'Unexpected content type: '.$contentType;
-			}
-		} else {
-			$info{$sym, 'success'} = 0;
-			$info{$sym, 'errormsg'} = 'Unexpected HTTP response: ' . $resp->status_line;
-		}
-	}
-
-
-	if (wantarray) {
-		return %info;
-	} else {
-		return \%info;
-	}
+      # Check for undefined symbols
+      foreach my $symbol (@symbols) {
+	  unless ($funds{$symbol, 'success'}) {
+	      $funds{$symbol, "success"}  = 0;
+	      $funds{$symbol, "errormsg"} = "Fund name not found";
+	  }
+      }
+  }
+  return %funds if wantarray;
+  return \%funds;
 }
 
 1;
 
- 	  	 
+=head1 NAME
+
+Finance::Quote::Ftest - Obtain fund prices the Fredrik way
+
+=head1 SYNOPSIS
+
+    use Finance::Quote;
+
+    $q = Finance::Quote->new;
+
+    %fundinfo = $q->fetch("fredrik_funds","fund name");
+
+=head1 DESCRIPTION
+
+This module obtains information about Fredrik fund prices from
+www.morningstar.se.  
+
+=head1 FUND NAMES
+
+Use some smart fund name...
+
+=head1 LABELS RETURNED
+
+Information available from Fredrik funds may include the following labels:
+date method source name currency price. The prices are updated at the
+end of each bank day.
+
+=head1 SEE ALSO
+
+Perhaps morningstar?
+
+=cut
