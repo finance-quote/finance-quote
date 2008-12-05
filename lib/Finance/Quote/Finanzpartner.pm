@@ -67,7 +67,7 @@ sub finanzpartner
 				$info{$stock,"errormsg"} = "Couldn't parse website";
 			} else {
 				$info{$stock,"name"} = $table->cell(1,1);
-				my $quote = $table->cell(7,1);
+				my $quote = $table->cell(6,1);
 				my @part = split(/\s/, $quote);
 				$info{$stock,"currency"} = $part[1];
 				$part[2] =~ s/\(//g;
