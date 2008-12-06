@@ -12,7 +12,7 @@ plan tests => 44;
 # Test Fidelity functions.
 
 my $q      = Finance::Quote->new();
-my @funds = ("102620", "103134", "101599", "102734", "100151",
+my @funds = ("102670", "103134", "101599", "102730", "100151",
 	     "102849", "101560");
 my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
