@@ -21,21 +21,17 @@ my %quotes = $q->fetch("trustnet",@stocks);
 
 ok(%quotes);
 
-TODO: {
-  local $TODO="To be debugged";
+# For each of our stocks, check to make sure we got back some
+# useful information.
 
-  # For each of our stocks, check to make sure we got back some
-  # useful information.
-  
-  foreach my $stock (@stocks) {
-    ok($quotes{$stock,"success"});
-    ok($quotes{$stock,"price"});
-    ok($quotes{$stock,"date"});
-    ok(substr($quotes{$stock,"isodate"},0,4) == $year ||
-         substr($quotes{$stock,"isodate"},0,4) == $lastyear);
-    ok(substr($quotes{$stock,"date"},6,4) == $year ||
-         substr($quotes{$stock,"date"},6,4) == $lastyear);
-  }
+foreach my $stock (@stocks) {
+  ok($quotes{$stock,"success"});
+  ok($quotes{$stock,"price"});
+  ok($quotes{$stock,"date"});
+  ok(substr($quotes{$stock,"isodate"},0,4) == $year ||
+       substr($quotes{$stock,"isodate"},0,4) == $lastyear);
+  ok(substr($quotes{$stock,"date"},6,4) == $year ||
+       substr($quotes{$stock,"date"},6,4) == $lastyear);
 }
 
 # Test that a bogus stock gets no success.
