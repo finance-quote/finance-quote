@@ -262,6 +262,95 @@ sub currency {
 }
 
 # =======================================================================
+# currency_lookup (public object method)
+#
+# search for available currency codes
+#
+# Usage: $quoter->currency_lookup({ name => qr/australia/i });
+#  $quoter->currency_lookup();
+#
+# undef is returned upon error.
+
+sub currency_lookup {
+	my $this = shift if (ref $_[0]);
+	$this ||= _dummy();
+
+  # Validate parameters
+  my %valid_params = map { $_ => 1 } qw( name code );
+  my %params = @_;
+  my $param_errors = 0;
+  for my $key ( keys %params ) {
+    if ( ! exists $valid_params{$key} ) {
+      warn "Invalid parameter: ${key}";
+      $param_errors++;
+    }
+  }
+  return undef if $param_errors > 0;
+
+  # Retrieve known currencies
+  my $known_currencies = _fetch_known_currencies();
+
+  # Return currencies based on parameters
+  my $returned_currencies = {};
+  if ( scalar keys %params == 0 ) {
+    $returned_currencies = $known_currencies;
+  }
+  else {
+    for my $code ( keys %{$known_currencies} ) {
+      if ( exists $params{name} ) {
+        $returned_currencies->{$code} = $known_currencies->{$code}
+          if _smart_compare( $params{name}
+                           , $known_currencies->{$code}->{name}
+                           );
+      }
+      if ( exists $params{code} ) {
+        $returned_currencies->{$code} = $known_currencies->{$code}
+          if _smart_compare( $params{code}, $code );
+      }
+    }
+  }
+  return $returned_currencies;
+}
+
+# _smart_compare (private method function)
+#
+# This function compares values where the method depends on the 
+# type of the first parameter.
+#  regex  : compare as regex
+#  scalar : test for substring match
+sub _smart_compare {
+  my ($val1, $val2) = @_;
+
+  if ( ref $val1 eq 'Regexp' ) {
+    return $val1 =~ $val2;
+  }
+  else {
+    return index($val2, $val1) > -1
+  }
+}
+
+# _fetch_known_currencies (private class function)
+#
+# This function retrieves the current known currency details
+# unless the information is already cached (at which stage the
+# cached version is returned).
+#
+# Keep data private to this function in a closure
+{
+  my $known_currencies = undef;
+  sub _fetch_known_currencies {
+    if ( ! defined $known_currencies ) {
+      $known_currencies = { CAD => { name => "Canadian Dollar" }
+                          , AUD => { name => "Australian Dollar" }
+                          , EUR => { name => "Euro" }
+                          };
+    }
+
+    return $known_currencies;
+  }
+}
+
+# =======================================================================
 # set_currency (public object method)
 #
 # set_currency allows information to be requested in the specified
