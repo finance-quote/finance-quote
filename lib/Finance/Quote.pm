@@ -267,7 +267,12 @@ sub currency {
 # search for available currency codes
 #
 # Usage: $quoter->currency_lookup({ name => qr/australia/i });
+#  $quoter->currency_lookup( code => 'EU' );
+#  $quoter->currency_lookup( name => 'Euro', code => qr/eu/i );
 #  $quoter->currency_lookup();
+#
+# If more than one lookup parameter is given all must match for
+# a currency to match.
 #
 # undef is returned upon error.
 
@@ -297,15 +302,22 @@ sub currency_lookup {
   }
   else {
     for my $code ( keys %{$known_currencies} ) {
-      if ( exists $params{name} ) {
-        $returned_currencies->{$code} = $known_currencies->{$code}
-          if _smart_compare( $params{name}
-                           , $known_currencies->{$code}->{name}
-                           );
+      # Make sure all parameters match
+      my $matched = 0;
+      if ( exists $params{name}
+           &&
+           _smart_compare( $known_currencies->{$code}->{name}, $params{name} )
+         ) {
+        $matched++;
       }
-      if ( exists $params{code} ) {
+      if ( exists $params{code}
+           &&
+           _smart_compare( $code, $params{code} )
+         ) {
+        $matched++;
+      }
+      if ( $matched == scalar keys %params ) {
         $returned_currencies->{$code} = $known_currencies->{$code}
-          if _smart_compare( $params{code}, $code );
       }
     }
   }
@@ -315,17 +327,17 @@ sub currency_lookup {
 # _smart_compare (private method function)
 #
 # This function compares values where the method depends on the 
-# type of the first parameter.
+# type of the second parameter.
 #  regex  : compare as regex
 #  scalar : test for substring match
 sub _smart_compare {
   my ($val1, $val2) = @_;
 
-  if ( ref $val1 eq 'Regexp' ) {
+  if ( ref $val2 eq 'Regexp' ) {
     return $val1 =~ $val2;
   }
   else {
-    return index($val2, $val1) > -1
+    return index($val1, $val2) > -1
   }
 }
 
