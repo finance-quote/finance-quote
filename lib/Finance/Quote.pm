@@ -1076,6 +1076,7 @@ module.  Please refer to the sub-modules for further information.
   Leigh Wedding <leigh.wedding@telstra.com>
   Tobias Vancura <tvancura@altavista.net>
   James Treacy <treacy@debian.org>
+  Bradley Dean <bjdean@bjdean.id.au>
 
 The Finance::Quote home page can be found at
 http://finance-quote.sourceforge.net/
