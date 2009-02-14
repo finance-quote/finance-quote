@@ -7,7 +7,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 9;
+plan tests => 12;
 
 # Test overall currency lookup
 my $currencies = Finance::Quote::currency_lookup();
@@ -27,6 +27,21 @@ while ( my ($code, $name) = each %test_currencies ) {
 
 # Test selective currency lookup
 $currencies = Finance::Quote::currency_lookup( name => qr/pound/i );
+
+# Test multiple lookup parameters
+$currencies = Finance::Quote::currency_lookup( name => "Australia"
+                                             , code => qr/AU/ );
+ok( exists $currencies->{AUD}
+  , "Expected currency code (AUD) exists for matching multiple params" );
+cmp_ok( scalar keys %{$currencies}, '==', 1
+      , "Only one currency returned for matching multiple params"
+      );
+
+$currencies = Finance::Quote::currency_lookup( name => "Euro"
+                                             , code => "AUD" );
+cmp_ok( scalar keys %{$currencies}, '==', 0
+      , "Expected zero-response for non-matching multiple params"
+      );
 
 # Test non-matching currency lookup
 $currencies = Finance::Quote::currency_lookup( name => qr/rubbish_value/i );
