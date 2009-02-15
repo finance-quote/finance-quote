@@ -240,6 +240,20 @@ The currency list stored in this module was last copied from the live site:
 
 Sun Feb 15 18:01:12 GMT 2009
 
+=head1 LICENSE
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+Currency information fetched through this module is bound by
+Yahoo!'s terms and conditons.
+
+=head1 AUTHORS
+
+  Bradley Dean <bjdean@bjdean.id.au>
+
 =head1 SEE ALSO
 
 Yahoo Currency Converter - http://uk.finance.yahoo.com/currency-converter
