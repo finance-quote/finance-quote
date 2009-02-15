@@ -166,13 +166,13 @@ sub new {
 	if (!@reqmodules or $reqmodules[0] eq "-defaults") {
 		shift(@reqmodules) if (@reqmodules);
 		# Default modules
-		@modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns Bourso Cdnfundlibrary Deka
-			      DWS FTPortfolios Fidelity FinanceCanada Fool HEX IndiaMutual
-			      LeRevenu ManInvestments NZX Platinum SEB StockHouseCanada
-			      TSP TSX Tdefunds Tdwaterhouse Tiaacref Troweprice Trustnet Union
-			      USFedBonds VWD ZA Cominvest Finanzpartner
-			      Yahoo::Asia Yahoo::Australia Yahoo::Brasil
-			      Yahoo::Europe Yahoo::NZ Yahoo::USA/; }
+		@modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns Bourso Cdnfundlibrary
+            Currencies Deka DWS FTPortfolios Fidelity FinanceCanada Fool HEX
+            IndiaMutual LeRevenu ManInvestments NZX Platinum SEB
+            StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref Troweprice
+            Trustnet Union USFedBonds VWD ZA Cominvest Finanzpartner
+            Yahoo::Asia Yahoo::Australia Yahoo::Brasil Yahoo::Europe Yahoo::NZ
+            Yahoo::USA/; }
 
 	$this->_load_modules(@modules,@reqmodules);
 
@@ -293,7 +293,7 @@ sub currency_lookup {
   return undef if $param_errors > 0;
 
   # Retrieve known currencies
-  my $known_currencies = _fetch_known_currencies();
+  my $known_currencies = Finance::Quote::Currencies::known_currencies();
 
   # Return currencies based on parameters
   my $returned_currencies = {};
@@ -338,27 +338,6 @@ sub _smart_compare {
   }
   else {
     return index($val1, $val2) > -1
-  }
-}
-
-# _fetch_known_currencies (private class function)
-#
-# This function retrieves the current known currency details
-# unless the information is already cached (at which stage the
-# cached version is returned).
-#
-# Keep data private to this function in a closure
-{
-  my $known_currencies = undef;
-  sub _fetch_known_currencies {
-    if ( ! defined $known_currencies ) {
-      $known_currencies = { CAD => { name => "Canadian Dollar" }
-                          , AUD => { name => "Australian Dollar" }
-                          , EUR => { name => "Euro" }
-                          };
-    }
-
-    return $known_currencies;
   }
 }
 
