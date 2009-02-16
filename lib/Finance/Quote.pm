@@ -922,6 +922,27 @@ The sources method returns a list of sources that have currently been loaded and
 can be passed to the fetch method.  If you're providing a user with a list of
 sources to choose from, then it is recommended that you use this method.
 
+=head2 CURRENCY_LOOKUP
+
+    $currencies_by_name = $q->currency_lookup( name => 'Australian' );
+    $currencies_by_code = $q->currency_lookup( code => qr/^b/i      );
+    $currencies_by_both = $q->currency_lookup( name => qr/pound/i
+                                             , code => 'GB'         );
+
+The currency_lookup method provides a search against the known currencies. The
+list of currencies is based on the available currencies in the Yahoo Currency
+Converter (the list is stored within the module as the list should be fairly
+static).
+
+The lookup can be done by currency name (ie "Australian Dollar"), by
+code (ie "AUD") or both. You can pass either a scalar or regular expression
+as a search value - scalar values are matched by substring while regular
+expressions are matched as-is (no changes are made to the expression).
+
+See L<Finance::Quote::Currencies::fetch_live_currencies> (and the
+C<t/currencies.t> test file) for a way to make sure that the stored
+currency list is up to date.
+
 =head2 CURRENCY
 
     $conversion_rate = $q->currency("USD","AUD");
