@@ -18,10 +18,18 @@ use strict;
 use warnings;
 
 use base 'Exporter';
+use vars qw/@EXPORT_OK $VERSION $YAHOO_CURRENCY_CONV_URL/;
 
-our @EXPORT_OK = qw( known_currencies fetch_live_currencies );
+@EXPORT_OK = qw( known_currencies fetch_live_currencies );
+$VERSION = '1.0';
 
-our $VERSION = '1.0';
+use HTTP::Request::Common;
+use LWP::UserAgent;
+use HTML::Parser;
+use Encode;
+
+# This is the URL used to extract the currency list
+$YAHOO_CURRENCY_CONV_URL = 'http://uk.finance.yahoo.com/currency-converter';
 
 # =======================================================================
 # methods used by Finance::Quote to import public functions
@@ -34,7 +42,7 @@ sub labels { return () };
 
 # =======================================================================
 # The current static currency list.
-# This list is generated using get_live_
+# This list is generated using fetch_live_currencies
 my %currencies = ( ALL => { name => qq{Albanian Lek} }
                  , DZD => { name => qq{Algerian Dinar} }
                  , XAL => { name => qq{Aluminium Ounces} }
@@ -208,8 +216,105 @@ sub known_currencies {
 # website. This function should really only be used to test if the known
 # currency list in this module is out of date.
 sub fetch_live_currencies {
-  warn "NotYetImplemented";
-  return {};
+  my $ua = LWP::UserAgent->new();
+  my $data = $ua->request(GET $YAHOO_CURRENCY_CONV_URL)->content;
+  my $p = HTML::Parser->new( start_h => [\&_start_handler, "tagname, attr"]
+                           , end_h   => [\&_end_handler, "tagname"]
+                           , text_h  => [\&_text_handler, "dtext"]
+                           );
+
+  # Avoid the "Parsing of undecoded UTF-8 will give garbage when decoding
+  # entities" warning by forcing utf mode and encoding to utf8
+  $p->utf8_mode(1);
+  $p->parse( Encode::encode_utf8($data) ); 
+
+  return _live_currencies();
+}
+
+# Store state variables in a closure
+{
+  # The currency hash
+  my %live_currencies = ();
+
+  # Keep track of being within a valid option tag (for text gathering)
+  my $in_currency_list = 0;
+  my $in_currency_option = 0;
+  my $currency_text = '';
+  my $currency_code = '';
+  
+  # _start_handler (private function)
+  #
+  # This is a HTML::Parser start tag handler
+  sub _start_handler {
+    my ($tagname, $attr) = @_;
+ 
+    if ( lc $tagname eq 'select'
+         &&
+         exists $attr->{name} && lc $attr->{name} eq 'from'
+       ) {
+      # Reset status
+      %live_currencies = ();
+
+      # We're in the list
+      $in_currency_list = 1;
+    }
+    elsif ( $in_currency_list == 1
+            &&
+            lc $tagname eq 'option'
+          ) {
+      $in_currency_option = 1;
+      $currency_code = $attr->{value};
+      $currency_text = '';
+    }
+  }
+  
+  # _end_handler (private function)
+  #
+  # This is a HTML::Parser end tag handler
+  sub _end_handler {
+    my ($tagname) = @_;
+
+    if ( lc $tagname eq 'select'
+         &&
+         $in_currency_list == 1
+       ) {
+      # We're leaving the currency list
+      $in_currency_list = 0;
+    }
+    elsif ( $in_currency_list == 1
+            &&
+            $in_currency_option == 1
+            &&
+            lc $tagname eq 'option'
+          ) {
+      # We're leaving an option
+      # Build currency list item (strip code from name)
+      $currency_text =~ s/\s*\([A-Z]+\)\s*$//;
+      $live_currencies{$currency_code} = { name => $currency_text };
+      $in_currency_option = 0;
+    }
+  }
+
+  # _text_handler (private function)
+  #
+  # This is a HTML::Parser text handler
+  sub _text_handler {
+    my ($dtext) = @_;
+
+    if ( $in_currency_list == 1
+         &&
+         $in_currency_option == 1
+       ) {
+      $currency_text .= $dtext;
+    }
+  }
+
+  # _live_currencies (private function)
+  #
+  # Return data from within the closure
+  sub _live_currencies {
+    return \%live_currencies;
+  }
 }
 
 1;
