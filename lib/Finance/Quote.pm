@@ -36,6 +36,7 @@ use Carp;
 use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
+use Encode;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $VERSION $TIMEOUT %MODULES %METHODS $AUTOLOAD
@@ -240,7 +241,8 @@ sub currency {
 
 	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}from=$from&to=$to")->content;
 	my $te = HTML::TableExtract->new( headers => ['Symbol', 'Bid', 'Ask'] );
-	$te->parse($data);
+    $te->parse(decode_utf8($data)); # The web page returns utf8 content which gives
+                                    # a warning when parsing $data in HTML::Parser
 
 	# Make sure there's a table to parse.
 	return undef unless ($te->tables);
