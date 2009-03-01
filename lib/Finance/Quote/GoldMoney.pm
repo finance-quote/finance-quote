@@ -54,7 +54,7 @@ sub goldmoney {
 	my $ua = $quoter->user_agent;
 	my (%symbolhash, @q, %info);
 	my (
-		$html_string, $te, $table, 
+		$html_string, $te, $table_gold, $table_silver,
 		$gold_gg, $gold_oz, $silver_oz, $currency
 	);
 
@@ -89,9 +89,10 @@ sub goldmoney {
 			$html_string =$response->content;
 	
 			# we want the 'Current Spot Rates' table
-			$te = new HTML::TableExtract->new( depth=>2, count=>3 , keep_html=>1);
+			$te = new HTML::TableExtract->new( attribs=>{class=>'spot'}, subtables=>1);
 			$te->parse($html_string);
-			$table=$te->table(2,3);
+			$table_gold=$te->table(1,0);
+			$table_silver=$te->table(1,1);
 		} else {
 			# retrieval error - flag an error and return right away
 			foreach my $s (@symbols) {
@@ -102,22 +103,24 @@ sub goldmoney {
 		}
 
 		# get list of currencies
-		# - we get the 'selected' element and extract its content
-		$currency = $table->cell(0,0);
-		if( $currency =~ /selected.*>(.*)</ ) {
-			$currency = $1;
-		}
+		# FIXME:
+		# - assume euro since the site change in 01/2009
+		# - currency is JavaScript()ed since then and therefore hard to parse, if you
+		#   know how please tell me
+		# - this assumption causes trouble when the module is used outside the
+		#   european region (F::Q considers every number it gets as EUR and converts it...)
+		$currency = 'EUR';
 	
 		# get gold rate
 		#
 		if( $_want_gold ) {
-			$_ = $table->cell(2,1);
-			if( /^(\d*\.\d*).*\/gg$/ ) {
+			$_ = $table_gold->cell(0,1);
+			if( /(\d*\.\d*).*\/gg/ ) {
 				$gold_gg = $1;
 			}
 
-			$_ = $table->cell(4,1);
-			if( /^(\d*\.\d*).*\/oz$/ ) {
+			$_ = $table_gold->cell(0,1);
+			if( /(\d*\.\d*).*\/oz/ ) {
 				$gold_oz = $1;
 
 				# assemble final dataset
@@ -137,8 +140,8 @@ sub goldmoney {
 		# get silver rate
 		#
 		if( $_want_silver ) {
-			$_ = $table->cell(6,1);
-			if( /^(\d*\.\d*).*\/oz$/ ) {
+			$_ = $table_silver->cell(0,1);
+			if( /(\d*\.\d*).*\/oz/ ) {
 				$silver_oz = $1;
 
 				$quoter->store_date(\%info, 'silver', {isodate => _goldmoney_time('isodate')});
