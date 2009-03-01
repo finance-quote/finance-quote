@@ -1,5 +1,12 @@
 #!/usr/bin/perl -w
 #
+#    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
+#    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
+#    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
+#    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
+#    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
+#    Copyright (C) 2000, Volker Stuerzl <volker.stuerzl@gmx.de>
+#    Copyright (C) 2006, Klaus Dahlke <klaus.dahlke@gmx.de>
 #    Copyright (C) 2008, Stephan Ebelt <stephan.ebelt@gmx.de>
 #
 #    This program is free software; you can redistribute it and/or modify
