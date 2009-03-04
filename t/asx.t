@@ -26,17 +26,17 @@ ok($quotes{"BHP","last"} > 0);
 ok($quotes{"BHP","success"});
 
 # Exercise the fetch function a little.
-%quotes = $q->fetch("asx","ITE");
+%quotes = $q->fetch("asx","RZR");
 ok(%quotes);
-ok($quotes{"ITE","last"} > 0);
-ok($quotes{"ITE","success"} > 0);
+ok($quotes{"RZR","last"} > 0);
+ok($quotes{"RZR","success"} > 0);
 
 # Check that we're getting currency information.
-ok($quotes{"ITE", "currency"} eq "AUD");
+ok($quotes{"RZR", "currency"} eq "AUD");
 
 # Check we're not getting bogus percentage signs.
-$quotes{"ITE","p_change"} ||= "";	# Avoid warning if undefined.
-ok($quotes{"ITE","p_change"} !~ /%/);
+$quotes{"RZR","p_change"} ||= "";	# Avoid warning if undefined.
+ok($quotes{"RZR","p_change"} !~ /%/);
 
 # Check that looking up a bogus stock returns failure:
 %quotes = $q->asx("BOG");
