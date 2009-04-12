@@ -9,13 +9,15 @@ if (not $ENV{ONLINE_TEST}) {
 
 plan tests => 9;
 
-# Test FTest functions.
+# Test Morningstar functions.
 
 my $q      = Finance::Quote->new();
 my $year   = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my %quotes = $q->ftest_funds("F0GBR069L2","BOGUS");
+my @stocks = ("F0GBR069L2","BOGUS");
+
+my %quotes = $q->fetch("morningstar",@stocks);
 ok(%quotes);
 
 # Check the nav values are defined.  These are the most
