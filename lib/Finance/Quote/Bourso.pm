@@ -179,7 +179,7 @@ sub bourso {
 			  my ($day,$month,$year) = ( $tempinfo{$key} =~ m|(\d\d)/(\d\d)/(\d\d)| );
 			  $year+=2000;
 			  $info{$stocks,"date"}= sprintf "%02d/%02d/%04d",$day,$month,$year;
-			  $quoter->store_date(\%info, $stocks, {eurodate => $info{$symbol,"date"}});
+			  $quoter->store_date(\%info, $stocks, {eurodate => $info{$stocks,"date"}});
 			};
 			/Volume/ && do {
 			  $info{$stocks,"volume"}= $tempinfo{$key} ;
