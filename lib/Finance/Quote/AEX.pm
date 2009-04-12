@@ -48,7 +48,7 @@ $VERSION = '1.15';
 
 # URLs of where to obtain information
 
-my $AEX_URL = 'http://www.aex.nl/scripts/marktinfo/koerszoek.asp'; 
+my $AEX_URL = "http://www.euronext.com/search/download/trapridownloadpopup.jcsv?pricesearchresults=actif&filter=1&belongsToList=market_EURLS&mep=8626&lan=NL&resultsTitle=Amsterdam+-+Euronext&cha=1800&format=txt&formatDecimal=.&formatDate=dd/MM/yy";
 my $AEXOPT_URL = 'http://www.aex.nl/scripts/marktinfo/OptieKoersen.asp?taal=en';
 my $AEXOPT_FRAME_HREF = "/scripts/marktinfo/OptieFrame.asp";
 my $AEXOPT_SUBFRAME_URL = "http://www.aex.nl/scripts/marktinfo/ShowOptie.asp?taal=en";
@@ -69,17 +69,17 @@ $AEXOPT_USE_SUBFRAMES = 0;
 sub methods { return (dutch       => \&aex,
                       aex         => \&aex,
                       aex_options => \&aex_options,
-                      aex_futures => \&aex_futures) } 
+                      aex_futures => \&aex_futures) }
 
 {
-        my @labels = qw/name symbol price last date time p_change bid ask offer open high low close volume currency method exchange/;
-        my @opt_labels = qw/name price last date time bid ask open high low close volume oi trade_volume bid_time bid_volume ask_time ask_volume currency method exchange/;
-	my @fut_labels = qw/name price last date time change bid ask open high low close volume currency method exchange/;
+  my @labels = qw/name symbol price last date time p_change bid ask offer open high low close volume currency method exchange/;
+  my @opt_labels = qw/name price last date time bid ask open high low close volume oi trade_volume bid_time bid_volume ask_time ask_volume currency method exchange/;
+  my @fut_labels = qw/name price last date time change bid ask open high low close volume currency method exchange/;
 
-        sub labels { return (dutch       => \@labels,
-                             aex         => \@labels,
-                             aex_options => \@opt_labels,
-                             aex_futures => \@fut_labels); } 
+  sub labels { return (dutch       => \@labels,
+                       aex         => \@labels,
+                       aex_options => \@opt_labels,
+                       aex_futures => \@fut_labels); }
 }
 
 # ==============================================================================
@@ -87,132 +87,100 @@ sub methods { return (dutch       => \&aex,
 # Stocks and indices
 
 sub aex {
- my $quoter = shift;
- my @symbols = @_;
- return unless @symbols;
-   
- my (%info,$url,$reply,$te);
- my ($row, $datarow, $matches);
- my ($time);
+  my $quoter = shift;
+  my @symbols = @_;
+  return unless @symbols;
 
- $url = $AEX_URL;    		# base url 
+  my (%info,$url,$reply,$te);
+  my ($row, $datarow, $matches);
+  my ($time);
 
-# Create a user agent object and HTTP headers
- my $ua  = new LWP::UserAgent(agent => 'Mozilla/4.0 (compatible; MSIE 5.5; Windows 98)');
+  $url = $AEX_URL;    		# base url 
 
- my $headers = new HTTP::Headers(
-    Accept => "text/html, text/plain, image/*",
-    Content_Type => "application/x-www-form-urlencoded");
- 
- foreach my $symbol (@symbols) {
+  # Create a user agent object and HTTP headers
+  my $ua  = new LWP::UserAgent(agent => 'Mozilla/4.0 (compatible; MSIE 5.5; Windows 98)');
 
-    # Compose form-data
-    my $q = new CGI( {zoek => "$symbol"} );
-    my $form_data = $q->query_string;
+  # Compose POST request
+  my $request = new HTTP::Request("GET", $url);
 
-    # Compose POST request
-    my $request = new HTTP::Request("POST", $url, $headers);
-    #printf $request . "\n";
-    $request->content( $form_data );
+  $reply = $ua->request( $request );
+  #print Dumper $reply;
+  if ($reply->is_success) { 
 
-    # Pass request to the user agent and get a response back
-    $reply = $ua->request( $request );
+    # Write retreived data to temp file for debugging
+    use POSIX;
+    my $filename = tmpnam();
+    open my $fw, ">", $filename or die "$filename: $!";
+    print $fw $reply->content;
+    close $fw;
 
-    if ($reply->is_success) { 
+    # Open reply to read lins
+    open FP, "<", \$reply->content or die "Unable to read data: $!";
 
-     # print STDOUT $reply->content,"\n";
+    # Open temp file instead while debugging
+    #open FP, "<", $filename or die "Unable to read data: $!";
 
-     # Define the headers of the table to be extracted from the received HTML page
-     $te = new HTML::TableExtract( headers => [qw(Fonds Current Change Time Bid Offer Volume High Low Open)]);
+    # Skip the first 4 lines, which are not CSV
+    my $dummy = <FP>;	# Typical content: Stocks
+    $dummy = <FP>;		# Typical content: Amsterdam - Euronext
+    $dummy = <FP>;		# Typical content:  
+    $dummy = <FP>;		# Typical content: Instrument's name;ISIN;Euronext code;Market;Symbol;ICB Sector (Level 4);Handelsvaluta;Laatst;Aantal;D/D-1 (%);Datum-tijd (CET);Omzet;Totaal aantal aandelen;Capitalisation;Trading mode;Dag Open;Dag Hoog;Dag Hoog / Datum-tijd (CET);Dag Laag;Dag Laag / Datum-tijd (CET); 31-12/Change (%); 31-12/Hoog; 31-12/Hoog/Datum; 31-12/Laag; 31-12/Laag/Datum; 52 weken/Change (%); 52 weken/Hoog; 52 weken/Hoog/Datum; 52 weken/Laag; 52 weken/Laag/Datum;Suspended;Suspended / Datum-tijd (CET);Reserved;Reserved / Datum-tijd (CET)
 
-     # Parse table
-     $te->parse($reply->content); 
-     
-     # Check for a page without tables
-     # This gets returned when a bad symbol name is given
-     unless ( $te->tables ) 
-     {
-       $info {$symbol,"success"} = 0;
-       $info {$symbol,"errormsg"} = "Fund name $symbol not found, bad symbol name";
-       next;
-     } 
-     
-     # extract table contents
-     my @rows; 
-     unless (@rows = $te->rows)
-     {
-       $info {$symbol,"success"} = 0;
-       $info {$symbol,"errormsg"} = "Parse error";
-       next;
-     }
+    while (my $line = <FP>) {
+      #print Dumper $line;
+      my @row_data = $quoter->parse_csv_semicolon($line);
+      #print Dumper \@row_data;
+      my $row = \@row_data;
+      #print Dumper $row;
+      next unless @row_data;
 
-     # search for the fund within the table-rows (as ther might be other
-     # funds having the same fundname in their prefix)
-     my $found = 0;
-     my $i = 0;
-     while ($i < @rows ) {
-       my $a = lc($rows[$i][0]);	# convert to lowercase
-       my $b = lc($symbol);
-       $a =~ s/\s*//g;		# remove spaces
-       $b =~ s/\s*//g;
-       if ($a eq $b) {
-          $found = 1;
-          last
-       }
-       $i++;
-     }
- 
-     unless ( $found ) 
-     {
-       $info {$symbol,"success"} = 0;
-       $info {$symbol,"errormsg"} = "Fund name $symbol not found";
-       next;
-     }
+      foreach my $symbol (@symbols) {
 
-     # convert decimal comma's into points
-     $rows[$i][$_] =~ s/,/./g foreach (1,4,5,7,8,9,2,6);
+        my $found = 0;
 
-#    print STDOUT "nr rows: ", $max;
-#    print STDOUT "$found,\n rows[", $i, "][0]: $rows[$i][0], symbol: $symbol\n";
+        # Match Fund's name, ISIN or symbol
+        if ( @$row[0] eq $symbol || @$row[1] eq $symbol || @$row[4] eq $symbol ) {
+          $info {$symbol, "exchange"} = "Amsterdam Euronext eXchange";
+          $info {$symbol, "method"} = "aex";
+          $info {$symbol, "symbol"} = @$row[4];
+          ($info {$symbol, "last"} = @$row[7]) =~ s/\s*//g;
+          $info {$symbol, "bid"} = undef;
+          $info {$symbol, "offer"} = undef;
+          $info {$symbol, "low"} = @$row[18];
+          $info {$symbol, "close"} = undef;
+          $info {$symbol, "p_change"} = @$row[9];
+          ($info {$symbol, "high"} = @$row[16]) =~ s/\s*//g;
+          ($info {$symbol, "volume"} = @$row[8]) =~ s/\s*//g;
 
-#    $info {$symbol, "success"} = 1;
-     $info {$symbol, "exchange"} = "Amsterdam Euronext eXchange";
-     $info {$symbol, "method"} = "aex";
-     $info {$symbol, "symbol"} = $symbol;
-     ($info {$symbol, "last"} = $rows[$i][1]) =~ s/\s*//g; # Remove spaces
-     ($info {$symbol, "bid"} = $rows[$i][4]) =~ s/\s*//g; 
-     ($info {$symbol, "offer"} = $rows[$i][5]) =~ s/\s*//g;
-     ($info {$symbol, "high"} = $rows[$i][7]) =~ s/\s*//g; 
-     ($info {$symbol, "low"} = $rows[$i][8]) =~ s/\s*//g;
-     ($info {$symbol, "open"} = $rows[$i][9]) =~ s/\s*//g;
-     ($info {$symbol, "close"} = $rows[$i][1]) =~ s/\s*//g;
-     ($info {$symbol, "p_change"} = $rows[$i][2]) =~ s/\s*//g;
-     ($info {$symbol, "volume"} = $rows[$i][6]) =~ s/\s*//g;
+          # Split the date and time from one table entity 
+          my $dateTime = @$row[10];
 
-# Split the date and time from one table entity 
-     my $dateTime = $rows[$i][3];
+          # Check for "dd mmm yyyy hh:mm" date/time format like "01 Aug 2004 16:34" 
+          if ($dateTime =~ m/(\d{2})\/(\d{2})\/(\d{2}) \s
+                             (\d{2}:\d{2})/xi ) { 
+            $quoter->store_date(\%info, $symbol, {month => $2, day => $1, year => $3});
+          }
 
-# Check for "dd mmm yyyy hh:mm" date/time format like "01 Aug 2004 16:34" 
-     if ($dateTime =~ m/(\d{2}) \s ([a-z]{3}) \s (\d{4}) \s
-                        (\d{2}:\d{2})/xi ) { 
-       $quoter->store_date(\%info, $symbol, {month => $2, day => $1, year => $3});
-       $info {$symbol, "time"} = "$4";
-     }
+          $info {$symbol, "currency"} = "EUR";
+          $info {$symbol, "success"} = 1; 
+        }
+      }
+    }
+  }
 
-     $info {$symbol, "currency"} = "EUR";
-     $info {$symbol, "success"} = 1; 
-   } else {
-     $info {$symbol, "success"} = 0;
-     $info {$symbol, "errormsg"} = "Error retrieving $symbol ";
-#    $info {$symbol, "errormsg"} = $reply->message;
-   }
- } 
+  foreach my $symbol (@symbols) {
+    unless ( !defined($info {$symbol, "success"}) || $info {$symbol, "success"} == 1 ) 
+      {
+        $info {$symbol,"success"} = 0;
+        $info {$symbol,"errormsg"} = "Fund name $symbol not found";
+        next;
+      }
+  }
 
-# print STDOUT("Resultaat:  $reply->message \n Fondsnaam: $symbol");
-
- return %info if wantarray;
- return \%info;
-} 
+  #print Dumper \%info;
+  return %info if wantarray;
+  return \%info;
+}
 
 
 ########################################################################
