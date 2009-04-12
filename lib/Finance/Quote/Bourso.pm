@@ -9,6 +9,7 @@
 #    Copyright (C) 2005, Morten Cools <morten@cools.no>
 #    Copyright (C) 2006, Dominique Corbex <domcox@sourceforge.net>
 #    Copyright (C) 2008, Bernard Fuentes <bernard.fuentes@gmail.com>
+#    Copyright (C) 2009, Erik Colson <eco@ecocode.net>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,6 +32,10 @@
 #
 #
 # Changelog
+#
+# 2009-04-12  Erik Colson
+#
+#     *       Major site change.
 #
 # 2008-11-09  Bernard Fuentes
 #
@@ -64,189 +69,150 @@ use vars qw($VERSION $Bourso_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
-use HTML::TableExtract;
-
+use HTML::TreeBuilder; # Boursorama doesn't put data in table elements anymore but uses <div>
 
 $VERSION='1.4';
 
-my $Bourso_URL = 'http://www.boursorama.com/recherche/recherche.phtml';
+my $Bourso_URL = 'http://www.boursorama.com/recherche/index.phtml';
 
 
 sub methods { return ( france => \&bourso,
-			bourso => \&bourso,
-			europe => \&bourso); }
-{ 
-	my @labels = qw/name last date isodate p_change open high low close volume currency method exchange/;
+                       bourso => \&bourso,
+                       europe => \&bourso); }
+{
+  my @labels = qw/name last date isodate p_change open high low close volume currency method exchange/;
 
-	sub labels { return (france => \@labels,
-			     bourso => \@labels,
-			     europe => \@labels); } 
+  sub labels { return (france => \@labels,
+                       bourso => \@labels,
+                       europe => \@labels); }
 }
 
 sub bourso {
 
-	my $quoter = shift;
-	my @stocks = @_;
-	my (%info,$reply,$url,$te,$ts,$row,$style);
-	my $ua = $quoter->user_agent();
+  my $quoter = shift;
+  my @stocks = @_;
+  my (%info,$reply,$url,$te,$ts,$row,$style);
+  my $ua = $quoter->user_agent();
 
-	$url=$Bourso_URL;
-	
-	foreach my $stocks (@stocks)
+  $url=$Bourso_URL;
+
+  foreach my $stocks (@stocks)
 	{
-		$reply = $ua->request(GET $url.join('',"?query=", $stocks));
+	  my $queryUrl = $url.join('',"?search[query]=", $stocks).
+		"&search[type]=rapide&search[categorie]=STK&search[bourse]=country:33";
+	  $reply = $ua->request(GET $queryUrl);
 
-		if ($reply->is_success) 
-		{
-			# print $reply->content;
+	  # print "URL=".$queryUrl."\n";
 
-			$te= new HTML::TableExtract( );
+	  if ($reply->is_success) {
+		# print $reply->content;
 
-			$te->parse($reply->content);
+		$info{$stocks,"success"} = 1;
 
-			unless ( $te->tables)
-			{
-				$info {$stocks,"success"} = 0;
-				$info {$stocks,"errormsg"} = "Stock name $stocks not found";
-				next;
-			}
+		my $tree = HTML::TreeBuilder->new_from_content($reply->content);
 
+		# retrieve SYMBOL
+		my @symbolline = $tree->look_down('class','isin');
 
-			my @rows;
-			unless (@rows = $te->rows)
-			{
-				$info {$stocks,"success"} = 0;
-				$info {$stocks,"errormsg"} = "Parse error";
-				next;
-			}
+		unless (@symbolline) {
+		  $info {$stocks,"success"} = 0;
+		  $info {$stocks,"errormsg"} = "Stock name $stocks not found";
+		  next ;
+		};
 
-			# debug
-#			foreach $ts ($te->table_states) {
-#				print "Table (", join(',', $ts->coords), "):\n";
-#				foreach $row ($ts->rows) {
-#					print join(',', @$row), "\n";
-#				}
-#			}
-#
+		my $symbol = $symbolline[0]->as_text;
+		($symbol) = ($symbol=~m/(\w+)-/);
+		$info{$stocks,"symbol"}=$symbol;
 
-			# Page style
-			foreach $ts ($te->table_state(3, 1)){
-				@rows=$ts->rows;
-				$style=$rows[0][0];
-			}
+		# retrieve NAME
+		my @nameline = $tree->look_down('class','nomste');
 
-			if ($style =~ /opcvm\/opcvm/) {
-				# style=fund
-				foreach $ts ($te->table_state(3, 2)){
-					@rows=$ts->rows;
-					$info{$stocks, "name"}=$rows[0][0];
-					}
-				foreach $ts ($te->table_state(4, 2)){
-					@rows=$ts->rows;
-					foreach $row ($ts->rows) {
+		unless (@nameline) {
+		  $info {$stocks,"success"} = 0;
+		  $info {$stocks,"errormsg"} = "Stock name $stocks not retrievable";
+		  next ;
+		};
 
-						ASSIGN:	for ( @$row[0] ) {
+		my $name = $nameline[0]->as_text;
+		$info{$stocks,"name"}=$name;
 
-								/Valeur liquidative/ && do {
-									($info{$stocks, "last"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									$info{$stocks, "price"}=$info{$stocks, "last"};
-									$info{$stocks, "success"}=1;
-									$info{$stocks, "method"}="bourso";
-									($info{$stocks, "currency"}=@$row[2]) =~ s/[^A-Z]//g;
-									# GnuCash
-									$info{$stocks, "symbol"}=$stocks;
-									$quoter->store_date(\%info, $stocks, {today => 1});
-									last ASSIGN;
-								};
-								/Variation Veille/ && do {
-									($info{$stocks, "p_change"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/Date/ && do {
-									#($info{$stocks, "date"}=@$row[2])=~ s/ (.*)//g;
-									$quoter->store_date(\%info, $stocks, {eurodate => @$row[2]});
-									last ASSIGN;
-								};
-							}
-						}
-					} 
-			} elsif ( $style =~ /cours-action/ or $style =~ /cours-obligation/ or
-                                  $style =~ /cours-warrant/ or $style =~ /cours-indice/) {
-				# style=stock, bond, warrant, index
+        # set method
+        $info{$stocks,"method"} = "bourso" ;
 
-				foreach $ts ($te->table_state(3, 2)){
-					@rows=$ts->rows;
-					}
-					($info{$stocks, "name"}=$rows[0][0]) =~ s/\s*//;
+		# retrieve other data
+		my $infoclass = ($tree->look_down('class','info1'))[0];
+		unless ($infoclass) {
+		  $info {$stocks,"success"} = 0;
+		  $info {$stocks,"errormsg"} = "$stocks retrieval not supported.";
+		  next ;
+		};
 
-				foreach $ts ($te->table_state(5, 0)){
-					@rows=$ts->rows;
-					}
-					($info{$stocks, "last"}=$rows[0][1]) =~ s/[^0-9.-]//g;
-					$info{$stocks, "price"}=$info{$stocks, "last"};
-					($info{$stocks, "currency"}=$rows[0][1]) =~ s/[^A-Z]//g;
-				
-				foreach $ts ($te->table_state(4, 1)){
-					@rows=$ts->rows;
-					foreach $row ($ts->rows) {
-						ASSIGN:	for ( @$row[0] ){  
-								/Cours/ && do {
-									$info{$stocks, "success"}=1;
-									$info{$stocks, "method"}="bourso";
-									# GnuCash
-									$info{$stocks, "symbol"}=$stocks;
-									last ASSIGN;
-								};
-								/Dernier/ && do {
-									$quoter->store_date(\%info, $stocks, {eurodate => @$row[2]});
-								};
+		my $keys = ($infoclass->look_down('class','t01'))[0]; # this div contains all keys
+		my $data = ($infoclass->look_down('class','t03'))[0]; # this div contains all values
+		my @keys = $keys->look_down('_tag','li');
+		my @values = $data->look_down('_tag','li');
 
-								/Variation/ && do {
-									($info{$stocks, "p_change"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/Volume/ && do {
-									($info{$stocks, "volume"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/Ouverture/ && do {
-									($info{$stocks, "open"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/ Haut/ && do {
-									($info{$stocks, "high"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/ Bas/ && do {
-									($info{$stocks, "low"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/ veille/ && do {
-									($info{$stocks, "close"}=@$row[2]) =~ s/[^0-9.-]*//g;
-									last ASSIGN;
-								};
-								/Valorisation/ && do {
-									my $nav;
-									$nav=@$row[2];
-									$nav =~ s/[^0-9.]*//g;
-									($info{$stocks, "cap"}=($nav * 1000000)) ;
-									last ASSIGN;
-								};
-								}
-							}
-						} 
-			}  else {
-				$info {$stocks,"success"} = 0;
-				$info {$stocks,"errormsg"} = "Error retreiving $stocks ";
-			}
+		my %tempinfo; #holds table data
 
-		} else {
-     			$info{$stocks, "success"}=0;
-			$info{$stocks, "errormsg"}="Error retreiving $stocks ";
-   		}
- 	} 
- 	return wantarray() ? %info : \%info;
- 	return \%info;
+		foreach my $i (0..$#keys) {
+		  my $keytext = ($keys[$i])->as_text;
+		  my $valuetext = ($values[$i])->as_text;
+		  $tempinfo{$keytext} = $valuetext;
+		}
+
+		foreach my $key (keys %tempinfo) {
+		  # print "$key -> $tempinfo{$key}\n";
+
+		ASSIGN:	for ( $key ) {
+			/Cours/ && do {
+			  my ($last, $currency) = ($tempinfo{$key} =~ m/(\d*.?\d*)\(c\)\s*(\w*)/);
+			  $info{$stocks,"last"} = $last;
+			  $info{$stocks,"currency"} = $currency||"EUR"; # defaults to EUR
+              my $exchange = $key;
+              $exchange =~ s/.*Cours\s*(\w.*\w)\s*/$1/; # the exchange is in the $key here
+              $info{$stocks,"exchange"} = $exchange ;
+			};
+			/Variation/ && do {
+			  $info{$stocks,"p_change"}=$tempinfo{$key}
+			};
+			/Dernier echange/ && do {
+			  my ($day,$month,$year) = ( $tempinfo{$key} =~ m|(\d\d)/(\d\d)/(\d\d)| );
+			  $year+=2000;
+			  $info{$stocks,"date"}= sprintf "%02d/%02d/%04d",$day,$month,$year;
+			  $quoter->store_date(\%info, $stocks, {eurodate => $info{$symbol,"date"}});
+			};
+			/Volume/ && do {
+			  $info{$stocks,"volume"}= $tempinfo{$key} ;
+			  $info{$stocks,"volume"} =~ s/\s//g ; # remove spaces etc in number
+			};
+			/Ouverture/ && do {
+			  $info{$stocks,"open"}=$tempinfo{$key}
+			};
+			/Haut/ && do {
+			  $info{$stocks,"high"}=$tempinfo{$key}
+			};
+			/Bas/ && do {
+			  $info{$stocks,"low"}=$tempinfo{$key}
+			};
+			/Cloture veille/ && do {
+			  $info{$stocks,"previous"}=$tempinfo{$key}
+			};
+			/Valorisation/ && do {
+			  $info{$stocks,"cap"}=$tempinfo{$key} ;
+			  $info{$stocks,"cap"} =~ s/[A-Z\s]//g ; # remove spaces and 'M' (millions) and currency (when not EUR)
+			  $info{$stocks,"cap"} =~ tr/,/./ ; # point instead of comma
+			  $info{$stocks,"cap"} *= 1000000 ; # valorisation is in millions
+			};
+		  }
+		}
+		$tree->delete ;
+	  } else {
+		$info{$stocks, "success"}=0;
+		$info{$stocks, "errormsg"}="Error retreiving $stocks ";
+	  }
+	}
+  return wantarray() ? %info : \%info;
+  return \%info;
 }
 1;
 
@@ -261,14 +227,14 @@ Finance::Quote::Bourso Obtain quotes from Boursorama.
     $q = Finance::Quote->new;
 
     %info = Finance::Quote->fetch("bourso","ml");  # Only query Bourso
-    %info = Finance::Quote->fetch("france","af"); # Failover to other sources OK. 
+    %info = Finance::Quote->fetch("france","af"); # Failover to other sources OK.
 
 =head1 DESCRIPTION
 
 This module fetches information from the "Paris Stock Exchange",
-http://www.boursorama.com. All stocks are available. 
+http://www.boursorama.com. All stocks are available.
 
-This module is loaded by default on a Finance::Quote object. It's 
+This module is loaded by default on a Finance::Quote object. It's
 also possible to load it explicity by placing "bourso" in the argument
 list to Finance::Quote->new().
 
@@ -276,8 +242,8 @@ This module provides both the "bourso" and "france" fetch methods.
 Please use the "france" fetch method if you wish to have failover
 with future sources for French stocks. Using the "bourso" method
 will guarantee that your information only comes from the Paris Stock Exchange.
- 
-Information obtained by this module may be covered by www.boursorama.com 
+
+Information obtained by this module may be covered by www.boursorama.com
 terms and conditions See http://www.boursorama.com/ for details.
 
 =head1 LABELS RETURNED
