@@ -40,7 +40,7 @@ use Encode;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $VERSION $TIMEOUT %MODULES %METHODS $AUTOLOAD
-	    $YAHOO_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
+            $YAHOO_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
 
 $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/currency/convert?amt=1&submit=Convert&";
 # If the above URL ever fails, try rewriting this module to use the URL below.
@@ -48,7 +48,8 @@ $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/currency/convert?amt=1&submit
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
-@EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref/;
+@EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref
+                currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
 $VERSION = '1.15';
@@ -59,30 +60,30 @@ $USE_EXPERIMENTAL_UA = 0;
 # call methods that objects export without having to go through fetch.
 
 sub AUTOLOAD {
-	my $method = $AUTOLOAD;
-	$method =~ s/.*:://;
+  my $method = $AUTOLOAD;
+  $method =~ s/.*:://;
 
-	# Force the dummy object (and hence default methods) to be loaded.
-	_dummy();
+  # Force the dummy object (and hence default methods) to be loaded.
+  _dummy();
 
-	# If the method we want is in %METHODS, then set up an appropriate
-	# subroutine for it next time.
+  # If the method we want is in %METHODS, then set up an appropriate
+  # subroutine for it next time.
 
-	if (exists($METHODS{$method})) {
-		eval qq[sub $method {
-			my \$this;
-			if (ref \$_[0]) {
-				\$this = shift;
-			}
-			\$this ||= _dummy();
-			\$this->fetch("$method",\@_); 
-		}];
-		carp $@ if $@;
-		no strict 'refs';	# So we can use &$method
-		return &$method(@_);
-	}
+  if (exists($METHODS{$method})) {
+    eval qq[sub $method {
+      my \$this;
+      if (ref \$_[0]) {
+        \$this = shift;
+      }
+      \$this ||= _dummy();
+      \$this->fetch("$method",\@_);
+     }];
+    carp $@ if $@;
+    no strict 'refs'; # So we can use &$method
+    return &$method(@_);
+  }
 
-	carp "$AUTOLOAD does not refer to a known method.";
+  carp "$AUTOLOAD does not refer to a known method.";
 }
 
 # _load_module (private class method)
@@ -90,51 +91,51 @@ sub AUTOLOAD {
 # use.
 
 sub _load_modules {
-	my $class = shift;
-	my $baseclass = ref $class || $class;
+  my $class = shift;
+  my $baseclass = ref $class || $class;
 
-	my @modules = @_;
+  my @modules = @_;
 
-	# Go to each module and use them.  Also record what methods
-	# they support and enter them into the %METHODS hash.
+  # Go to each module and use them.  Also record what methods
+  # they support and enter them into the %METHODS hash.
 
-	foreach my $module (@modules) {
-		my $modpath = "${baseclass}::${module}";
-		unless (defined($MODULES{$modpath})) {
+  foreach my $module (@modules) {
+    my $modpath = "${baseclass}::${module}";
+    unless (defined($MODULES{$modpath})) {
 
-			# Have to use an eval here because perl doesn't
-			# like to use strings.
-			eval "use $modpath;";
-			carp $@ if $@;
-			$MODULES{$modpath} = 1;
+      # Have to use an eval here because perl doesn't
+      # like to use strings.
+      eval "use $modpath;";
+      carp $@ if $@;
+      $MODULES{$modpath} = 1;
 
-			# Methodhash will continue method-name, function ref
-			# pairs.
-			my %methodhash = $modpath->methods;
-			my %labelhash = $modpath->labels;
+      # Methodhash will continue method-name, function ref
+      # pairs.
+      my %methodhash = $modpath->methods;
+      my %labelhash = $modpath->labels;
 
-			# Find the labels that we can do currency conversion
-			# on.
+      # Find the labels that we can do currency conversion
+      # on.
 
-			my $curr_fields_func = $modpath->can("currency_fields")
-						|| \&default_currency_fields;
-			
-			my @currency_fields = &$curr_fields_func;
+      my $curr_fields_func = $modpath->can("currency_fields")
+            || \&default_currency_fields;
+      
+      my @currency_fields = &$curr_fields_func;
 
-			# @currency_fields may contain duplicates.
-			# This following chunk of code removes them.
+      # @currency_fields may contain duplicates.
+      # This following chunk of code removes them.
 
-			my %seen;
-			@currency_fields=grep {!$seen{$_}++} @currency_fields;
+      my %seen;
+      @currency_fields=grep {!$seen{$_}++} @currency_fields;
 
-			foreach my $method (keys %methodhash) {
-				push (@{$METHODS{$method}},
-					{ function => $methodhash{$method},
-					  labels   => $labelhash{$method},
-					  currency_fields => \@currency_fields});
-			}
-		}
-	}
+      foreach my $method (keys %methodhash) {
+        push (@{$METHODS{$method}},
+          { function => $methodhash{$method},
+            labels   => $labelhash{$method},
+            currency_fields => \@currency_fields});
+      }
+    }
+  }
 }
 
 # =======================================================================
@@ -145,43 +146,44 @@ sub _load_modules {
 # loads a default set of methods.
 
 sub new {
-	my $self = shift;
-	my $class = ref($self) || $self;
+  my $self = shift;
+  my $class = ref($self) || $self;
 
-	my $this = {};
-	bless $this, $class;
+  my $this = {};
+  bless $this, $class;
 
-	my @modules = ();
-	my @reqmodules = ();	# Requested modules.
+  my @modules = ();
+  my @reqmodules = ();  # Requested modules.
 
-	# If there's no argument list, but we have the appropriate
-	# environment variable set, we'll use that instead.
-	if ($ENV{FQ_LOAD_QUOTELET} and !@_) {
-		@reqmodules = split(' ',$ENV{FQ_LOAD_QUOTELET});
-	} else {
-		@reqmodules = @_;
-	}
+  # If there's no argument list, but we have the appropriate
+  # environment variable set, we'll use that instead.
+  if ($ENV{FQ_LOAD_QUOTELET} and !@_) {
+    @reqmodules = split(' ',$ENV{FQ_LOAD_QUOTELET});
+  } else {
+    @reqmodules = @_;
+  }
 
-	# If we get an empty new(), or one starting with -defaults,
-	# then load up the default methods.
-	if (!@reqmodules or $reqmodules[0] eq "-defaults") {
-		shift(@reqmodules) if (@reqmodules);
-		# Default modules
-		@modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns Bourso Cdnfundlibrary Deka
-			      DWS FTPortfolios Fidelity FinanceCanada Fool GoldMoney HEX IndiaMutual
-			      LeRevenu ManInvestments NZX Platinum SEB StockHouseCanada
-			      TSP TSX Tdefunds Tdwaterhouse Tiaacref Troweprice Trustnet Union
-			      USFedBonds VWD ZA Cominvest Finanzpartner
-			      Yahoo::Asia Yahoo::Australia Yahoo::Brasil
-			      Yahoo::Europe Yahoo::NZ Yahoo::USA/; }
+  # If we get an empty new(), or one starting with -defaults,
+  # then load up the default methods.
+  if (!@reqmodules or $reqmodules[0] eq "-defaults") {
+    shift(@reqmodules) if (@reqmodules);
+    # Default modules
+    @modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns Bourso Cdnfundlibrary
+            Currencies Deka DWS FTPortfolios Fidelity FinanceCanada Fool
+            GoldMoney HEX
+            IndiaMutual LeRevenu ManInvestments NZX Platinum SEB
+            StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref Troweprice
+            Trustnet Union USFedBonds VWD ZA Cominvest Finanzpartner
+            Yahoo::Asia Yahoo::Australia Yahoo::Brasil Yahoo::Europe Yahoo::NZ
+            Yahoo::USA/; }
 
-	$this->_load_modules(@modules,@reqmodules);
+  $this->_load_modules(@modules,@reqmodules);
 
-	$this->{TIMEOUT} = $TIMEOUT if defined($TIMEOUT);
-	$this->{FAILOVER} = 1;
-	$this->{REQUIRED} = [];
+  $this->{TIMEOUT} = $TIMEOUT if defined($TIMEOUT);
+  $this->{FAILOVER} = 1;
+  $this->{REQUIRED} = [];
 
-	return $this;
+  return $this;
 }
 
 # =======================================================================
@@ -190,10 +192,10 @@ sub new {
 # _dummy returns a Finance::Quote object.  I'd really rather not have
 # this, but to maintain backwards compatibility we hold on to it.
 {
-	my $dummy_obj;
-	sub _dummy {
-		return $dummy_obj ||= Finance::Quote->new;
-	}
+  my $dummy_obj;
+  sub _dummy {
+    return $dummy_obj ||= Finance::Quote->new;
+  }
 }
 
 # =======================================================================
@@ -206,7 +208,7 @@ sub new {
 #        $sourceref = $quoter->sources();
 
 sub sources {
-	return(wantarray ? keys %METHODS : [keys %METHODS]);
+  return(wantarray ? keys %METHODS : [keys %METHODS]);
 }
 
 
@@ -216,51 +218,131 @@ sub sources {
 # currency allows the conversion of one currency to another.
 #
 # Usage: $quoter->currency("USD","AUD");
-#	 $quoter->currency("15.95 USD","AUD");
+#  $quoter->currency("15.95 USD","AUD");
 #
 # undef is returned upon error.
 
 sub currency {
-	my $this = shift if (ref($_[0]));
-	$this ||= _dummy();
+  my $this = shift if (ref($_[0]));
+  $this ||= _dummy();
 
-	my ($from, $to) = @_;
-	return undef unless ($from and $to);
+  my ($from, $to) = @_;
+  return undef unless ($from and $to);
 
-	$from =~ s/^\s*(\d*\.?\d*)\s*//;
-	my $amount = $1 || 1;
+  $from =~ s/^\s*(\d*\.?\d*)\s*//;
+  my $amount = $1 || 1;
 
-	# Don't know if these have to be in upper case, but it's
-	# better to be safe than sorry.
-	$to = uc($to);
-	$from = uc($from);
+  # Don't know if these have to be in upper case, but it's
+  # better to be safe than sorry.
+  $to = uc($to);
+  $from = uc($from);
 
-	return $amount if ($from eq $to);	# Trivial case.
+  return $amount if ($from eq $to); # Trivial case.
 
-	my $ua = $this->user_agent;
+  my $ua = $this->user_agent;
 
-	my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}from=$from&to=$to")->content;
-	my $te = HTML::TableExtract->new( headers => ['Symbol', 'Bid', 'Ask'] );
-    $te->parse(decode_utf8($data)); # The web page returns utf8 content which gives
-                                    # a warning when parsing $data in HTML::Parser
+  my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}from=$from&to=$to")->content;
+  my $te = HTML::TableExtract->new( headers => ['Symbol', 'Bid', 'Ask'] );
+  $te->parse(decode_utf8($data)); # The web page returns utf8 content which gives
+                                  # a warning when parsing $data in HTML::Parser
 
-	# Make sure there's a table to parse.
-	return undef unless ($te->tables);
+  # Make sure there's a table to parse.
+  return undef unless ($te->tables);
 
-	my $row = ($te->rows())[0];
-	my ($exchange_rate) = $$row[1];
+  my $row = ($te->rows())[0];
+  my ($exchange_rate) = $$row[1];
         $exchange_rate =~ s/,// ; # solve a bug when conversion rate
                                   # involves thousands. yahoo inserts
                                   # a comma when thousands occur
 
-	{
-		local $^W = 0;	# Avoid undef warnings.
+  {
+    local $^W = 0;  # Avoid undef warnings.
 
-		# We force this to a number to avoid situations where
-		# we may have extra cruft, or no amount.
-		return undef unless ($exchange_rate+0);
-	}
-	return ($exchange_rate * $amount);
+    # We force this to a number to avoid situations where
+    # we may have extra cruft, or no amount.
+    return undef unless ($exchange_rate+0);
+  }
+  return ($exchange_rate * $amount);
+}
+
+# =======================================================================
+# currency_lookup (public object method)
+#
+# search for available currency codes
+#
+# Usage: $quoter->currency_lookup({ name => qr/australia/i });
+#  $quoter->currency_lookup( code => 'EU' );
+#  $quoter->currency_lookup( name => 'Euro', code => qr/eu/i );
+#  $quoter->currency_lookup();
+#
+# If more than one lookup parameter is given all must match for
+# a currency to match.
+#
+# undef is returned upon error.
+
+sub currency_lookup {
+  my $this = shift if (ref $_[0]);
+  $this ||= _dummy();
+
+  # Validate parameters
+  my %valid_params = map { $_ => 1 } qw( name code );
+  my %params = @_;
+  my $param_errors = 0;
+  for my $key ( keys %params ) {
+    if ( ! exists $valid_params{$key} ) {
+      warn "Invalid parameter: ${key}";
+      $param_errors++;
+    }
+  }
+  return undef if $param_errors > 0;
+
+  # Retrieve known currencies
+  my $known_currencies = Finance::Quote::Currencies::known_currencies();
+
+  # Return currencies based on parameters
+  my $returned_currencies = {};
+  if ( scalar keys %params == 0 ) {
+    $returned_currencies = $known_currencies;
+  }
+  else {
+    for my $code ( keys %{$known_currencies} ) {
+      # Make sure all parameters match
+      my $matched = 0;
+      if ( exists $params{name}
+           &&
+           _smart_compare( $known_currencies->{$code}->{name}, $params{name} )
+         ) {
+        $matched++;
+      }
+      if ( exists $params{code}
+           &&
+           _smart_compare( $code, $params{code} )
+         ) {
+        $matched++;
+      }
+      if ( $matched == scalar keys %params ) {
+        $returned_currencies->{$code} = $known_currencies->{$code}
+      }
+    }
+  }
+  return $returned_currencies;
+}
+
+# _smart_compare (private method function)
+#
+# This function compares values where the method depends on the 
+# type of the second parameter.
+#  regex  : compare as regex
+#  scalar : test for substring match
+sub _smart_compare {
+  my ($val1, $val2) = @_;
+
+  if ( ref $val2 eq 'Regexp' ) {
+    return $val1 =~ $val2;
+  }
+  else {
+    return index($val1, $val2) > -1
+  }
 }
 
 # =======================================================================
@@ -278,14 +360,14 @@ sub currency {
 # know what you are doing.
 
 sub set_currency {
-	my $this = shift if (ref $_[0]);
-	$this ||= _dummy();
+  my $this = shift if (ref $_[0]);
+  $this ||= _dummy();
 
-	unless (defined($_[0])) {
-		delete $this->{"currency"};
-	} else {
-		$this->{"currency"} = $_[0];
-	}
+  unless (defined($_[0])) {
+    delete $this->{"currency"};
+  } else {
+    $this->{"currency"} = $_[0];
+  }
 }
 
 # default_currency_fields (public method)
@@ -295,8 +377,8 @@ sub set_currency {
 # function then that list will be used instead.
 
 sub default_currency_fields {
-	return qw/last high low net bid ask close open day_range year_range
-	          eps div cap nav price/;
+  return qw/last high low net bid ask close open day_range year_range
+            eps div cap nav price/;
 }
 
 # _convert (private object method)
@@ -307,61 +389,61 @@ sub default_currency_fields {
 # that conversion should apply to.
 
 {
-	my %conversion;		# Conversion lookup table.
+  my %conversion;   # Conversion lookup table.
 
-	sub _convert {
-		my $this = shift;
-		my $info = shift;
-		my $stocks = shift;
-		my $convert_fields = shift;
-		my $new_currency = $this->{"currency"};
+  sub _convert {
+    my $this = shift;
+    my $info = shift;
+    my $stocks = shift;
+    my $convert_fields = shift;
+    my $new_currency = $this->{"currency"};
 
-		# Skip all this unless they actually want conversion.
-		return unless $new_currency;
+    # Skip all this unless they actually want conversion.
+    return unless $new_currency;
 
-		foreach my $stock (@$stocks) {
-			my $currency;
+    foreach my $stock (@$stocks) {
+      my $currency;
 
-			# Skip stocks that don't have a currency.
-			next unless ($currency = $info->{$stock,"currency"});
+      # Skip stocks that don't have a currency.
+      next unless ($currency = $info->{$stock,"currency"});
 
-			# Skip if it's already in the same currency.
-			next if ($currency eq $new_currency);
+      # Skip if it's already in the same currency.
+      next if ($currency eq $new_currency);
 
-			# Lookup the currency conversion if we haven't
-			# already.
-			unless (exists $conversion{$currency,$new_currency}) {
-				$conversion{$currency,$new_currency} =
-					$this->currency($currency,$new_currency);
-			}
+      # Lookup the currency conversion if we haven't
+      # already.
+      unless (exists $conversion{$currency,$new_currency}) {
+        $conversion{$currency,$new_currency} =
+          $this->currency($currency,$new_currency);
+      }
 
-			# Make sure we have a reasonable currency conversion.
-			# If we don't, mark the stock as bad.
-			unless ($conversion{$currency,$new_currency}) {
-				$info->{$stock,"success"} = 0;
-				$info->{$stock,"errormsg"} =
-					"Currency conversion failed.";
-				next;
-			}
+      # Make sure we have a reasonable currency conversion.
+      # If we don't, mark the stock as bad.
+      unless ($conversion{$currency,$new_currency}) {
+        $info->{$stock,"success"} = 0;
+        $info->{$stock,"errormsg"} =
+          "Currency conversion failed.";
+        next;
+      }
 
-			# Okay, we have clean data.  Convert it.  Ideally
-			# we'd like to just *= entire fields, but
-			# unfortunately some things (like ranges,
-			# capitalisation, etc) don't take well to that.
-			# Hence we pull out any numbers we see, convert
-			# them, and stick them back in.  That's pretty
-			# yucky, but it works.
+      # Okay, we have clean data.  Convert it.  Ideally
+      # we'd like to just *= entire fields, but
+      # unfortunately some things (like ranges,
+      # capitalisation, etc) don't take well to that.
+      # Hence we pull out any numbers we see, convert
+      # them, and stick them back in.  That's pretty
+      # yucky, but it works.
 
-			foreach my $field (@$convert_fields) {
-				next unless (defined $info->{$stock,$field});
+      foreach my $field (@$convert_fields) {
+        next unless (defined $info->{$stock,$field});
 
-				$info->{$stock,$field} = $this->scale_field($info->{$stock,$field},$conversion{$currency,$new_currency});
-			}
+        $info->{$stock,$field} = $this->scale_field($info->{$stock,$field},$conversion{$currency,$new_currency});
+      }
 
-			# Set the new currency.
-			$info->{$stock,"currency"} = $new_currency;
-		}
-	}
+      # Set the new currency.
+      $info->{$stock,"currency"} = $new_currency;
+    }
+  }
 }
 
 # =======================================================================
@@ -372,16 +454,16 @@ sub default_currency_fields {
 # it by.  For example, scale_field("1023","0.01") would return "10.23".
 
 sub scale_field {
-	shift if ref $_[0];	# Shift off the object, if there is one.
+  shift if ref $_[0]; # Shift off the object, if there is one.
 
-	my ($field, $scale) = @_;
-	my @chunks = split(/([^0-9.])/,$field);
+  my ($field, $scale) = @_;
+  my @chunks = split(/([^0-9.])/,$field);
 
-	for (my $i=0; $i < @chunks; $i++) {
-		next unless $chunks[$i] =~ /\d/;
-		$chunks[$i] *= $scale;
-	}
-	return join("",@chunks);
+  for (my $i=0; $i < @chunks; $i++) {
+    next unless $chunks[$i] =~ /\d/;
+    $chunks[$i] *= $scale;
+  }
+  return join("",@chunks);
 }
 
 
@@ -392,14 +474,14 @@ sub scale_field {
 # for all new objects that will be created.
 
 sub timeout {
-	if (@_ == 1 or !ref($_[0])) {	# Direct or class call.
-		return $TIMEOUT = $_[0];
-	}
-	
-	# Otherwise we were called through an object.  Yay.
-	# Set the timeout in this object only.
-	my $this = shift;
-	return $this->{TIMEOUT} = shift;
+  if (@_ == 1 or !ref($_[0])) { # Direct or class call.
+    return $TIMEOUT = $_[0];
+  }
+
+  # Otherwise we were called through an object.  Yay.
+  # Set the timeout in this object only.
+  my $this = shift;
+  return $this->{TIMEOUT} = shift;
 }
 
 # =======================================================================
@@ -408,10 +490,10 @@ sub timeout {
 # This sets/gets whether or not it's acceptable to use failover techniques.
 
 sub failover {
-	my $this = shift;
-	my $value = shift;
+  my $this = shift;
+  my $value = shift;
         return $this->{FAILOVER} = $value if (defined($value));
-	return $this->{FAILOVER};
+  return $this->{FAILOVER};
 }
 
 # =======================================================================
@@ -427,10 +509,10 @@ sub failover {
 # This method always succeeds.
 
 sub require_labels {
-	my $this = shift;
-	my @labels = @_;
-	$this->{REQUIRED} = \@labels;
-	return;
+  my $this = shift;
+  my @labels = @_;
+  $this->{REQUIRED} = \@labels;
+  return;
 }
 
 # _require_test (private object method)
@@ -441,15 +523,15 @@ sub require_labels {
 # This function could probably be made more efficient.
 
 sub _require_test {
-	my $this = shift;
-	my %available;
-	@available{@_} = ();	# Ooooh, hash-slice.  :)
-	my @required = @{$this->{REQUIRED}};
-	return 1 unless @required;
-	for (my $i = 0; $i < @required; $i++) {
-		return 0 unless exists $available{$required[$i]};
-	}
-	return 1;
+  my $this = shift;
+  my %available;
+  @available{@_} = ();  # Ooooh, hash-slice.  :)
+  my @required = @{$this->{REQUIRED}};
+  return 1 unless @required;
+  for (my $i = 0; $i < @required; $i++) {
+    return 0 unless exists $available{$required[$i]};
+  }
+  return 1;
 }
 
 # =======================================================================
@@ -459,45 +541,45 @@ sub _require_test {
 # fetch.  It's a nicer interface for when you have a list of stocks with
 # different sources which you wish to deal with.
 sub fetch {
-	my $this = shift if ref ($_[0]);
-	
-	$this ||= _dummy();
-	
-	my $method = lc(shift);
-	my @stocks = @_;
+  my $this = shift if ref ($_[0]);
 
-	unless (exists $METHODS{$method}) {
-		carp "Undefined fetch-method $method passed to ".
-		     "Finance::Quote::fetch";
-		return;
-	}
+  $this ||= _dummy();
 
-	# Failover code.  This steps through all availabe methods while
-	# we still have failed stocks to look-up.  This loop only
-	# runs a single time unless FAILOVER is defined.
+  my $method = lc(shift);
+  my @stocks = @_;
 
-	my %returnhash = ();
+  unless (exists $METHODS{$method}) {
+    carp "Undefined fetch-method $method passed to ".
+         "Finance::Quote::fetch";
+    return;
+  }
 
-	foreach my $methodinfo (@{$METHODS{$method}}) {
-		my $funcref = $methodinfo->{"function"};
-		next unless $this->_require_test(@{$methodinfo->{"labels"}});
-		my @failed_stocks = ();
-		%returnhash = (%returnhash,&$funcref($this,@stocks));
+  # Failover code.  This steps through all availabe methods while
+  # we still have failed stocks to look-up.  This loop only
+  # runs a single time unless FAILOVER is defined.
 
-		foreach my $stock (@stocks) {
-			push(@failed_stocks,$stock)
-				unless ($returnhash{$stock,"success"});
-		}
+  my %returnhash = ();
 
-		$this->_convert(\%returnhash,\@stocks,
-		                $methodinfo->{"currency_fields"});
+  foreach my $methodinfo (@{$METHODS{$method}}) {
+    my $funcref = $methodinfo->{"function"};
+    next unless $this->_require_test(@{$methodinfo->{"labels"}});
+    my @failed_stocks = ();
+    %returnhash = (%returnhash,&$funcref($this,@stocks));
 
-		last unless $this->{FAILOVER};
-		last unless @failed_stocks;
-		@stocks = @failed_stocks;
-	}
+    foreach my $stock (@stocks) {
+      push(@failed_stocks,$stock)
+        unless ($returnhash{$stock,"success"});
+    }
 
-	return wantarray() ? %returnhash : \%returnhash;
+    $this->_convert(\%returnhash,\@stocks,
+                    $methodinfo->{"currency_fields"});
+
+    last unless $this->{FAILOVER};
+    last unless @failed_stocks;
+    @stocks = @failed_stocks;
+  }
+
+  return wantarray() ? %returnhash : \%returnhash;
 }
 
 # =======================================================================
@@ -511,24 +593,24 @@ sub fetch {
 # user-agent settings.
 
 sub user_agent {
-	my $this = shift;
+  my $this = shift;
 
-	return $this->{UserAgent} if $this->{UserAgent};
+  return $this->{UserAgent} if $this->{UserAgent};
 
-	my $ua;
+  my $ua;
 
-	if ($USE_EXPERIMENTAL_UA) {
-		$ua = Finance::Quote::UserAgent->new;
-	} else {
-		$ua = LWP::UserAgent->new;
-	}
+  if ($USE_EXPERIMENTAL_UA) {
+    $ua = Finance::Quote::UserAgent->new;
+  } else {
+    $ua = LWP::UserAgent->new;
+  }
 
-	$ua->timeout($this->{TIMEOUT}) if defined($this->{TIMEOUT});
-	$ua->env_proxy;
+  $ua->timeout($this->{TIMEOUT}) if defined($this->{TIMEOUT});
+  $ua->env_proxy;
 
-	$this->{UserAgent} = $ua;
+  $this->{UserAgent} = $ua;
 
-	return $ua;
+  return $ua;
 }
 
 # =======================================================================
@@ -538,7 +620,7 @@ sub user_agent {
 #
 sub parse_csv
 {
-    shift if (ref $_[0]);	# Shift off the object if we have one.
+    shift if (ref $_[0]); # Shift off the object if we have one.
     my $text = shift;      # record containing comma-separated values
     my @new  = ();
 
@@ -561,7 +643,7 @@ sub parse_csv
 #
 sub parse_csv_semicolon
 {
-    shift if (ref $_[0]);	# Shift off the object if we have one.
+    shift if (ref $_[0]); # Shift off the object if we have one.
     my $text = shift;      # record containing comma-separated values
     my @new  = ();
 
@@ -586,17 +668,17 @@ sub parse_csv_semicolon
 # also in the ISO date format (yyyy-mm-dd).  This function expects to
 # be called with the arguments:
 #
-#	(inforef, symbol_name, data_hash)
+# (inforef, symbol_name, data_hash)
 #
 # The components of date hash can be any of:
 #
-#	usdate	 - A date in mm/dd/yy or mm/dd/yyyy
-#	eurodate - A date in dd/mm/yy or dd/mm/yyyy
-#	isodate	 - A date in yy-mm-dd or yyyy-mm-dd
-#	year	 - The year in yyyy
-#	month	 - The month in mm or mmm format (i.e. 07 or Jul)
-#	day	 - The day
-#	today	 - A flag to indicate todays date should be used.
+# usdate   - A date in mm/dd/yy or mm/dd/yyyy
+# eurodate - A date in dd/mm/yy or dd/mm/yyyy
+# isodate  - A date in yy-mm-dd or yyyy-mm-dd
+# year   - The year in yyyy
+# month  - The month in mm or mmm format (i.e. 07 or Jul)
+# day  - The day
+# today  - A flag to indicate todays date should be used.
 #
 # The separator for the *date forms is ignored.  It can be any
 # non-alphanumeric character.  Any combination of year, month, and day
@@ -612,7 +694,7 @@ sub store_date
 
     my ($year, $month, $day, $this_month, $year_specified);
     my %mnames = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
-		  jul => 7, aug => 8, sep => 9, oct =>10, nov =>11, dec =>12);
+      jul => 7, aug => 8, sep => 9, oct =>10, nov =>11, dec =>12);
 
 #    printf "In store_date\n";
 #    print "inforef $inforef\n";
@@ -705,7 +787,7 @@ Finance::Quote - Get stock and mutual fund quotes from various exchanges
 
    $q->require_labels(qw/price date high low volume/);
 
-   $q->failover(1);	# Set failover support (on by default).
+   $q->failover(1); # Set failover support (on by default).
 
    %quotes  = $q->fetch("nasdaq",@stocks);
    $hashref = $q->fetch("nyse",@stocks);
@@ -737,8 +819,8 @@ for a given stock, you can specify that using require_labels().
 
     name         Company or Mutual Fund Name
     last         Last Price
-    high	 Highest trade today
-    low		 Lowest trade today
+    high   Highest trade today
+    low    Lowest trade today
     date         Last Trade Date  (MM/DD/YY format)
     time         Last Trade Time
     net          Net Change
@@ -757,14 +839,14 @@ for a given stock, you can specify that using require_labels().
     div          Dividend per Share
     div_yield    Dividend Yield
     cap          Market Capitalization
-    ex_div	 Ex-Dividend Date.
+    ex_div   Ex-Dividend Date.
     nav          Net Asset Value
     yield        Yield (usually 30 day avg)
-    exchange	 The exchange the information was obtained from.
-    success	 Did the stock successfully return information? (true/false)
-    errormsg	 If success is false, this field may contain the reason why.
-    method	 The module (as could be passed to fetch) which found
-		 this information.
+    exchange   The exchange the information was obtained from.
+    success  Did the stock successfully return information? (true/false)
+    errormsg   If success is false, this field may contain the reason why.
+    method   The module (as could be passed to fetch) which found
+     this information.
 
 If all stock lookups fail (possibly because of a failed connection) then
 the empty list may be returned, or undef in a scalar context.
@@ -810,19 +892,19 @@ Fetch takes an exchange as its first argument.  The second and remaining
 arguments are treated as stock-names.  In the standard Finance::Quote
 distribution, the following exchanges are recognised:
 
-    australia		Australan Stock Exchange
-    dwsfunds		Deutsche Bank Gruppe funds
-    fidelity		Fidelity Investments
-    tiaacref		TIAA-CREF
-    troweprice		T. Rowe Price
-    europe		European Markets
-    canada		Canadian Markets
-    usa			USA Markets
-    nyse		New York Stock Exchange
-    nasdaq		NASDAQ
-    uk_unit_trusts	UK Unit Trusts
-    vanguard		Vanguard Investments
-    vwd			Vereinigte Wirtschaftsdienste GmbH
+    australia   Australan Stock Exchange
+    dwsfunds    Deutsche Bank Gruppe funds
+    fidelity    Fidelity Investments
+    tiaacref    TIAA-CREF
+    troweprice    T. Rowe Price
+    europe    European Markets
+    canada    Canadian Markets
+    usa     USA Markets
+    nyse    New York Stock Exchange
+    nasdaq    NASDAQ
+    uk_unit_trusts  UK Unit Trusts
+    vanguard    Vanguard Investments
+    vwd     Vereinigte Wirtschaftsdienste GmbH
 
 When called in an array context, a hash is returned.  In a scalar
 context, a reference to a hash will be returned.  The structure
@@ -844,6 +926,27 @@ The sources method returns a list of sources that have currently been loaded and
 can be passed to the fetch method.  If you're providing a user with a list of
 sources to choose from, then it is recommended that you use this method.
 
+=head2 CURRENCY_LOOKUP
+
+    $currencies_by_name = $q->currency_lookup( name => 'Australian' );
+    $currencies_by_code = $q->currency_lookup( code => qr/^b/i      );
+    $currencies_by_both = $q->currency_lookup( name => qr/pound/i
+                                             , code => 'GB'         );
+
+The currency_lookup method provides a search against the known currencies. The
+list of currencies is based on the available currencies in the Yahoo Currency
+Converter (the list is stored within the module as the list should be fairly
+static).
+
+The lookup can be done by currency name (ie "Australian Dollar"), by
+code (ie "AUD") or both. You can pass either a scalar or regular expression
+as a search value - scalar values are matched by substring while regular
+expressions are matched as-is (no changes are made to the expression).
+
+See L<Finance::Quote::Currencies::fetch_live_currencies> (and the
+C<t/currencies.t> test file) for a way to make sure that the stored
+currency list is up to date.
+
 =head2 CURRENCY
 
     $conversion_rate = $q->currency("USD","AUD");
@@ -862,7 +965,7 @@ See Finance::Quote::Yahoo for more information.
 
 =head2 SET_CURRENCY
 
-    $q->set_currency("FRF");	# Get results in French Francs.
+    $q->set_currency("FRF");  # Get results in French Francs.
 
 The set_currency method can be used to request that all information be
 returned in the specified currency.  Note that this increases the
@@ -878,8 +981,8 @@ conversion is bound by Yahoo!'s terms and conditions.
 
 =head2 FAILOVER
 
-    $q->failover(1);	# Set automatic failover support.
-    $q->failover(0);	# Disable failover support.
+    $q->failover(1);  # Set automatic failover support.
+    $q->failover(0);  # Disable failover support.
 
 The failover method takes a single argument which either sets (if
 true) or unsets (if false) automatic failover support.  If automatic
@@ -901,7 +1004,7 @@ Finance::Quote and its helpers use.  Normally this would not
 be useful to an application, however it is possible to modify
 the user-agent directly using this method:
 
-    $q->user_agent->timeout(10);	# Set the timeout directly.
+    $q->user_agent->timeout(10);  # Set the timeout directly.
 
 
 =head2 SCALE_FIELD
@@ -953,6 +1056,7 @@ conversion rates.
  Copyright 2001 Leigh Wedding (ASX updates)
  Copyright 2001 Tobias Vancura (Fool support)
  Copyright 2001 James Treacy (TD Waterhouse support)
+ Copyright 2008 Erik Colson (isoTime)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -978,6 +1082,8 @@ module.  Please refer to the sub-modules for further information.
   Leigh Wedding <leigh.wedding@telstra.com>
   Tobias Vancura <tvancura@altavista.net>
   James Treacy <treacy@debian.org>
+  Bradley Dean <bjdean@bjdean.id.au>
+  Erik Colson <eco@ecocode.net>
 
 The Finance::Quote home page can be found at
 http://finance-quote.sourceforge.net/
