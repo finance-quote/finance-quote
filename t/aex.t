@@ -7,33 +7,38 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 23;
+plan tests => 25;
 
 # Test AEX functions.
 
 my $quoter = Finance::Quote->new();
 
-my %quotes = $quoter->aex("AAB A NEDERLANDCRT");
+my %quotes = $quoter->aex("AH");
 ok(%quotes);
 
 # Check that some values are defined.
-ok($quotes{"AAB A NEDERLANDCRT","success"});
-ok($quotes{"AAB A NEDERLANDCRT","last"} > 0);
-ok($quotes{"AAB A NEDERLANDCRT","date"});
-ok($quotes{"AAB A NEDERLANDCRT","volume"} > 0);
+ok($quotes{"AH","success"});
+ok($quotes{"AH","last"} > 0);
+ok($quotes{"AH","date"});
+ok($quotes{"AH","volume"} > 0);
 
 my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
-ok(substr($quotes{"AAB A NEDERLANDCRT","isodate"},0,4) == $year ||
-   substr($quotes{"AAB A NEDERLANDCRT","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"AAB A NEDERLANDCRT","date"},6,4) == $year ||
-   substr($quotes{"AAB A NEDERLANDCRT","date"},6,4) == $lastyear);
+ok(substr($quotes{"AH","isodate"},0,4) == $year ||
+   substr($quotes{"AH","isodate"},0,4) == $lastyear);
+ok(substr($quotes{"AH","date"},6,4) == $year ||
+   substr($quotes{"AH","date"},6,4) == $lastyear);
 
 # Exercise the fetch function 
-%quotes = $quoter->fetch("aex","AAB AEX Click Perp.");
+%quotes = $quoter->fetch("aex","AMG");
 ok(%quotes);
-ok($quotes{"AAB AEX Click Perp.","success"});
-ok($quotes{"AAB AEX Click Perp.","last"} > 0);
+ok($quotes{"AMG","success"});
+ok($quotes{"AMG","last"} > 0);
+
+# Check fetching on based on ISIN 
+%quotes = $quoter->aex("NL0000009165");  # NL0000009165 ==  Heineken == HEIA
+ok(%quotes);
+ok($quotes{"NL0000009165","success"});
 
 # Test options fetching
 # the following tests will fail after Dec 2009:-(
