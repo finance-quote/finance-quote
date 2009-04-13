@@ -36,7 +36,7 @@ use vars qw/$FIDELITY_URL $VERSION/;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 
-$VERSION = '1.15';
+$VERSION = '1.16';
 
 $FIDELITY_URL = ("http://activequote.fidelity.com/nav/fulllist.csv");
 

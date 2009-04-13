@@ -52,7 +52,7 @@ $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/currency/convert?amt=1&submit
                 currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.15';
+$VERSION = '1.16';
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -119,7 +119,7 @@ sub _load_modules {
 
       my $curr_fields_func = $modpath->can("currency_fields")
             || \&default_currency_fields;
-      
+
       my @currency_fields = &$curr_fields_func;
 
       # @currency_fields may contain duplicates.

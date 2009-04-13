@@ -45,7 +45,7 @@ use warnings;
 
 use vars qw/$VERSION/;
 
-$VERSION = '1.15';
+$VERSION = '1.16';
 
 sub methods {
 	return(dwsfunds => \&dwsfunds);
