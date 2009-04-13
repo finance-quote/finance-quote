@@ -14,6 +14,7 @@ function correctly.  These modules include:
 	LWP::UserAgent
 	HTTP::Request::Common
 	HTML::TableExtract
+    HTML::TreeBuilder
 
 You will receive a warning during the make process if one or more of
 these modules are missing.
