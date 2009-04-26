@@ -16,29 +16,34 @@ my $q      = Finance::Quote->new();
 $q->timeout(120);	# ASX is broken regularly, so timeouts are good.
 
 my %quotes = $q->asx("WES","BHP");
-ok(%quotes);
+ok( %quotes, "Data returned for call to asx" );
 
 # Check the last values are defined.  These are the most used and most
 # reliable indicators of success.
-ok($quotes{"WES","last"} > 0);
-ok($quotes{"WES","success"});
-ok($quotes{"BHP","last"} > 0);
-ok($quotes{"BHP","success"});
+ok( $quotes{"WES","success"}, "WES query was successful" );
+cmp_ok( $quotes{"WES","last"}, '>', 0
+      , "Last price for WES was > 0" );
+ok( $quotes{"BHP","success"}, "BHP query was successful" );
+cmp_ok( $quotes{"BHP","last"}, '>', 0
+      , "Last price for BHP was > 0" );
 
 # Exercise the fetch function a little.
 %quotes = $q->fetch("asx","RZR");
-ok(%quotes);
-ok($quotes{"RZR","last"} > 0);
-ok($quotes{"RZR","success"} > 0);
+ok( %quotes, "Data returned for call to fetch" );
+ok( $quotes{"RZR","success"}, "RZR query was successful" );
+cmp_ok( $quotes{"RZR","last"}, '>', 0
+      , "Last price for RZR was > 0" );
 
 # Check that we're getting currency information.
-ok($quotes{"RZR", "currency"} eq "AUD");
+cmp_ok( $quotes{"RZR", "currency"}, "eq", "AUD"
+      , "Currency of RZR is AUD" );
 
 # Check we're not getting bogus percentage signs.
-$quotes{"RZR","p_change"} ||= "";	# Avoid warning if undefined.
-ok($quotes{"RZR","p_change"} !~ /%/);
+unlike( $quotes{"RZR","p_change"}
+      , qr/%/
+      , "No percentage sign in p_change value" );
 
 # Check that looking up a bogus stock returns failure:
 %quotes = $q->asx("BOG");
-ok(! $quotes{"BOG","success"});
+ok( ! $quotes{"BOG","success"}, "asx call for invalid stock returns failure");
 
