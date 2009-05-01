@@ -42,7 +42,7 @@ use vars qw/$ASX_URL $VERSION/;
 
 $VERSION = '1.16';
 
-$ASX_URL = 'http://www.asx.com.au/asx/markets/PriceResults.jsp?method=get&template=F1001&ASXCodes=';
+$ASX_URL = 'http://www.asx.com.au/asx/markets/priceLookup.do?by=asxCodes&asxCodes=';
 
 sub methods {return (australia => \&asx,asx => \&asx)}
 
@@ -104,6 +104,9 @@ sub asx {
 		# Delete spaces and '*' which sometimes appears after the code.
 		# Also delete high bit characters.
 		$stock =~ tr/* \200-\377//d;
+
+		# Delete any whitespace characters
+		$stock =~ s/\s//g;
 
 		$info{$stock,'symbol'} = $stock;
 
