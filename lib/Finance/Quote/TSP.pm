@@ -3,7 +3,7 @@
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
-#    Copyright (C) 2000, Paul Fenwick <pjf@Acpan.org>
+#    Copyright (C) 2000, Paul Fenwick <pjf@cpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2001, Rob Sessink <rob_ses@users.sourceforge.net>
 #    Copyright (C) 2004, Frank Mori Hess <fmhess@users.sourceforge.net>
