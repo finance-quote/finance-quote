@@ -250,10 +250,28 @@ sub yahoo_request {
                           $info{$symbol,"time"} = $quoter->isoTime($info{$symbol,"time"});
                         }
 
+			# Convert prices (when needed). E.G. Some London sources
+			# return in pence. Yahoo denotes this with GBP vs GBp
+			# We'd like them to return in pounds (divide by 100).
+			if (defined($exchange)) {
+			  if (($exchange eq "L"  && 
+			       (($info{$symbol,"currency"} eq "GBp") || 
+				#Assume GBX also quoted in pence; if not remove next line
+				($info{$symbol,"currency"} eq "GBX")))  ||
+			      ($exchange eq "TA")) {
+			    foreach my $field ($quoter->default_currency_fields) {
+			      next unless ($info{$symbol,$field});
+			      $info{$symbol,$field} =
+				$quoter->scale_field($info{$symbol,$field},0.01);
+			    }
+			  }
+			  # Other exchanges here as needed.
+			}
+
+
 			if (defined($info{$symbol,"currency"})) {
-			  # Convert the currency to be all uppercase for
-			  # backward compatability.  Needed because Yahoo
-			  # returns GBP as GBp.  There may be others.
+			  # Having converted London prices to GBP above we
+			  # make lower-case and turn GBX to GBP.   
 			  $info{$symbol,"currency"} =~ tr/a-z/A-Z/;
                           # yahoo started to return GBX instead of GBP
                           # somewhere arround 9 oct 2008.
@@ -274,20 +292,6 @@ sub yahoo_request {
 			  $info{$symbol,"currency_set_by_fq"} = 1;
 			}
 
-			# Convert prices (when needed). E.G. London sources
-			# return in pence. We'd like them to return in pounds
-			# (divide by 100).
-			if (defined($exchange)) {
-			  if (($exchange eq "L"  && $info{$symbol,"currency"} eq "GBP") ||
-			      ($exchange eq "TA")) {
-			    foreach my $field ($quoter->default_currency_fields) {
-			      next unless ($info{$symbol,$field});
-			      $info{$symbol,$field} =
-				$quoter->scale_field($info{$symbol,$field},0.01);
-			    }
-			  }
-			  # Other exchanges here as needed.
-			}
 
 		} # End of processing each stock line.
 	} # End of lookup loop.
