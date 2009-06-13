@@ -7,7 +7,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 8;
+plan tests => 9;
 
 # Test currency conversion, both explicit requests and automatic
 # conversion.
@@ -19,20 +19,24 @@ ok($q->currency("USD","AUD"));			# Test 1
 ok($q->currency("EUR","JPY"));			# Test 2
 ok(! defined($q->currency("XXX","YYY")));	# Test 3
 
-# Test 4
+# test for thousands : GBP -> IQD. This should be > 1000
+ok($q->currency("GBP","IQD")>1000) ;            # Test 4
+
+# Test 5
 ok(($q->currency("10 AUD","AUD")) == (10 * ($q->currency("AUD","AUD"))));
 
 # Euros into French Francs are fixed at a conversion rate of
 # 1:6.559576 .  We can use this knowledge to test that a stock is
 # converting correctly.
 
-# Test 5
+# Test 6
 my %baseinfo = $q->fetch("yahoo_europe","UG.PA");
 ok($baseinfo{"UG.PA","success"});
 
 $q->set_currency("AUD");	# All new requests in Aussie Dollars.
 
 my %info = $q->fetch("yahoo_europe","UG.PA");
-ok($info{"UG.PA","success"});		# Test 6
-ok($info{"UG.PA","currency"} eq "AUD");	# Test 7
-ok($info{"UG.PA","price"} > 0);		# Test 8
+ok($info{"UG.PA","success"});		# Test 7
+ok($info{"UG.PA","currency"} eq "AUD");	# Test 8
+ok($info{"UG.PA","price"} > 0);		# Test 9
+
