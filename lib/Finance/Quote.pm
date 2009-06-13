@@ -35,16 +35,15 @@ use Exporter ();
 use Carp;
 use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
-use HTML::TableExtract;
+use HTML::TreeBuilder;
 use Encode;
+use Data::Dumper;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $VERSION $TIMEOUT %MODULES %METHODS $AUTOLOAD
             $YAHOO_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
 
-$YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/currency/convert?amt=1&submit=Convert&";
-# If the above URL ever fails, try rewriting this module to use the URL below.
-# $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/q?s=USDCAD%3DX";
+$YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/q?s=";
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
@@ -241,16 +240,23 @@ sub currency {
 
   my $ua = $this->user_agent;
 
-  my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}from=$from&to=$to")->content;
-  my $te = HTML::TableExtract->new( headers => ['Symbol', 'Bid', 'Ask'] );
-  $te->parse(decode_utf8($data)); # The web page returns utf8 content which gives
-                                  # a warning when parsing $data in HTML::Parser
+  my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}$from$to%3DX")->content;
+  # The web page returns utf8 content which gives a warning when parsing $data
+  # in HTML::Parser
+  my $tb = HTML::TreeBuilder->new_from_content(decode_utf8($data));
 
-  # Make sure there's a table to parse.
-  return undef unless ($te->tables);
+  # Find the <div> with the data
+  my $div = $tb->look_down('id','yfi_quote_summary_data');
+  # Make sure there's a <div> to parse.
+  return undef unless $div;
 
-  my $row = ($te->rows())[0];
-  my ($exchange_rate) = $$row[1];
+  # The first <b> should contain the quote
+  my $rate_element=$div->look_down('_tag','b');
+  # Make sure there's a <b> to parse.
+  return undef unless $rate_element;
+
+  my $exchange_rate=$rate_element->as_text;
+
         $exchange_rate =~ s/,// ; # solve a bug when conversion rate
                                   # involves thousands. yahoo inserts
                                   # a comma when thousands occur
