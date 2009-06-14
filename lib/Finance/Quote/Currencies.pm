@@ -77,8 +77,7 @@ my %currencies = ( ALL => { name => qq{Albanian Lek} }
                  , XCP => { name => qq{Copper Pounds} }
                  , CRC => { name => qq{Costa Rica Colon} }
                  , HRK => { name => qq{Croatian Kuna} }
-                 , CUP => { name => qq{Cuban Peso} }
-                 , CYP => { name => qq{Cyprus Pound} }
+                 , CUP => { name => qq{Cuban Peso} } 
                  , CZK => { name => qq{Czech Koruna} }
                  , DKK => { name => qq{Danish Krone} }
                  , DJF => { name => qq{Dijibouti Franc} }
@@ -140,7 +139,7 @@ my %currencies = ( ALL => { name => qq{Albanian Lek} }
                  , NAD => { name => qq{Namibian Dollar} }
                  , NPR => { name => qq{Nepalese Rupee} }
                  , ANG => { name => qq{Neth Antilles Guilder} }
-                 , TRY => { name => qq{New Turkish Lira} }
+                 , TRY => { name => qq{Turkish Lira} }
                  , NZD => { name => qq{New Zealand Dollar} }
                  , NIO => { name => qq{Nicaragua Cordoba} }
                  , NGN => { name => qq{Nigerian Naira} }
@@ -175,7 +174,6 @@ my %currencies = ( ALL => { name => qq{Albanian Lek} }
                  , ZAR => { name => qq{South African Rand} }
                  , LKR => { name => qq{Sri Lanka Rupee} }
                  , SHP => { name => qq{St Helena Pound} }
-                 , SDD => { name => qq{Sudanese Dinar} }
                  , SZL => { name => qq{Swaziland Lilageni} }
                  , SEK => { name => qq{Swedish Krona} }
                  , CHF => { name => qq{Swiss Franc} }
@@ -183,10 +181,10 @@ my %currencies = ( ALL => { name => qq{Albanian Lek} }
                  , TWD => { name => qq{Taiwan Dollar} }
                  , TZS => { name => qq{Tanzanian Shilling} }
                  , THB => { name => qq{Thai Baht} }
-                 , TOP => { name => qq{Tonga Pa'anga} }
-                 , TTD => { name => qq{Trinidad&Tobago Dollar} }
+                 , TOP => { name => qq{Tonga Pa'ang} }
+                 , TTD => { name => qq{Trinidad & Tobago Dollar} }
                  , TND => { name => qq{Tunisian Dinar} }
-                 , USD => { name => qq{U.S. Dollar} }
+                 , USD => { name => qq{United States Dollar} }
                  , AED => { name => qq{UAE Dirham} }
                  , UGX => { name => qq{Ugandan Shilling} }
                  , UAH => { name => qq{Ukraine Hryvnia} }
@@ -196,7 +194,8 @@ my %currencies = ( ALL => { name => qq{Albanian Lek} }
                  , VND => { name => qq{Vietnam Dong} }
                  , YER => { name => qq{Yemen Riyal} }
                  , ZMK => { name => qq{Zambian Kwacha} }
-                 , ZWD => { name => qq{Zimbabwe Dollar} }
+                 , ZWD => { name => qq{Zimbabwe dollar} }
+                 , SDG => { name => qq{Sudanese Pound} }
                  );
 
 # =======================================================================
@@ -250,7 +249,7 @@ sub fetch_live_currencies {
  
     if ( lc $tagname eq 'select'
          &&
-         exists $attr->{name} && lc $attr->{name} eq 'from'
+         exists $attr->{name} && lc $attr->{name} eq 'currency-1'
        ) {
       # Reset status
       %live_currencies = ();
