@@ -2,11 +2,11 @@
 #
 # HU.pm
 #
-# Version 0.1 - Download of Hungarian (HU) stocks from www.MAGYARTOKEPIAC.hu
+# Version 0.2 - Download of Hungarian (HU) stocks from www.MAGYARTOKEPIAC.hu
 # This version based on ZA.pm module
 #
 # Zoltan Levardy <zoltan at levardy dot org>
-# 2008
+# 2008,2009
 
 
 package Finance::Quote::HU;
@@ -19,6 +19,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 use Encode;
+use Storable qw(dclone);
 
 $VERSION='1.15';
 
@@ -26,238 +27,248 @@ my %MONTHS = (
 	"JAN","01","FEB","02","MAR","03","APR","04","MAY","05","JUN","06","JUL","07","AUG","08","SEP","09","OCT","10","NOV","11","DEC","12");
 my %XMONTHS = ( 
 	"01","JAN","02","FEB","03","MAR","04","APR","05","MAY","06","JUN","07","JUL","08","AUG","09","SEP","10","OCT","11","NOV","12","DEC");
-my %ISINS = (
-	"AAA", "NL0006033375",
-	"ANY", "HU0000079835",
-	"BIF", "HU0000088760",
-	"BOOK", "HU0000065008",
-	"CSEPEL", "HU0000085618",
-	"DANUBIUS", "HU0000074067",
-	"ECONET", "HU0000058987",
-	"EGIS", "HU0000053947",
-	"EHEP", "HU0000067582",
-	"ELMU", "HU0000074513",
-	"EMASZ", "HU0000074539",
-	"FEVITAN", "HU0000071972",
-	"FHB", "HU0000078175",		
-	"FORRAS/T", "HU0000066071",
-	"FORRAS/OE", "HU0000066394",
-	"FOTEX", "HU0000075189",
-	"FREESOFT", "HU0000071030",
-	"GENESIS", "HU0000071865",
-	"GSPARK", "HU0000083696",
-	"HUMET", "HU0000073176",
-	"KPACK", "HU0000075692",
-	"KONZUM", "HU0000072939",
-	"LINAMAR", "HU0000074851",
-	"MTELEKOM", "HU0000073507",
-	"MOL", "HU0000068952",
-	"ORC", "LU0122624777",
-	"OTP", "HU0000061726",
-	"PANNERGY", "HU0000089867",
-	"PFLAX", "HU0000075296",
-	"PVALTO", "HU0000072434",
-	"PANNUNION", "HU0000092960",
-	"PHYLAXIA", "HU0000088414",
-	"QUAESTOR", "HU0000074000",
-	"RABA", "HU0000073457",
-	"RFV", "HU0000089198",
-	"RICHTER", "HU0000067624",
-	"SYNERGON", "HU0000069950",
-	"TVK", "HU0000073119",
-	"TVNETWORK", "HU0000072715",
-	"ZWACK", "HU0000074844");
 
+
+### STOCK urls
 my $MAGYARTOKEPIAC_MAINURL = ("http://www.magyartokepiac.hu/");
 my $MAGYARTOKEPIAC_URL = ($MAGYARTOKEPIAC_MAINURL."cegadatok/reszletek.php");
+### ETF,Funds urls
 my $BAMOSZ_MAINURL = ("http://www.bamosz.hu/");
 my $BAMOSZ_URL = ($BAMOSZ_MAINURL."adatok/napiadatok/index.ind?do=show");
+### ISIN urls:
+my $BET_MAINURL = ("http://www.bet.hu/");
+my $BET_ISINURL = ($BET_MAINURL."topmenu/kereskedesi_adatok/product_search");
 #print "[debug]: URL=", $MAGYARTOKEPIAC_URL, "\n";
 #print "[debug]: URL=", $BAMOSZ_URL, "\n";
 
 sub methods {
-    return (hu => \&magyartokepiac, hungary => \&magyartokepiac, bse => \&magyartokepiac, bux => \&magyartokepiac);
+   return (hu => \&main, hungary => \&main, bse => \&main, bux => \&main);
 }
 
 sub labels {
-    my @labels = qw/method source name symbol currency last date isodate high low p_change/;
-    return (hu => \@labels, hungary => \@labels, magyartokepiac => \@labels, bse => \@labels, bux => \@labels);
+   my @labels = qw/method source name symbol currency last date isodate high low p_change/;
+   return (hu => \@labels, hungary => \@labels, magyartokepiac => \@labels, bse => \@labels, bux => \@labels);
 }   
 
-sub magyartokepiac {
+### main program
+######################
+sub main {
+	my $quoter = shift;
+   my @symbols = @_;
+   my %info;
 
-	#print "[debug]: hungary()";
-
-    my $quoter = shift;
-    my @symbols = @_;
-    my %info;
-    my ($te, $ts, $row);
-    my @rows;
 	
-	#print "[debug]: hungary() symbols=",@symbols,"\n";
-    return unless @symbols;
+	#print "[debug]: main() symbols=",@symbols,"\n";
+   return unless @symbols;
 	
 	my $ua = $quoter->user_agent;
 	my $isin;
-
+	
 	foreach my $symbol (@symbols) {
-		$isin = ticker2isin($symbol);
+		my %iinfo = ticker2isin($symbol,$ua);
+		$isin=$iinfo{$symbol,"isin"};
+		#print "[debug]: isin found: ", $isin, "\n";
+		#$isin = ticker2isin_by_map($symbol);
 		#print "[debug]: hungary() ticker=",$symbol,", isin=",$isin,"\n";
-
-		my $url = $MAGYARTOKEPIAC_URL."?isin=".$isin;
-	    #print "[debug]: ", $url, "\n";
-	    my $response = $ua->request(GET $url);
-	    #print "[debug]: ", $response->content, "\n";
 		
-		if (!$response->is_success) {
-            $info{$symbol, "success"} = 0;
-            $info{$symbol, "errormsg"} = "Error contacting URL";
-            next;
-        }
-
-		#PARSING
-		$te = HTML::TableExtract->new( depth => 1, count => 0 );
-		$te->parse(decode_utf8($response->content));
-		foreach $ts ($te->tables) {
-			my $cell = $ts->rows->[0][0];
-			my $status = 1;
-			my $price = 0;
-			my $close = 0;
-			
-			my $c=0;
-			foreach (split(/\n/,$cell)) {
-				my $line = trim($_);
-				$c++;
-				#if ($line ne "") { print " [debug] myline ",$c,"::",$line; }
-				
-				if ($c == 4) { #4th line is the name
-					$line =~ s/\(.*folyamok\)//;
-					#print "[debug]: name=",$line,"\n";
-					$info{$symbol, "name"}  = $line;
-					
-					if (!$line) {
-						#print "[debug]: name is empty!\n";
-						$status = 0;
-						$info{$symbol, "errormsg"} = "The provided ISIN/TICKER is invalid. Your symbol was '$symbol'.";
-					}
+		#TODO: call magyartokepiac() here
+		my %minfo = magyartokepiac($quoter,$ua,$isin,$symbol);
+		if ($minfo{$symbol,"success"}) {
+			#%info = %minfo;
+			%info = %{ dclone(\%minfo) };
+		} else {
+			### in some cases the ISIN provided by BET.HU is good, but the quotes page using an old one a MAGYARTOKEPIAC.HU
+			my $isin_alt = ticker2isin_by_map($symbol);
+			if ($isin ne $isin_alt) {
+				#print "[debug]: alternate lookup of isin: $isin\n";
+				$isin=$isin_alt;
+				my %info2 = magyartokepiac($quoter,$ua,$isin,$symbol);
+				unless ($info2{$symbol,"success"}) {
+					print STDERR "Alternate ISIN pickup also not working...";
+				} else {
+					#%info = dclone %info2;
+					%info = %{ dclone(\%info2) };
 				}
-				if ($status && $c == 6) { #6th "last"
-					$price = $line;
-					$info{$symbol, "last"}  = $price;
-					$info{$symbol, "price"}  = $price;
-					#$info{$symbol, "nav"}  = $line;
-				}
-				if ($status && $c == 7) { #7th "net" ("p_change")
-					my @values = split('\s\(.?\s', $line);
-					#print "[debug]: line=",$line,"\n";
-					#print "[debug]: v[0]=",$values[0],"\n";
-					$info{$symbol, "net"}  = $values[0];
-					#print "[debug]: v[1]=",$values[1],"\n";
-					$values[1] =~ s/\s%\)//;
-					#print "[debug]: v[1]=",$values[1],"\n";
-					$info{$symbol, "p_change"}  = $values[1];
-				}
-				if ($status && $c == 8) { #7th "date" "time"
-					my @values = split('\s', $line);
-					#$info{$symbol, "date"}  = $MONTHS{uc $values[1]}."/".$values[0]."/".substr($values[2],2);
-					$info{$symbol, "time"}  = $values[3];
-
-					$quoter->store_date(\%info, $symbol, {eurodate => $line});
-					
-					#my @values = split('\s', $line);
-					#print "SHARE DATE: ",$MONTHS{uc $values[1]}."/".$values[0]."/".substr($values[2],2)." ".$values[3],"\n";
-					#print "SHARE DATE: '",$line,"'\n";
-				}
-				if ($status && $c == 13) { #13th "open"
-					$info{$symbol, "open"}  = $line;
-				}
-				if ($status && $c == 15) { #15th "volume"
-					$info{$symbol, "volume"}  = $line;
-				}
-				if ($status && $c == 17) { #17th "pe"
-					$info{$symbol, "pe"}  = $line;
-				}
-				if ($status && $c == 20) { #20th "close"
-					$close = $line;
-					$info{$symbol, "close"}  = $close;
-				}
-				if ($status && $c == 22) { #22th "avg_vol"
-					$info{$symbol, "avg_vol"}  = $line;
-				}
-				if ($status && $c == 24) { #24th "eps"
-					$info{$symbol, "eps"}  = $line;
-
-				}
-				if ($status && $c == 27) { #27th "high"
-					$info{$symbol, "high"}  = $line;
-				}
-				if ($status && $c == 34) { #34th "eps"
-					$info{$symbol, "low"}  = $line;
-				}
-				if ($status && $c == 38) { #38th "cap"
-					$info{$symbol, "cap"}  = $line;
-				}
-				
-				#if ($line ne "") { print " ==>> ",$line, [debug]"\n"; }
-				
 			}
 			
-			#POST PROCESSING (out of trade price is the last closing price):
-			if ($price eq 0) {
-				$info{$symbol, "price"} = $close;
-			}
-
-			#if status is 0, then going to find on another website:
-			if ($status) {
-				# GENERAL FIELDS
-			    $info{$symbol, "method"} = "magyartokepiac";
-			    $info{$symbol, "symbol"} = $symbol;
-			    $info{$symbol, "currency"} = "HUF";
-			    $info{$symbol, "source"} = $MAGYARTOKEPIAC_MAINURL;
-			} else {
-				#print "[debug] magyartokepiac(): isin=",$isin,"\n";
-				my %binfo = bamosz($quoter,$ua,$isin);
-				$status = $binfo{$isin,"success"};
-				# GENERAL FIELDS
-			    $info{$symbol, "method"} = "bamosz";
-			    $info{$symbol, "symbol"} = $isin;
-			    $info{$symbol, "currency"} = "HUF";
-			    $info{$symbol, "source"} = $BAMOSZ_MAINURL;
-				#LAST and DATE:
-				if ($status) {
-					$info{$symbol, "date"} = $binfo{$isin,"date"};
-					$info{$symbol, "isodate"} = $binfo{$isin,"isodate"};
-					#$info{$symbol, "time"} = $binfo{$isin,"time"};
-					$info{$symbol, "last"} = $binfo{$isin,"last"};
-					$info{$symbol, "price"} = $binfo{$isin,"last"};
-					$info{$symbol, "volume"} = $binfo{$isin,"volume"};
-					$info{$symbol, "nav"} = $binfo{$isin,"nav"};
-					$info{$symbol, "net"} = $binfo{$isin,"net"};
-					$info{$symbol, "p_change"} = $binfo{$isin,"p_change"};
-					#print "\n",$binfo{$isin,"last"}," ",$binfo{$isin,"date"},"\n";
-				}
-			}
-
-			$info{$symbol, "success"} = $status;
-			#print "[debug]: status set to ",$status,"\n";
+			
+			
 		}
-	    
 	}
-
-    return wantarray() ? %info : \%info;
+	
+	return wantarray() ? %info : \%info;
 }
 
+### this method is fetching STOCK quotes by ISIN - www.magyartokepiac.hu
+#############################################
+sub magyartokepiac {
+
+	#print "[debug]: magyartokepiac()";
+	my $quoter = $_[0];
+	my $ua = $_[1];
+	my $isin = $_[2];
+	my $symbol = $_[3];
+
+   my %minfo;
+
+	my ($te, $ts, $row);
+   my @rows;
+
+	
+
+	my $url = $MAGYARTOKEPIAC_URL."?isin=".$isin;
+	#print "[debug]: ", $url, "\n";
+	my $response = $ua->request(GET $url);
+	#print "[debug]: ", $response->content, "\n";
+	
+	if (!$response->is_success) {
+		$minfo{$symbol, "success"} = 0;
+		$minfo{$symbol, "errormsg"} = "Error contacting URL";
+		next;
+	}
+
+	#PARSING
+	$te = HTML::TableExtract->new( depth => 1, count => 0 );
+	$te->parse(decode_utf8($response->content));
+	foreach $ts ($te->tables) {
+		my $cell = $ts->rows->[0][0];
+		my $status = 1;
+		my $price = 0;
+		my $close = 0;
+		
+		my $c=0;
+		foreach (split(/\n/,$cell)) {
+			my $line = trim($_);
+			$c++;
+			#if ($line ne "") { print " [debug] myline ",$c,"::",$line; }
+			
+			if ($c == 4) { #4th line is the name
+				$line =~ s/\(.*folyamok\)//;
+				#print "[debug]: name=",$line,"\n";
+				$minfo{$symbol, "name"}  = $line;
+				
+				if (!$line) {
+					#print "[debug]: name is empty!\n";
+					$status = 0;
+					$minfo{$symbol, "errormsg"} = "The provided ISIN/TICKER is invalid. Your symbol was '$symbol'.";
+				}
+			}
+			if ($status && $c == 6) { #6th "last"
+				$price = $line;
+				$minfo{$symbol, "last"}  = $price;
+				$minfo{$symbol, "price"}  = $price;
+				#$info{$symbol, "nav"}  = $line;
+			}
+			if ($status && $c == 7) { #7th "net" ("p_change")
+				my @values = split('\s\(.?\s', $line);
+				#print "[debug]: line=",$line,"\n";
+				#print "[debug]: v[0]=",$values[0],"\n";
+				$minfo{$symbol, "net"}  = $values[0];
+				#print "[debug]: v[1]=",$values[1],"\n";
+				$values[1] =~ s/\s%\)//;
+				#print "[debug]: v[1]=",$values[1],"\n";
+				$minfo{$symbol, "p_change"}  = $values[1];
+			}
+			if ($status && $c == 8) { #7th "date" "time"
+				my @values = split('\s', $line);
+				#$info{$symbol, "date"}  = $MONTHS{uc $values[1]}."/".$values[0]."/".substr($values[2],2);
+				$minfo{$symbol, "time"}  = $values[3];
+
+				$quoter->store_date(\%minfo, $symbol, {eurodate => $line});
+				
+				#my @values = split('\s', $line);
+				#print "SHARE DATE: ",$MONTHS{uc $values[1]}."/".$values[0]."/".substr($values[2],2)." ".$values[3],"\n";
+				#print "SHARE DATE: '",$line,"'\n";
+			}
+			if ($status && $c == 13) { #13th "open"
+				$minfo{$symbol, "open"}  = $line;
+			}
+			if ($status && $c == 15) { #15th "volume"
+				$minfo{$symbol, "volume"}  = $line;
+			}
+			if ($status && $c == 17) { #17th "pe"
+				$minfo{$symbol, "pe"}  = $line;
+			}
+			if ($status && $c == 20) { #20th "close"
+				$close = $line;
+				$minfo{$symbol, "close"}  = $close;
+			}
+			if ($status && $c == 22) { #22th "avg_vol"
+				$minfo{$symbol, "avg_vol"}  = $line;
+			}
+			if ($status && $c == 24) { #24th "eps"
+				$minfo{$symbol, "eps"}  = $line;
+			}
+			if ($status && $c == 27) { #27th "high"
+				$minfo{$symbol, "high"}  = $line;
+			}
+			if ($status && $c == 34) { #34th "eps"
+				$minfo{$symbol, "low"}  = $line;
+			}
+			if ($status && $c == 38) { #38th "cap"
+				$minfo{$symbol, "cap"}  = $line;
+			}
+			
+			#if ($line ne "") { print " ==>> ",$line, [debug]"\n"; }
+			
+		}
+		
+		#POST PROCESSING (out of trade price is the last closing price):
+		if ($price eq 0) {
+			$minfo{$symbol, "price"} = $close;
+		}
+
+		#if status is 0, then going to find on another website:
+		if ($status) {
+			# GENERAL FIELDS
+			$minfo{$symbol, "method"} = "magyartokepiac";
+			$minfo{$symbol, "symbol"} = $symbol;
+			$minfo{$symbol, "currency"} = "HUF";
+			$minfo{$symbol, "source"} = $MAGYARTOKEPIAC_MAINURL;
+		} else {
+			#print "[debug] magyartokepiac(): isin=",$isin,"\n";
+			my %binfo = bamosz($quoter,$ua,$isin);
+			$status = $binfo{$isin,"success"};
+			# GENERAL FIELDS
+			$minfo{$symbol, "method"} = "bamosz";
+			$minfo{$symbol, "symbol"} = $isin;
+			$minfo{$symbol, "currency"} = "HUF";
+			$minfo{$symbol, "source"} = $BAMOSZ_MAINURL;
+			#LAST and DATE:
+			if ($status) {
+				$minfo{$symbol, "date"} = $binfo{$isin,"date"};
+				$minfo{$symbol, "isodate"} = $binfo{$isin,"isodate"};
+				#$info{$symbol, "time"} = $binfo{$isin,"time"};
+				$minfo{$symbol, "last"} = $binfo{$isin,"last"};
+				$minfo{$symbol, "price"} = $binfo{$isin,"last"};
+				$minfo{$symbol, "volume"} = $binfo{$isin,"volume"};
+				$minfo{$symbol, "nav"} = $binfo{$isin,"nav"};
+				$minfo{$symbol, "net"} = $binfo{$isin,"net"};
+				$minfo{$symbol, "p_change"} = $binfo{$isin,"p_change"};
+				#print "\n",$binfo{$isin,"last"}," ",$binfo{$isin,"date"},"\n";
+			}
+		}
+
+		$minfo{$symbol, "success"} = $status;
+		#print "[debug]: status set to ",$status,"\n";
+	}
+
+	return wantarray() ? %minfo : \%minfo;
+}
+
+### this method is about fetching ETF, funds by ISIN
+###############################
 sub bamosz {
 	my $quoter = $_[0];
 	my $ua = $_[1];
 	my $x = $_[2];
 	#print "[debug]: bamosz(): param=",$x,"\n";
 
-    my %binfo;
-    my ($te, $ts, $row);
+   my %binfo;
+   my ($te, $ts, $row);
 	my @rows;
 	
-    return unless $x;
+   return unless $x;
 
 	my $url = $BAMOSZ_URL."&fund_id=".$x.bamosz_date()."&show=arf&show=nee&show=cf&show=d_cf";
 	#&fund_id=HU0000704366&from_year=2008&from_month=12&from_day=3&until_year=2008&until_month=12&until_day=4&show=arf"
@@ -300,14 +311,14 @@ sub bamosz {
 	}
 	
 	# Debug to dump all tables in HTML...
-    # print "\n \n \n \n[debug]: ++++ ==== ++++ ==== ++++ ==== ++++ ==== START OF TABLE DUMP ++++  ==== \n \n \n \n";
+   # print "\n \n \n \n[debug]: ++++ ==== ++++ ==== ++++ ==== ++++ ==== START OF TABLE DUMP ++++  ==== \n \n \n \n";
 	# foreach $ts ($te->table_states) {;
 		# printf "\n \n \n \n[debug]: //// //// \\\\ START OF TABLE %d,%d //// \\\\ //// \\\\ \n \n \n \n",$ts->depth, $ts->count;
-        # foreach $row ($ts->rows) {
+       # foreach $row ($ts->rows) {
 			# print "[debug]: ", $row->[0], " | ", $row->[1], " | ", $row->[2], " | ", $row->[3], "\n";
-        # }
-    # }
-    # print "\n \n \n \n[debug]: ++++ ==== ++++ ==== ++++ ==== ++++ ==== END OF TABLE DUMP ++++ ==== \n \n \n \n";
+       # }
+   # }
+   # print "\n \n \n \n[debug]: ++++ ==== ++++ ==== ++++ ==== ++++ ==== END OF TABLE DUMP ++++ ==== \n \n \n \n";
 
 	foreach $ts ($te->tables) {
 		my $lastdate = $ts->rows->[1][0];
@@ -365,7 +376,140 @@ sub bamosz_date {
 		"&until_year=".(1900 + $T[5])."&until_month=".(1+$T[4])."&until_day=".$T[3];
 }
 
+### this methods is mapping STOCK TICKERS into ISIN by an internal mapping table
+#################################################
 sub ticker2isin {
+	my $ticker = $_[0];
+	my $ua = $_[1];
+	
+	my %iinfo;
+	my $isin;
+	my ($te, $ts, $row);
+	my @rows;
+	
+	#print "[debug]: ticker2isin(): ticker=", $ticker, "\n";
+	
+	#$BET_ISINURL
+	my $url = $BET_ISINURL."?isinquery=".$ticker;
+	#print "[debug]: ticker2isin(): url=", $url, "\n";
+	my $response = $ua->request(GET $url);
+	#print "[debug]: ", $response->content, "\n";
+	if (!$response->is_success) {
+		print STDERR  "[debug] ticker2isin(): isin url cannot be read.\n";
+       $iinfo{$ticker, "success"} = 0;
+       $iinfo{$ticker, "errormsg"} = "Error contacting isin URL";
+       next;
+   }
+
+	#PARSING
+	$te = HTML::TableExtract->new( depth => 9, count => 0 );
+	$te->parse(decode_utf8($response->content));
+	
+	unless ($te->first_table_found()) {
+		print STDERR  "[debug] ticker2isin(): no tables on this page\n";
+		$iinfo{$ticker, "success"}  = 0;
+		$iinfo{$ticker, "errormsg"} = "Parse error";
+		return;
+	}
+	
+	# Debug to dump all tables in HTML...
+   #print "\n \n \n \n[debug]: ++++ ==== ++++ ==== ++++ ==== ++++ ==== START OF TABLE DUMP ++++  ==== \n \n \n \n";
+	#foreach $ts ($te->table_states) {;
+	#	printf "\n \n \n \n[debug]: //// //// \\\\ START OF TABLE %d,%d //// \\\\ //// \\\\ \n \n \n \n",$ts->depth, $ts->count;
+   #	foreach $row ($ts->rows) {
+	#		print "[debug]: ", $row->[0], " | ", $row->[1], " | ", $row->[2], " | ", $row->[3], "\n";
+	#		#print "[debug]: ", $row->[0], "\n";
+   #	}
+   #}
+   #print "\n \n \n \n[debug]: ++++ ==== ++++ ==== ++++ ==== ++++ ==== END OF TABLE DUMP ++++ ==== \n \n \n \n";
+	
+	my $status = 1;
+	foreach $ts ($te->tables) {
+		#my $cell_ticker = $ts->rows->[4][1];
+		#my $cell_isin = $ts->rows->[4][2];
+		
+
+		foreach $row ($ts->rows) {
+			my $cell_ticker = uc trim($row->[1]);
+			my $cell_isin = uc trim($row->[2]);
+			#print "[debug]: ", $cell_ticker, " | ", $cell_isin, "\n";
+			
+			if ($cell_ticker eq uc $ticker) {
+				#print "[debug]: found ISIN: ",$cell_isin," for ticker: ", $cell_ticker, "\n";
+				foreach (split(/\n/,$cell_isin)) {
+					my $line = trim($_);
+					#if ($line ne "") { print " [debug]: ticker2isin(): myline ::",$line,"::\n"; }
+					if ($line eq "") { $status=0; }
+					
+					$isin=$line;
+					#print " [debug]: ticker2isin(): isin ::",$isin,"::\n";
+				}
+			}
+			
+		}
+	}
+	
+	if (!$isin) { 
+		#print "[debug]: ticker2isin(): no isin found for ticker: $ticker \n"; 
+		$isin=$ticker; 
+	} else {
+		$iinfo{$ticker, "success"} = $status;
+		$iinfo{$ticker, "isin"} = $isin;
+	}
+	
+	
+	return wantarray() ? %iinfo : \%iinfo;
+}
+
+### this map is used by next method ticker2isin
+### @deprecated
+############################
+my %ISINS = (
+	"AAA", "NL0006033375",
+	"ANY", "HU0000079835",
+	"BIF", "HU0000088760",
+	"BOOK", "HU0000065008",
+	"CSEPEL", "HU0000085618",
+	"DANUBIUS", "HU0000074067",
+	"ECONET", "HU0000058987",
+	"EGIS", "HU0000053947",
+	"EHEP", "HU0000067582",
+	"ELMU", "HU0000074513",
+	"EMASZ", "HU0000074539",
+	"FEVITAN", "HU0000071972",
+	"FHB", "HU0000078175",		
+	"FORRAS/T", "HU0000066071",
+	"FORRAS/OE", "HU0000066394",
+	"FOTEX", "HU0000075189",
+	"FREESOFT", "HU0000071030",
+	"GENESIS", "HU0000071865",
+	"GSPARK", "HU0000083696",
+	"HUMET", "HU0000073176",
+	"KPACK", "HU0000075692",
+	"KONZUM", "HU0000072939",
+	"LINAMAR", "HU0000074851",
+	"MTELEKOM", "HU0000073507",
+	"MOL", "HU0000068952",
+	"ORC", "LU0122624777",
+	"OTP", "HU0000061726",
+	"PANNERGY", "HU0000089867",
+	"PFLAX", "HU0000075296",
+	"PVALTO", "HU0000072434",
+	"PANNUNION", "HU0000092960",
+	"PHYLAXIA", "HU0000088414",
+	"QUAESTOR", "HU0000074000",
+	"RABA", "HU0000073457",
+	"RFV", "HU0000089198",
+	"RICHTER", "HU0000067624",
+	"SYNERGON", "HU0000069950",
+	"TVK", "HU0000073119",
+	"TVNETWORK", "HU0000072715",
+	"ZWACK", "HU0000074844");
+	
+### this methods is mapping STOCK TICKERS into ISIN by an internal mapping table
+### @deprecated by the ticker2isin which is fetching ISIN from BET.HU
+#################################################
+sub ticker2isin_by_map {
 	my $ticker = $_[0];
 	my $isin; 
 	#print "[debug]: ticker2isin(): ticker=", $ticker, "\n";
@@ -383,8 +527,10 @@ sub ticker2isin {
 
 sub trim {
 	my $str = $_[0];
-	$str =~ s/^\s+//;
-	$str =~ s/\s+$//; 
+	if ($str) {
+		$str =~ s/^\s+//;
+		$str =~ s/\s+$//; 
+	}
 	return $str;
 }
 
@@ -398,11 +544,11 @@ www.bamosz.hu
 
 =head1 SYNOPSIS
 
-    use Finance::Quote;
+   use Finance::Quote;
 
-    $q = Finance::Quote->new;
+   $q = Finance::Quote->new;
 
-    # Don't know anything about failover yet...
+   # Don't know anything about failover yet...
 
 =head1 DESCRIPTION
 
@@ -424,5 +570,3 @@ Napi Gazdasag website - http://www.bamosz.hu/
 Finance::Quote
 
 =cut
-
-
