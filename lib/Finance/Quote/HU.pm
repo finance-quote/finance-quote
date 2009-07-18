@@ -91,7 +91,7 @@ sub main {
 		else {
 			### in some cases the ISIN provided by BET.HU is good, but the quotes page using an old one a MAGYARTOKEPIAC.HU
 			my $isin_alt = ticker2isin_by_map($symbol);
-			if ($isin ne $isin_alt) {
+			if (!$isin || ($isin ne $isin_alt)) {
 				#print "[debug]: alternate lookup of isin: $isin\n";
 				$isin=$isin_alt;
 				my %info2 = magyartokepiac($quoter,$ua,$isin,$symbol);
@@ -125,10 +125,14 @@ sub magyartokepiac {
 
    my %minfo;
 
+	if (!$isin) {
+		$minfo{$symbol, "success"} = 0;
+		$minfo{$symbol, "errormsg"} = "No ISIN specified";
+    return wantarray() ? %minfo : \%minfo;
+	}
+
 	my ($te, $ts, $row);
    my @rows;
-
-	
 
 	my $url = $MAGYARTOKEPIAC_URL."?isin=".$isin;
 	#print "[debug]: ", $url, "\n";
@@ -138,7 +142,8 @@ sub magyartokepiac {
 	if (!$response->is_success) {
 		$minfo{$symbol, "success"} = 0;
 		$minfo{$symbol, "errormsg"} = "Error contacting URL";
-		next;
+    return wantarray() ? %minfo : \%minfo;
+#		next;
 	}
 
 	#PARSING
