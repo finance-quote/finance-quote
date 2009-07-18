@@ -475,7 +475,7 @@ sub ticker2isin {
 	return wantarray() ? %iinfo : \%iinfo;
 }
 
-### this map is used by next method ticker2isin
+### this map is used by next method ticker2isin_by_map
 ### @deprecated
 ############################
 my %ISINS = (
