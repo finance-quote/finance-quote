@@ -96,7 +96,9 @@ sub main {
 				$isin=$isin_alt;
 				my %info2 = magyartokepiac($quoter,$ua,$isin,$symbol);
 				unless ($info2{$symbol,"success"}) {
-					print STDERR "Alternate ISIN pickup also not working...";
+					# print STDERR "Alternate ISIN pickup also not working...";
+          $info2{$symbol,"errormsg"}="Alternate ISIN pickup also not working..." ;
+          %info = (%info2, %info);
 				} else {
 					#%info = dclone %info2;
 					#print "[debug]: new isin found: $isin_alt\n";

@@ -63,5 +63,4 @@ ok($quotes{"HU0000702709","currency"} eq "HUF");
 
 # Check that a ZOL fund returns no-success.
 ok(!$quotes{"ZOL","success"});
-ok($quotes{"ZOL","errormsg"} eq "Parse error" || $quotes{"ZOL","errormsg"} eq "The provided ISIN/TICKER is invalid. Your symbol was 'ZOL'.");
-
+ok($quotes{"ZOL","errormsg"} eq "Parse error" || $quotes{"ZOL","errormsg"} eq "The provided ISIN/TICKER is invalid. Your symbol was 'ZOL'." || $quotes{"ZOL","errormsg"} eq "Alternate ISIN pickup also not working..." );
