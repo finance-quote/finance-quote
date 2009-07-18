@@ -8,6 +8,12 @@
 # Zoltan Levardy <zoltan at levardy dot org>
 # 2008,2009
 
+# Comments on work in progress by Zoltan posted on 3 Jul 2009
+# Current implementation does the next steps:
+# (1) trying to find ISIN online.
+# (2) reading stock page to get quote
+# (3) if failed then trying to find as ETF on different page
+# (4) if not found as ETF, then trying to get ISIN from local map, and reading stock page again.
 
 package Finance::Quote::HU;
 require 5.004;
