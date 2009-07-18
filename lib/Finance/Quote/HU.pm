@@ -65,6 +65,7 @@ sub main {
 	my $isin;
 	
 	foreach my $symbol (@symbols) {
+		#print "[debug]: main() ticker=",$symbol,"\n";
 		my %iinfo = ticker2isin($symbol,$ua);
 		$isin=$iinfo{$symbol,"isin"};
 		#print "[debug]: isin found: ", $isin, "\n";
@@ -73,10 +74,15 @@ sub main {
 		
 		#TODO: call magyartokepiac() here
 		my %minfo = magyartokepiac($quoter,$ua,$isin,$symbol);
+		#print "[debug] main(): ",$minfo{$symbol,"success"},"\n";
 		if ($minfo{$symbol,"success"}) {
 			#%info = %minfo;
-			%info = %{ dclone(\%minfo) };
-		} else {
+			#%info = %{ dclone(\%minfo) };
+			#append minfo to info:
+			%info = (%minfo, %info);
+			#print "[debug] main: minfo copied into info\n";
+		} 
+		else {
 			### in some cases the ISIN provided by BET.HU is good, but the quotes page using an old one a MAGYARTOKEPIAC.HU
 			my $isin_alt = ticker2isin_by_map($symbol);
 			if ($isin ne $isin_alt) {
@@ -87,14 +93,14 @@ sub main {
 					print STDERR "Alternate ISIN pickup also not working...";
 				} else {
 					#%info = dclone %info2;
-					%info = %{ dclone(\%info2) };
+					#print "[debug]: new isin found: $isin_alt\n";
+					#%info = %{ dclone(\%info2) };
+					%info = (%info2, %info);
 				}
 			}
-			
-			
-			
 		}
 	}
+	#print "[debug] main(): done.\n\n";
 	
 	return wantarray() ? %info : \%info;
 }
@@ -226,7 +232,7 @@ sub magyartokepiac {
 			$minfo{$symbol, "currency"} = "HUF";
 			$minfo{$symbol, "source"} = $MAGYARTOKEPIAC_MAINURL;
 		} else {
-			#print "[debug] magyartokepiac(): isin=",$isin,"\n";
+			#print "[debug] magyartokepiac(): call bamosz(): isin=",$isin,"\n";
 			my %binfo = bamosz($quoter,$ua,$isin);
 			$status = $binfo{$isin,"success"};
 			# GENERAL FIELDS
@@ -467,7 +473,7 @@ sub ticker2isin {
 my %ISINS = (
 	"AAA", "NL0006033375",
 	"ANY", "HU0000079835",
-	"BIF", "HU0000088760",
+	"BIF", "HU0000074083",
 	"BOOK", "HU0000065008",
 	"CSEPEL", "HU0000085618",
 	"DANUBIUS", "HU0000074067",
@@ -499,7 +505,7 @@ my %ISINS = (
 	"PHYLAXIA", "HU0000088414",
 	"QUAESTOR", "HU0000074000",
 	"RABA", "HU0000073457",
-	"RFV", "HU0000089198",
+	"RFV", "HU0000086640",
 	"RICHTER", "HU0000067624",
 	"SYNERGON", "HU0000069950",
 	"TVK", "HU0000073119",
