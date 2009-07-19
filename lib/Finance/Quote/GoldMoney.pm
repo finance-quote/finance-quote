@@ -61,12 +61,13 @@ sub goldmoney {
 	my $ua = $quoter->user_agent;
 	my (%symbolhash, @q, %info);
 	my (
-		$html_string, $te, $table_gold, $table_silver,
-		$gold_gg, $gold_oz, $silver_oz, $currency
+		$html_string, $te, $table_gold, $table_silver, $table_platinum,
+		$gold_gg, $gold_oz, $silver_oz, $platinum_oz, $platinum_pg, $currency
 	);
 
 	my $_want_gold = 0;
 	my $_want_silver = 0;
+	my $_want_platinum = 0;
 
 	# - feed all requested symbols into %info (to be returned later)
 	# - set error state to false by default
@@ -81,14 +82,16 @@ sub goldmoney {
 			$_want_gold = 1;
 		} elsif($s eq 'silver') {
 			$_want_silver = 1;
+		} elsif($s eq 'platinum') {
+			$_want_platinum = 1;
 		} else {
 			$info{$s,'errormsg'} = "No data returned (note: this module only works for 'gold' and 'silver')";
 		}
 	}
 
 	# get the page
-	# - but only if we want either gold or silver (there is nothing else there)
-	if( $_want_gold or $_want_silver ) {
+	# - but only if we want either gold, silver or platinum (there is nothing else there)
+	if( $_want_gold or $_want_silver or $_want_platinum) {
 		my $GOLDMONEY_URL = "http://goldmoney.com";
 		my $response = $ua->request(GET $GOLDMONEY_URL);
 	
@@ -98,8 +101,9 @@ sub goldmoney {
 			# we want the 'Current Spot Rates' table
 			$te = new HTML::TableExtract->new( attribs=>{class=>'spot'}, subtables=>1);
 			$te->parse($html_string);
-			$table_gold=$te->table(1,0);
-			$table_silver=$te->table(1,1);
+			$table_gold=$te->table(3,0);
+			$table_silver=$te->table(3,1);
+			$table_platinum=$te->table(3,2);
 		} else {
 			# retrieval error - flag an error and return right away
 			foreach my $s (@symbols) {
@@ -121,12 +125,12 @@ sub goldmoney {
 		# get gold rate
 		#
 		if( $_want_gold ) {
-			$_ = $table_gold->cell(0,1);
+			$_ = $table_gold->cell(0,0);
 			if( /(\d*\.\d*).*\/gg/ ) {
 				$gold_gg = $1;
 			}
 
-			$_ = $table_gold->cell(0,1);
+			$_ = $table_gold->cell(0,0);
 			if( /(\d*\.\d*).*\/oz/ ) {
 				$gold_oz = $1;
 
@@ -147,7 +151,7 @@ sub goldmoney {
 		# get silver rate
 		#
 		if( $_want_silver ) {
-			$_ = $table_silver->cell(0,1);
+			$_ = $table_silver->cell(0,0);
 			if( /(\d*\.\d*).*\/oz/ ) {
 				$silver_oz = $1;
 
@@ -161,6 +165,31 @@ sub goldmoney {
 			}
 		}
 		
+		# get platinum rate
+		#
+		if( $_want_platinum ) {
+			$_ = $table_platinum->cell(0,0);
+			if( /(\d*\.\d*).*\/pg/ ) {
+				$platinum_pg = $1;
+			}
+
+			$_ = $table_platinum->cell(0,0);
+			if( /(\d*\.\d*).*\/oz/ ) {
+				$platinum_oz = $1;
+
+				# assemble final dataset
+				# - take "now" as date/time as the site is always current and does
+				#   not provide this explicitly - so there is a time-slip
+				$quoter->store_date(\%info, 'platinum', {isodate => _goldmoney_time('isodate')});
+				$info{'platinum','time'}     = _goldmoney_time('time');
+				$info{'platinum','name'}     = 'Platinum Spot';
+				$info{'platinum','last'}     = $platinum_oz;
+				$info{'platinum','price'}    = $platinum_oz;
+				$info{'platinum','price_pg'} = $platinum_pg;
+				$info{'platinum','currency'} = $currency;
+				$info{'platinum','success'}  = 1;
+			}
+		}
 	}
 
 	return wantarray() ? %info : \%info;
@@ -200,7 +229,7 @@ sub _goldmoney_time {
 
 =head1 NAME
 
-Finance::Quote::GoldMoney - obtain gold and silver rates from GoldMoney.
+Finance::Quote::GoldMoney - obtain spot rates from GoldMoney.
 
 =head1 SYNOPSIS
 
@@ -208,15 +237,17 @@ Finance::Quote::GoldMoney - obtain gold and silver rates from GoldMoney.
 
     $q = Finance::Quote->new;
 
-    %rates = $q->fetch('goldmoeny','gold', 'silver');
+    %rates = $q->fetch('goldmoeny','gold', 'silver', 'platinum');
 
 =head1 DESCRIPTION
 
-This module obtains current spot rates for 'gold' and 'silver' from
-Goldmoney (http://www.goldmoney.com). All other symbols are ignored.
+This module obtains current spot rates for 'gold', 'silver' and
+'platinum' from Goldmoney (http://www.goldmoney.com). All other
+symbols are ignored.
 
 Information returned by this module is governed by Net Transactions
-Ltd.'s terms and conditions.
+Ltd.'s terms and conditions. This module is *not* affiliated with the
+company in any way. Use at your own risk.
 
 =head1 LABELS RETURNED
 
@@ -225,7 +256,8 @@ The following labels are returned by Finance::Quote::GoldMoney:
 	- exchange
 	- name
 	- date, time
-	- price (per ounce), price_gg (per goldgram, gold only)
+	- price (per ounce), price_gg (per goldgram, gold only),
+      price_pg (per platinumgram, platinum only)
     - currency
 
 =head1 SEE ALSO
