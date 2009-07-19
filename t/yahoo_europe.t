@@ -7,7 +7,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 21;
+plan tests => 24;
 
 # Test Yahoo_europe functions.
 
@@ -66,4 +66,12 @@ ok($xetraquotes{"DBK.DE","currency"} eq "EUR");
 ok(($xetraquotes{"DBK.DE","currency"} eq "EUR") &&
    !defined($xetraquotes{"DBK.DE","currency_set_by_fq"}));
 
-
+# Check if close is between year_range for LTI.L (expressed in GBp) for checking if conversion is correct
+my %ltiquotes = $q->fetch("yahoo","LTI.L");
+ok($ltiquotes{"LTI.L","success"});
+my ($min,$max) = (50,1000); # change this if quotes are not supposed to be in this range anymore
+if ($ltiquotes{"LTI.L","year_range"}=~ m/([\d\.]+)\s*-\s*([\d\.]+)/) {
+  my ($year_low,$year_high) = ($1,$2) ;
+  ok (($year_low >= $min) && ($year_high <= $max));
+}
+ok (($ltiquotes{"LTI.L","close"} >= $min) && ($ltiquotes{"LTI.L","close"} <= $max));
