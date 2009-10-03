@@ -69,9 +69,10 @@ ok(($xetraquotes{"DBK.DE","currency"} eq "EUR") &&
 # Check if close is between year_range for LTI.L (expressed in GBp) for checking if conversion is correct
 my %ltiquotes = $q->fetch("yahoo","LTI.L");
 ok($ltiquotes{"LTI.L","success"});
-my ($min,$max) = (50,1000); # change this if quotes are not supposed to be in this range anymore
+my ($min,$max) = (50,50000); # change this if quotes are not supposed to be in this range anymore
 if ($ltiquotes{"LTI.L","year_range"}=~ m/([\d\.]+)\s*-\s*([\d\.]+)/) {
   my ($year_low,$year_high) = ($1,$2) ;
   ok (($year_low >= $min) && ($year_high <= $max));
+  print "$year_low - $year_high\n";
 }
 ok (($ltiquotes{"LTI.L","close"} >= $min) && ($ltiquotes{"LTI.L","close"} <= $max));
