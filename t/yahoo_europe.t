@@ -7,7 +7,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 24;
+plan tests => 27;
 
 # Test Yahoo_europe functions.
 
@@ -73,6 +73,13 @@ my ($min,$max) = (50,50000); # change this if quotes are not supposed to be in t
 if ($ltiquotes{"LTI.L","year_range"}=~ m/([\d\.]+)\s*-\s*([\d\.]+)/) {
   my ($year_low,$year_high) = ($1,$2) ;
   ok (($year_low >= $min) && ($year_high <= $max));
-  print "$year_low - $year_high\n";
+  # print "$year_low - $year_high\n";
 }
 ok (($ltiquotes{"LTI.L","close"} >= $min) && ($ltiquotes{"LTI.L","close"} <= $max));
+
+# check that A0GFY7.SG returns correctly the currency (reported by GnuCash user)
+%xetraquotes = $q->fetch("yahoo_europe","A0GFY7.SG");
+ok($xetraquotes{"A0GFY7.SG","success"});
+ok($xetraquotes{"A0GFY7.SG","currency"} eq "EUR");
+ok(($xetraquotes{"A0GFY7.SG","currency"} eq "EUR") &&
+   !defined($xetraquotes{"A0GFY7.SG","currency_set_by_fq"}));
