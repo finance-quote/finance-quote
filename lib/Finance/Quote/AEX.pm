@@ -197,6 +197,8 @@ to have failover with future sources for Dutch stocks. Using the "aex"
 method will guarantee that your information only comes from the Euronext
 Amsterdam website.
 
+Note that options and futures are not supported by this module.
+
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::AEX :
