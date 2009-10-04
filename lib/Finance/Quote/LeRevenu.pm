@@ -64,7 +64,7 @@ sub lerevenu {
 
 	foreach my $stocks (@stocks)
 	{
-		$url="$LR_URL?recherchenom=$stocks&p=20";
+		$url="$LR_URL?recherchenom=$stocks";
 	
 		$reply = $ua->request(GET $url);  
 
@@ -232,7 +232,6 @@ sub lerevenu {
 				};
 				# style=fund
 			        /SICAVetFCP/ && do {
-					my $myquote; my @mycurrency;
 					foreach $ts ($te->table_state(6, 0)){
 						@rows=$ts->rows;
 						$info{$stocks, "name"}=$rows[0][0];
@@ -240,9 +239,7 @@ sub lerevenu {
 						$info{$stocks, "success"}=1;
 						$info{$stocks, "exchange"}="Euronext Paris";
 						$info{$stocks, "method"}="lerevenu";
-						$myquote=$rows[0][2] ;
-						@mycurrency= split / /, $myquote;
-						($info{$stocks,"currency"}=$mycurrency[1]) =~ s/[\W]*//g ;
+						($info{$stocks,"currency"}=$rows[0][2]) =~ s/[^A-Z]*//g ;
 						$quoter->store_date(\%info, $stocks, {eurodate => $rows[0][1]});
 						($info{$stocks, "p_change"}=$rows[2][2])=~ s/[^0-9.-]*//g;
 						}
