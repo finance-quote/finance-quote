@@ -40,7 +40,7 @@ use Exporter;
 
 use vars qw/$FOOL_URL $VERSION @FIELDS $MAX_REQUEST_SIZE @ISA/;
 
-$VERSION = '1.16';
+$VERSION = '1.17';
 
 $FOOL_URL = 'http://quote.fool.com/quotes.csv?symbols=';
 

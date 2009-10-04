@@ -40,7 +40,7 @@ use HTML::TableExtract;
 
 use vars qw/$ASX_URL $VERSION/;
 
-$VERSION = '1.16';
+$VERSION = '1.17';
 
 $ASX_URL = 'http://www.asx.com.au/asx/markets/priceLookup.do?by=asxCodes&asxCodes=';
 
