@@ -99,8 +99,8 @@ Finance::Quote::Yahoo::Europe - Fetch quotes from Yahoo Europe
     use Finance::Quote;
     $q = Finance::Quote->new;
 
-    %info = $q->fetch("europe","12150.PA"); # Failover to other methods ok.
-    %info = $q->fetch("yahoo_europe","12150.PA"); # Use this module only.
+    %info = $q->fetch("europe","UG.PA"); # Failover to other methods ok.
+    %info = $q->fetch("yahoo_europe","UG.PA"); # Use this module only.
 
 =head1 DESCRIPTION
 
