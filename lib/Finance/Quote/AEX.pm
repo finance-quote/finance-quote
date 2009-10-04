@@ -44,7 +44,7 @@ use HTTP::Request::Common qw(POST);
 use HTML::TableExtract;
 use CGI;
 
-$VERSION = '1.16';
+$VERSION = '1.17';
 
 # URLs of where to obtain information
 

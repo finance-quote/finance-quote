@@ -51,7 +51,7 @@ $YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/q?s=";
                 currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.16';
+$VERSION = '1.17';
 
 $USE_EXPERIMENTAL_UA = 0;
 

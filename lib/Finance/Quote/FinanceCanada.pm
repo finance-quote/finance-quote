@@ -19,7 +19,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.16';
+$VERSION = '1.17';
 my $FINANCECANADA_MAINURL = ("http://finance.canada.com/");
 my $FINANCECANADA_URL = "http://stockgroup.canada.com/sn_overview.asp?symbol=T.";
 
