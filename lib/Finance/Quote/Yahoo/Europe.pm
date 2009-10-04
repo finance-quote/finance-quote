@@ -50,9 +50,10 @@ $YAHOO_EUROPE_URL = ("http://uk.finance.yahoo.com/d/quotes.csv");
 # Another solution might be to change Base.pm FIELDS labels to this
 # string + div_date and ex_div. Code would be nicier, but this will
 # need more testing for other yahoo modules and can be done later.
-our @YH_EUROPE_FIELDS = qw/symbol name last time date net p_change volume bid ask
+our @YH_EUROPE_FIELDS = qw/symbol name last net p_change volume bid ask
                            close open day_range year_range eps pe div div_yield
-                           cap avg_vol currency/;
+                           cap avg_vol currency time date ex_div div_date/;
+our @YH_FIELD_ENCODING = qw/s n l1 c1 p2 v b a p o m w e r d y j1 a2 c4 t1 d1 q r1/;
 
 sub methods {return (europe => \&yahoo_europe,yahoo_europe => \&yahoo_europe)};
 
@@ -73,6 +74,7 @@ sub yahoo_europe
         # localise the Base.FIELDS array. Perl restores the array at
         # the end of this sub.
         local @Finance::Quote::Yahoo::Base::FIELDS = @YH_EUROPE_FIELDS ;
+        local @Finance::Quote::Yahoo::Base::FIELD_ENCODING = @YH_FIELD_ENCODING ;
 
 	# This does all the hard work.
 	my %info = yahoo_request($quoter,$YAHOO_EUROPE_URL,\@symbols);
