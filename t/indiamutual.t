@@ -7,13 +7,13 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 44;
+plan tests => 50;
 
 # Test Fidelity functions.
 
 my $q      = Finance::Quote->new();
 my @funds = ("102670", "103134", "101599", "102730", "100151",
-	     "102849", "101560");
+	     "102849", "101560", "106524");
 my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
