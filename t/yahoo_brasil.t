@@ -12,7 +12,7 @@ plan tests => 16;
 # Test Yahoo_europe functions.
 
 my $q      = Finance::Quote->new();
-my @stocks = ("BRGE1","BAZA3");
+my @stocks = ("ELUM4","BAZA3");
 my $year   = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
