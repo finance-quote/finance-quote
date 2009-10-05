@@ -1,3 +1,61 @@
+2009-05-10  Erik Colson <eco@ecocode.net>
+
+	* Lots of tests added
+
+2009-10-04  Erik Colson <eco@ecocode.net>
+
+	* IndiaMutual.t tests added
+	* Yahoo_europe: Bug 44245 solved. Wrong fields returned.
+	* Documentation: Bug 48818 corrected.
+
+2009-10-03  Erik Colson <eco@ecocode.net>
+
+	* yahoo_europe.t tests corrected
+
+2009-09-30  Erik Colson <eco@ecocode.net>
+
+	* Bourso.t tests corrected
+
+2009-09-29  Erik Colson <eco@ecocode.net>
+
+	* AEX.pm removed code for options and futures. (didn't work)
+
+2009-07-19  Erik Colson <eco@ecocode.net>
+
+	* Bug in Yahoo::Base corrected. Sometimes year range is wrongly returned.
+
+2009-07-19  Giles Robertson
+
+	* Bug in Yahoo::Base corrected. GBp wrongly interpreted.
+
+2009-07-19  Stephan Ebelt
+
+	* Goldmoney.pm patched. support for platinum added.
+
+2009-07-18  Zoltan Levardy <zoltan@levardy.org>
+
+	* New module HU.pm (Hungarian stocks)
+
+2009-06-14  Divakar Ramachandran
+
+	* Bug RT 46155 solved by modifying link in IndiaMutual.pm
+
+2009-06-14  Stephan Ebelt
+
+	* Cominvest URL modified
+
+2009-06-14  Erik Colson <eco@ecocode.net>
+
+	* currencies adapted to yahoo denomination
+
+2009-06-13  Sattvik
+
+	* currency retrieval updated (yahoo website changed)
+
+2009-04-27  Bradley Dean <bjdean@bjdean.id.au>
+
+	* ASX.pm updated due to website change
+
 2009-04-13  Erik Colson <eco@ecocode.net>
 
 	* Release 1.16
