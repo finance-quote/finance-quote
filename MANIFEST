@@ -36,6 +36,7 @@ lib/Finance/Quote/Fool.pm
 lib/Finance/Quote/FTPortfolios.pm
 lib/Finance/Quote/GoldMoney.pm
 lib/Finance/Quote/HEX.pm
+lib/Finance/Quote/HU.pm
 lib/Finance/Quote/IndiaMutual.pm
 lib/Finance/Quote/LeRevenu.pm
 lib/Finance/Quote/ManInvestments.pm
@@ -92,6 +93,7 @@ t/finanzpartner.t
 t/ftportfolios.t
 t/goldmoney.t
 t/hex.t
+t/hu.t
 t/indiamutual.t
 t/lerevenu.t
 t/maninvestments.t
