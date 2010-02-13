@@ -14,7 +14,7 @@ $VERSION = '1.17';
 $MORNINGSTAR_SE_FUNDS_URL = 
     'http://morningstar.se/Funds/Quicktake/Overview.aspx?perfid=';
 $PRICE_PATH = '//div/div/span[@title=\'Senaste NAV\']/span';
-$NAME_PATH = 'id(\'content_main\')/div/div/div/div/div/div/div/h2';
+$NAME_PATH = '//div/div/div/div/div/div/div/h2';
 $DATE_PATH = '//div/div/span[@title=\'NAV-datum\']/span';
 $PCHANGE_PATH = 
     decode_utf8 '//div/div/span[@title=\'Ändring NAV en dag (SEK)\']/span';
@@ -181,7 +181,7 @@ friendly name, it is the id that morningstar uses on their website.
 =head1 LABELS RETURNED
 
 Information available from Fredrik funds may include the following labels:
-isodate name currency nav p_change method success
+date name currency nav p_change method success
 
 The prices are updated at the end of each bank day.
 
