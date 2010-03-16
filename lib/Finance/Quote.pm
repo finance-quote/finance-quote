@@ -169,7 +169,7 @@ sub new {
     # Default modules
     @modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns BSERO Bourso Cdnfundlibrary
             Currencies Deka DWS FTPortfolios Fidelity FinanceCanada Fool HU
-            GoldMoney HEX
+            GoldMoney HEX BSESofia
             IndiaMutual LeRevenu ManInvestments Morningstar NZX Platinum SEB
             StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref Troweprice
             Trustnet Union USFedBonds VWD ZA Cominvest Finanzpartner
