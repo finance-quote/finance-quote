@@ -31,8 +31,8 @@ use vars qw/$BSESofia_URL $VERSION/;
 $VERSION = "0.7";
 
 # Single share URL
-#$BSESofia_URL = 'http://www.bse-sofia.bg/?page=QuotesInfo&site_lang=en&code='; # Tue Mar 16 22:49:07 2010
-$BSESofia_URL = 'http://localhost/~pau4o/singleShare.html?page=QuotesInfo&site_lang=en&code=';
+$BSESofia_URL = 'http://www.bse-sofia.bg/?page=QuotesInfo&site_lang=en&code='; # Tue Mar 16 22:49:07 2010
+#$BSESofia_URL = 'http://localhost/~pau4o/singleShare.html?page=QuotesInfo&site_lang=en&code=';
 
 # trading session results
 #$BSESofia_URL = 'http://beis.bia-bg.com/bseinfo/lasttraded.php';
