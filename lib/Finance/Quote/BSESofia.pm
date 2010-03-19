@@ -93,7 +93,6 @@ sub bse_get {
       if ( checkForOldName($stock) ) {
           $info{$stock,"success"} = 0;
           $info{$stock,"errormsg"} = "Requested stock $stock was chaged to: " . checkForOldName($stock);
-          Debug(%info); # DEBUG
           next;
       }
 
@@ -106,7 +105,6 @@ sub bse_get {
               $info{$stock,"success"} = 0;
               $info{$stock,"errormsg"} = "HTTP error";
           }
-          Debug(%info); # DEBUG
           next;
       }
 
@@ -126,7 +124,6 @@ sub bse_get {
       unless ($share =~ /$stock/i) {
           $info{$stock,"success"} = 0;
           $info{$stock,"errormsg"} = "Can't find info about $stock.";
-          Debug(%info); # DEBUG
           next;
       }
 
@@ -162,7 +159,6 @@ sub bse_get {
       unless ( $1 =~ /Last trading session results and best current offers/) {
           $info{$stock,"success"} = 0;
           $info{$stock,"errormsg"} = "Failed to parse second HTML table.";
-          Debug(%info); # DEBUG
           next;
       }
 
@@ -186,20 +182,6 @@ sub bse_get {
       $info{$stock, "method"} = "bsesofia";
       $info{$stock, "exchange"} = "Bulgarian Stock Exchange";
       $info{$stock, "success"} = 1;
-#####################################################################
-      Debug(%info); # DEBUG
-
-      sub Debug {
-          my %ofni = (@_);
-          print STDERR "\n==================================\n";
-          foreach ( sort keys %ofni) {
-              my $value = $ofni{$_};
-              s/\W/_/;
-              print STDERR $_, ' => ', $value, "\n";
-          }
-          print STDERR "==================================\n\n";
-      }
-#####################################################################
   }
   return wantarray() ? %info : \%info;
 }
