@@ -31,9 +31,9 @@ use vars qw/$BSESofia_URL $VERSION/;
 $VERSION = "0.7";
 
 # Single share URL
-#$BSESofia_URL = 'http://www.bse-sofia.bg/?page=QuotesInfo&site_lang=en&code='; # Tue Mar 16 22:49:07 2010
-$BSESofia_URL = 'http://localhost/~pau4o/9kda.html?page=QuotesInfo&site_lang=en&code=';
-$BSESofia_URL = 'http://localhost/~pau4o/singleShare.html?page=QuotesInfo&site_lang=en&code=';
+$BSESofia_URL = 'http://www.bse-sofia.bg/?page=QuotesInfo&site_lang=en&code='; # Tue Mar 16 22:49:07 2010
+#$BSESofia_URL = 'http://localhost/~pau4o/9kda.html?page=QuotesInfo&site_lang=en&code=';
+#$BSESofia_URL = 'http://localhost/~pau4o/singleShare.html?page=QuotesInfo&site_lang=en&code=';
 
 # trading session results
 #$BSESofia_URL = 'http://beis.bia-bg.com/bseinfo/lasttraded.php';
@@ -122,10 +122,14 @@ sub bsesofia_get {
               s!(<table.+?Volume.+?Last.+?average.+?Change.+?<tr>.+?</tr>)
                !$1</table>!sx;
           @tableHeaders = qw/volume last average p_change/;
+          # currency information in in FLASH!!!
+          #TODO: get it from URL with SessionResults
+          $info{$stock, "currency"} = "EUR";
       }
       else {
           $tableRow = 3;
           @tableHeaders = qw/volume high low last average p_change/;
+          $info{$stock, "currency"} = "BGN";
       }
       $headerRow = $tableRow - 1; # row with headers
 
@@ -208,8 +212,6 @@ sub bsesofia_get {
           next;
       }
 
-
-      $info{$stock, "currency"} = "BGN";
       $info{$stock, "method"} = "bsesofia";
       $info{$stock, "exchange"} = "Bulgarian Stock Exchange";
       $info{$stock, "success"} = 1;
