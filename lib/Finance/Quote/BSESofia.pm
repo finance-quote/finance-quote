@@ -199,7 +199,7 @@ sub bse_get {
           $i++;
       }
 
-      if ( ($info{$stock,'last'} eq '') or ($info{$stock,'last'} =~ /^0\.?0*$/) ) {
+      if ($info{$stock,'last'} eq '') {
           $info{$stock,'success'} = 0;
           $info{$stock,'errormsg'} = "Stock does not traded in last trade sesion.";
           Debug(%info); # DEBUG
