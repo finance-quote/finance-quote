@@ -115,7 +115,20 @@ sub bsesofia_get {
       $info{$stock,'symbol'} = $stock;
 
       my $page = $response->content;
-      if ($page =~ /Unofficial Market Bonds/) {
+
+      if ( $page =~ /The security is inactive/is ) {
+          $info{$stock,"success"} = 0;
+          $info{$stock,"errormsg"} = "Requested security: $stock is inactive";
+          next;
+      }
+
+      if ( $page =~ /Invalid BSE CODE/is ) {
+          $info{$stock,"success"} = 0;
+          $info{$stock,"errormsg"} = "Invalid security code";
+          next;
+      }
+
+      if ($page =~ /official Market Bonds/is) {
           $tableRow = 2; # row with data that we fetch
           # ugly hack to close unclosed table tag
           $page =~
@@ -210,6 +223,15 @@ sub bsesofia_get {
           $info{$stock,'errormsg'} = "Stock does not traded in last trade sesion.";
           next;
       }
+
+      # fix values
+      if ($info{$stock,'volume'} eq '') {
+          $info{$stock,'volume'} = 0;
+      }
+      if ($info{$stock,'nominal'} =~ /\s/) {
+          $info{$stock,'nominal'} =~ s/\s//g;
+      }
+
 
       $info{$stock, "method"} = "bsesofia";
       $info{$stock, "exchange"} = "Bulgarian Stock Exchange";
@@ -404,7 +426,6 @@ sub checkForOldName {
         HKON    => '6C7',      AGROF   => '6AG',      DFAV    => '4OFA',
         HASK    => '6AS',      BIBILD  => '9RSA',     BPM     => '59W',
         KRS     => '5T3',      BBAST   => 'A32A',     ELG     => 'ELW',
-        SLR     => 'SLR',
     );
     return $oldToNew{$stockSymbol} ? $oldToNew{$stockSymbol} : 0;
 }
