@@ -33,6 +33,7 @@ $VERSION = "0.7";
 # Single share URL
 #$BSESofia_URL = 'http://www.bse-sofia.bg/?page=QuotesInfo&site_lang=en&code='; # Tue Mar 16 22:49:07 2010
 $BSESofia_URL = 'http://localhost/~pau4o/9kda.html?page=QuotesInfo&site_lang=en&code=';
+$BSESofia_URL = 'http://localhost/~pau4o/singleShare.html?page=QuotesInfo&site_lang=en&code=';
 
 # trading session results
 #$BSESofia_URL = 'http://beis.bia-bg.com/bseinfo/lasttraded.php';
@@ -83,7 +84,7 @@ sub bse_get {
   #     push @stocks, checkForOldName($_);
   # }
 
-  my (%info, $tableRow, $headerRow, $reportDate);
+  my (%info, $tableRow, $headerRow, $reportDate, @tableHeaders);
 
   my $ua = $quoter->user_agent; # This gives us a user-agent
   $ua->agent("Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.1.3) Gecko/20070310 Iceweasel/2.0.0.3 (Debian-2.0.0.3-1)");
@@ -117,9 +118,11 @@ sub bse_get {
           $page =~
               s!(<table.+?Volume.+?Last.+?average.+?Change.+?<tr>.+?</tr>)
                !$1</table>!sx;
+          @tableHeaders = qw/volume last average p_change/;
       }
       else {
           $tableRow = 3;
+          @tableHeaders = qw/volume high low last average p_change/;
       }
       $headerRow = $tableRow - 1; # row with headers
 
@@ -186,11 +189,13 @@ sub bse_get {
       $te->parse($page);
 
       $table = $te->first_table_found();
-      foreach my $label (qw/volume last average p_change/) {
-          my $cellContent = $table->space($tableRow, $i);
-          $cellContent = justASCII($cellContent);
-          $info{$stock,$label} = $cellContent
-              if $table->space($headerRow, $i) =~ /$headers{$label}/;
+      foreach my $label (@tableHeaders) {
+          unless ( ($label eq 'high') or ($label eq 'low') ) {
+              my $cellContent = $table->space($tableRow, $i);
+              $cellContent = justASCII($cellContent);
+              $info{$stock,$label} = $cellContent
+                  if $table->space($headerRow, $i) =~ /$headers{$label}/;
+          }
           $i++;
       }
 
