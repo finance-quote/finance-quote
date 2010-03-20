@@ -49,7 +49,12 @@ sub methods {
 }
 
 {
-    my @labels = qw/price last symbol volume average method currency c_name exchange/;
+    my @labels = qw(
+        average currency date
+        exchange isodate last
+        method name nominal
+        p_change success symbol volume);
+
 
     sub labels {
         return (
@@ -494,4 +499,3 @@ Bulgarian Stock Exchange, http://www.bse-sofia.bg/
 Finance::Quote
 
 =cut
-
