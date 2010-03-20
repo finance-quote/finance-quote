@@ -113,6 +113,10 @@ sub bse_get {
       my $page = $response->content;
       if ($page =~ /Unofficial Market Bonds/) {
           $tableRow = 2; # row with data that we fetch
+          # ugly hack to close unclosed table tag
+          $page =~
+              s!(<table.+?Volume.+?Last.+?average.+?Change.+?<tr>.+?</tr>)
+               !$1</table>!sx;
       }
       else {
           $tableRow = 3;
