@@ -31,8 +31,9 @@ use vars qw/$BSESofia_URL $VERSION/;
 $VERSION = "0.7";
 
 # Single share URL
-$BSESofia_URL = 'http://www.bse-sofia.bg/?page=QuotesInfo&site_lang=en&code='; # Tue Mar 16 22:49:07 2010
-#$BSESofia_URL = 'http://localhost/~pau4o/singleShare.html?page=QuotesInfo&site_lang=en&code=';
+#$BSESofia_URL = 'http://www.bse-sofia.bg/?page=QuotesInfo&site_lang=en&code='; # Tue Mar 16 22:49:07 2010
+$BSESofia_URL = 'http://localhost/~pau4o/9kda.html?page=QuotesInfo&site_lang=en&code=';
+$BSESofia_URL = 'http://localhost/~pau4o/singleShare.html?page=QuotesInfo&site_lang=en&code=';
 
 # trading session results
 #$BSESofia_URL = 'http://beis.bia-bg.com/bseinfo/lasttraded.php';
@@ -41,15 +42,20 @@ $BSESofia_URL = 'http://www.bse-sofia.bg/?page=QuotesInfo&site_lang=en&code='; #
 
 sub methods {
     return (
-        bulgaria => \&bse_get,
-        bsesofia => \&bse_get,
-        europe   => \&bse_get
+        bulgaria => \&bsesofia_get,
+        bsesofia => \&bsesofia_get,
+        europe   => \&bsesofia_get
     );
 }
 
 {
-    my @labels = qw/price last symbol volume average method currency c_name exchange/;
-                   #volume high low last average change
+    my @labels = qw(
+        average currency date
+        exchange isodate last
+        method name nominal
+        p_change success symbol volume);
+
+
     sub labels {
         return (
             bulgaria => \@labels,
@@ -69,7 +75,7 @@ sub justASCII {
     return $nonASCII;
 }
 
-sub bse_get {
+sub bsesofia_get {
 
   my $quoter = shift;   # The Finance::Quote object.
 
@@ -83,7 +89,7 @@ sub bse_get {
   #     push @stocks, checkForOldName($_);
   # }
 
-  my %info;
+  my (%info, $tableRow, $headerRow, $reportDate, @tableHeaders);
 
   my $ua = $quoter->user_agent; # This gives us a user-agent
   $ua->agent("Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.1.3) Gecko/20070310 Iceweasel/2.0.0.3 (Debian-2.0.0.3-1)");
@@ -98,8 +104,6 @@ sub bse_get {
 
       my $response = $ua->request(GET $BSESofia_URL . $stock);
 
-      $info{$stock,'symbol'} = $stock;
-
       unless ($response->is_success) {
           foreach my $stock (@stocks) {
               $info{$stock,"success"} = 0;
@@ -108,15 +112,50 @@ sub bse_get {
           next;
       }
 
-      ####################
-      # dividents and name
-      ####################
+      $info{$stock,'symbol'} = $stock;
+
+      my $page = $response->content;
+      if ($page =~ /Unofficial Market Bonds/) {
+          $tableRow = 2; # row with data that we fetch
+          # ugly hack to close unclosed table tag
+          $page =~
+              s!(<table.+?Volume.+?Last.+?average.+?Change.+?<tr>.+?</tr>)
+               !$1</table>!sx;
+          @tableHeaders = qw/volume last average p_change/;
+      }
+      else {
+          $tableRow = 3;
+          @tableHeaders = qw/volume high low last average p_change/;
+      }
+      $headerRow = $tableRow - 1; # row with headers
+
+      if ($page =~ /Last trading session results and best current offers:\D*([0-9-]+)/) {
+          $reportDate = justASCII($1);
+      }
+
+      $quoter->store_date(\%info, $stock, {isodate => $reportDate});
+
+      my %headers = (
+          symbol   => qr/BSE\s+Code/i,
+          name     => qr/Issuer/i,
+          nominal  => qr/Nominal/i,
+          volume   => qr/Volume\s+\(lots\)/i,
+          high     => qr/High/i,
+          low      => qr/Low/i,
+          last     => qr/Last/i,
+          average  => qr/Weighted-average/i,
+          p_change => qr/Change\s+\(%\)/i,
+      );
+
+      ########################
+      # first top level table
+      ########################
       my $te = HTML::TableExtract->new(
           depth => 0,
           count => 0,
-      ); # first top level table
+      );
 
-      $te->parse($response->content);
+      $te->parse($page);
 
       # check that we are looking for right share
       my $share = $te->first_table_found->space(2,0);
@@ -128,55 +167,47 @@ sub bse_get {
       }
 
       my $table = $te->first_table_found();
-      my $i;
-      foreach my $label (qw/symbol name nominal div_date div div_yield last_price last_open/) {
-          my $cellContent = $table->space(2, $i++);
-          $cellContent = justASCII($cellContent);
-          $info{$stock,$label} = $cellContent;
-      }
-      # fallback date and price - "Open Price ... (in quoting currency) As of ... date"
-      $info{$stock,"last"} = $info{$stock,'last_price'};
-      $quoter->store_date(\%info, $stock, {isodate => $info{$stock,'last_open'}});
+      my $i = 0;
 
+      foreach my $label (qw/symbol name nominal/) {
+          my $cellContent = $table->space(2, $i);
+          $cellContent = justASCII($cellContent);
+          $info{$stock,$label} = $cellContent
+              if $table->space(1, $i) =~ /$headers{$label}/;
+          $i++;
+      }
 
       undef $te;
       undef $table;
-      undef $i;
+      $i = 0;
       ######################################################
-      # Last trading session results and best current offers
+      # table with information from last trading session
       ######################################################
       $te = HTML::TableExtract->new(
           depth => 0,
           count => 1,
       ); # second top level table
 
-      $te->parse($response->content);
+      $te->parse($page);
 
-      my $tableCheck = $te->first_table_found->space(0,0);
-      $tableCheck =~ s/^(.*:\D+)//; # strip all except date
+      $table = $te->first_table_found();
+      foreach my $label (@tableHeaders) {
+          unless ( ($label eq 'high') or ($label eq 'low') ) {
+              my $cellContent = $table->space($tableRow, $i);
+              $cellContent = justASCII($cellContent);
+              $info{$stock,$label} = $cellContent
+                  if $table->space($headerRow, $i) =~ /$headers{$label}/;
+          }
+          $i++;
+      }
 
-      # check page layout changes
-      unless ( $1 =~ /Last trading session results and best current offers/) {
-          $info{$stock,"success"} = 0;
-          $info{$stock,"errormsg"} = "Failed to parse second HTML table.";
+      if ($info{$stock,'last'} eq '') {
+          $info{$stock,'success'} = 0;
+          $info{$stock,'errormsg'} = "Stock does not traded in last trade sesion.";
+          Debug(%info); # DEBUG
           next;
       }
 
-      $table = $te->first_table_found();
-      foreach my $label (qw/volume high low last average p_change/) {
-          my $cellContent = $table->space(3, $i++);
-          $cellContent = justASCII($cellContent);
-
-          if ( $label eq 'last') { # last from Last Traded Session
-              if ($cellContent !~ /^0\.0*$/) { # we have newer info
-                  $info{$stock,$label} = $cellContent;
-                  $quoter->store_date(\%info, $stock, {isodate => $tableCheck});
-              }
-          }
-          else {
-              $info{$stock,$label} = $cellContent;
-          }
-      }
 
       $info{$stock, "currency"} = "BGN";
       $info{$stock, "method"} = "bsesofia";
@@ -451,4 +482,3 @@ Bulgarian Stock Exchange, http://www.bse-sofia.bg/
 Finance::Quote
 
 =cut
-
