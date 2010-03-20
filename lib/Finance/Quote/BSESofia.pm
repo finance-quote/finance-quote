@@ -184,9 +184,9 @@ sub bsesofia_get {
       undef $te;
       undef $table;
       $i = 0;
-      ######################################################
+      ##################################################
       # table with information from last trading session
-      ######################################################
+      ##################################################
       $te = HTML::TableExtract->new(
           depth => 0,
           count => 1,
@@ -208,7 +208,6 @@ sub bsesofia_get {
       if ($info{$stock,'last'} eq '') {
           $info{$stock,'success'} = 0;
           $info{$stock,'errormsg'} = "Stock does not traded in last trade sesion.";
-          Debug(%info); # DEBUG
           next;
       }
 
@@ -219,9 +218,9 @@ sub bsesofia_get {
   return wantarray() ? %info : \%info;
 }
 
-#####################################################################
+########################################################################
 # as of 16.06.2008 codes for all stocks are changed with launch of Xetra
-#####################################################################
+########################################################################
 sub checkForOldName {
     my $stockSymbol = uc shift;
     my %oldToNew = (
