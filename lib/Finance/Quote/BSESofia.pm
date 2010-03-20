@@ -42,9 +42,9 @@ $BSESofia_URL = 'http://localhost/~pau4o/singleShare.html?page=QuotesInfo&site_l
 
 sub methods {
     return (
-        bulgaria => \&bse_get,
-        bsesofia => \&bse_get,
-        europe   => \&bse_get
+        bulgaria => \&bsesofia_get,
+        bsesofia => \&bsesofia_get,
+        europe   => \&bsesofia_get
     );
 }
 
@@ -70,7 +70,7 @@ sub justASCII {
     return $nonASCII;
 }
 
-sub bse_get {
+sub bsesofia_get {
 
   my $quoter = shift;   # The Finance::Quote object.
 
