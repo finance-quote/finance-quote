@@ -218,7 +218,20 @@ sub bsesofia_get {
           $i++;
       }
 
-      if ($info{$stock,'last'} eq '') {
+      if (
+          ($info{$stock,'last'} eq '')
+                                ||
+          ($info{$stock,'last'} =~ /^0\.?0*$/)
+      ) { # don't return success for stocks that are not traded
+          # and make shure that Gnucash don't use values if we return success=0
+          undef $info{$stock,'last'};
+          undef $info{$stock,'date'};
+          undef $info{$stock,'currency'};
+          undef $info{$stock,'average'};
+          undef $info{$stock,'volume'};
+          undef $info{$stock,'p_change'};
+          undef $info{$stock,'nominal'};
+          undef $info{$stock,'name'};
           $info{$stock,'success'} = 0;
           $info{$stock,'errormsg'} = "Stock does not traded in last trade sesion.";
           next;

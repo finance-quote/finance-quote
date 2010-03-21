@@ -237,7 +237,7 @@ foreach $stock (@stocks) {
         ok(substr($quotes{$stock,"date"},6,4) == $year ||
                substr($quotes{$stock,"date"},6,4) == $lastyear,
            'We have fetched recent info');
-        cmp_ok($quotes{$stock,"last"}, '>=', 0,
+        cmp_ok($quotes{$stock,"last"}, '>', 0,
                'Got value for last price');
         like($quotes{$stock,"p_change"}, '/^-?\d+\.\d{2,}$/',
              'Got percent change from previous day\'s close');
