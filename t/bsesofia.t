@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More;
+use Test::More tests => 59;
 use Finance::Quote;
 
 if (not $ENV{ONLINE_TEST}) {
@@ -263,5 +263,3 @@ $stock = 'BOGUS'; # bogus stock name
 note("\nTesting BOGUS stock name");
 ok(! $quotes{$stock,"success"},
    'No success for BOGUS stock name');
-
-done_testing();
