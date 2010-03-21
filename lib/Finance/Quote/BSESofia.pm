@@ -128,7 +128,7 @@ sub bsesofia_get {
       $headerRow = $tableRow - 1; # row with headers
 
       if ($page =~ /Last trading session results and best current offers:\D*([0-9-]+)/) {
-          $reportDate = justASCII($1);
+          $reportDate = valueClean($1);
       }
 
       $quoter->store_date(\%info, $stock, {isodate => $reportDate});
@@ -157,7 +157,7 @@ sub bsesofia_get {
 
       # check that we are looking for right share
       my $share = $te->first_table_found->space(2,0);
-      $share = justASCII($share);
+      $share = valueClean($share);
       unless ($share =~ /$stock/i) {
           $info{$stock,"success"} = 0;
           $info{$stock,"errormsg"} = "Can't find info about $stock.";
@@ -169,7 +169,7 @@ sub bsesofia_get {
 
       foreach my $label (qw/symbol name nominal/) {
           my $cellContent = $table->space(2, $i);
-          $cellContent = justASCII($cellContent);
+          $cellContent = valueClean($cellContent);
           $info{$stock,$label} = $cellContent
               if $table->space(1, $i) =~ /$headers{$label}/;
           $i++;
@@ -192,7 +192,7 @@ sub bsesofia_get {
       foreach my $label (@tableHeaders) {
           unless ( ($label eq 'high') or ($label eq 'low') ) {
               my $cellContent = $table->space($tableRow, $i);
-              $cellContent = justASCII($cellContent);
+              $cellContent = valueClean($cellContent);
               $info{$stock,$label} = $cellContent
                   if $table->space($headerRow, $i) =~ /$headers{$label}/;
           }
@@ -226,7 +226,6 @@ sub bsesofia_get {
           $info{$stock,'nominal'} =~ s/\s//g;
       }
 
-
       $info{$stock, "method"} = "bsesofia";
       $info{$stock, "exchange"} = "Bulgarian Stock Exchange";
       $info{$stock, "success"} = 1;
@@ -235,12 +234,12 @@ sub bsesofia_get {
 }
 
 # utility functions
-sub justASCII {
-    my $nonASCII =  shift;
-    $nonASCII =~ tr/\200-\377//d; # remove all non-ASCII characters
-    $nonASCII =~ s/^\s*//;        # leading spaces
-    $nonASCII =~ s/\s*$//;        # trailing spaces
-    return $nonASCII;
+sub valueClean {
+    my $value =  shift;
+    $value =~ tr/\200-\377//d; # remove all non-ASCII characters
+    $value =~ s/^\s*//;        # leading spaces
+    $value =~ s/\s*$//;        # trailing spaces
+    return $value;
 }
 
 ########################################################################
