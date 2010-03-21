@@ -31,13 +31,11 @@ use vars qw/$BSESofia_URL $VERSION/;
 $VERSION = "0.7";
 
 # Single share URL
-$BSESofia_URL = 'http://www.bse-sofia.bg/?page=QuotesInfo&site_lang=en&code='; # Tue Mar 16 22:49:07 2010
-#$BSESofia_URL = 'http://localhost/~pau4o/9kda.html?page=QuotesInfo&site_lang=en&code=';
-#$BSESofia_URL = 'http://localhost/~pau4o/singleShare.html?page=QuotesInfo&site_lang=en&code=';
+$BSESofia_URL = 'http://www.bse-sofia.bg/?page=QuotesInfo&site_lang=en&code=';
 
 # trading session results
-#$BSESofia_URL = 'http://beis.bia-bg.com/bseinfo/lasttraded.php';
-# $BSESofia_URL = 'http://www.bse-sofia.bg/?page=SessionResults'; # Tue Mar 16 22:49:40 2010
+# $BSESofia_URL = 'http://beis.bia-bg.com/bseinfo/lasttraded.php';
+# $BSESofia_URL = 'http://www.bse-sofia.bg/?page=SessionResults';
 
 
 sub methods {
@@ -65,29 +63,12 @@ sub methods {
     }
 }
 
-# remove all non-ASCII characters and strip
-# spaces
-sub justASCII {
-    my $nonASCII =  shift;
-    $nonASCII =~ tr/\200-\377//d;
-    $nonASCII =~ s/^\s*//; # leading spaces
-    $nonASCII =~ s/\s*$//; # trailing spaces
-    return $nonASCII;
-}
-
 sub bsesofia_get {
 
   my $quoter = shift;   # The Finance::Quote object.
 
   my @stocks = @_;
   return unless @stocks;
-
-  # is it appropriate to return info for new stock symbol?
-  # # add new stock code to @stocks
-  # my @shares = @stocks;
-  # foreach (@shares) {
-  #     push @stocks, checkForOldName($_);
-  # }
 
   my (%info, $tableRow, $headerRow, $reportDate, @tableHeaders);
 
@@ -251,6 +232,15 @@ sub bsesofia_get {
       $info{$stock, "success"} = 1;
   }
   return wantarray() ? %info : \%info;
+}
+
+# utility functions
+sub justASCII {
+    my $nonASCII =  shift;
+    $nonASCII =~ tr/\200-\377//d; # remove all non-ASCII characters
+    $nonASCII =~ s/^\s*//;        # leading spaces
+    $nonASCII =~ s/\s*$//;        # trailing spaces
+    return $nonASCII;
 }
 
 ########################################################################
