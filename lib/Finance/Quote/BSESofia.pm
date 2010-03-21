@@ -135,7 +135,7 @@ sub bsesofia_get {
               s!(<table.+?Volume.+?Last.+?average.+?Change.+?<tr>.+?</tr>)
                !$1</table>!sx;
           @tableHeaders = qw/volume last average p_change/;
-          # currency information in in FLASH!!!
+          # currency information is in FLASH!!!
           #TODO: get it from URL with SessionResults
           $info{$stock, "currency"} = "EUR";
       }
@@ -443,9 +443,6 @@ sub checkForOldName {
     return $oldToNew{$stockSymbol} ? $oldToNew{$stockSymbol} : 0;
 }
 
-1;
-
-__END__
 
 =head1 NAME
 
@@ -457,8 +454,9 @@ Finance::Quote::BSESofia - Obtain quotes from the Bulgarian Stock Exchange.
 
     $q = Finance::Quote->new;
 
-    %stockinfo = $q->fetch("bsesofia","VAMO");      # Only query BSESofia.
-    %stockinfo = $q->fetch("bulgaria","VAMO"); # Failover to other sources OK.
+    %stockinfo = $q->fetch("bsesofia","5ALB"); # Only query BSESofia.
+    %stockinfo = $q->fetch("bulgaria","5ALB"); # Fail-over to other sources OK.
+    %stockinfo = $q->fetch("europe","5ALB");   # Fail-over to other sources OK.
 
 =head1 DESCRIPTION
 
@@ -470,7 +468,12 @@ also possible to load it explicity by placing "BSESofia" in the argument
 list to Finance::Quote->new().
 
 This module provides both the "bsesofia", "bulgaria" and "europe"
-fetch methods. Second and third are aliases of first method.
+fetch methods.
+
+Using the "bsesofia" method will guarantee that your information only
+comes from the Bulgarian Stock Exchange. If you wish to have fail-over
+methods to deliver information from future sources for Bulgarian
+stocks, please use "bulgaria" or "europe" methods.
 
 Information returned by this module is governed by the Bulgarian
 Stock Exchange's terms and conditions.
@@ -479,22 +482,41 @@ Stock Exchange's terms and conditions.
 
 The following labels may be returned by Finance::Quote::BSESofia:
 
-    price        Last Price
-    last         Last Price
-    volume       Volume
-    symbol       A unique code used by the Bulgarian Stock Exchange (BSE Sofia)
-                 for trading, clearing & settlement purposes.
-    volume       The number of securities traded on last session.
-    average      Average Price
-    method       The module (as could be passed to fetch) which found
-                 this information.
-    currency     In which currency is price information.
-    c_name       Company or Mutual Fund Long Name
-    exchange     The exchange the information was obtained from.
+    average  - Weighted-average from last trading session
+    currency - BGN or EUR see L<BUGS>
+    date     - Last Trade Date  (MM/DD/YY format)
+    exchange - The exchange the information was obtained from
+    isodate  - Last Trade Date  (YYYY-MM-DD format)
+    last     - Price from last trading session
+    method   - The module (as could be passed to fetch) which found this information.
+    name     - Company or Mutual Fund Name
+    nominal  - nominal value of the security
+    p_change - Percent Change from previous day's close
+    success  - Did the stock successfully return information? (true/false)
+    symbol   - BSE Sofia code for security
+    volume   - Volume traded on last trading session
+
+Module will return 0 for success in case of:
+    - Error when connecting to the source
+    - Missing or zero value for the price of the last trading session
+    - The absence of information on the security
+    - Submission of an invalid security code
+    - Security is inactive
+    - Submission of a security code from the time before switching to the
+      system Xetra (in this case, the new code will be indicated in the
+      error message)
 
 
-If all stock lookups fail (possibly because of a failed connection) then
-the empty list may be returned, or undef in a scalar context.
+=head1 BUGS
+
+There is no way to ask prices for bonds or shares, they are mixed.
+
+Because information for currency is shown only in FLASH (.swf)
+returned information for currency about bonds may be wrong. As a
+general rule for bonds returned currency is EUR and for shares
+it's BGN.
+
+Currently only information from last traded session can be obtained.
 
 =head1 COPYRIGHT
 
@@ -508,7 +530,7 @@ module.
 
 =head1 AUTHORS
 
-  Kamen Naydenov <pau4o@kamennn.eu>
+Kamen Naydenov <pau4o@kamennn.eu>
 
 =head1 SEE ALSO
 
@@ -517,3 +539,5 @@ Bulgarian Stock Exchange, http://www.bse-sofia.bg/
 Finance::Quote
 
 =cut
+
+1;
