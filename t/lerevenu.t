@@ -7,14 +7,16 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 32;
+plan tests => 20;
 
 # Test LeRevenu functions.
 
 my $q      = Finance::Quote->new();
 
 # my stocks = stock, fund, warrant, bond, indice
-my @stocks = ("AF","FR0000441677","FR0010324475","FR0010112052","FR0003500008");
+my @stocks = ("FR0000441677","FR0010112052","FR0003500008");
+
+# AF to be reintroduced !!
 
 # LeRevenu tests need to cover all the possible cases:
 #
