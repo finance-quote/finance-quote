@@ -43,7 +43,7 @@ $VERSION = '1.17';
 
 # URLs of where to obtain information
 
-$TSP_URL = 'http://www.tsp.gov/rates/share-prices.html';
+$TSP_URL = 'https://www.tsp.gov/investmentfunds/shareprice/sharePriceHistory.shtml';
 $TSP_MAIN_URL=("http://www.tsp.gov");
 
 %TSP_FUND_COLUMNS = (
