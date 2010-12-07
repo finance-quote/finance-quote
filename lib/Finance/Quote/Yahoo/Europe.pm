@@ -142,6 +142,11 @@ Finance::Quote->new().
 Information obtained by this module may be covered by Yahoo's terms
 and conditions.  See http://finance.uk.yahoo.com/ for more details.
 
+=head1 SPECIFIC NOTES ON CERTAIN SYMBOLS
+
+Starting in November 2010, the Yahoo site didn't respond to ^DJI symbol
+retrieval. Use ^DJI.US instead.
+
 =head1 LABELS RETURNED
 
 This module returns all the standard labels (where available) provided
