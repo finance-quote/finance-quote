@@ -46,11 +46,13 @@ $VERSION = '1.17';
 $TSP_URL = 'https://www.tsp.gov/investmentfunds/shareprice/sharePriceHistory.shtml';
 $TSP_MAIN_URL=("http://www.tsp.gov");
 
+# ENHANCE-ME: The decade target funds like 2020 appear and disappear.
+# Better not to hard code them.
+#
 %TSP_FUND_COLUMNS = (
     TSPL2040FUND => "L 2040",
     TSPL2030FUND => "L 2030",
     TSPL2020FUND => "L 2020",
-    TSPL2010FUND => "L 2010",
     TSPLINCOMEFUND => "L INCOME",
     TSPGFUND => "G FUND",
     TSPFFUND => "F FUND",
@@ -62,7 +64,6 @@ $TSP_MAIN_URL=("http://www.tsp.gov");
     TSPL2040 => 'Lifecycle 2040 Fund',
     TSPL2030 => 'Lifecycle 2030 Fund',
     TSPL2020 => 'Lifecycle 2020 Fund',
-    TSPL2010 => 'Lifecycle 2010 Fund',
     TSPLINCOME => 'Lifecycle Income Fund',
     TSPGFUND => 'Government Securities Investment Fund',
     TSPFFUND => 'Fixed Income Index Investment Fund',
@@ -90,7 +91,7 @@ sub tsp {
 
 	# Local Variables
 	my(%info, %fundrows);
-	my($ua, $reply, $row, $te);
+	my($ua, $reply, $row, $te, $ts);
 
 	$ua = $quoter->user_agent;
 	$reply = $ua->request(GET $TSP_URL);
@@ -102,7 +103,9 @@ sub tsp {
 
 	# First row is newest data, older data follows, maybe there
 	# should be some way to get it?
-	$row = ($te->rows())[0];
+        $ts = $te->first_table_found
+          || die 'TSP data table not recognised';
+        $row = $ts->row(0);
 
 	# Make a hash that maps the order the columns are in
 	for(my $i=1; my $key = each %TSP_FUND_COLUMNS ; $i++) {
