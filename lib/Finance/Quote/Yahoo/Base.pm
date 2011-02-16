@@ -255,7 +255,7 @@ sub yahoo_request {
                         # to a plain number for ease of use
                         if (defined($info{$symbol,"cap"})) {
                           $info{$symbol,"cap"}
-                            = _B_to_billions ($info{$symbol,"cap"});
+                            = $quoter->B_to_billions ($info{$symbol,"cap"});
                         }
 
       # Convert prices (when needed). E.G. Some London sources
@@ -333,58 +333,6 @@ sub yahoo_request {
 	return \%info;
 }
 
-# If $str ends with a B like "20B" or "1.6B" then expand it as billions like
-# "20000000000" or "1600000000".
-#
-# This is done with string manipulations so floating-point rounding doesn't
-# produce spurious digits for values like "1.6" which aren't exactly
-# representable in binary.
-#
-# Is "B" for billions the only abbreviation from Yahoo?
-# Could extend and rename this if there's also millions or thousands.
-#
-# For reference, if the value was just for use within perl then simply
-# substituting to exponential "1.5e9" might work.  But expanding to full
-# digits seems a better idea as the value is likely to be printed directly
-# as a string.
-#
-sub _B_to_billions {
-  my ($str) = @_;
-  ### _B_to_billions(): $str
-  if ($str =~ s/B$//i) {
-    $str = _decimal_shiftup ($str, 9);
-  }
-  return $str;
-}
-
-# $str is a number like "123" or "123.45"
-# return it with the decimal point moved $shift places to the right
-# must have $shift>=1
-# eg. _decimal_shiftup("123",3)    -> "123000"
-#     _decimal_shiftup("123.45",1) -> "1234.5"
-#     _decimal_shiftup("0.25",1)   -> "2.5"
-#
-sub _decimal_shiftup {
-  my ($str, $shift) = @_;
-
-  # delete decimal point and set $after to count of chars after decimal.
-  # Leading "0" as in "0.25" is deleted too giving "25" so as not to end up
-  # with something that might look like leading 0 for octal.
-  my $after = ($str =~ s/(^0)?\.(.*)/$2/ ? length($2) : 0);
-  
-  $shift -= $after;
-  # now $str is an integer and $shift is relative to the end of $str
-
-  if ($shift >= 0) {
-    # moving right, eg. "1234" becomes "12334000"
-    return $str . ('0' x $shift);  # extra zeros appended
-  } else {
-    # negative means left, eg. "12345" becomes "12.345"
-    # no need to prepend zeros since demanding initial $shift>=1
-    substr ($str, $shift,0, '.');  # new '.' at shifted spot from end
-    return $str;
-  }
-}
 
 1;
 
