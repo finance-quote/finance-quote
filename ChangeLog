@@ -3,6 +3,7 @@ XXXX-XX-XX  Erik Colson <eco@ecocode.net>
 	* TSP.pm updated. Patch from Kevin Ryde.
 	* YAHOO/Base.pm added conversion from 'B' billions to
 	                numbers. Patch from Kevin Ryde.
+	* Billions support moved to Quote.pm
 
 2009-10-05  Erik Colson <eco@ecocode.net>
 
