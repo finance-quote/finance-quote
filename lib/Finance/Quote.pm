@@ -808,7 +808,7 @@ sub decimal_shiftup {
   # delete decimal point and set $after to count of chars after decimal.
   # Leading "0" as in "0.25" is deleted too giving "25" so as not to end up
   # with something that might look like leading 0 for octal.
-  my $after = ($str =~ s/(^0)?\.(.*)/$2/ ? length($2) : 0);
+  my $after = ($str =~ s/(?:^0)?\.(.*)/$1/ ? length($1) : 0);
 
   $shift -= $after;
   # now $str is an integer and $shift is relative to the end of $str
