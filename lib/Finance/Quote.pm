@@ -788,7 +788,7 @@ sub isoTime {
 sub B_to_billions {
 
   my ($self,$str) = @_;
-  ### _B_to_billions(): $str
+  ### B_to_billions(): $str
   if ($str =~ s/B$//i) {
     $str = $self->decimal_shiftup ($str, 9);
   }
@@ -798,9 +798,9 @@ sub B_to_billions {
 # $str is a number like "123" or "123.45"
 # return it with the decimal point moved $shift places to the right
 # must have $shift>=1
-# eg. _decimal_shiftup("123",3)    -> "123000"
-#     _decimal_shiftup("123.45",1) -> "1234.5"
-#     _decimal_shiftup("0.25",1)   -> "2.5"
+# eg. decimal_shiftup("123",3)    -> "123000"
+#     decimal_shiftup("123.45",1) -> "1234.5"
+#     decimal_shiftup("0.25",1)   -> "2.5"
 #
 sub decimal_shiftup {
   my ($self, $str, $shift) = @_;
