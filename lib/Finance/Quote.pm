@@ -803,12 +803,25 @@ sub B_to_billions {
 #     _decimal_shiftup("0.25",1)   -> "2.5"
 #
 sub decimal_shiftup {
-  my ($self, $f, $shift_dec) = @_ ;
-  my $precision = 0 ;
-  $precision = length($1) if ($f=~ /\.(\d+)/) ;
-  my $new_precision = ($shift_dec>$precision) ? 0 : $precision-$shift_dec ;
-  $f *= (10**$shift_dec) ;
-  return sprintf("%.".$new_precision."f",$f) ;
+  my ($self, $str, $shift) = @_;
+
+  # delete decimal point and set $after to count of chars after decimal.
+  # Leading "0" as in "0.25" is deleted too giving "25" so as not to end up
+  # with something that might look like leading 0 for octal.
+  my $after = ($str =~ s/(?:^0)?\.(.*)/$1/ ? length($1) : 0);
+
+  $shift -= $after;
+  # now $str is an integer and $shift is relative to the end of $str
+
+  if ($shift >= 0) {
+    # moving right, eg. "1234" becomes "12334000"
+    return $str . ('0' x $shift);  # extra zeros appended
+  } else {
+    # negative means left, eg. "12345" becomes "12.345"
+    # no need to prepend zeros since demanding initial $shift>=1
+    substr ($str, $shift,0, '.');  # new '.' at shifted spot from end
+    return $str;
+  }
 }
 
 # Dummy destroy function to avoid AUTOLOAD catching it.
