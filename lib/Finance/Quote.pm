@@ -857,7 +857,7 @@ Finance::Quote - Get stock and mutual fund quotes from various exchanges
 This module gets stock quotes from various internet sources, including
 Yahoo! Finance, Fidelity Investments, and the Australian Stock Exchange.
 There are two methods of using this module -- a functional interface
-that is depreciated, and an object-orientated method that provides
+that is deprecated, and an object-orientated method that provides
 greater flexibility and stability.
 
 With the exception of straight currency exchange rates, all information
