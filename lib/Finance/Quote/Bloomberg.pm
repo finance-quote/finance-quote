@@ -26,7 +26,6 @@ use 5.006;
 use HTTP::Request::Common;
 use Web::Scraper;
 use DateTime::Format::Natural;
-use YAML;
 
 our $VERSION = '0.01';
 my $BLOOMBERG_MAINURL          = 'http://www.bloomberg.com/';
