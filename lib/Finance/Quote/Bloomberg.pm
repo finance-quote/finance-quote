@@ -43,21 +43,7 @@ sub bloomberg_stocks_index {
     my ( $quoter, @symbols ) = @_;
     return unless @symbols;
 
-    my %indexes = ();
-    my $ua      = $quoter->user_agent;
-
-    foreach my $symbol (@symbols) {
-        my $uri   = URI->new( $BLOOMBERG_STOCKS_INDEX_URL . $symbol );
-        my $reply = $ua->request( GET $uri);
-        if ( $reply->is_success ) {
-            %indexes =
-              ( %indexes, _scrape_stocks_index( $reply->content, $symbol ) );
-        }
-        else {
-            $indexes{ $symbol, 'success' }  = 0;
-            $indexes{ $symbol, 'errormsg' } = "HTTP failure";
-        }
-    }
+    my %indexes = build_info($quoter, $BLOOMBERG_STOCKS_INDEX_URL, [ \&_scrape_stocks_index ], \@symbols);
 
     return %indexes if wantarray;
     return \%indexes;
@@ -136,6 +122,30 @@ sub _scrape_stocks_index {
     }
 
     $info{ $symbol, 'success' } = 1;
+    return %info;
+}
+
+sub build_info {
+    my ($quoter, $url, $scrapers_ref, $symbols_ref) = @_;
+
+    my %info = ();
+    my $ua      = $quoter->user_agent;
+
+    foreach my $scraper_ref (@$scrapers_ref) {
+        foreach my $symbol (@$symbols_ref) {
+            my $uri   = URI->new( $url . $symbol );
+            my $reply = $ua->request( GET $uri);
+            if ( $reply->is_success ) {
+                %info =
+                ( %info, $scraper_ref->( $reply->content, $symbol ) );
+            }
+            else {
+                $info{ $symbol, 'success' }  = 0;
+                $info{ $symbol, 'errormsg' } = "HTTP failure";
+            }
+        }
+    }
+
     return %info;
 }
 
