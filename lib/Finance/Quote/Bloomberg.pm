@@ -28,14 +28,14 @@ use Web::Scraper;
 use DateTime::Format::Natural;
 
 our $VERSION = '0.01';
-my $BLOOMBERG_MAINURL          = 'http://www.bloomberg.com/';
-my $BLOOMBERG_STOCKS_INDEX_URL = 'http://www.bloomberg.com/apps/quote?ticker=';
+my $BLOOMBERG_MAINURL = 'http://www.bloomberg.com/';
+my $BLOOMBERG_URL     = 'http://www.bloomberg.com/apps/quote?ticker=';
 
 sub methods { return ( bloomberg_stocks_index => \&bloomberg_stocks_index ); }
 
 {
-    my @labels =
-      qw/date isodate method source name currency price net p_change open high low/;
+    my @labels
+        = qw/date isodate method source name currency price net p_change open high low/;
     sub labels { return ( bloomberg_stocks_index => \@labels ); }
 }
 
@@ -43,7 +43,9 @@ sub bloomberg_stocks_index {
     my ( $quoter, @symbols ) = @_;
     return unless @symbols;
 
-    my %indexes = build_info($quoter, $BLOOMBERG_STOCKS_INDEX_URL, [ \&_scrape_stocks_index ], \@symbols);
+    my %indexes
+        = build_info( $quoter, $BLOOMBERG_URL, [ \&_scrape_stocks_index ],
+        \@symbols );
 
     return %indexes if wantarray;
     return \%indexes;
@@ -61,15 +63,15 @@ sub _scrape_stocks_index {
         process '#price_info .price', 'price_info' => 'TEXT';
         process '.date',              'date'       => 'TEXT';
         process '//div[@id="company_info"]/h1',
-          'name' => [ 'TEXT', sub { s/\s+\(.*\)//; } ];
+            'name' => [ 'TEXT', sub { s/\s+\(.*\)//; } ];
         process '#quote_summary .value',
-          'values[]' => [ 'TEXT', sub { s/,//g } ];
+            'values[]' => [ 'TEXT', sub {s/,//g} ];
     };
     my $result = $scraper->scrape($content);
 
     if ( defined $result->{price_info} ) {
-        $info{ $symbol, 'currency' } =
-          ( split( /\s+/, $result->{price_info} ) )[2];
+        $info{ $symbol, 'currency' }
+            = ( split( /\s+/, $result->{price_info} ) )[2];
     }
     else {
         $info{ $symbol, 'success' }  = 0;
@@ -83,7 +85,7 @@ sub _scrape_stocks_index {
         return %info;
     }
     my $dt = $dt_parser->parse_datetime( $result->{date} )
-      if ( defined $result->{date} );
+        if ( defined $result->{date} );
     if ( $dt_parser->success ) {
         $info{ $symbol, 'isodate' } = $dt->date;
         $info{ $symbol, 'date' }    = $dt->mdy('/');
@@ -126,18 +128,17 @@ sub _scrape_stocks_index {
 }
 
 sub build_info {
-    my ($quoter, $url, $scrapers_ref, $symbols_ref) = @_;
+    my ( $quoter, $url, $scrapers_ref, $symbols_ref ) = @_;
 
     my %info = ();
-    my $ua      = $quoter->user_agent;
+    my $ua   = $quoter->user_agent;
 
     foreach my $scraper_ref (@$scrapers_ref) {
         foreach my $symbol (@$symbols_ref) {
             my $uri   = URI->new( $url . $symbol );
             my $reply = $ua->request( GET $uri);
             if ( $reply->is_success ) {
-                %info =
-                ( %info, $scraper_ref->( $reply->content, $symbol ) );
+                %info = ( %info, $scraper_ref->( $reply->content, $symbol ) );
             }
             else {
                 $info{ $symbol, 'success' }  = 0;
