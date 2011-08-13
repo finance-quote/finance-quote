@@ -42,7 +42,6 @@ requires(       'HTTP::Request::Common'     => 0);
 requires(       'HTML::TableExtract'        => 0);
 requires(       'HTML::TreeBuilder'         => 0);
 requires(       'Web::Scraper'              => 0);
-requires(       'DateTime::Format::Natural' => 0);
 
 test_requires(  'Test::More'                => 0);
 
