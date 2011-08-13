@@ -25,7 +25,6 @@ use 5.006;
 
 use HTTP::Request::Common;
 use Web::Scraper;
-use DateTime::Format::Natural;
 
 our $VERSION = '0.03';
 my $BLOOMBERG_MAINURL = 'http://www.bloomberg.com/';
@@ -88,7 +87,6 @@ sub bloomberg_fund {
 
 sub _scrape_stocks_index {
     my ( $content, $symbol ) = @_;
-    my $dt_parser = DateTime::Format::Natural->new;
 
     my %info = ();
     $info{ $symbol, 'method' } = 'bloomberg_stocks_index';
@@ -128,7 +126,10 @@ sub _scrape_stocks_index {
         'low' => [ 'TEXT', sub {s/,//g} ]
         ),
         process(
-        '//span[@class="date"]', 'date' => [ 'TEXT', \&_parse_date ]
+        '//span[@class="date"]', 'date' => [ 'TEXT', \&_mdy ]
+        ),
+        process(
+        '//span[@class="date"]', 'isodate' => [ 'TEXT', \&_isodate ]
         ),
         process(
         '//td[@class="name" and text()=~"NAV"]/following-sibling::node()[1]',
@@ -141,7 +142,7 @@ sub _scrape_stocks_index {
     };
     my $result = $scraper->scrape($content);
 
-    foreach my $label (qw/name price currency net p_change open high low/) {
+    foreach my $label (qw/name date isodate price currency net p_change open high low/) {
         if ( defined $result->{$label} ) {
             $info{ $symbol, $label } = $result->{$label};
         }
@@ -150,23 +151,6 @@ sub _scrape_stocks_index {
             $info{ $symbol, 'errormsg' } = "Parse " . $label . " error";
             return %info;
         }
-    }
-
-    unless ( defined $result->{date} ) {
-        $info{ $symbol, 'success' }  = 0;
-        $info{ $symbol, 'errormsg' } = "Parse date error";
-        return %info;
-    }
-    my $dt = $dt_parser->parse_datetime( $result->{date} )
-        if ( defined $result->{date} );
-    if ( $dt_parser->success ) {
-        $info{ $symbol, 'isodate' } = $dt->date;
-        $info{ $symbol, 'date' }    = $dt->mdy('/');
-    }
-    else {
-        $info{ $symbol, 'success' }  = 0;
-        $info{ $symbol, 'errormsg' } = $dt_parser->error;
-        return %info;
     }
 
     $info{ $symbol, 'success' } = 1;
@@ -342,6 +326,18 @@ sub build_info {
     }
 
     return %info;
+}
+
+sub _isodate {
+    my $date = shift;
+    my ( $yyyy, $mm, $dd ) = split /\//, _parse_date($date);
+    return sprintf "%04d-%02d-%02d", $yyyy, $mm, $dd;
+}
+
+sub _mdy {
+    my $date = shift;
+    my ( $yyyy, $mm, $dd ) = split /\//, _parse_date($date);
+    return sprintf "%02d/%02d/%04d", $mm, $dd, $yyyy;
 }
 
 sub _parse_date {
