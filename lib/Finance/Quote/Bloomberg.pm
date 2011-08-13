@@ -279,7 +279,8 @@ Finance::Quote::Bloomberg - Obtain quotes from Bloomberg.
 
 This module obtains information from Bloomberg. Currently Information of
 Stock Index and ETF can be fetched. Query them with ticker symbols.
-To find their tickers, search at http://www.bloomberg.com/.
+To find their tickers, search http://www.bloomberg.com/ or Yahoo! Finance
+and so on.
 
 Information returned by this module is governed by Bloomberg's terms and
 conditions.
@@ -296,7 +297,7 @@ date, isodate, method, source, name, currency, price, net, p_change, open, high 
 The following labels may be returned by Finance::Quote::Bloomberg::bloomberg_etf:
 date, isodate, method, source, name, currency, price, net, p_change, open, high, low, nav and p_premium.
 
-The p_premium is percent premium/discount of the ETF.
+The p_premium means the ETF's percent premium/discount.
 
 =head1 SEE ALSO
 
