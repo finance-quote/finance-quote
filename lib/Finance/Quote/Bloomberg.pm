@@ -55,9 +55,8 @@ sub bloomberg_stocks_index {
     my ( $quoter, @symbols ) = @_;
     return unless @symbols;
 
-    my %indexes
-        = build_info( $quoter, $BLOOMBERG_URL, [ \&_scrape_basic, \&_scrape_stocks_index ],
-        \@symbols );
+    my %indexes = build_info( $quoter, $BLOOMBERG_URL,
+        [ \&_scrape_basic, \&_scrape_stocks_index ], \@symbols );
 
     return %indexes if wantarray;
     return \%indexes;
@@ -67,8 +66,8 @@ sub bloomberg_etf {
     my ( $quoter, @symbols ) = @_;
     return unless @symbols;
 
-    my %etfs
-        = build_info( $quoter, $BLOOMBERG_URL, [ \&_scrape_etf ], \@symbols );
+    my %etfs = build_info( $quoter, $BLOOMBERG_URL,
+        [ \&_scrape_basic, \&_scrape_etf ], \@symbols );
 
     return %etfs if wantarray;
     return \%etfs;
@@ -178,29 +177,8 @@ sub _scrape_etf {
 
     my %info = ();
     $info{ $symbol, 'method' } = 'bloomberg_etf';
-    $info{ $symbol, 'source' } = $BLOOMBERG_MAINURL;
 
     my $scraper = scraper {
-        process(
-        'id("company_info")/h1/text()[1]',
-        'name' => [ 'TEXT', sub { s/^\s*(.*?)\s*$/$1/; } ]
-        ),
-        process(
-        '//div[@class="price" and text()=~"PRICE:"]/span[@class="amount"]',
-        'price' => [ 'TEXT', sub {s/,//g} ],
-        ),
-        process(
-        '//div[@class="price" and text()=~"PRICE:"]/text()[2]',
-        'currency' => [ 'TEXT', sub { s/\s//g; } ]
-        ),
-        process(
-        '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
-        'net' => [ 'TEXT', sub { s/,//g; ( split(/\s+/) )[0]; } ]
-        ),
-        process(
-        '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
-        'p_change' => [ 'TEXT', sub { /\((.*)%\)/; $1 } ]
-        ),
         process(
         '//td[@class="name" and text()=~"Open"]/following-sibling::node()',
         'open' => [ 'TEXT', sub {s/,//g} ]
@@ -228,9 +206,7 @@ sub _scrape_etf {
     };
     my $result = $scraper->scrape($content);
 
-    foreach my $label (
-        qw/name price currency net p_change open high low nav p_premium/)
-    {
+    foreach my $label (qw/open high low nav p_premium/) {
         if ( defined $result->{$label} ) {
             $info{ $symbol, $label } = $result->{$label};
         }
