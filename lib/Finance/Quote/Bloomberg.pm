@@ -354,7 +354,7 @@ Finance::Quote::Bloomberg - Obtain quotes from Bloomberg.
 =head1 DESCRIPTION
 
 This module obtains information from Bloomberg. Currently Information of
-Stock Index and ETF can be fetched. Query them with ticker symbols.
+Stock Index, ETF and Fund can be fetched. Query them with ticker symbols.
 To find their tickers, search http://www.bloomberg.com/ or Yahoo! Finance
 and so on.
 
@@ -374,6 +374,11 @@ The following labels may be returned by Finance::Quote::Bloomberg::bloomberg_etf
 date, isodate, method, source, name, currency, price, net, p_change, open, high, low, nav and p_premium.
 
 The p_premium means the ETF's percent premium/discount.
+
+=head2 bloomberg_fund()
+
+The following labels may be returned by Finance::Quote::Bloomberg::bloomberg_fund:
+date, isodate, method, source, name, currency, price, net and p_change.
 
 =head1 SEE ALSO
 
