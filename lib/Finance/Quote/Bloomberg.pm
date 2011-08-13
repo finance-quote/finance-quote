@@ -343,10 +343,16 @@ Finance::Quote::Bloomberg - Obtain quotes from Bloomberg.
     $q = Finance::Quote->new;
 
     # Fetching Stock Index Information
-    %quotes = $q->fetch( 'bloomberg_stocks_index', "stock-index-ticker" );
+    %index_quotes = $q->fetch( 'bloomberg_stocks_index', "stock-index-ticker" );
 
     # Fetching ETF Information 
-    %quotes = $q->fetch( 'bloomberg_etf', "etf-ticker" );
+    %etf_quotes = $q->fetch( 'bloomberg_etf', "etf-ticker" );
+
+    # Fetching Fund Information
+    %fund_quotes = $q->fetch( 'bloomberg_fund', "fund-ticker" );
+
+    # Fetching Stock Information
+    %stock_quotes = $q->fetch( 'bloomberg_stock', "stock-ticker" );
 
 =head1 DESCRIPTION
 
