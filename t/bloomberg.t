@@ -10,7 +10,7 @@ if ( not $ENV{ONLINE_TEST} ) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 59;
+plan tests => 71;
 
 my $q        = Finance::Quote->new;
 my $year     = ( localtime() )[5] + 1900;
@@ -188,3 +188,37 @@ ok( $quotes{ "81317104:JP", "p_change" } !~ /%/,
 
 ok( !$quotes{ "BOGUS:JP", "success" }, "BOGUS Fund returns no-success" );
 
+
+# Test Bloomberg stock functions.
+%quotes = $q->fetch( 'bloomberg_stock', '7203:JP', 'BOGUS:JP' );
+ok( %quotes, "bloomberg_stock() returns hash" );
+
+ok( $quotes{ '7203:JP', 'source' } eq 'http://www.bloomberg.com/',
+    "source should be http://www.bloomberg.com/" );
+ok( $quotes{ '7203:JP', 'method' } eq 'bloomberg_stock',
+    "method should be bloomberg_stock" );
+
+ok( $quotes{ '7203:JP', 'success' }, "7203:JP should be success" );
+ok( $quotes{ "7203:JP", "price" } > 0,
+    "7203:JP's price should be greater than 0"
+);
+ok( $quotes{ "7203:JP", "net" }, "7203:JP's net should be defined" );
+ok( $quotes{ "7203:JP", "name" } eq "Toyota Motor Corp",
+    "7203:JP's name should be 'Toyota Motor Corp'"
+);
+ok( $quotes{ "7203:JP", "currency" } eq "JPY",
+    "7203:JP's currency should be JPY"
+);
+ok( substr( $quotes{ "7203:JP", "isodate" }, 0, 4 ) == $year
+        || substr( $quotes{ "7203:JP", "isodate" }, 0, 4 ) == $lastyear,
+    "year of isodate should be this year or last year"
+);
+ok( substr( $quotes{ "7203:JP", "date" }, 6, 4 ) == $year
+        || substr( $quotes{ "7203:JP", "date" }, 6, 4 ) == $lastyear,
+    "year of isodate should be this year or last year"
+);
+ok( $quotes{ "7203:JP", "p_change" } !~ /%/,
+    "p_change shouldn't have spurious % signs"
+);
+
+ok( !$quotes{ "BOGUS:JP", "success" }, "BOGUS returns no-success" );
