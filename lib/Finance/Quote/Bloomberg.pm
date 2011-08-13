@@ -26,7 +26,7 @@ use 5.006;
 use HTTP::Request::Common;
 use Web::Scraper;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 my $BLOOMBERG_MAINURL = 'http://www.bloomberg.com/';
 my $BLOOMBERG_URL     = 'http://www.bloomberg.com/apps/quote?ticker=';
 
@@ -34,7 +34,8 @@ sub methods {
     return (
         bloomberg_stocks_index => \&bloomberg_stocks_index,
         bloomberg_etf          => \&bloomberg_etf,
-        bloomberg_fund         => \&bloomberg_fund
+        bloomberg_fund         => \&bloomberg_fund,
+        bloomberg_stock        => \&bloomberg_stock
     );
 }
 
@@ -46,7 +47,8 @@ sub methods {
         return (
             bloomberg_stocks_index => \@labels,
             bloomberg_etf          => [ @labels, 'nav', 'p_premium' ],
-            bloomberg_fund         => [ (@labels)[ 0 .. 8 ] ]
+            bloomberg_fund         => [ (@labels)[ 0 .. 8 ] ],
+            bloomberg_stock        => \@labels
         );
     }
 }
@@ -85,6 +87,17 @@ sub bloomberg_fund {
 
     return %funds if wantarray;
     return \%funds;
+}
+
+sub bloomberg_stock {
+    my ( $quoter, @symbols ) = @_;
+    return unless @symbols;
+
+    my %stocks = build_info( $quoter, $BLOOMBERG_URL,
+        [ \&_scrape_basic, \&_scrape_stock ], \@symbols );
+
+    return %stocks if wantarray;
+    return \%stocks;
 }
 
 sub _scrape_basic {
@@ -206,6 +219,43 @@ sub _scrape_etf {
     my $result = $scraper->scrape($content);
 
     foreach my $label (qw/open high low nav p_premium/) {
+        if ( defined $result->{$label} ) {
+            $info{ $symbol, $label } = $result->{$label};
+        }
+        else {
+            $info{ $symbol, 'success' }  = 0;
+            $info{ $symbol, 'errormsg' } = "Parse " . $label . " error";
+            return %info;
+        }
+    }
+
+    $info{ $symbol, 'success' } = 1;
+    return %info;
+}
+
+sub _scrape_stock {
+    my ( $content, $symbol ) = @_;
+
+    my %info = ();
+    $info{ $symbol, 'method' } = 'bloomberg_stock';
+
+    my $scraper = scraper {
+        process(
+        '//td[@class="name" and text()=~"Open"]/following-sibling::node()',
+        'open' => [ 'TEXT', sub {s/,//g} ]
+        ),
+        process(
+        '//td[@class="name" and text()=~"High"]/following-sibling::node()',
+        'high' => [ 'TEXT', sub {s/,//g} ]
+        ),
+        process(
+        '//td[@class="name" and text()=~"Low"]/following-sibling::node()',
+        'low' => [ 'TEXT', sub {s/,//g} ]
+        );
+    };
+    my $result = $scraper->scrape($content);
+
+    foreach my $label (qw/open high low/) {
         if ( defined $result->{$label} ) {
             $info{ $symbol, $label } = $result->{$label};
         }
