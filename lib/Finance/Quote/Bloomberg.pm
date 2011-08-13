@@ -56,7 +56,7 @@ sub bloomberg_stocks_index {
     return unless @symbols;
 
     my %indexes
-        = build_info( $quoter, $BLOOMBERG_URL, [ \&_scrape_stocks_index ],
+        = build_info( $quoter, $BLOOMBERG_URL, [ \&_scrape_basic, \&_scrape_stocks_index ],
         \@symbols );
 
     return %indexes if wantarray;
@@ -85,11 +85,10 @@ sub bloomberg_fund {
     return \%funds;
 }
 
-sub _scrape_stocks_index {
+sub _scrape_basic {
     my ( $content, $symbol ) = @_;
 
     my %info = ();
-    $info{ $symbol, 'method' } = 'bloomberg_stocks_index';
     $info{ $symbol, 'source' } = $BLOOMBERG_MAINURL;
 
     my $scraper = scraper {
@@ -98,11 +97,11 @@ sub _scrape_stocks_index {
         'name' => [ 'TEXT', sub { s/^\s*(.*?)\s*$/$1/; } ]
         ),
         process(
-        '//div[@class="price" and text()=~"VALUE:"]/span[@class="amount"]',
+        '//div[@class="price" and (text()=~"VALUE:" or text()=~"PRICE:" or text()=~"NAV:")]/span[@class="amount"]',
         'price' => [ 'TEXT', sub {s/,//g} ],
         ),
         process(
-        '//div[@class="price" and text()=~"VALUE:"]/text()[2]',
+        '//div[@class="price" and (text()=~"VALUE:" or text()=~"PRICE:" or text()=~"NAV:")]/text()[2]',
         'currency' => [ 'TEXT', sub { s/\s//g; } ]
         ),
         process(
@@ -113,6 +112,37 @@ sub _scrape_stocks_index {
         '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
         'p_change' => [ 'TEXT', sub { /\((.*)%\)/; $1 } ]
         ),
+        process(
+        '//span[@class="date"]', 'date' => [ 'TEXT', \&_mdy ]
+        ),
+        process(
+        '//span[@class="date"]', 'isodate' => [ 'TEXT', \&_isodate ]
+        );
+    };
+    my $result = $scraper->scrape($content);
+
+    foreach my $label (qw/name date isodate price currency net p_change/) {
+        if ( defined $result->{$label} ) {
+            $info{ $symbol, $label } = $result->{$label};
+        }
+        else {
+            $info{ $symbol, 'success' }  = 0;
+            $info{ $symbol, 'errormsg' } = "Parse " . $label . " error";
+            return %info;
+        }
+    }
+
+    $info{ $symbol, 'success' } = 1;
+    return %info;
+}
+
+sub _scrape_stocks_index {
+    my ( $content, $symbol ) = @_;
+
+    my %info = ();
+    $info{ $symbol, 'method' } = 'bloomberg_stocks_index';
+
+    my $scraper = scraper {
         process(
         '//td[@class="name" and text()=~"Open"]/following-sibling::node()',
         'open' => [ 'TEXT', sub {s/,//g} ]
@@ -125,24 +155,10 @@ sub _scrape_stocks_index {
         '//td[@class="name" and text()=~"Low"]/following-sibling::node()',
         'low' => [ 'TEXT', sub {s/,//g} ]
         ),
-        process(
-        '//span[@class="date"]', 'date' => [ 'TEXT', \&_mdy ]
-        ),
-        process(
-        '//span[@class="date"]', 'isodate' => [ 'TEXT', \&_isodate ]
-        ),
-        process(
-        '//td[@class="name" and text()=~"NAV"]/following-sibling::node()[1]',
-        'nav' => [ 'TEXT', sub {s/,//g} ]
-        ),
-        process(
-        '//td[@class="name" and text()=~"Premium"]/following-sibling::node()',
-        'p_premium' => 'TEXT'
-        );
     };
     my $result = $scraper->scrape($content);
 
-    foreach my $label (qw/name date isodate price currency net p_change open high low/) {
+    foreach my $label (qw/open high low/) {
         if ( defined $result->{$label} ) {
             $info{ $symbol, $label } = $result->{$label};
         }
