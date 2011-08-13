@@ -10,7 +10,7 @@ if ( not $ENV{ONLINE_TEST} ) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 47;
+plan tests => 59;
 
 my $q        = Finance::Quote->new;
 my $year     = ( localtime() )[5] + 1900;
@@ -59,6 +59,7 @@ ok( $quotes{ "MXEF:IND", "p_change" } !~ /%/,
 ok( !$quotes{ "BOGUS.SI", "success" },
     "BOGUS Stocks Index returns no-success"
 );
+
 
 # Test Bloomberg ETF functions.
 %quotes = $q->fetch( 'bloomberg_etf', '1681:JP', '1557:JP', 'BOGUS:JP' );
@@ -151,3 +152,39 @@ ok( $quotes{ "1557:JP", "p_premium" } !~ /%/,
 );
 
 ok( !$quotes{ "BOGUS:JP", "success" }, "BOGUS ETF returns no-success" );
+
+
+# Test Bloomberg fund functions.
+%quotes = $q->fetch( 'bloomberg_fund', '81317104:JP', 'BOGUS:JP' );
+ok( %quotes, "bloomberg_fund() returns hash" );
+
+ok( $quotes{ '81317104:JP', 'source' } eq 'http://www.bloomberg.com/',
+    "source should be http://www.bloomberg.com/" );
+ok( $quotes{ '81317104:JP', 'method' } eq 'bloomberg_fund',
+    "method should be bloomberg_fund" );
+
+ok( $quotes{ '81317104:JP', 'success' }, "81317104:JP should be success" );
+ok( $quotes{ "81317104:JP", "price" } > 0,
+    "81317104:JP's price should be greater than 0"
+);
+ok( $quotes{ "81317104:JP", "net" }, "81317104:JP's net should be defined" );
+ok( $quotes{ "81317104:JP", "name" } eq "CMAM Japan Bond Index e",
+    "81317104:JP's name should be 'CMAM Japan Bond Index e'"
+);
+ok( $quotes{ "81317104:JP", "currency" } eq "JPY",
+    "81317104:JP's currency should be JPY"
+);
+ok( substr( $quotes{ "81317104:JP", "isodate" }, 0, 4 ) == $year
+        || substr( $quotes{ "81317104:JP", "isodate" }, 0, 4 ) == $lastyear,
+    "year of isodate should be this year or last year"
+);
+ok( substr( $quotes{ "81317104:JP", "date" }, 6, 4 ) == $year
+        || substr( $quotes{ "81317104:JP", "date" }, 6, 4 ) == $lastyear,
+    "year of isodate should be this year or last year"
+);
+ok( $quotes{ "81317104:JP", "p_change" } !~ /%/,
+    "p_change shouldn't have spurious % signs"
+);
+
+ok( !$quotes{ "BOGUS:JP", "success" }, "BOGUS Fund returns no-success" );
+
