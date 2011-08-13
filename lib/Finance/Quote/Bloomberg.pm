@@ -77,8 +77,11 @@ sub bloomberg_fund {
     my ( $quoter, @symbols ) = @_;
     return unless @symbols;
 
-    my %funds = build_info( $quoter, $BLOOMBERG_URL, [ \&_scrape_fund ],
+    my %funds = build_info( $quoter, $BLOOMBERG_URL, [ \&_scrape_basic ],
         \@symbols );
+    foreach my $symbol (@symbols) {
+        $funds{ $symbol, 'method' } = 'bloomberg_fund';
+    }
 
     return %funds if wantarray;
     return \%funds;
@@ -211,69 +214,6 @@ sub _scrape_etf {
             $info{ $symbol, 'errormsg' } = "Parse " . $label . " error";
             return %info;
         }
-    }
-
-    $info{ $symbol, 'success' } = 1;
-    return %info;
-}
-
-sub _scrape_fund {
-    my ( $content, $symbol ) = @_;
-
-    my %info = ();
-    $info{ $symbol, 'method' } = 'bloomberg_fund';
-    $info{ $symbol, 'source' } = $BLOOMBERG_MAINURL;
-
-    my $scraper = scraper {
-        process(
-        'id("company_info")/h1/text()[1]',
-        'name' => [ 'TEXT', sub { s/^\s*(.*?)\s*$/$1/; } ]
-        ),
-        process(
-        '//div[@class="price" and text()=~"NAV:"]/span[@class="amount"]',
-        'price' => [ 'TEXT', sub {s/,//g} ],
-        ),
-        process(
-        '//div[@class="price" and text()=~"NAV:"]/text()[2]',
-        'currency' => [ 'TEXT', sub { s/\s//g; } ]
-        ),
-        process(
-        '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
-        'net' => [ 'TEXT', sub { s/,//g; ( split(/\s+/) )[0]; } ]
-        ),
-        process(
-        '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
-        'p_change' => [ 'TEXT', sub { /\((.*)%\)/; $1 } ]
-        ),
-        process(
-        '//td[@class="name" and text()=~"Assets"]/following-sibling::node()[1]',
-        'date' => [ 'TEXT', sub { /\(on\s+(.*)\)/; $1; } ]
-        );
-    };
-    my $result = $scraper->scrape($content);
-
-    foreach my $label (qw/name price currency net p_change/) {
-        if ( defined $result->{$label} ) {
-            $info{ $symbol, $label } = $result->{$label};
-        }
-        else {
-            $info{ $symbol, 'success' }  = 0;
-            $info{ $symbol, 'errormsg' } = "Parse " . $label . " error";
-            return %info;
-        }
-    }
-
-    if ( defined $result->{date} ) {
-        my ( $mm, $dd, $yy ) = split '/', $result->{date};
-        $info{ $symbol, 'date' } = sprintf "%02d/%02d/%04d", $mm, $dd,
-            $yy + 2000;
-        $info{ $symbol, 'isodate' } = sprintf "%04d-%02d-%02d", $yy + 2000,
-            $mm, $dd;
-    }
-    else {
-        $info{ $symbol, 'success' }  = 0;
-        $info{ $symbol, 'errormsg' } = "Parse date error";
-        return %info;
     }
 
     $info{ $symbol, 'success' } = 1;
