@@ -192,10 +192,6 @@ sub _scrape_etf {
         'low' => [ 'TEXT', sub {s/,//g} ]
         ),
         process(
-        '//td[@class="name" and text()=~"Assets"]/following-sibling::node()[1]',
-        'date' => [ 'TEXT', sub { /\(on\s+(.*)\)/; $1; } ]
-        ),
-        process(
         '//td[@class="name" and text()=~"NAV"]/following-sibling::node()[1]',
         'nav' => [ 'TEXT', sub {s/,//g} ]
         ),
@@ -215,19 +211,6 @@ sub _scrape_etf {
             $info{ $symbol, 'errormsg' } = "Parse " . $label . " error";
             return %info;
         }
-    }
-
-    if ( defined $result->{date} ) {
-        my ( $mm, $dd, $yy ) = split '/', $result->{date};
-        $info{ $symbol, 'date' } = sprintf "%02d/%02d/%04d", $mm, $dd,
-            $yy + 2000;
-        $info{ $symbol, 'isodate' } = sprintf "%04d-%02d-%02d", $yy + 2000,
-            $mm, $dd;
-    }
-    else {
-        $info{ $symbol, 'success' }  = 0;
-        $info{ $symbol, 'errormsg' } = "Parse date error";
-        return %info;
     }
 
     $info{ $symbol, 'success' } = 1;
