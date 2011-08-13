@@ -27,16 +27,27 @@ use HTTP::Request::Common;
 use Web::Scraper;
 use DateTime::Format::Natural;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 my $BLOOMBERG_MAINURL = 'http://www.bloomberg.com/';
 my $BLOOMBERG_URL     = 'http://www.bloomberg.com/apps/quote?ticker=';
 
-sub methods { return ( bloomberg_stocks_index => \&bloomberg_stocks_index ); }
+sub methods {
+    return (
+        bloomberg_stocks_index => \&bloomberg_stocks_index,
+        bloomberg_etf          => \&bloomberg_etf
+    );
+}
 
 {
     my @labels
         = qw/date isodate method source name currency price net p_change open high low/;
-    sub labels { return ( bloomberg_stocks_index => \@labels ); }
+
+    sub labels {
+        return (
+            bloomberg_stocks_index => \@labels,
+            bloomberg_etf          => [ @labels, 'nav', 'p_premium' ]
+        );
+    }
 }
 
 sub bloomberg_stocks_index {
@@ -49,6 +60,17 @@ sub bloomberg_stocks_index {
 
     return %indexes if wantarray;
     return \%indexes;
+}
+
+sub bloomberg_etf {
+    my ( $quoter, @symbols ) = @_;
+    return unless @symbols;
+
+    my %etfs
+        = build_info( $quoter, $BLOOMBERG_URL, [ \&_scrape_etf ], \@symbols );
+
+    return %etfs if wantarray;
+    return \%etfs;
 }
 
 sub _scrape_stocks_index {
@@ -127,6 +149,91 @@ sub _scrape_stocks_index {
     return %info;
 }
 
+sub _scrape_etf {
+    my ( $content, $symbol ) = @_;
+
+    my %info = ();
+    $info{ $symbol, 'method' } = 'bloomberg_etf';
+    $info{ $symbol, 'source' } = $BLOOMBERG_MAINURL;
+
+    my $scraper = scraper {
+        process(
+            'id("company_info")/h1/text()[1]',
+            'name' => [ 'TEXT', sub { s/^\s*(.*?)\s*$/$1/; } ]
+        ),
+        process(
+            '//div[@class="price" and text()=~"PRICE:"]/span[@class="amount"]',
+            'price' => [ 'TEXT', sub { s/,//g } ],
+        ),
+        process(
+            '//div[@class="price" and text()=~"PRICE:"]/text()[2]',
+            'currency' => [ 'TEXT', sub { s/\s//g; } ]
+        ),
+        process(
+            '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
+            'net' => [ 'TEXT', sub { s/,//g; ( split(/\s+/) )[0]; } ]
+        ),
+        process(
+            '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
+            'p_change' => [ 'TEXT', sub { /\((.*)%\)/; $1 } ]
+        ),
+        process(
+            '//td[@class="name" and text()=~"Open"]/following-sibling::node()',
+            'open' => [ 'TEXT', sub { s/,//g } ]
+        ),
+        process(
+            '//td[@class="name" and text()=~"High"]/following-sibling::node()',
+            'high' => [ 'TEXT', sub { s/,//g } ]
+        ),
+        process(
+            '//td[@class="name" and text()=~"Low"]/following-sibling::node()',
+            'low' => [ 'TEXT', sub { s/,//g } ]
+        ),
+        process(
+            '//td[@class="name" and text()=~"Assets"]/following-sibling::node()[1]',
+            'date' => ['TEXT', sub { /\(on\s+(.*)\)/; $1; } ]
+        ),
+        process(
+            '//td[@class="name" and text()=~"NAV"]/following-sibling::node()[1]',
+            'nav' => [ 'TEXT', sub { s/,//g } ]
+        ),
+        process(
+            '//td[@class="name" and text()=~"Premium"]/following-sibling::node()',
+            'p_premium' => 'TEXT'
+        );
+    };
+    my $result = $scraper->scrape($content);
+
+    foreach my $label (
+        qw/name price currency net p_change open high low nav p_premium/)
+    {
+        if ( defined $result->{$label} ) {
+            $info{ $symbol, $label } = $result->{$label};
+        }
+        else {
+            $info{ $symbol, 'success' }  = 0;
+            $info{ $symbol, 'errormsg' } = "Parse " . $label . " error";
+            return %info;
+        }
+    }
+
+    if ( defined $result->{date} ) {
+        my ( $mm, $dd, $yy ) = split '/', $result->{date};
+        $info{ $symbol, 'date' } = sprintf "%02d/%02d/%04d", $mm, $dd,
+            $yy + 2000;
+        $info{ $symbol, 'isodate' } = sprintf "%04d-%02d-%02d", $yy + 2000,
+            $mm, $dd;
+    }
+    else {
+        $info{ $symbol, 'success' }  = 0;
+        $info{ $symbol, 'errormsg' } = "Parse date error";
+        return %info;
+    }
+
+    $info{ $symbol, 'success' } = 1;
+    return %info;
+}
+
 sub build_info {
     my ( $quoter, $url, $scrapers_ref, $symbols_ref ) = @_;
 
@@ -162,21 +269,34 @@ Finance::Quote::Bloomberg - Obtain quotes from Bloomberg.
 
     $q = Finance::Quote->new;
 
+    # Fetching Stock Index Information
     %quotes = $q->fetch( 'bloomberg_stocks_index', "stock-index-ticker" );
+
+    # Fetching ETF Information 
+    %quotes = $q->fetch( 'bloomberg_etf', "etf-ticker" );
 
 =head1 DESCRIPTION
 
-This module obtains information about World Stock Indexes from Bloomberg.
-Query it with ticker symbols.
+This module obtains information from Bloomberg. Currently Information of
+Stock Index and ETF can be fetched. Query them with ticker symbols.
+To find their tickers, search at http://www.bloomberg.com/.
 
 Information returned by this module is governed by Bloomberg's terms and
 conditions.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::Bloomberg:
-date, isodate, method, source, name, currency, price, net, p_change,
-open, high and low.
+=head2 bloomberg_stocks_index()
+
+The following labels may be returned by Finance::Quote::Bloomberg::bloomberg_stocks_index:
+date, isodate, method, source, name, currency, price, net, p_change, open, high and low.
+
+=head2 bloomberg_etf()
+
+The following labels may be returned by Finance::Quote::Bloomberg::bloomberg_etf:
+date, isodate, method, source, name, currency, price, net, p_change, open, high, low, nav and p_premium.
+
+The p_premium is percent premium/discount of the ETF.
 
 =head1 SEE ALSO
 
