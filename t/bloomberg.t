@@ -10,7 +10,7 @@ if ( not $ENV{ONLINE_TEST} ) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 32;
+plan tests => 47;
 
 my $q        = Finance::Quote->new;
 my $year     = ( localtime() )[5] + 1900;
@@ -61,7 +61,7 @@ ok( !$quotes{ "BOGUS.SI", "success" },
 );
 
 # Test Bloomberg ETF functions.
-%quotes = $q->fetch( 'bloomberg_etf', '1681:JP', 'BOGUS:JP' );
+%quotes = $q->fetch( 'bloomberg_etf', '1681:JP', '1557:JP', 'BOGUS:JP' );
 ok( %quotes, "bloomberg_etf() returns hash" );
 
 ok( $quotes{ '1681:JP', 'source' } eq 'http://www.bloomberg.com/',
@@ -105,6 +105,48 @@ ok( $quotes{ "1681:JP", "nav" } > 0,
     "1681:JP's nav should be greater than 0"
 );
 ok( $quotes{ "1681:JP", "p_premium" } !~ /%/,
+    "p_premium shouldn't have spurious % signs"
+);
+
+ok( $quotes{ '1681:JP', 'source' } eq 'http://www.bloomberg.com/',
+    "source should be http://www.bloomberg.com/" );
+ok( $quotes{ '1681:JP', 'method' } eq 'bloomberg_etf',
+    "method should be bloomberg_stocks_index"
+);
+
+ok( $quotes{ '1557:JP', 'success' }, "1557:JP should be success" );
+ok( $quotes{ "1557:JP", "price" } > 0,
+    "1557:JP's price should be greater than 0"
+);
+ok( $quotes{ "1557:JP", "open" } > 0,
+    "1557:JP's open should be greater than 0"
+);
+ok( $quotes{ "1557:JP", "high" } > 0,
+    "1557:JP's high should be greater than 0"
+);
+ok( $quotes{ "1557:JP", "low" } > 0,
+    "1557:JP's high should be greater than 0" );
+ok( $quotes{ "1557:JP", "net" }, "1557:JP's net should be defined" );
+ok( $quotes{ "1557:JP", "name" } eq "SPDR S&P 500 ETF Trust",
+    "1557:JP's name should be 'SPDR S&P 500 ETF Trust'"
+);
+ok( $quotes{ "1557:JP", "currency" } eq "JPY",
+    "1557:JP's currency should be JPY"
+);
+ok( substr( $quotes{ "1557:JP", "isodate" }, 0, 4 ) == $year
+        || substr( $quotes{ "1557:JP", "isodate" }, 0, 4 ) == $lastyear,
+    "year of isodate should be this year or last year"
+);
+ok( substr( $quotes{ "1557:JP", "date" }, 6, 4 ) == $year
+        || substr( $quotes{ "1557:JP", "date" }, 6, 4 ) == $lastyear,
+    "year of isodate should be this year or last year"
+);
+ok( $quotes{ "1557:JP", "p_change" } !~ /%/,
+    "p_change shouldn't have spurious % signs"
+);
+ok( $quotes{ "1557:JP", "nav" } eq "N.A." || $quotes{ "1557:JP", "nav" },
+    "1557:JP's nav should be greater than 0 or 'N.A.'" );
+ok( $quotes{ "1557:JP", "p_premium" } !~ /%/,
     "p_premium shouldn't have spurious % signs"
 );
 
