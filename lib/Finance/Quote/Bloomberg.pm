@@ -95,23 +95,61 @@ sub _scrape_stocks_index {
     $info{ $symbol, 'source' } = $BLOOMBERG_MAINURL;
 
     my $scraper = scraper {
-        process '#price_info .price', 'price_info' => 'TEXT';
-        process '.date',              'date'       => 'TEXT';
-        process '//div[@id="company_info"]/h1',
-            'name' => [ 'TEXT', sub { s/\s+\(.*\)//; } ];
-        process '#quote_summary .value',
-            'values[]' => [ 'TEXT', sub {s/,//g} ];
+        process(
+        'id("company_info")/h1/text()[1]',
+        'name' => [ 'TEXT', sub { s/^\s*(.*?)\s*$/$1/; } ]
+        ),
+        process(
+        '//div[@class="price" and text()=~"VALUE:"]/span[@class="amount"]',
+        'price' => [ 'TEXT', sub {s/,//g} ],
+        ),
+        process(
+        '//div[@class="price" and text()=~"VALUE:"]/text()[2]',
+        'currency' => [ 'TEXT', sub { s/\s//g; } ]
+        ),
+        process(
+        '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
+        'net' => [ 'TEXT', sub { s/,//g; ( split(/\s+/) )[0]; } ]
+        ),
+        process(
+        '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
+        'p_change' => [ 'TEXT', sub { /\((.*)%\)/; $1 } ]
+        ),
+        process(
+        '//td[@class="name" and text()=~"Open"]/following-sibling::node()',
+        'open' => [ 'TEXT', sub {s/,//g} ]
+        ),
+        process(
+        '//td[@class="name" and text()=~"High"]/following-sibling::node()',
+        'high' => [ 'TEXT', sub {s/,//g} ]
+        ),
+        process(
+        '//td[@class="name" and text()=~"Low"]/following-sibling::node()',
+        'low' => [ 'TEXT', sub {s/,//g} ]
+        ),
+        process(
+        '//span[@class="date"]', 'date' => [ 'TEXT', \&_parse_date ]
+        ),
+        process(
+        '//td[@class="name" and text()=~"NAV"]/following-sibling::node()[1]',
+        'nav' => [ 'TEXT', sub {s/,//g} ]
+        ),
+        process(
+        '//td[@class="name" and text()=~"Premium"]/following-sibling::node()',
+        'p_premium' => 'TEXT'
+        );
     };
     my $result = $scraper->scrape($content);
 
-    if ( defined $result->{price_info} ) {
-        $info{ $symbol, 'currency' }
-            = ( split( /\s+/, $result->{price_info} ) )[2];
-    }
-    else {
-        $info{ $symbol, 'success' }  = 0;
-        $info{ $symbol, 'errormsg' } = "Parse currency error";
-        return %info;
+    foreach my $label (qw/name price currency net p_change open high low/) {
+        if ( defined $result->{$label} ) {
+            $info{ $symbol, $label } = $result->{$label};
+        }
+        else {
+            $info{ $symbol, 'success' }  = 0;
+            $info{ $symbol, 'errormsg' } = "Parse " . $label . " error";
+            return %info;
+        }
     }
 
     unless ( defined $result->{date} ) {
@@ -128,33 +166,6 @@ sub _scrape_stocks_index {
     else {
         $info{ $symbol, 'success' }  = 0;
         $info{ $symbol, 'errormsg' } = $dt_parser->error;
-        return %info;
-    }
-
-    if ( defined $result->{name} ) {
-        $info{ $symbol, 'name' } = $result->{name};
-    }
-    else {
-        $info{ $symbol, 'success' }  = 0;
-        $info{ $symbol, 'errormsg' } = "Parse name error";
-        return %info;
-    }
-
-    if ( @{ $result->{values} } == 5 ) {
-        $info{ $symbol, 'price' } = $result->{values}->[0];
-        $info{ $symbol, 'open' }  = $result->{values}->[2];
-        $info{ $symbol, 'high' }  = $result->{values}->[3];
-        $info{ $symbol, 'low' }   = $result->{values}->[4];
-
-        my ( $net, $p_change ) = split /\s+/, $result->{values}->[1];
-        $info{ $symbol, 'net' } = $net;
-        $info{ $symbol, 'net' } = $net;
-        $p_change =~ s/[\(\)%]//g;
-        $info{ $symbol, 'p_change' } = $p_change;
-    }
-    else {
-        $info{ $symbol, 'success' }  = 0;
-        $info{ $symbol, 'errormsg' } = "Parse values error";
         return %info;
     }
 
@@ -331,6 +342,31 @@ sub build_info {
     }
 
     return %info;
+}
+
+sub _parse_date {
+    my $date = shift;
+    my ( $mon, $day ) = split /\s+/, $date;
+    my @now = localtime();
+
+    my %mnames = (
+        Jan => 1,
+        Feb => 2,
+        Mar => 3,
+        Apr => 4,
+        May => 5,
+        Jun => 6,
+        Jul => 7,
+        Aug => 8,
+        Sep => 9,
+        Oct => 10,
+        Nov => 11,
+        Dec => 12
+    );
+
+    my ( $yyyy, $mm, $dd ) = ( $now[5] + 1900, $mnames{$mon}, $day );
+    $yyyy-- if ( $now[4] + 1 < $mm ); # MM may point last December in January.
+    return sprintf "%04d/%02d/%02d", $yyyy, $mm, $dd;
 }
 
 1;
