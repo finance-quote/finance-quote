@@ -27,14 +27,15 @@ use HTTP::Request::Common;
 use Web::Scraper;
 use DateTime::Format::Natural;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 my $BLOOMBERG_MAINURL = 'http://www.bloomberg.com/';
 my $BLOOMBERG_URL     = 'http://www.bloomberg.com/apps/quote?ticker=';
 
 sub methods {
     return (
         bloomberg_stocks_index => \&bloomberg_stocks_index,
-        bloomberg_etf          => \&bloomberg_etf
+        bloomberg_etf          => \&bloomberg_etf,
+        bloomberg_fund         => \&bloomberg_fund
     );
 }
 
@@ -45,7 +46,8 @@ sub methods {
     sub labels {
         return (
             bloomberg_stocks_index => \@labels,
-            bloomberg_etf          => [ @labels, 'nav', 'p_premium' ]
+            bloomberg_etf          => [ @labels, 'nav', 'p_premium' ],
+            bloomberg_fund         => [ (@labels)[ 0 .. 8 ] ]
         );
     }
 }
@@ -71,6 +73,17 @@ sub bloomberg_etf {
 
     return %etfs if wantarray;
     return \%etfs;
+}
+
+sub bloomberg_fund {
+    my ( $quoter, @symbols ) = @_;
+    return unless @symbols;
+
+    my %funds = build_info( $quoter, $BLOOMBERG_URL, [ \&_scrape_fund ],
+        \@symbols );
+
+    return %funds if wantarray;
+    return \%funds;
 }
 
 sub _scrape_stocks_index {
@@ -158,48 +171,48 @@ sub _scrape_etf {
 
     my $scraper = scraper {
         process(
-            'id("company_info")/h1/text()[1]',
-            'name' => [ 'TEXT', sub { s/^\s*(.*?)\s*$/$1/; } ]
+        'id("company_info")/h1/text()[1]',
+        'name' => [ 'TEXT', sub { s/^\s*(.*?)\s*$/$1/; } ]
         ),
         process(
-            '//div[@class="price" and text()=~"PRICE:"]/span[@class="amount"]',
-            'price' => [ 'TEXT', sub { s/,//g } ],
+        '//div[@class="price" and text()=~"PRICE:"]/span[@class="amount"]',
+        'price' => [ 'TEXT', sub {s/,//g} ],
         ),
         process(
-            '//div[@class="price" and text()=~"PRICE:"]/text()[2]',
-            'currency' => [ 'TEXT', sub { s/\s//g; } ]
+        '//div[@class="price" and text()=~"PRICE:"]/text()[2]',
+        'currency' => [ 'TEXT', sub { s/\s//g; } ]
         ),
         process(
-            '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
-            'net' => [ 'TEXT', sub { s/,//g; ( split(/\s+/) )[0]; } ]
+        '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
+        'net' => [ 'TEXT', sub { s/,//g; ( split(/\s+/) )[0]; } ]
         ),
         process(
-            '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
-            'p_change' => [ 'TEXT', sub { /\((.*)%\)/; $1 } ]
+        '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
+        'p_change' => [ 'TEXT', sub { /\((.*)%\)/; $1 } ]
         ),
         process(
-            '//td[@class="name" and text()=~"Open"]/following-sibling::node()',
-            'open' => [ 'TEXT', sub { s/,//g } ]
+        '//td[@class="name" and text()=~"Open"]/following-sibling::node()',
+        'open' => [ 'TEXT', sub {s/,//g} ]
         ),
         process(
-            '//td[@class="name" and text()=~"High"]/following-sibling::node()',
-            'high' => [ 'TEXT', sub { s/,//g } ]
+        '//td[@class="name" and text()=~"High"]/following-sibling::node()',
+        'high' => [ 'TEXT', sub {s/,//g} ]
         ),
         process(
-            '//td[@class="name" and text()=~"Low"]/following-sibling::node()',
-            'low' => [ 'TEXT', sub { s/,//g } ]
+        '//td[@class="name" and text()=~"Low"]/following-sibling::node()',
+        'low' => [ 'TEXT', sub {s/,//g} ]
         ),
         process(
-            '//td[@class="name" and text()=~"Assets"]/following-sibling::node()[1]',
-            'date' => ['TEXT', sub { /\(on\s+(.*)\)/; $1; } ]
+        '//td[@class="name" and text()=~"Assets"]/following-sibling::node()[1]',
+        'date' => [ 'TEXT', sub { /\(on\s+(.*)\)/; $1; } ]
         ),
         process(
-            '//td[@class="name" and text()=~"NAV"]/following-sibling::node()[1]',
-            'nav' => [ 'TEXT', sub { s/,//g } ]
+        '//td[@class="name" and text()=~"NAV"]/following-sibling::node()[1]',
+        'nav' => [ 'TEXT', sub {s/,//g} ]
         ),
         process(
-            '//td[@class="name" and text()=~"Premium"]/following-sibling::node()',
-            'p_premium' => 'TEXT'
+        '//td[@class="name" and text()=~"Premium"]/following-sibling::node()',
+        'p_premium' => 'TEXT'
         );
     };
     my $result = $scraper->scrape($content);
@@ -207,6 +220,69 @@ sub _scrape_etf {
     foreach my $label (
         qw/name price currency net p_change open high low nav p_premium/)
     {
+        if ( defined $result->{$label} ) {
+            $info{ $symbol, $label } = $result->{$label};
+        }
+        else {
+            $info{ $symbol, 'success' }  = 0;
+            $info{ $symbol, 'errormsg' } = "Parse " . $label . " error";
+            return %info;
+        }
+    }
+
+    if ( defined $result->{date} ) {
+        my ( $mm, $dd, $yy ) = split '/', $result->{date};
+        $info{ $symbol, 'date' } = sprintf "%02d/%02d/%04d", $mm, $dd,
+            $yy + 2000;
+        $info{ $symbol, 'isodate' } = sprintf "%04d-%02d-%02d", $yy + 2000,
+            $mm, $dd;
+    }
+    else {
+        $info{ $symbol, 'success' }  = 0;
+        $info{ $symbol, 'errormsg' } = "Parse date error";
+        return %info;
+    }
+
+    $info{ $symbol, 'success' } = 1;
+    return %info;
+}
+
+sub _scrape_fund {
+    my ( $content, $symbol ) = @_;
+
+    my %info = ();
+    $info{ $symbol, 'method' } = 'bloomberg_fund';
+    $info{ $symbol, 'source' } = $BLOOMBERG_MAINURL;
+
+    my $scraper = scraper {
+        process(
+        'id("company_info")/h1/text()[1]',
+        'name' => [ 'TEXT', sub { s/^\s*(.*?)\s*$/$1/; } ]
+        ),
+        process(
+        '//div[@class="price" and text()=~"NAV:"]/span[@class="amount"]',
+        'price' => [ 'TEXT', sub {s/,//g} ],
+        ),
+        process(
+        '//div[@class="price" and text()=~"NAV:"]/text()[2]',
+        'currency' => [ 'TEXT', sub { s/\s//g; } ]
+        ),
+        process(
+        '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
+        'net' => [ 'TEXT', sub { s/,//g; ( split(/\s+/) )[0]; } ]
+        ),
+        process(
+        '//td[@class="name" and text()="Change"]/following-sibling::node()[1]',
+        'p_change' => [ 'TEXT', sub { /\((.*)%\)/; $1 } ]
+        ),
+        process(
+        '//td[@class="name" and text()=~"Assets"]/following-sibling::node()[1]',
+        'date' => [ 'TEXT', sub { /\(on\s+(.*)\)/; $1; } ]
+        );
+    };
+    my $result = $scraper->scrape($content);
+
+    foreach my $label (qw/name price currency net p_change/) {
         if ( defined $result->{$label} ) {
             $info{ $symbol, $label } = $result->{$label};
         }
@@ -278,7 +354,7 @@ Finance::Quote::Bloomberg - Obtain quotes from Bloomberg.
 =head1 DESCRIPTION
 
 This module obtains information from Bloomberg. Currently Information of
-Stock Index and ETF can be fetched. Query them with ticker symbols.
+Stock Index, ETF and Fund can be fetched. Query them with ticker symbols.
 To find their tickers, search http://www.bloomberg.com/ or Yahoo! Finance
 and so on.
 
@@ -298,6 +374,11 @@ The following labels may be returned by Finance::Quote::Bloomberg::bloomberg_etf
 date, isodate, method, source, name, currency, price, net, p_change, open, high, low, nav and p_premium.
 
 The p_premium means the ETF's percent premium/discount.
+
+=head2 bloomberg_fund()
+
+The following labels may be returned by Finance::Quote::Bloomberg::bloomberg_fund:
+date, isodate, method, source, name, currency, price, net and p_change.
 
 =head1 SEE ALSO
 
