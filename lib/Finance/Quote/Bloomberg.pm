@@ -311,8 +311,7 @@ sub _mdy {
 
 sub _parse_date {
     my $date = shift;
-    my ( $mon, $day ) = split /\s+/, $date;
-    my @now = localtime();
+    my @now  = localtime();
 
     my %mnames = (
         Jan => 1,
@@ -329,9 +328,20 @@ sub _parse_date {
         Dec => 12
     );
 
-    my ( $yyyy, $mm, $dd ) = ( $now[5] + 1900, $mnames{$mon}, $day );
+    my ( $yyyy, $mm, $day );
+    $yyyy = $now[5] + 1900;
+
+    if ( $date =~ /^(\w{3})\s*(\d+)$/ ) {
+        $mm  = $mnames{$1};
+        $day = $2;
+    }
+    elsif ( $date =~ /^\s*(\d+)$/ ) {
+        $mm  = $now[4] + 1;
+        $day = $1;
+    }
+
     $yyyy-- if ( $now[4] + 1 < $mm ); # MM may point last December in January.
-    return sprintf "%04d/%02d/%02d", $yyyy, $mm, $dd;
+    return sprintf "%04d/%02d/%02d", $yyyy, $mm, $day;
 }
 
 1;
