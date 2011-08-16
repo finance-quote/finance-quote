@@ -29,6 +29,7 @@ use Web::Scraper;
 our $VERSION = '0.04';
 my $BLOOMBERG_MAINURL = 'http://www.bloomberg.com/';
 my $BLOOMBERG_URL     = 'http://www.bloomberg.com/apps/quote?ticker=';
+my $USER_AGENT        = "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)";
 
 sub methods {
     return (
@@ -275,6 +276,9 @@ sub build_info {
 
     my %info = ();
     my $ua   = $quoter->user_agent;
+
+    # Bloomberg probably restricts access with "libwww-perl" user agent string.
+    $ua->agent($USER_AGENT);
 
     foreach my $scraper_ref (@$scrapers_ref) {
         foreach my $symbol (@$symbols_ref) {
