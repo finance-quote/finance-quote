@@ -10,7 +10,7 @@ if ( not $ENV{ONLINE_TEST} ) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 71;
+plan tests => 72;
 
 my $q        = Finance::Quote->new;
 my $year     = ( localtime() )[5] + 1900;
@@ -222,3 +222,7 @@ ok( $quotes{ "7203:JP", "p_change" } !~ /%/,
 );
 
 ok( !$quotes{ "BOGUS:JP", "success" }, "BOGUS returns no-success" );
+
+
+# Test private method
+ok( Finance::Quote::Bloomberg::_mdy(" 15") eq sprintf("%02d/%02d/%04d", (localtime)[4]+1, 15, (localtime)[5]+1900));
