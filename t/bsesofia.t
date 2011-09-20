@@ -2,11 +2,14 @@
 
 use strict;
 use warnings;
-use Test::More tests => 59;
+use Test::More;
 use Finance::Quote;
 
 if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
+}
+else {
+    plan tests => 59;
 }
 
 # Test BSESofia functions.
