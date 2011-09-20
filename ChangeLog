@@ -1,4 +1,11 @@
-2009-05-10  Erik Colson <eco@ecocode.net>
+XXXX-XX-XX  Erik Colson <eco@ecocode.net>
+
+	* TSP.pm updated. Patch from Kevin Ryde.
+	* YAHOO/Base.pm added conversion from 'B' billions to
+	                numbers. Patch from Kevin Ryde.
+	* Billions support moved to Quote.pm
+
+2009-10-05  Erik Colson <eco@ecocode.net>
 
 	* Lots of tests added
 
@@ -96,7 +103,7 @@
 
 	* Finanzpartner module adapted to site updated. By Jan Wilamowius.
 	* Morningstar patched by Fredrik Persson.
-	
+
 2008-11-09  Erik Colson <eco@ecocode.net>
 
 	* Bourso.pm updated due to website update. By Bernard Fuentes
@@ -154,7 +161,7 @@
 
         * Failing tests moved to todo-state for ftportfolios, aiahk, nzx,
           maninvestments.
-	
+
 2008-09-30  Paul Fenwick <pjf@cpan.org>
 
         * BUGFIX: Applied patch from Bill Carlson to fix Tiaacref.pm.
@@ -165,7 +172,7 @@
 	* StockHouseCanada.pm updated to new site layout
 
 	* DWS.pm updated
-	
+
 2008-09-27  Erik Colson <eco@ecocode.net>
 
 	* VWD.pm updated to new site layout
@@ -336,7 +343,7 @@
 	present.
 
 	* lib/Finance/Quote.pm:
-	* lib/Finance/Quote/HEX.pm: 
+	* lib/Finance/Quote/HEX.pm:
 	* test/hex.t: New module from Mika Laari
 	<mikalaari@users.sourceforge.net> to fetch quote information from
 	the Helsinki stock exchange.
@@ -345,7 +352,7 @@
 	function.  All modules should use this function to set the 'date'
 	and 'isodate' fields based on the retrieved textual date (or lack
 	thereof).
-	
+
 	* test/lerevenu.t: Test the right module.
 
 2006-04-07  David Hampton  <hampton@employees.org>
@@ -382,8 +389,8 @@
 
 2006-01-10  David Hampton  <hampton@employees.org>
 
-	* test/dws.t: 
-	* test/maninvestments.t: 
+	* test/dws.t:
+	* test/maninvestments.t:
 	* test/yahoo_brasil.t: Accept dates in both the previous and
 	current year as valid responses.
 
@@ -409,13 +416,13 @@
 	provides time (date only) so remove tests for time of quote.
 	Futures quotes don't always have bid/ask values so comment out
 	those tests.
-	
+
 	* test/indiamutual.t:
 	* test/trustnet.t:
 	* test/union.t:
 	* test/yahoo.t: Changed test stock to one that is still on the
 	exchange.
-	
+
 	* test/yahoo_brasil.t: All returned prices (for all stocks I
 	tried) return a price of zero, so comment out the test for
 	non-zero.
@@ -440,7 +447,7 @@
 	* lib/Finance/Quote/VWD.pm: Remove the thousands separator
 	character from quote values.
 
-	* lib/Finance/Quote/TSP.pm: 
+	* lib/Finance/Quote/TSP.pm:
 	* test/tsp.t: Frank Mori Hess's <fmhess at speakeasy.net> change
 	to add support for the TSP lifecycle L funds.
 
@@ -450,7 +457,7 @@
 	investment fund prices from Deka.  Module from Knut Franke
 	<Knut.Franke at gmx.de>
 
-	* lib/Finance/Quote/USFedBonds.pm: 
+	* lib/Finance/Quote/USFedBonds.pm:
 	* test/usfedbonds.t: Add a new US Federal Bonds stock quote module
 	from Stephen Langenhoven <langenhoven at users.sourceforge.net>.
 
@@ -475,11 +482,11 @@
 	* lib/Finance/Quote/ZA.pm:
 	* test/za.t: Add a new South African stock quote module from
 	Stephen Langenhoven <langenhoven at users.sourceforge.net>.
-	
+
 2005-08-10  David Hampton  <hampton@employees.org>
 
 	* lib/Finance/Quote/VWD.pm: Handle invalid ISINs better. VWD
-	delivers a 404 error instead of a blank page.  Fix suggested by 
+	delivers a 404 error instead of a blank page.  Fix suggested by
 	Uwe Simon <uwe.simon.koeln at t-online dot de>
 
 2005-07-04  Paul Fenwick  <pjf@cpan.org>
@@ -565,7 +572,7 @@
 
 	* lib/Finance/Quote.pm: Documentation correction from Trent
 	Piepho.
-	
+
 	* lib/Finance/Quote/Yahoo/Base.pm (yahoo_request): Fix an
 	undefined reference when Yahoo ocassionally returns an empty
 	field.
@@ -580,7 +587,7 @@
 
 	* lib/Finance/Quote/ASX.pm:
 	* lib/Finance/Quote/Trustnet.pm: Got the modules working again.
-	
+
 	* lib/Finance/Quote/ManInvestments.pm:
 	* lib/Finance/Quote/Platinum.pm: New modules for Australian
 	investment price sources from Ian Dall <iandall at
@@ -588,31 +595,31 @@
 
 	* lib/Finance/Quote/NZX.pm: New modules for fetching quotes the
 	from the New Zealand stock exchange. Provided by Michael Curtis.
-	
+
 	* lib/Finance/Quote/SEB.pm: New modules for fetching quotes from
 	the Swedish Bank.  Submitted by Tomas Carlsson.
-	
+
 	* lib/Finance/Quote/TSP.pm: New modules for fetching quotes from
 	the US Govt. Thrift Service Plan.  Submitted by Frank Mori Hess.
 
-	* lib/Finance/Quote/Yahoo/Base.pm: Corrected currency tags for Vienna and Valence.  
+	* lib/Finance/Quote/Yahoo/Base.pm: Corrected currency tags for Vienna and Valence.
 
 	* lib/Finance/Quote/Yahoo/Brasil.pm: Add new Yahoo Brasil module
 	from Ismael Orenstein <perdig at users.sourceforge.net>.
 
 	* t/*: Various new test modules.
-	
+
 2005-02-09  David Hampton  <hampton@employees.org>
 
 	* lib/Finance/Quote/Fidelity.pm:
 	* lib/Finance/Quote/Union.pm: Got the modules working again.
-	
+
 	* lib/Finance/Quote/Yahoo/Base.pm: Extract the currency directly
 	from Yahoo, instead of looking it up in an exchange/currency
 	mapping table.
 
 	* t/*: Various new test and updated modules.
-	
+
 2005-02-06  David Hampton  <hampton@employees.org>
 
 	* lib/Finance/Quote/BMONesbittBurns.pm: Got the modules working again.
