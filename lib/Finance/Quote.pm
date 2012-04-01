@@ -35,7 +35,6 @@ use Exporter ();
 use Carp;
 use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
-use HTML::TreeBuilder;
 use Encode;
 use Data::Dumper;
 
@@ -43,7 +42,14 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $VERSION $TIMEOUT %MODULES %METHODS $AUTOLOAD
             $YAHOO_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
 
-$YAHOO_CURRENCY_URL = "http://uk.finance.yahoo.com/q?s=";
+# Call on the Yahoo API:
+#  - "f=l1" should return a single value - the "Last Trade (Price Only)"
+#  - "s=" the value of s should be "<FROM><TO>=X"
+#         where <FROM> and <TO> are currencies
+# Excample: http://finance.yahoo.com/d/quotes.csv?f=l1&s=AUDGBP=X
+# Documentation can be found here:
+#     http://code.google.com/p/yahoo-finance-managed/wiki/csvQuotesDownload
+$YAHOO_CURRENCY_URL = "http://finance.yahoo.com/d/quotes.csv?e=.csv&f=l1&s=";
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
@@ -240,26 +246,13 @@ sub currency {
 
   my $ua = $this->user_agent;
 
-  my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}$from$to%3DX")->content;
-  # The web page returns utf8 content which gives a warning when parsing $data
-  # in HTML::Parser
-  my $tb = HTML::TreeBuilder->new_from_content(decode_utf8($data));
+  # The response should be a single value (the exchange rate)
+  my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}${from}${to}=X")->content;
+  my $exchange_rate = $data;
 
-  # Find the <div> with the data
-  my $div = $tb->look_down('id','yfi_quote_summary_data');
-  # Make sure there's a <div> to parse.
-  return undef unless $div;
-
-  # The first <b> should contain the quote
-  my $rate_element=$div->look_down('_tag','b');
-  # Make sure there's a <b> to parse.
-  return undef unless $rate_element;
-
-  my $exchange_rate=$rate_element->as_text;
-
-        $exchange_rate =~ s/,// ; # solve a bug when conversion rate
-                                  # involves thousands. yahoo inserts
-                                  # a comma when thousands occur
+  $exchange_rate =~ s/,// ; # solve a bug when conversion rate
+                            # involves thousands. yahoo inserts
+                            # a comma when thousands occur
 
   {
     local $^W = 0;  # Avoid undef warnings.
@@ -268,6 +261,7 @@ sub currency {
     # we may have extra cruft, or no amount.
     return undef unless ($exchange_rate+0);
   }
+
   return ($exchange_rate * $amount);
 }
 
