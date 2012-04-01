@@ -35,7 +35,6 @@ use Exporter ();
 use Carp;
 use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
-use HTML::TreeBuilder;
 use Encode;
 use Data::Dumper;
 
