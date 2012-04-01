@@ -48,7 +48,9 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
 #  - "s=" the value of s should be "<FROM><TO>=X"
 #         where <FROM> and <TO> are currencies
 # Excample: http://finance.yahoo.com/d/quotes.csv?f=l1&s=AUDGBP=X
-$YAHOO_CURRENCY_URL = "http://finance.yahoo.com/d/quotes.csv?f=l1&s=";
+# Documentation can be found here:
+#     http://code.google.com/p/yahoo-finance-managed/wiki/csvQuotesDownload
+$YAHOO_CURRENCY_URL = "http://finance.yahoo.com/d/quotes.csv?e=.csv&f=l1&s=";
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
