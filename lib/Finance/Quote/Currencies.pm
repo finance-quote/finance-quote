@@ -114,7 +114,7 @@ my %currencies = ( ALL => { name => qq{Albanian Lek} }
                  , JOD => { name => qq{Jordanian Dinar} }
                  , KZT => { name => qq{Kazakhstan Tenge} }
                  , KES => { name => qq{Kenyan Shilling} }
-                 , KRW => { name => qq{Korean Won} }
+                 , KRW => { name => qq{South Korean Won} }
                  , KWD => { name => qq{Kuwaiti Dinar} }
                  , LAK => { name => qq{Lao Kip} }
                  , LVL => { name => qq{Latvian Lat} }
@@ -190,7 +190,7 @@ my %currencies = ( ALL => { name => qq{Albanian Lek} }
                  , UAH => { name => qq{Ukraine Hryvnia} }
                  , UYU => { name => qq{Uruguayan New Peso} }
                  , VUV => { name => qq{Vanuatu Vatu} }
-                 , VEB => { name => qq{Venezuelan Bolivar} }
+                 , VEF => { name => qq{Venezuelan Bolivar Fuerte}}
                  , VND => { name => qq{Vietnam Dong} }
                  , YER => { name => qq{Yemen Riyal} }
                  , ZMK => { name => qq{Zambian Kwacha} }
