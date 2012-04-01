@@ -262,6 +262,17 @@ sub currency {
     return undef unless ($exchange_rate+0);
   }
 
+if ( $exchange_rate < 0.001 ) {
+    # exchange_rate is too little. we'll get more accuracy by using
+    # the inverse rate and inverse it
+    my $inverse_rate = $this->currency( $to, $from );
+    {
+        local $^W = 0;
+        return undef unless ( $exchange_rate + 0 );
+    }
+    $exchange_rate = int( 100000000 / $inverse_rate + .5 ) / 100000000;
+}
+
   return ($exchange_rate * $amount);
 }
 
