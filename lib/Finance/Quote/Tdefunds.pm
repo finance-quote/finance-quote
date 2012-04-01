@@ -111,6 +111,7 @@ sub tdefunds
             $sym = &tdefunds_create_symbol($sym);
 
 	    # $sym =~ tr/a-z/A-Z/;
+            $aa {$sym, "symbol"} = $sym;
 	    $aa {$sym, "exchange"} = "TD Waterhouse";  # TRP
 	    $aa {$sym, "method"} = "tdefunds";
 	    $aa {$sym, "name"} = $name;
