@@ -250,6 +250,14 @@ sub yahoo_request {
                           $info{$symbol,"time"} = $quoter->isoTime($info{$symbol,"time"});
                         }
 
+                        # "cap" from Yahoo::USA sometimes has "B" for
+                        # billions suffix, eg. from "F" Ford -- expand that
+                        # to a plain number for ease of use
+                        if (defined($info{$symbol,"cap"})) {
+                          $info{$symbol,"cap"}
+                            = $quoter->B_to_billions ($info{$symbol,"cap"});
+                        }
+
       # Convert prices (when needed). E.G. Some London sources
       # return in pence. Yahoo denotes this with GBP vs GBp
       # We'd like them to return in pounds (divide by 100).
@@ -324,6 +332,7 @@ sub yahoo_request {
 	return %info if wantarray;
 	return \%info;
 }
+
 
 1;
 

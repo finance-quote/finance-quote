@@ -7,7 +7,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 9;
+plan tests => 11;
 
 # Test currency conversion, both explicit requests and automatic
 # conversion.
@@ -40,3 +40,13 @@ ok($info{"UG.PA","success"});		# Test 7
 ok($info{"UG.PA","currency"} eq "AUD");	# Test 8
 ok($info{"UG.PA","price"} > 0);		# Test 9
 
+# Check if inverse is working ok
+ok(check_inverse("EUR","RUB"),"Inverse is calculated correctly: multiplication should be 1");
+ok(check_inverse("CZK","USD"),"Inverse is calculated correctly: multiplication should be 1");
+
+sub check_inverse {
+    my ($cur1,$cur2)=@_;
+    my $a = $q->currency($cur1,$cur2);
+    my $b = $q->currency($cur2,$cur1);
+    return $a*$b;
+}

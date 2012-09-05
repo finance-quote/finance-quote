@@ -7,7 +7,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 27;
+plan tests => 29;
 
 # Test Yahoo_europe functions.
 
@@ -83,3 +83,8 @@ ok($xetraquotes{"A0GFY7.SG","success"});
 ok($xetraquotes{"A0GFY7.SG","currency"} eq "EUR");
 ok(($xetraquotes{"A0GFY7.SG","currency"} eq "EUR") &&
    !defined($xetraquotes{"A0GFY7.SG","currency_set_by_fq"}));
+
+# check ^DJI.US after change by yahoo in November 2010
+%xetraquotes = $q->fetch("yahoo_europe","^DJI.US");
+ok($xetraquotes{"^DJI","success"});
+ok($xetraquotes{"^DJI","currency"} eq "USD");
