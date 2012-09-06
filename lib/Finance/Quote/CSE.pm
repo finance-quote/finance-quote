@@ -4,6 +4,7 @@
 #    Hiranya Samarasekera <hiranyas@gmail.com> to be able to retrieve stock
 #    information from the Colombo Stock Exchange (CSE) in Sri Lanka.
 #    ----------------------------------------------------------------------
+#
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -35,12 +36,12 @@ use CGI;
 
 $VERSION = '1.17';
 
-my $CSE_URL = "http://www.cse.lk/listedcompanies/overview.htm?d-16544-e=1&6578706f7274=1";
+my $CSE_URL = "http://www.cse.lk/trade_summary_report.do?reportType=CSV";
 
 sub methods { return (cse       => \&cse) }
 
 {
-  my @labels = qw/name symbol price last date time p_change bid ask offer open high low close volume currency method exchange/;
+  my @labels = qw/ID SYMBOL NAME LAST_TRADE_QUANTITY TRADE_DATE PRICE SHAREVOLUME TRADEVOLUME TURNOVER HI_TRADE LO_TRADE CHANGE CHANGE_PERCENTAGE ISSUE_DATE CLOSING_PRICE PREVIOUS_CLOSE MARKET_CAP MARKET_CAP_PERCENTAGE OPEN currency method exchange/;
 
   sub labels { return (cse       => \@labels) }
 }
@@ -98,18 +99,18 @@ sub cse {
           $info {$symbol, "exchange"} = "Colombo Stock Exchange, Sri Lanka";
           $info {$symbol, "method"} = "cse";
           $info {$symbol, "symbol"} = @$row[1];
-          $info {$symbol, "name"} = @$row[0];
-          ($info {$symbol, "last"} = @$row[8]) =~ s/\s*//g;
+          $info {$symbol, "name"} = @$row[2];
+          ($info {$symbol, "last"} = @$row[5]) =~ s/\s*//g;
           $info {$symbol, "bid"} = undef;
           $info {$symbol, "offer"} = undef;
-          $info {$symbol, "open"} = @$row[5];
+          $info {$symbol, "open"} = @$row[18];
           $info {$symbol, "nav"} = undef;
-          $info {$symbol, "price"} = undef;
-          $info {$symbol, "low"} = @$row[7];
-          $info {$symbol, "close"} = @$row[4];
-          $info {$symbol, "p_change"} = @$row[10];
-          ($info {$symbol, "high"} = @$row[6]) =~ s/\s*//g;
-          ($info {$symbol, "volume"} = @$row[2]) =~ s/,//g;;
+          $info {$symbol, "price"} = @$row[5];
+          $info {$symbol, "low"} = @$row[10];
+          $info {$symbol, "close"} = @$row[15];
+          $info {$symbol, "p_change"} = @$row[12];
+          ($info {$symbol, "high"} = @$row[9]) =~ s/\s*//g;
+          ($info {$symbol, "volume"} = @$row[6]) =~ s/,//g;;
 
           $quoter->store_date(\%info, $symbol, {today => 1});
 
@@ -161,8 +162,8 @@ list to Finance::Quote->new().
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::CSE :
-name, last, p_change, open, high, low, close, 
-volume, currency, method, exchange, time.
+symbol, name, last, open, price, low, close, p_change,
+high, volume, exchange, method
 
 =head1 SEE ALSO
 
