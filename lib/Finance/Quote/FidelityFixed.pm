@@ -22,8 +22,8 @@ use HTML::TableExtract;
 $VERSION = '1.01';
 
 # e.g., http://fixedincome.fidelity.com/fi/FIIndividualBondsSearch?cusip=912810QT8
-my $FIDELITY_MAINURL = ("http://fixedincome.fidelity.com/");
-my $FIDELITY_URL = ($FIDELITY_MAINURL."fi/FIIndividualBondsSearch?cusip=");
+my $FIDELITY_MAINURL = ("https://fixedincome.fidelity.com/");
+my $FIDELITY_URL = ($FIDELITY_MAINURL."ftgw/fi/FIIndividualBondsSearch?cusip=");
 
 sub methods {
     return (fidelityfixed => \&fidelityfixed);
