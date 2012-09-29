@@ -23,7 +23,9 @@ $AMFI_MAIN_URL = ("http://www.amfiindia.com/");
 $AMFI_URL = ("${AMFI_MAIN_URL}NavReport.aspx?type=0");
 #$AMFI_URL = ("${AMFI_MAIN_URL}spages/NAV0.txt"); #This page seems to do the job also. Keep for reference
 
-$AMFI_NAV_LIST = "/tmp/amfinavlist.txt";
+# amfinavlist.txt is a cache-file. keep it until updated on the website since this is a 1meg file.
+my $cachedir = $ENV{TMPDIR} // '/tmp/';
+$AMFI_NAV_LIST = $cachedir."amfinavlist.txt";
 
 sub methods { return (indiamutual => \&amfiindia,
 		      amfiindia => \&amfiindia); }
