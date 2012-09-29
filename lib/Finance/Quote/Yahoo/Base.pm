@@ -144,7 +144,7 @@ my %currency_tags = (
 # This function expects a Finance::Quote object, a base URL to use,
 # a refernece to a list of symbols to lookup.  If a fourth argument is
 # used then it will act as a suffix that needs to be appended to the stocks
-# in order to obtain the correct information.  This function relies upon 
+# in order to obtain the correct information.  This function relies upon
 # the fact that the various Yahoo's all work the same way.
 
 sub yahoo_request {
@@ -156,7 +156,7 @@ sub yahoo_request {
 
 	# The suffix is used to specify particular markets.
 	my $suffix = shift || "";
-	
+
 	my $uses_semicolon = shift || 0;
 
 	my %info;

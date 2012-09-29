@@ -38,11 +38,11 @@ ok(! $quotes{"BOGUS","success"});
 
 # London stocks can be returned in a variety of currencies
 
-my %londonquotes = $q->fetch("yahoo_europe","BAY.L");
-ok($londonquotes{"BAY.L","success"});
-ok($londonquotes{"BAY.L","currency"} eq "GBP");
-ok(($londonquotes{"BAY.L","currency"} eq "GBP") &&
-   !defined($londonquotes{"BAY.L","currency_set_by_fq"}));
+my %londonquotes = $q->fetch("yahoo_europe","ATG.L");
+ok($londonquotes{"ATG.L","success"});
+ok($londonquotes{"ATG.L","currency"} eq "GBP");
+ok(($londonquotes{"ATG.L","currency"} eq "GBP") &&
+   !defined($londonquotes{"ATG.L","currency_set_by_fq"}));
 
 %londonquotes = $q->fetch("yahoo_europe","CCR.L");
 ok($londonquotes{"CCR.L","success"});
