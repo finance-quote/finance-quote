@@ -38,6 +38,7 @@ author(
 
 requires(       'LWP::UserAgent'            => 0);
 requires(       'Crypt::SSLeay'             => 0);
+requires(       'Mozilla::CA'               => 0);
 requires(       'HTTP::Request::Common'     => 0);
 requires(       'HTML::TableExtract'        => 0);
 requires(       'HTML::TreeBuilder'         => 0);
