@@ -7,7 +7,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 23;
+plan tests => 25;
 
 # Test TIAA-CREF functions.
 
@@ -15,7 +15,7 @@ my $q      = Finance::Quote->new();
 my $year   = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my %quotes = $q->tiaacref("CREFmony","TIAAreal","TLSRX","TCMVX","TLGRX","BOGOname");
+my %quotes = $q->tiaacref("CREFmony","TIAAreal","TLSRX","TCMVX","TLGRX","BOGOname","CREFbond");
 ok(%quotes);
 
 ok($quotes{"CREFmony","nav"} > 0);
@@ -53,3 +53,6 @@ ok($quotes{"TLGRX","success"} > 0);
 
 ok($quotes{"BOGOname","success"} == 0);
 ok($quotes{"BOGOname","errormsg"} eq "Bad symbol");
+
+ok($quotes{"CREFbond","success"} > 0);
+ok($quotes{"CREFbond","nav"} > 0);
