@@ -177,7 +177,7 @@ sub new {
             Currencies Deka DWS FTPortfolios Fidelity FinanceCanada Fool HU
             GoldMoney HEX
             IndiaMutual LeRevenu ManInvestments Morningstar NZX Platinum SEB
-            StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref Troweprice
+            SIXfunds SIXshares StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref Troweprice
             Trustnet Union USFedBonds VWD ZA Cominvest Finanzpartner
             Yahoo::Asia Yahoo::Australia Yahoo::Brasil Yahoo::Europe Yahoo::NZ
             Yahoo::USA/; }
