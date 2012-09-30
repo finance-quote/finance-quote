@@ -84,7 +84,12 @@ ok($xetraquotes{"A0GFY7.SG","currency"} eq "EUR");
 ok(($xetraquotes{"A0GFY7.SG","currency"} eq "EUR") &&
    !defined($xetraquotes{"A0GFY7.SG","currency_set_by_fq"}));
 
-# check ^DJI.US after change by yahoo in November 2010
-%xetraquotes = $q->fetch("yahoo_europe","^DJI.US");
-ok($xetraquotes{"^DJI","success"});
-ok($xetraquotes{"^DJI","currency"} eq "USD");
+TODO: {
+    # Yahoo does not provide retrieval of ^DJI.US quotes since it lost
+    # license for it. ^DJI can only be viewed on the html page anymore. We
+    # need to write a HTML page scraper for this case
+    local $TODO = "^DJI not returned by yahoo anymore.";
+    %xetraquotes = $q->fetch("yahoo_europe","%40%5EDJI.US");
+    ok($xetraquotes{"^DJI","success"});
+    ok($xetraquotes{"^DJI","currency"} eq "USD");
+}
