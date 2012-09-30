@@ -52,7 +52,7 @@ resources(      homepage   => 'http://finance-quote.sourceforge.net/');
 
 # Uppercase resource names are not special in the spec.
 
-resource(       MailingList => 'https://lists.sourceforge.net/lists/listinfo/finance-quote-devel');
+resources(       MailingList => 'https://lists.sourceforge.net/lists/listinfo/finance-quote-devel');
 
 # And we're done!
 
