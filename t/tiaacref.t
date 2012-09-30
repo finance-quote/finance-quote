@@ -7,7 +7,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 25;
+plan tests => 27;
 
 # Test TIAA-CREF functions.
 
@@ -56,3 +56,6 @@ ok($quotes{"BOGOname","errormsg"} eq "Bad symbol");
 
 ok($quotes{"CREFbond","success"} > 0);
 ok($quotes{"CREFbond","nav"} > 0);
+ok($quotes{"CREFbond", "currency"} eq "USD");
+ok(substr($quotes{"CREFbond","date"},6,4) == $year ||
+   substr($quotes{"CREFbond","date"},6,4) == $lastyear);
