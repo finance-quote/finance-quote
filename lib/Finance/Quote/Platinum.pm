@@ -41,7 +41,7 @@ use HTML::TableExtract;
 
 use vars qw/$PLATINUM_URL $VERSION/;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 $PLATINUM_URL = 'http://www.platinum.com.au/Platinum_Trust_Unit_Prices.htm';
 
@@ -101,7 +101,7 @@ sub platinum {
 			   'Platinum Asia Fund' => 'PLA0004AU',
 			   'Platinum International Brands Fund' => 'PLA0100AU',
 			   'Platinum International Technology Fund' => 'PLA0101AU');
-			       
+
 		# Delete spaces and '*' which sometimes appears after the code.
 		# Also delete high bit characters.
 		$name =~ tr/ \000-\037\200-\377/ /s;
@@ -115,10 +115,10 @@ sub platinum {
 		foreach my $label (qw/date ask bid/) {
 			$info{$stock,$label} = shift(@$row);
 			# Again, get rid of nasty high-bit characters.
-			$info{$stock,$label} =~ tr/ \200-\377//d 
+			$info{$stock,$label} =~ tr/ \200-\377//d
 				unless ($label eq "name");
 		}
-		
+
 		$info{$stock,'last'} = $info{$stock,'bid'};
 
 		$quoter->store_date(\%info, $stock, {eurodate => $info{$stock,'date'}});

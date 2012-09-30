@@ -48,14 +48,14 @@
 # 2006-09-02  Dominique Corbex <domcox@sourceforge.net>
 #
 #     * (1.3) changes on web site
-# 
+#
 # 2006-06-28  Dominique Corbex <domcox@sourceforge.net>
 #
-#     * (1.2) changes on web site 
+#     * (1.2) changes on web site
 #
 # 2006-02-22  Dominique Corbex <domcox@sourceforge.net>
 #
-#     * (1.0) iniial release 
+#     * (1.0) iniial release
 #
 
 
@@ -71,7 +71,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TreeBuilder; # Boursorama doesn't put data in table elements anymore but uses <div>
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 my $Bourso_URL = 'http://www.boursorama.com/recherche/index.phtml';
 
@@ -313,5 +313,3 @@ volume, currency, method, exchange, symbol.
 Boursorama (french web site), http://www.boursorama.com
 
 =cut
-
-	

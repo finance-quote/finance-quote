@@ -41,7 +41,7 @@ use HTML::TableExtract;
 
 use vars qw/$MANINV_URL $VERSION/;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 $MANINV_URL = 'http://www.maninvestments.com.au/index.cfm?action=productprices&cat_id=5';
 $MANINV_URL = 'http://www.maninvestments.com.au/netassetvalues-print.cfm';
@@ -136,7 +136,7 @@ sub maninv {
 		       'OM-IP Strategic Ltd' => 'OMIPS',
 		       'OM-IP Strategic Series 2 Ltd' => 'OMIPS2S',
 		       'OM-IP Hedge Plus Ltd' => 'OMIPHP');
-	    
+
 
 	    # Delete spaces and '*' which sometimes appears after the code.
 	    # Also delete high bit characters.
@@ -147,7 +147,7 @@ sub maninv {
 	    $info{$stock, "currency"} = @$row[1];
 	    $quoter->store_date(\%info, $stock, {eurodate => @$row[3]});
 	    $info{$stock,'nav'} = @$row[4];
-	    $info{$stock,'nav'} =~ tr/ $\000-\037\200-\377//d; 
+	    $info{$stock,'nav'} =~ tr/ $\000-\037\200-\377//d;
 	    $info{$stock,'last'} = $info{$stock,'nav'};
 	    $info{$stock, "method"} = "maninv";
 	    $info{$stock, "exchange"} = "Man Investments Australia";

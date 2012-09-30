@@ -57,7 +57,7 @@ $YAHOO_CURRENCY_URL = "http://finance.yahoo.com/d/quotes.csv?e=.csv&f=l1&s=";
                 currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -341,7 +341,7 @@ sub currency_lookup {
 
 # _smart_compare (private method function)
 #
-# This function compares values where the method depends on the 
+# This function compares values where the method depends on the
 # type of the second parameter.
 #  regex  : compare as regex
 #  scalar : test for substring match

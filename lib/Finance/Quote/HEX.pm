@@ -41,7 +41,7 @@ use HTML::TableExtract;
 
 use vars qw/$HEX_URL $VERSION/;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 $HEX_URL = 'http://omxgroup.is-teledata.com/html/securitypricelistequities.html?language=fi';
 
@@ -135,7 +135,7 @@ sub hex {
 
 		$info{$stock,'volume'} = $$row[9];
 		$info{$stock,'volume'} =~ tr/ \200-\377//d;
-		
+
 		# Use deciman point instead of comma.
 		foreach my $label (qw/last bid ask high low p_change/) {
 			$info{$stock,$label} =~ s/,/./;

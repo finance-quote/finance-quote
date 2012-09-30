@@ -19,7 +19,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 my $FINANCECANADA_MAINURL = ("http://finance.canada.com/");
 my $FINANCECANADA_URL = "http://stockgroup.canada.com/sn_overview.asp?symbol=T.";
 
@@ -33,7 +33,7 @@ sub labels {
     my @labels = qw/method source name symbol currency last date isodate nav price/;
     return (canada => \@labels,
             financecanada => \@labels);
-}   
+}
 
 
 
@@ -145,7 +145,7 @@ sub financecanada {
 	    }
 	    $info{$symbol, "day_range"} = $info{$symbol, "low"} . " - " . $info{$symbol, "high"}
 	    if (defined($info{$symbol, "high"}) && defined($info{$symbol, "low"}));
-	    
+
 	    if (defined($year_high) && defined($year_low)) {
 		$info{$symbol, "year_range"} = "$year_low - $year_high";
 	    }
@@ -172,7 +172,7 @@ finance.canada.com
 
     # Can failover to other methods
     %quotes = $q->fetch("canada", "stock_fund-code");
-    
+
     # Use this module only
     %quotes = $q->fetch("financecanada", "stock_fund-code");
 
@@ -204,4 +204,3 @@ Finance Canada.com website - http://finance.canada.com/
 Finance::Quote
 
 =cut
-

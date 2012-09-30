@@ -40,7 +40,7 @@ use Exporter;
 
 use vars qw/$FOOL_URL $VERSION @FIELDS $MAX_REQUEST_SIZE @ISA/;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 $FOOL_URL = 'http://quote.fool.com/quotes.csv?symbols=';
 
@@ -87,7 +87,7 @@ sub fool {
 
 	# Okay, the data is here
         my $reply = $response->content;
-    
+
         my $i=0;
 	foreach (split('\x0D', $reply)) {
 	  if ( $i++ ) {    # the first line only contains info about

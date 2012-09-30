@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#    Copyright (C) 2004, Michael Curtis 
+#    Copyright (C) 2004, Michael Curtis
 #    Modified from DWS.pm - its copyrights
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
@@ -37,9 +37,9 @@ use strict;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 
-use vars qw/$VERSION/; 
+use vars qw/$VERSION/;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 sub methods { return (nz => \&nzx, nzx => \&nzx); }
 sub labels {

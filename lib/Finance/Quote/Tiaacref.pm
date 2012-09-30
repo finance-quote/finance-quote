@@ -41,7 +41,7 @@ use HTTP::Request::Common;
 use Carp;
 use Encode;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 # URLs of where to obtain information.
 # This used to be different for the CREF and TIAA annuities, but this changed.

@@ -44,7 +44,7 @@ use HTTP::Request::Common qw(POST);
 use HTML::TableExtract;
 use CGI;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 # URLs of where to obtain information
 
@@ -73,7 +73,7 @@ sub aex {
   my ($row, $datarow, $matches);
   my ($time);
 
-  $url = $AEX_URL;    		# base url 
+  $url = $AEX_URL;    		# base url
 
   # Create a user agent object and HTTP headers
   my $ua  = new LWP::UserAgent(agent => 'Mozilla/4.0 (compatible; MSIE 5.5; Windows 98)');
@@ -83,7 +83,7 @@ sub aex {
 
   $reply = $ua->request( $request );
   #print Dumper $reply;
-  if ($reply->is_success) { 
+  if ($reply->is_success) {
 
     # Write retreived data to temp file for debugging
     use POSIX;
@@ -101,7 +101,7 @@ sub aex {
     # Skip the first 4 lines, which are not CSV
     my $dummy = <FP>;	# Typical content: Stocks
     $dummy = <FP>;		# Typical content: Amsterdam - Euronext
-    $dummy = <FP>;		# Typical content:  
+    $dummy = <FP>;		# Typical content:
     $dummy = <FP>;		# Typical content: Instrument's name;ISIN;Euronext code;Market;Symbol;ICB Sector (Level 4);Handelsvaluta;Laatst;Aantal;D/D-1 (%);Datum-tijd (CET);Omzet;Totaal aantal aandelen;Capitalisation;Trading mode;Dag Open;Dag Hoog;Dag Hoog / Datum-tijd (CET);Dag Laag;Dag Laag / Datum-tijd (CET); 31-12/Change (%); 31-12/Hoog; 31-12/Hoog/Datum; 31-12/Laag; 31-12/Laag/Datum; 52 weken/Change (%); 52 weken/Hoog; 52 weken/Hoog/Datum; 52 weken/Laag; 52 weken/Laag/Datum;Suspended;Suspended / Datum-tijd (CET);Reserved;Reserved / Datum-tijd (CET)
 
     while (my $line = <FP>) {
@@ -130,24 +130,24 @@ sub aex {
           ($info {$symbol, "high"} = @$row[16]) =~ s/\s*//g;
           ($info {$symbol, "volume"} = @$row[8]) =~ s/\s*//g;
 
-          # Split the date and time from one table entity 
+          # Split the date and time from one table entity
           my $dateTime = @$row[10];
 
-          # Check for "dd mmm yyyy hh:mm" date/time format like "01 Aug 2004 16:34" 
+          # Check for "dd mmm yyyy hh:mm" date/time format like "01 Aug 2004 16:34"
           if ($dateTime =~ m/(\d{2})\/(\d{2})\/(\d{2}) \s
-                             (\d{2}:\d{2})/xi ) { 
+                             (\d{2}:\d{2})/xi ) {
             $quoter->store_date(\%info, $symbol, {month => $2, day => $1, year => $3});
           }
 
           $info {$symbol, "currency"} = "EUR";
-          $info {$symbol, "success"} = 1; 
+          $info {$symbol, "success"} = 1;
         }
       }
     }
   }
 
   foreach my $symbol (@symbols) {
-    unless ( !defined($info {$symbol, "success"}) || $info {$symbol, "success"} == 1 ) 
+    unless ( !defined($info {$symbol, "success"}) || $info {$symbol, "success"} == 1 )
       {
         $info {$symbol,"success"} = 0;
         $info {$symbol,"errormsg"} = "Fund name $symbol not found";
@@ -161,11 +161,11 @@ sub aex {
 }
 
 
-1; 
+1;
 
 =head1 NAME
 
-Finance::Quote::AEX Obtain quotes from Amsterdam Euronext eXchange 
+Finance::Quote::AEX Obtain quotes from Amsterdam Euronext eXchange
 
 =head1 SYNOPSIS
 
@@ -174,19 +174,19 @@ Finance::Quote::AEX Obtain quotes from Amsterdam Euronext eXchange
     $q = Finance::Quote->new;
 
     %info = Finance::Quote->fetch("aex","AAB 93-08 7.5");  # Only query AEX
-    %info = Finance::Quote->fetch("dutch","AAB 93-08 7.5"); # Failover to other sources OK 
+    %info = Finance::Quote->fetch("dutch","AAB 93-08 7.5"); # Failover to other sources OK
 
 =head1 DESCRIPTION
 
 This module fetches information from the "Amsterdam Euronext
 eXchange AEX" http://www.aex.nl. Only local Dutch investment funds
-and all traded here options and futures are available. 
+and all traded here options and futures are available.
 
-This module is loaded by default on a Finance::Quote object. It's 
+This module is loaded by default on a Finance::Quote object. It's
 also possible to load it explicity by placing "AEX" in the argument
 list to Finance::Quote->new().
 
-Information obtained by this module may be covered by www.aex.nl 
+Information obtained by this module may be covered by www.aex.nl
 terms and conditions See http://www.aex.nl/ for details.
 
 =head2 Stocks And Indices
@@ -202,7 +202,7 @@ Note that options and futures are not supported by this module.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::AEX :
-name, last, date, p_change, bid, offer, open, high, low, close, 
+name, last, date, p_change, bid, offer, open, high, low, close,
 volume, currency, method, exchange, time.
 
 =head1 SEE ALSO
@@ -210,4 +210,3 @@ volume, currency, method, exchange, time.
 Amsterdam Euronext eXchange, http://www.aex.nl
 
 =cut
-

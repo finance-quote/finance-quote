@@ -39,7 +39,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 # URLs of where to obtain information
 
@@ -74,11 +74,11 @@ $TSP_MAIN_URL=("http://www.tsp.gov");
     TSPIFUND => 'International Stock Index Investment Fund' );
 
 sub methods { return (tsp => \&tsp) }
- 
-{ 
+
+{
 	my @labels = qw/name nav date isodate currency method last close/;
 
-	sub labels { return (tsp => \@labels); } 
+	sub labels { return (tsp => \@labels); }
 }
 
 # ==============================================================================
@@ -86,7 +86,7 @@ sub tsp {
 	my $quoter = shift;
 	my @symbols = @_;
 
-	# Make sure symbols are requested  
+	# Make sure symbols are requested
 	##CAN exit more gracefully - add later##
 
 	return unless @symbols;
@@ -98,7 +98,7 @@ sub tsp {
 	$ua = $quoter->user_agent;
 	$reply = $ua->request(GET $TSP_URL);
 	return unless ($reply->is_success);
-	$te = new HTML::TableExtract( headers => 
+	$te = new HTML::TableExtract( headers =>
 		["Date", values %TSP_FUND_COLUMNS] );
 
 	$te->parse($reply->content);
@@ -147,8 +147,8 @@ sub tsp {
 	}
 	return %info if wantarray;
 	return \%info;
-} 
-1; 
+}
+1;
 
 =head1 NAME
 
@@ -164,7 +164,7 @@ Finance::Quote::TSP Obtain fund prices for US Federal Government Thrift Savings 
 
 =head1 DESCRIPTION
 
-This module fetches fund information from the "Thrift Savings Plan" 
+This module fetches fund information from the "Thrift Savings Plan"
 
     http://www.tsp.gov
 
@@ -206,4 +206,3 @@ value.
 Thrift Savings Plan, http://www.tsp.gov
 
 =cut
-

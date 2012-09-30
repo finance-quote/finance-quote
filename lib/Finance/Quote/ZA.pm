@@ -3,10 +3,10 @@
 # ZA.pm
 #
 
-# Version 0.1.1 - 
+# Version 0.1.1 -
 # This version corrects the data downloaded by removing spaces and converting
-# cent values into Rand values – this ensures that the Price Editor in GNUCash 
-# can import the data. The rest of the module and all the hard work 
+# cent values into Rand values – this ensures that the Price Editor in GNUCash
+# can import the data. The rest of the module and all the hard work
 # remains that of Stephen Langenhoven!
 # Rolf Endres
 # 2008.02.18
@@ -31,7 +31,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 my $SHARENET_MAINURL = ("http://www.sharenet.co.za/");
 my $SHARENET_URL = ($SHARENET_MAINURL."jse/");
@@ -44,7 +44,7 @@ sub methods {
 sub labels {
     my @labels = qw/method source name symbol currency last date isodate high low p_change/;
     return (sharenet => \@labels);
-}   
+}
 
 
 sub sharenet {
@@ -132,7 +132,7 @@ sub sharenet {
           $info{$symbol, "last"}  = $rows[1][1];
           $info{$symbol, "last"} =~ tr/ //d;
           $info{$symbol, "last"} =  0.01 * $info{$symbol, "last"};
-      
+
 
           $info{$symbol, "high"}  = $rows[2][1];
           $info{$symbol, "high"} =~ tr/ //d;
@@ -146,7 +146,7 @@ sub sharenet {
 
           $info{$symbol, "p_change"} = $rows[6][1];
           $info{$symbol, "p_change"} =~ tr/ //d;
- 
+
        }
 
     }
@@ -187,4 +187,3 @@ Sharenet website - http://www.sharenet.co.za/
 Finance::Quote
 
 =cut
-

@@ -39,7 +39,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 # URLs of where to obtain information.
 
@@ -51,8 +51,8 @@ sub methods { return (uk_unit_trusts => \&trustnet, trustnet => \&trustnet); }
 
 {
         my @labels = qw/exchange method source name currency bid ask yield price/;
-	
-	sub labels { return (trustnet => \@labels, 
+
+	sub labels { return (trustnet => \@labels,
 	                     uk_unit_trusts => \@labels); }
 }
 
@@ -62,15 +62,15 @@ sub trustnet
   {
     my $quoter = shift;
     my @symbols = @_;
-    
+
     return unless @symbols;
     my(@q,%aa,$ua,$url,$sym,$ts,$price,$currency,$reply,$trust,$trusto,$unittype,$suffix);
     my ($row, $datarow, $matches, $encoded);
     my %curr_iso = (GBP => "GBP", "£" => "GBP", "\$" => "USD");
-    
+
     my %symbolhash;
     @symbolhash{@symbols} = map(1,@symbols);
-    # 
+    #
     for (@symbols) {
       my $te = new HTML::TableExtract( headers => [("Fund Name", "Group Name", "Bid Price", "Offer Price", "Yield")]);
       $trust = $_;
@@ -93,12 +93,12 @@ sub trustnet
       $ua = $quoter->user_agent;
       $reply = $ua->request(GET $url);
       return unless ($reply->is_success);
-      
+
       # print STDERR $reply->content,"\n";
-      
+
       $te->parse($reply->content);
       $ts  = ($te->table_states)[0];
-      
+
       if( defined ($ts)) {
 	# check the trust name - first look for an exact match trimming trailing spaces
 	$matches = 0;
@@ -107,7 +107,7 @@ sub trustnet
 	    next if !defined($$row[1]);
 	  ($sym = $$row[0]) =~ s/^ +//;
 	  $sym =~ s/ +\xA0.+//;
-	  
+
 	  #  print "Checking <", $sym,  "> for <", $trusto, ">\n";
 	  if ($sym =~ /^$trusto$/i) {
 	    $matches++;

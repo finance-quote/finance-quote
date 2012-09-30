@@ -39,7 +39,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 # URLs of where to obtain information.
 
@@ -50,7 +50,7 @@ sub methods { return (ftportfolios => \&ftportfolios, ftportfolios_direct => \&f
 
 {
         my @labels = qw/exchange method source name currency nav pop price/;
-	
+
 	sub labels { return (ftportfolios => \@labels,
 	                     ftportfolios_direct => \@labels); }
 }
@@ -61,20 +61,20 @@ sub ftportfolios
 {
     my $quoter = shift;
     my @symbols = @_;
-    
+
     return unless @symbols;
     my(@q,%aa,$ua,$url,$sym,$ts,$date,$price,$currency,$reply,$trust);
     my ($row, $datarow, $matches);
     my %curr_iso = ("\$" => "USD");
-    
+
     my %symbolhash;
     @symbolhash{@symbols} = map(1,@symbols);
-    # 
+    #
     for (@symbols) {
       my $te = new HTML::TableExtract( );
       $trust = $_;
       $url = "$FTPORTFOLIOS_URL";
-      
+
       # print STDERR "Retrieving \"$trust\" from $url\n";
       $ua = $quoter->user_agent;
 
@@ -83,9 +83,9 @@ sub ftportfolios
       push @{ $ua->requests_redirectable }, 'POST';
       $reply = $ua->request(POST $url, [searchfor => $trust]);
       return unless ($reply->is_success);
-      
+
       # print STDERR $reply->content,"\n";
-      
+
       $te->utf8_mode(1);
       $te->parse($reply->content);
 

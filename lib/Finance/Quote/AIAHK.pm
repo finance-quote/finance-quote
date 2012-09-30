@@ -34,16 +34,16 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 $AIAHK_URL = 'http://www.aia.com.hk/daily/fund_mst_rightb.asp?cat=BR_AC';
 
 
 sub methods { return (aiahk => \&aiahk); }
-{ 
+{
 	my @labels = qw/name code date isodate price bid offer p_change_3m
 	    p_change_1y p_change_3y currency method exchange/;
 
-	sub labels { return (aiahk => \@labels); } 
+	sub labels { return (aiahk => \@labels); }
 }
 
 sub aiahk {
@@ -139,7 +139,7 @@ sub aiahk {
 
 =head1 NAME
 
-Finance::Quote::AIAHK Obtain quotes from American International Assurance 
+Finance::Quote::AIAHK Obtain quotes from American International Assurance
 
 =head1 SYNOPSIS
 
@@ -154,11 +154,11 @@ Finance::Quote::AIAHK Obtain quotes from American International Assurance
 This module fetches information from the American International
 Assurance http://www.aia.com.hk. All funds are available.
 
-This module is loaded by default on a Finance::Quote object. It's 
+This module is loaded by default on a Finance::Quote object. It's
 also possible to load it explicity by placing "AIAHK" in the argument
 list to Finance::Quote->new().
 
-Information obtained by this module may be covered by www.aia.com.hk 
+Information obtained by this module may be covered by www.aia.com.hk
 terms and conditions See http://www.aia.com.hk/ for details.
 
 =head1 LABELS RETURNED

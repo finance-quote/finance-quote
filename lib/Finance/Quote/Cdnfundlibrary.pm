@@ -21,7 +21,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 # URLs of where to obtain information.
 
@@ -46,7 +46,7 @@ sub fundlibrary   {
     my $quoter = shift;
     my @symbols = @_;
 
-    # Make sure symbols are requested  
+    # Make sure symbols are requested
     ##CAN exit more gracefully - add later##
 
     return unless @symbols;
@@ -72,13 +72,13 @@ sub fundlibrary   {
 
       # Check for a page without tables
       # This gets returned when a bad symbol name is given
-      unless ( $te->tables > 0 ) 
+      unless ( $te->tables > 0 )
       {
 	$fundquote {$mutual,"success"} = 0;
 	$fundquote {$mutual,"errormsg"} = "Fund name $mutual not found";
 	next;
-      } 
-     
+      }
+
       # Fund name
       $reply->content =~ m#<div\s+class="tSmallTitle">([^<]+)</div>#;
       $fundquote {$mutual, "name"} = $1;
@@ -173,4 +173,3 @@ Fundlibrary website - http://www.fundlibrary.com/
 Finance::Quote
 
 =cut
-

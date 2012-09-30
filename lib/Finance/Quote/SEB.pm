@@ -35,14 +35,14 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use utf8;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 $SEB_FUNDS_URL = 'http://taz.vv.sebank.se/cgi-bin/pts3/pow/fmk/2100/Senaste_fondkurserna.TXT';
 
 sub methods { return (seb_funds => \&seb_funds); }
 
 {
   my @labels = qw/date isodate method source name currency price/;
-	
+
   sub labels { return (seb_funds => \@labels); }
 }
 

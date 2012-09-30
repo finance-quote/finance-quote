@@ -44,10 +44,10 @@ use HTML::TreeBuilder;
 
 use vars qw/$VERSION/;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 sub methods { return (vwd => \&vwd); }
-sub labels { return (vwd => [qw/currency date isodate 
+sub labels { return (vwd => [qw/currency date isodate
             name price last symbol time/]); }
 
 # =======================================================================
@@ -218,5 +218,3 @@ currency date isodate name price last symbol time.
 vwd Vereinigte Wirtschaftsdienste GmbH, http://www.vwd.de/
 
 =cut
-
- 	  	 

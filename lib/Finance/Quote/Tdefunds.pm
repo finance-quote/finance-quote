@@ -33,7 +33,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use Carp;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 # URLs of where to obtain information.
 
@@ -154,12 +154,12 @@ Finance::Quote::Tdefunds	- Obtain quotes from TD Waterhouse Efunds
 =head1 DESCRIPTION
 
 This module obtains information about managed funds from TD
-Waterhouse Canada Efunds. All TD Waterhouse efunds are downloaded at once. 
+Waterhouse Canada Efunds. All TD Waterhouse efunds are downloaded at once.
 
 The symbols for each efund are the names of the efund with any
 unusal characters (not a letter, space or period) removed. For example;
 a fund called "TD US Index ($US)" would have the symbol
-"TD US Index US". 
+"TD US Index US".
 
 =head1 LABELS RETURNED
 

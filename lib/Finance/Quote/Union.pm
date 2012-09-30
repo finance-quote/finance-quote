@@ -40,7 +40,7 @@ use HTTP::Request::Common;
 
 use vars qw/$VERSION/;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 sub methods { return (unionfunds => \&unionfunds); }
 sub labels { return (unionfunds => [qw/exchange name date isodate price method/]); }
@@ -164,7 +164,3 @@ exchange, name, date, price, last.
 UNION (Union Invest), http://www.union-invest.de/
 
 =cut
-
-
-
-

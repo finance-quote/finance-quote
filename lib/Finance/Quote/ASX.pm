@@ -40,7 +40,7 @@ use HTML::TableExtract;
 
 use vars qw/$ASX_URL $VERSION/;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 $ASX_URL = 'http://www.asx.com.au/asx/markets/priceLookup.do?by=asxCodes&asxCodes=';
 
@@ -115,10 +115,10 @@ sub asx {
 			$info{$stock,$label} = shift(@$row);
 
 			# Again, get rid of nasty high-bit characters.
-			$info{$stock,$label} =~ tr/ \200-\377//d 
+			$info{$stock,$label} =~ tr/ \200-\377//d
 				unless ($label eq "name");
 		}
-		
+
 		# If that stock does not exist, it will have a empty
 		# string for all the fields.  The "last" price should
 		# always be defined (even if zero), if we see an empty

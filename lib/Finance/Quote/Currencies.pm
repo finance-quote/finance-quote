@@ -21,7 +21,7 @@ use base 'Exporter';
 use vars qw/@EXPORT_OK $VERSION $YAHOO_CURRENCY_CONV_URL/;
 
 @EXPORT_OK = qw( known_currencies fetch_live_currencies );
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 use HTTP::Request::Common;
 use LWP::UserAgent;
@@ -77,7 +77,7 @@ my %currencies = ( ALL => { name => qq{Albanian Lek} }
                  , XCP => { name => qq{Copper Pounds} }
                  , CRC => { name => qq{Costa Rica Colon} }
                  , HRK => { name => qq{Croatian Kuna} }
-                 , CUP => { name => qq{Cuban Peso} } 
+                 , CUP => { name => qq{Cuban Peso} }
                  , CZK => { name => qq{Czech Koruna} }
                  , DKK => { name => qq{Danish Krone} }
                  , DJF => { name => qq{Dijibouti Franc} }
@@ -225,7 +225,7 @@ sub fetch_live_currencies {
   # Avoid the "Parsing of undecoded UTF-8 will give garbage when decoding
   # entities" warning by forcing utf mode and encoding to utf8
   $p->utf8_mode(1);
-  $p->parse( Encode::encode_utf8($data) ); 
+  $p->parse( Encode::encode_utf8($data) );
 
   return _live_currencies();
 }
@@ -240,13 +240,13 @@ sub fetch_live_currencies {
   my $in_currency_option = 0;
   my $currency_text = '';
   my $currency_code = '';
-  
+
   # _start_handler (private function)
   #
   # This is a HTML::Parser start tag handler
   sub _start_handler {
     my ($tagname, $attr) = @_;
- 
+
     if ( lc $tagname eq 'select'
          &&
          exists $attr->{name} && lc $attr->{name} eq 'currency-1'
@@ -266,7 +266,7 @@ sub fetch_live_currencies {
       $currency_text = '';
     }
   }
-  
+
   # _end_handler (private function)
   #
   # This is a HTML::Parser end tag handler
@@ -336,7 +336,7 @@ Finance::Quote::Currencies - List of currencies from Yahoo Finance
 This module provides a list of known currencies from Yahoo Currency Converter.
 
 The converter website includes a list of known currencies - this module includes
-a stored list 
+a stored list
 
 =head1 LAST EXTRACT
 

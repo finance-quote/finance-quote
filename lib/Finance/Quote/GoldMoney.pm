@@ -38,7 +38,7 @@ use warnings;
 
 use vars qw/$VERSION/;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 sub methods {
 	return(goldmoney => \&goldmoney);
@@ -52,7 +52,7 @@ sub labels {
 #
 # - get 'gold' and 'silver' spot rates from goldmoney.com
 # - error out properly (that is: ignore) all other symbols
-# 
+#
 sub goldmoney {
 	my $quoter = shift;
 	my @symbols = @_;
@@ -94,10 +94,10 @@ sub goldmoney {
 	if( $_want_gold or $_want_silver or $_want_platinum) {
 		my $GOLDMONEY_URL = "http://goldmoney.com";
 		my $response = $ua->request(GET $GOLDMONEY_URL);
-	
+
 		if ($response->is_success) {
 			$html_string =$response->content;
-	
+
 			# we want the 'Current Spot Rates' table
 			$te = new HTML::TableExtract->new( attribs=>{class=>'spot'}, subtables=>1);
 			$te->parse($html_string);
@@ -108,7 +108,7 @@ sub goldmoney {
 			# retrieval error - flag an error and return right away
 			foreach my $s (@symbols) {
 				%info = _goldmoney_error(@symbols, 'HTTP error: ' . $response->status_line);
-				return wantarray() ? %info : \%info;			
+				return wantarray() ? %info : \%info;
 			}
 			return wantarray() ? %info : \%info;
 		}
@@ -121,7 +121,7 @@ sub goldmoney {
 		# - this assumption causes trouble when the module is used outside the
 		#   european region (F::Q considers every number it gets as EUR and converts it...)
 		$currency = 'EUR';
-	
+
 		# get gold rate
 		#
 		if( $_want_gold ) {
@@ -164,7 +164,7 @@ sub goldmoney {
 				$info{'silver','success'}  = 1;
 			}
 		}
-		
+
 		# get platinum rate
 		#
 		if( $_want_platinum ) {
@@ -265,5 +265,3 @@ The following labels are returned by Finance::Quote::GoldMoney:
 GoldMoney (Net Transactions Ltd.), http://www.goldmoney.com/
 
 =cut
-
- 	  	 

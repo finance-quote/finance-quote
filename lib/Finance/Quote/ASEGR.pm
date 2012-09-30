@@ -30,7 +30,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 my $ASEGR_URL = 'http://www.ase.gr/content/en/MarketData/Stocks/Prices/Share_SearchResults.asp?';
 
@@ -38,12 +38,12 @@ my $ASEGR_URL = 'http://www.ase.gr/content/en/MarketData/Stocks/Prices/Share_Sea
 sub methods { return ( greece => \&asegr,
 			asegr => \&asegr,
 			europe => \&asegr); }
-{ 
+{
 	my @labels = qw/name last date isodate p_change open high low close volume currency method exchange/;
 
 	sub labels { return (greece => \@labels,
 			     asegr => \@labels,
-			     europe => \@labels); } 
+			     europe => \@labels); }
 }
 
 sub asegr {
@@ -54,14 +54,14 @@ sub asegr {
 	my $ua = $quoter->user_agent();
 
 	$url=$ASEGR_URL;
-	
+
 	foreach my $stocks (@stocks)
 	{
 		$reply = $ua->request(GET $url.join('',"share=",$stocks));
 
-		if ($reply->is_success) 
+		if ($reply->is_success)
 		{
-			
+
 			$te= new HTML::TableExtract( headers =>
 			[("Date","Price","\%Change","Volume","Max","Min","Value","Trades","Open")]);
 
@@ -81,7 +81,7 @@ sub asegr {
 				$info {$stocks,"errormsg"} = "Parse error";
 				next;
 			}
-			
+
 			$info{$stocks, "success"}=1;
 			$info{$stocks, "exchange"}="Athens Stock Exchange";
 			$info{$stocks, "method"}="asegr";
@@ -90,7 +90,7 @@ sub asegr {
 			($info{$stocks, "close"}=$rows[1][1]) =~ s/\s*//g;
 			($info{$stocks, "p_change"}=$rows[0][2]) =~ s/\s*//g;
 			($info{$stocks, "volume"}=$rows[0][3]) =~ s/\s*//g;
-			($info{$stocks, "high"}=$rows[0][4]) =~ s/\s*//g; 
+			($info{$stocks, "high"}=$rows[0][4]) =~ s/\s*//g;
 			($info{$stocks, "low"}=$rows[0][5]) =~ s/\s*//g;
 			($info{$stocks, "nav"}=$rows[0][6]) =~ s/\s*//g;
 			($info{$stocks, "open"}=$rows[0][8]) =~ s/\s*//g;
@@ -103,7 +103,7 @@ sub asegr {
      			$info{$stocks, "success"}=0;
 			$info{$stocks, "errormsg"}="Error retreiving $stocks ";
    }
- } 
+ }
  return wantarray() ? %info : \%info;
  return \%info;
 }
@@ -120,14 +120,14 @@ Finance::Quote::ASEGR Obtain quotes from Athens Stock Exchange.
     $q = Finance::Quote->new;
 
     %info = Finance::Quote->fetch("asegr","minoa");  # Only query ASEGR
-    %info = Finance::Quote->fetch("greece","aaak"); # Failover to other sources OK. 
+    %info = Finance::Quote->fetch("greece","aaak"); # Failover to other sources OK.
 
 =head1 DESCRIPTION
 
 This module fetches information from the "Athens Stock Exchange",
-http://www.ase.gr. All stocks are available. 
+http://www.ase.gr. All stocks are available.
 
-This module is loaded by default on a Finance::Quote object. It's 
+This module is loaded by default on a Finance::Quote object. It's
 also possible to load it explicity by placing "ASEGR" in the argument
 list to Finance::Quote->new().
 
@@ -135,14 +135,14 @@ This module provides both the "asegr" and "greece" fetch methods.
 Please use the "greece" fetch method if you wish to have failover
 with future sources for Greek stocks. Using the "asegr" method
 will guarantee that your information only comes from the Athens Stock Exchange.
- 
-Information obtained by this module may be covered by www.ase.gr 
+
+Information obtained by this module may be covered by www.ase.gr
 terms and conditions See http://www.ase.gr/ for details.
 
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::ASEGR :
-name, last, date, p_change, open, high, low, close, 
+name, last, date, p_change, open, high, low, close,
 volume, currency, method, exchange.
 
 =head1 SEE ALSO
@@ -150,5 +150,3 @@ volume, currency, method, exchange.
 Athens Stock Exchange, http://www.ase.gr
 
 =cut
-
-	

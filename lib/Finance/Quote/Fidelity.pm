@@ -36,7 +36,7 @@ use vars qw/$FIDELITY_URL $VERSION/;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 $FIDELITY_URL = ("http://activequote.fidelity.com/nav/fulllist.csv");
 
@@ -74,13 +74,13 @@ sub fidelity
     if ($reply->is_success) {
       foreach (split('\015?\012',$reply->content)) {
 	my @q = $quoter->parse_csv($_) or next;
-	
+
 	$sym = $q[2] or next;
 	$sym =~ s/^ +//;
-    
+
     	# Skip symbols we didn't ask for.
     	next unless (defined($symbolhash{$sym}));
-    
+
 	 $aa {$sym, "exchange"}	= "Fidelity";  # Fidelity
 	 $aa {$sym, "method"}  	= "fidelity_direct";
 	($aa {$sym, "name"}    	= $q[0]) =~ s/^\s+//;

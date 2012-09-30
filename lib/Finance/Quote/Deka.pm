@@ -23,7 +23,7 @@ use HTML::TableExtract;
 require Crypt::SSLeay;
 
 use vars qw($VERSION);
-$VERSION = '1.17';
+$VERSION = '1.18';
 my $DEKA_URL = "https://www.deka.de/dn/useCases/fundsearch/UCFundsSearch.shtml?ACTION_FIELD=quickSearch";
 
 sub methods {return (deka        => \&deka);}
@@ -70,7 +70,7 @@ sub deka
 #	  next if !defined $$row[0] || !defined $$row[1];
 #	  print "Row: ", join('|', @$row), "\n";
 #	}
-	
+
         foreach my $row ($ts->rows) {
 	  next if !defined $$row[0] || !defined $$row[1];
 	  $info{$stock,"name"} = $$row[0];

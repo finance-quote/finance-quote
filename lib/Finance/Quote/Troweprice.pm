@@ -38,7 +38,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use Carp;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 # URLs of where to obtain information.
 
@@ -61,7 +61,7 @@ sub troweprice
     my $quoter = shift;
     my(@q,%aa,$ua,$url,$sym);
 
-    # for T Rowe Price,  we get them all. 
+    # for T Rowe Price,  we get them all.
     $url = $TROWEPRICE_URL;
     $ua = $quoter->user_agent;
     my $reply = $ua->request(GET $url);
@@ -76,7 +76,7 @@ sub troweprice
             $aa {$sym, "exchange"} = "T. Rowe Price";  # TRP
 	    $aa {$sym, "method"} = "troweprice";
             # ($aa {$sym, "name"} = $q[0]) =~ s/^ +//;
-            $aa {$sym, "name"} = $sym;  # no name supplied ... 
+            $aa {$sym, "name"} = $sym;  # no name supplied ...
             $aa {$sym, "nav"} = $q[1];
 	    $quoter->store_date(\%aa, $sym, {usdate => $q[2]});
 	    $aa {$sym, "price"} = $aa{$sym,"nav"};

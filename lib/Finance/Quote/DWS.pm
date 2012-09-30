@@ -45,7 +45,7 @@ use warnings;
 
 use vars qw/$VERSION/;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 sub methods {
 	return(dwsfunds => \&dwsfunds);
@@ -63,7 +63,7 @@ sub labels {
 #    ...
 #
 # This subroutine was written by Volker Stuerzl <volker.stuerzl@gmx.de>
-# 
+#
 # Version 2.0 as new webpage provides the data
 # 2006-03-19: Klaus Dahlke
 # Since DWS has changed its format and the data are not available via
@@ -96,7 +96,7 @@ sub dwsfunds {
 		$wkn, $isin, $exchange, $date, $name, $type
 	);
 
-	# define DWS 'Fondsart' (engl: classifications) as used on the page 
+	# define DWS 'Fondsart' (engl: classifications) as used on the page
 	# - these strings are used to break down the real name later
 	# - hardcoding at its best... but not much choice in order to get more
 	#   correct results
@@ -132,12 +132,12 @@ sub dwsfunds {
 
 		$te = new HTML::TableExtract->new( depth => 3, count => 1 );
 		$te->parse($html_string);
-		$ts=$te->table_state(3,1); 
+		$ts=$te->table_state(3,1);
 	} else {
 		# retrieval error - flag an error and return right away
 		foreach my $fund (@funds) {
 			%info = _dwsfunds_error(@funds, 'HTTP error: ' . $response->status_line);
-			return wantarray() ? %info : \%info;			
+			return wantarray() ? %info : \%info;
 		}
 
 		return wantarray() ? %info : \%info;
@@ -169,13 +169,13 @@ sub dwsfunds {
 		$exchange = $ce1[1];
 
 
-		# get date and last price 
+		# get date and last price
 		#
 		@ce2=split(/:/, $cells[2]);
 		$date = $ce2[0];
 		$last = $ce2[2];
-		
-		# 
+
+		#
 		# wkn or isin is the source
 		#
 		@ce4=split(/:/, $cells[4]);
@@ -191,11 +191,11 @@ sub dwsfunds {
 				foreach my $t (@dws_fund_classifications) {
 					if( $name =~ /$t/ ) {
 						$type = $t;
-				
+
 						my @n = split(/$t/, $name);
 						$name = $n[0];
 						$name_ok = 1;
-				
+
 						last();
 					}
 				}
@@ -211,10 +211,10 @@ sub dwsfunds {
 				# - keep arbitrary precision and any eventually following unit (%, $, ...)
 				if( $last =~ /^(.*),(\d*.{1})$/ ) {
 					my @tmp = ( $1, $2 );
-					$tmp[0] =~ s/\.//g;        
+					$tmp[0] =~ s/\.//g;
 					$last = join('.', @tmp);
 				}
-				
+
 				# finaly, build up the result
 				$info{$fund,"exchange"} = $exchange;
 				$info{$fund,"symbol"}   = $fund;
@@ -288,5 +288,3 @@ exchange, name, date, price, last.
 DWS (Deutsche Bank Gruppe), http://www.dws.de/
 
 =cut
-
- 	  	 

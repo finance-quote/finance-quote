@@ -21,7 +21,7 @@
 # This code derived from Padzensky's work on package Finance::YahooQuote,
 # but extends its capabilites to encompas a greater number of data sources.
 #
-# 
+#
 
 require 5.005;
 
@@ -29,20 +29,20 @@ use strict;
 
 package Finance::Quote::BMONesbittBurns;
 
-use vars qw($VERSION $BMO_URL); 
+use vars qw($VERSION $BMO_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 # URLs of where to obtain information
 my $BMO_URL = 'http://bmonesbittburns.com/QuickQuote/QuickQuote.asp?Symbol=';
 
-sub methods { return (bmonesbittburns => \&bmonesbittburns) } 
+sub methods { return (bmonesbittburns => \&bmonesbittburns) }
 sub labels  { return (bmonesbittburns => [qw/name last p_change bid offer open high low volume currency method exchange date isodate time/]) };
-			
+
 # ==============================================================================
 sub bmonesbittburns {
     my $quoter = shift;
@@ -51,30 +51,30 @@ sub bmonesbittburns {
 
     my($url, $reply, $te);
     my(%info);
-    
+
     my $ua = $quoter->user_agent; 	# user_agent
-    $url = $BMO_URL;    		    # base url 
-    
+    $url = $BMO_URL;    		    # base url
+
     foreach my $symbol (@symbols) {
-        $reply = $ua->request(GET $url.join('',$symbol)); 
-        
-        if ($reply->is_success) { 
-        
+        $reply = $ua->request(GET $url.join('',$symbol));
+
+        if ($reply->is_success) {
+
             #print STDERR $reply->content,"\n";
-            
+
             $te = new HTML::TableExtract( depth => 2);
 
             # parse table
-            $te->parse($reply->content); 
-            
+            $te->parse($reply->content);
+
             # check for a page without tables.
             # This gets returned when a bad symbol name is given.
             unless ( $te->tables )  {
                 $info {$symbol,"succes"} = 0;
                 $info {$symbol,"errormsg"} = "Fund name $symbol not found, bad symbol name";
                 next;
-            } 
-            
+            }
+
 	    if (0) {
 	      my ($table, $row);
 
@@ -112,18 +112,18 @@ sub bmonesbittburns {
             $info {$symbol, "success"} = 1;
             $info {$symbol, "exchange"} = "BMO Nesbitt Burns";
             $info {$symbol, "method"} = "bmonesbittburns";
-            
+
             ($info {$symbol, "last"}      = $rows[ 1][2]) =~ s/\s*//g; # Remove spaces
             ($info {$symbol, "p_change"}  = $rows[ 2][5]) =~ s/\s*//g;
             ($info {$symbol, "close"}     = $rows[ 3][5]) =~ s/\s*//g;
-            ($info {$symbol, "bid"}       = $rows[ 4][2]) =~ s/\s*//g; 
+            ($info {$symbol, "bid"}       = $rows[ 4][2]) =~ s/\s*//g;
             ($info {$symbol, "offer"}     = $rows[ 4][5]) =~ s/\s*//g;
             ($info {$symbol, "open"}      = $rows[ 6][2]) =~ s/\s*//g;
             ($info {$symbol, "volume"}    = $rows[ 6][5]) =~ s/\s*//g;
-            ($info {$symbol, "high"}      = $rows[ 7][2]) =~ s/\s*//g; 
+            ($info {$symbol, "high"}      = $rows[ 7][2]) =~ s/\s*//g;
             ($info {$symbol, "low"}       = $rows[ 7][5]) =~ s/\s*//g;
             if ($#rows >= 9) {
-                ($info {$symbol, "eps"}       = $rows[10][2]) =~ s/\s*//g; 
+                ($info {$symbol, "eps"}       = $rows[10][2]) =~ s/\s*//g;
                 ($info {$symbol, "pe"}        = $rows[10][5]) =~ s/\s*//g;
                 ($info {$symbol, "div_yield"} = $rows[12][5]) =~ s/\s*//g;
 
@@ -135,7 +135,7 @@ sub bmonesbittburns {
 	    # This site appears to provide either a date or a time but not both
             my($dt) = $rows[3][2];
             if ($dt =~ /:/) {
-                ($info {$symbol, "time"} = "$dt:00") =~ s/\s*//g; 
+                ($info {$symbol, "time"} = "$dt:00") =~ s/\s*//g;
 		$quoter->store_date(\%info, $symbol, {today => 1});
             }
             else {
@@ -151,11 +151,11 @@ sub bmonesbittburns {
             else {
                 $info {$symbol, "currency"} = "CAD";
             }
-            $info {$symbol, "success"} = 1; 
+            $info {$symbol, "success"} = 1;
 
             # Walk through our fields and remove high-ascii
 	    # characters which may have snuck in.
-	    
+
 	    foreach (@{labels()}) {
                 $info{$symbol,$_} =~ tr/\200-\377//d;
 	    }
@@ -168,9 +168,9 @@ sub bmonesbittburns {
 
     return %info if wantarray;
     return \%info;
-} 
+}
 
-1; 
+1;
 
 =head1 NAME
 
@@ -199,21 +199,20 @@ are supported:
   I    Index
   X    U.S Stocks (most exchanges)
 
-This module is loaded by default on a Finance::Quote object. It's 
+This module is loaded by default on a Finance::Quote object. It's
 also possible to load it explicity by placing "BMONesbittBurns" in the argument
 list to Finance::Quote->new().
 
-Information obtained by this module may be covered by BMO Nesbitt Burns 
+Information obtained by this module may be covered by BMO Nesbitt Burns
 terms and conditions. See http://bmonesbittburns.com/ for details.
 
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::BMONesbittBurns :
-name, last, date, p_change, bid, offer, open, high, low,  
+name, last, date, p_change, bid, offer, open, high, low,
 volume, currency, method, exchange, time, date.
 
 =head1 SEE ALSO
 
 BMO Nesbitt-Burns  http://bmonesbittburns.com/QuickQuote/QuickQuote.asp
 =cut
-

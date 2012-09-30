@@ -41,18 +41,18 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 my $LR_URL = 'http://bourse.lerevenu.com/recherchenom.hts';
 
 
 sub methods { return ( france => \&lerevenu,
 			lerevenu => \&lerevenu); }
-{ 
+{
 	my @labels = qw/name last date isodate p_change open high low close volume currency method exchange/;
 
 	sub labels { return (france => \@labels,
-			     lerevenu => \@labels); } 
+			     lerevenu => \@labels); }
 }
 
 sub lerevenu {
@@ -65,10 +65,10 @@ sub lerevenu {
 	foreach my $stocks (@stocks)
 	{
 		$url="$LR_URL?recherchenom=$stocks&p=20";
-	
-		$reply = $ua->request(GET $url);  
 
-		if ($reply->is_success) 
+		$reply = $ua->request(GET $url);
+
+		if ($reply->is_success)
 		{
 			# print STDERR $reply->content,"\n";
 
@@ -113,11 +113,11 @@ sub lerevenu {
 					foreach $ts ($te->table_state(5, 0)){
 						@rows=$ts->rows;
 						$info{$stocks, "name"}=$rows[0][0];
-						} 
+						}
 					foreach $ts ($te->table_state(8, 1)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
-						ASSIGN:	for ( @$row[0] ) {  
+						ASSIGN:	for ( @$row[0] ) {
 								/Dernier/ && do {
 									($info{$stocks, "last"}=@$row[1]) =~ s/[^0-9.-]*//g;
 									($info{$stocks, "close"}=@$row[2]) =~ s/[^0-9.-]*//g;
@@ -157,7 +157,7 @@ sub lerevenu {
 					foreach $ts ($te->table_state(6, 5)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
-						ASSIGN:	for ( @$row[0] ){  
+						ASSIGN:	for ( @$row[0] ){
 								/Isin/ && do {
 									# GnuCash
 									$info{$stocks, "symbol"}=@$row[1];
@@ -166,14 +166,14 @@ sub lerevenu {
 							}
 					    }
 					}
-					last SWITCH; 
+					last SWITCH;
 				};
 				# style=bond
 			       	/Obligations/ && do {
 					foreach $ts ($te->table_state(5, 0)){
 						@rows=$ts->rows;
 						$info{$stocks, "name"}=$rows[0][0];
-						}  
+						}
 					foreach $ts ($te->table_state(8, 0)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
@@ -219,7 +219,7 @@ sub lerevenu {
 					foreach $ts ($te->table_state(8, 3)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
-						ASSIGN:	for ( @$row[0] ){ 
+						ASSIGN:	for ( @$row[0] ){
 								/Isin/ && do {
 									# GnuCash
 									$info{$stocks, "symbol"}=@$row[1];
@@ -228,7 +228,7 @@ sub lerevenu {
 							}
 						}
 					}
-					last SWITCH; 
+					last SWITCH;
 				};
 				# style=fund
 			        /SICAVetFCP/ && do {
@@ -249,7 +249,7 @@ sub lerevenu {
 					foreach $ts ($te->table_state(9, 7)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
-						ASSIGN:	for ( @$row[0] ){  
+						ASSIGN:	for ( @$row[0] ){
 								/Actif/ && do {
 									my $nav;
 									$nav=@$row[1];
@@ -263,7 +263,7 @@ sub lerevenu {
 					foreach $ts ($te->table_state(9, 9)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
-						ASSIGN:	for ( @$row[0] ){  
+						ASSIGN:	for ( @$row[0] ){
 								/ISIN/ && do {
 									# GnuCash
 									($info{$stocks, "symbol"}=@$row[1]) =~ s/\s*//g;
@@ -272,18 +272,18 @@ sub lerevenu {
 							}
 						}
 					}
-					last SWITCH; 
+					last SWITCH;
 				};
 				# style=warrant
-				/Bons&Warrants/ && do { 
+				/Bons&Warrants/ && do {
 					foreach $ts ($te->table_state(5, 0)){
 						@rows=$ts->rows;
 						$info{$stocks, "name"}=$rows[0][0];
-						}  
+						}
  					foreach $ts ($te->table_state(7, 1)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
-						ASSIGN:	for ( @$row[0] ){  
+						ASSIGN:	for ( @$row[0] ){
 								/Dernier/ && do {
 									($info{$stocks, "last"}=@$row[1]) =~ s/[^0-9.-]*//g;
 									($info{$stocks, "close"}=@$row[1]) =~ s/[^0-9.-]*//g;
@@ -322,7 +322,7 @@ sub lerevenu {
 					foreach $ts ($te->table_state(6, 8)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
-						ASSIGN:	for ( @$row[0] ){  
+						ASSIGN:	for ( @$row[0] ){
 								/Isin/ && do {
 									# GnuCash
 									$info{$stocks, "symbol"}=@$row[1];
@@ -333,18 +333,18 @@ sub lerevenu {
 
 					    }
 					}
-					last SWITCH; 
+					last SWITCH;
 				};
 				# style=indice
-			        /Indices/ && do {  
+			        /Indices/ && do {
 					foreach $ts ($te->table_state(5, 0)){
 						@rows=$ts->rows;
 						$info{$stocks, "name"}=$rows[0][0];
-						}  
+						}
 					foreach $ts ($te->table_state(7, 1)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
-						ASSIGN:	for ( @$row[0] ){  
+						ASSIGN:	for ( @$row[0] ){
 								/Dernier/ && do {
 									($info{$stocks, "last"}=@$row[1]) =~ s/[^0-9.-]*//g;
 									($info{$stocks, "close"}=@$row[1]) =~ s/[^0-9.-]*//g;
@@ -379,7 +379,7 @@ sub lerevenu {
 					foreach $ts ($te->table_state(7, 2)){
 						@rows=$ts->rows;
 						foreach $row ($ts->rows) {
-						ASSIGN:	for ( @$row[0] ){  
+						ASSIGN:	for ( @$row[0] ){
 								/Isin/ && do {
 									# GnuCash
 									$info{$stocks, "symbol"}=@$row[1];
@@ -389,7 +389,7 @@ sub lerevenu {
 						}
 					    }
 					}
-					last SWITCH; 
+					last SWITCH;
 				};
 			        {
 					$info {$stocks,"success"} = 0;
@@ -398,12 +398,12 @@ sub lerevenu {
 			}
 
 
-		} 
+		}
 		else {
      			$info{$stocks, "success"}=0;
 			$info{$stocks, "errormsg"}="Error retreiving $stocks ";
    		}
- 	} 
+ 	}
  	return wantarray() ? %info : \%info;
  	return \%info;
 }
@@ -420,14 +420,14 @@ Finance::Quote::LeRevenu Obtain quotes from http://bourse.lerevenu.com.
     $q = Finance::Quote->new;
 
     %info = Finance::Quote->fetch("LeRevenu","FR0000031122");  # Only query LeRevenu
-    %info = Finance::Quote->fetch("france","ml"); # Failover to other sources OK. 
+    %info = Finance::Quote->fetch("france","ml"); # Failover to other sources OK.
 
 =head1 DESCRIPTION
 
 This module fetches information from the "Paris Stock Exchange",
-http://bourse.lerevenu.com. All stocks are available. 
+http://bourse.lerevenu.com. All stocks are available.
 
-This module is loaded by default on a Finance::Quote object. It's 
+This module is loaded by default on a Finance::Quote object. It's
 also possible to load it explicity by placing "LeRevenu" in the argument
 list to Finance::Quote->new().
 
@@ -435,14 +435,14 @@ This module provides both the "lerevenu" and "france" fetch methods.
 Please use the "france" fetch method if you wish to have failover
 with future sources for French stocks. Using the "lerevenur" method
 will guarantee that your information only comes from the Paris Stock Exchange.
- 
-Information obtained by this module may be covered by http://bourse.lerevenu.com 
+
+Information obtained by this module may be covered by http://bourse.lerevenu.com
 terms and conditions See http://bourse.lerevenu.com for details.
 
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::LeRevenu :
-name, last, date, p_change, open, high, low, close, 
+name, last, date, p_change, open, high, low, close,
 volume, currency, method, exchange.
 
 =head1 SEE ALSO
@@ -450,5 +450,3 @@ volume, currency, method, exchange.
 Le Revenu, http://bourse.lerevenu.com
 
 =cut
-
-	

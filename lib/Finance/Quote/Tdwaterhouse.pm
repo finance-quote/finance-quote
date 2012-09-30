@@ -33,7 +33,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use Carp;
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 # URLs of where to obtain information.
 
@@ -153,12 +153,12 @@ Finance::Quote::Tdwaterhouse	- Obtain quotes from TD Waterhouse Canada
 =head1 DESCRIPTION
 
 This module obtains information about managed funds from TD
-Waterhouse Canada. All TD Waterhouse funds are downloaded at once. 
+Waterhouse Canada. All TD Waterhouse funds are downloaded at once.
 
 The symbols for each mutual fund are the names of the fund with any
 unusal characters (not a letter, space or period) removed. For example;
 a fund called "TD Health Sciences ($US)" would have the symbol
-"TD Health Sciences US". 
+"TD Health Sciences US".
 
 =head1 LABELS RETURNED
 
