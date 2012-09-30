@@ -24,6 +24,7 @@ lib/Finance/Quote/ASEGR.pm
 lib/Finance/Quote/ASX.pm
 lib/Finance/Quote/BMONesbittBurns.pm
 lib/Finance/Quote/Bourso.pm
+lib/Finance/Quote/BSERO.pm
 lib/Finance/Quote/Cdnfundlibrary.pm
 lib/Finance/Quote/Cominvest.pm
 lib/Finance/Quote/Currencies.pm
@@ -44,6 +45,8 @@ lib/Finance/Quote/Morningstar.pm
 lib/Finance/Quote/NZX.pm
 lib/Finance/Quote/Platinum.pm
 lib/Finance/Quote/SEB.pm
+lib/Finance/Quote/SIXfunds.pm
+lib/Finance/Quote/SIXshares.pm
 lib/Finance/Quote/StockHouseCanada.pm
 lib/Finance/Quote/Tdefunds.pm
 lib/Finance/Quote/Tdwaterhouse.pm
@@ -67,6 +70,8 @@ lib/Finance/Quote/ZA.pm
 Makefile.PL
 MANIFEST			This list of files
 META.yml
+MYMETA.json
+MYMETA.yml
 README
 t/00-use.t
 t/01-pod.t
@@ -80,6 +85,7 @@ t/asegr.t
 t/asx.t
 t/bmonesbittburns.t
 t/bourso.t
+t/bsero.t
 t/cdnfundlibrary.t
 t/cominvest.t
 t/currencies.t
@@ -102,6 +108,8 @@ t/nzx.t
 t/platinum.t
 t/quote.t
 t/seb.t
+t/sixfunds.t
+t/sixshares.t
 t/stockhousecanada.t
 t/tdefunds.t
 t/tdwaterhouse.t
