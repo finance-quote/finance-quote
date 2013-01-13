@@ -39,9 +39,11 @@ lib/Finance/Quote/GoldMoney.pm
 lib/Finance/Quote/HEX.pm
 lib/Finance/Quote/HU.pm
 lib/Finance/Quote/IndiaMutual.pm
+lib/Finance/Quote/Infobank.pm
 lib/Finance/Quote/LeRevenu.pm
 lib/Finance/Quote/ManInvestments.pm
 lib/Finance/Quote/Morningstar.pm
+lib/Finance/Quote/MorningstarJP.pm
 lib/Finance/Quote/NZX.pm
 lib/Finance/Quote/Platinum.pm
 lib/Finance/Quote/SEB.pm
