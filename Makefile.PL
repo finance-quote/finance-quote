@@ -44,7 +44,7 @@ requires(       'HTML::TableExtract'        => 0);
 requires(       'HTML::TreeBuilder'         => 0);
 requires(       'Encode'                    => 0);
 requires(       'JSON'                      => 0);
-requires(       'URL::Escape'               => 0);
+requires(       'URI::Escape'               => 0);
 
 test_requires(  'Test::More'                => 0);
 
