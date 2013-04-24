@@ -20,15 +20,17 @@ use warnings;
 use HTTP::Request::Common;
 use JSON;
 use LWP::UserAgent;
+use POSIX;
 use URI::Escape;
 
 my @markets = qw/USD EUR JPY CAD GBP CHF RUB AUD SEK DKK HKD PLN CNY SGD THB NZD NOK/;
-my @labels = ("last", "bid", "ask");
+my @labels = qw/ask bid currency date exchange last method source success symbol time timezone/;
 
 sub methods {
 	my %result;
 	foreach my $market (@markets) {
 		my $lmarket = lc $market;
+		# TODO: prepend $market to @_, then goto-&mtgox
 		$result{"mtgox_$lmarket"} = sub { mtgox ($market, @_) };
 		$result{"bitcoin_$lmarket"} = sub { mtgox ($market, @_) };
 	}
@@ -49,42 +51,93 @@ sub mtgox {
 	@_ = (@_);
 	my $market = shift // "Missing market";
 	my $quoter = shift // "Missing quoter";
-	my @currencies = (@_);
-
-	my $ua = $quoter->user_agent();
-	$ua->max_size (1024);
-
-	my %data;
+	my @symbols = (@_);
 
 	my %info;
-	foreach my $currency (@currencies) {
-		$info{$currency, "source"} = "MtGox";
-		$info{$currency, "success"} = 0;
-
-		if (!exists $data{$currency}) {
-			if (length $currency > 10) {
-				$info{$currency, "errormsg"} = "Symbol too long";
-				next;
-			}
-			my $r = $ua->request(GET sprintf "https://data.mtgox.com/api/2/%s${market}/money/ticker_fast", uri_escape $currency);
-			if ($r->is_success) {
-				$data{$currency} = decode_json ($r->decoded_content);
-			} else {
-				$info{$currency, "errormsg"} = "HTTP failure";
-				next;
-			}
-		}
-
-		if ($data{$currency}->{"result"} ne "success") {
-			$info{$currency, "errormsg"} = "API failure";
+	foreach my $symbol (@symbols) {
+		if (exists $info{$symbol,"symbol"}) {
 			next;
 		}
 
-		$info{$currency, "success"} = 1;
-		# last_all gives us the last trade in any currency, converted to the local currency
-		$info{$currency, "last"} = $data{$currency}->{"data"}{"last_all"}{"value"};
-		$info{$currency, "bid"} = $data{$currency}->{"data"}{"buy"}{"value"};
-		$info{$currency, "ask"} = $data{$currency}->{"data"}{"sell"}{"value"};
+		$info{$symbol,"success"} = 0;
+		$info{$symbol,"source"} = "MtGox";
+		$info{$symbol,"symbol"} = $symbol;
+
+		if (length $symbol > 10) {
+			$info{$symbol, "errormsg"} = "Symbol too long";
+			next;
+		}
+
+		my $r = $quoter->user_agent->request(GET sprintf "https://data.mtgox.com/api/2/%s${market}/money/ticker_fast", uri_escape $symbol);
+		if (!$r->is_success) {
+			$info{$symbol, "errormsg"} = "HTTP failure";
+			next;
+		}
+
+		my $ticker = decode_json ($r->decoded_content);
+		# TODO: catch JSON error
+
+		if ($ticker->{"result"} ne "success") {
+			$info{$symbol, "errormsg"} = "API failure";
+			next;
+		}
+
+		# last_all gives us the last trade in any currency, converted
+		# to the local currency
+		if ($ticker->{"data"}{"last_all"}{"currency"} eq $market) {
+			$info{$symbol, "last"} = $ticker->{"data"}{"last_all"}{"value"};
+		}
+		if ($ticker->{"data"}{"buy"}{"currency"} eq $market) {
+			$info{$symbol, "bid"} = $ticker->{"data"}{"buy"}{"value"};
+		}
+		if ($ticker->{"data"}{"sell"}{"currency"} eq $market) {
+			$info{$symbol, "ask"} = $ticker->{"data"}{"sell"}{"value"};
+		}
+
+		# The ticker data not supply a timestamp. Fetch the latest
+		# trade data and use the date from that instead. To avoid a
+		# time-consuming transfer, only request trades from the last
+		# minute, falling back to requesting more and more, up to 24
+		# hours' worth.
+		foreach my $cutoff (60, 60*60, 6*60*60, 24*60*60) {
+			my $url = sprintf("https://data.mtgox.com/api/2/%s${market}/money/trades/fetch?since=%s", uri_escape($symbol), 1000_000 * (time - $cutoff));
+			my $r2 = $quoter->user_agent->request(GET $url);
+			if (!$r2->is_success) {
+				last;
+			}
+
+			my $trades = decode_json ($r2->decoded_content);
+			# TODO: catch JSON error
+
+			if ($trades->{"result"} ne "success") {
+				last;
+			}
+
+			# If there are no trades, try again. This is the only
+			# time we use next, as opposed to last.
+			my $last = $trades->{"data"}[-1];
+			if (!$last) {
+				next;
+			}
+
+			if ($last->{"item"} ne $symbol || $last->{"price_currency"} ne $market) {
+				last;
+			}
+
+			$info{$symbol, "last"} = $last->{"price"};
+			my @ts = gmtime $last->{"date"};
+			$info{$symbol, "date"} = strftime("%m/%d/%y", @ts);
+			$info{$symbol, "time"} = strftime("%H:%M:%S", @ts);
+			$info{$symbol, "timezone"} = "UTC";
+			last;
+		}
+
+		if ($info{$symbol, "last"} || $info{$symbol, "buy"} || $info{$symbol, "sell"}) {
+			$info{$symbol, "success"} = 1;
+			$info{$symbol, "currency"} = $market;
+			$info{$symbol, "exchange"} = "Mt.Gox";
+			$info{$symbol, "method"} = sprintf("mtgox_%s", lc $market);
+		}
 	}
 	return wantarray() ? %info : \%info;
 }
@@ -167,17 +220,27 @@ by the symbol name passed to the method.
 Mt.Gox operates a multi-currency market, where all offers across all markets
 are amalgamated into a common pool. Trades between markets are matched using
 the European Central Bank's daily exchange rate, plus a 2.5% fee included in
-the offer price.
+the price.
 
 =head1 LABELS RETURNED
 
 =over
 
+=item ask: lowest asking price
+
+=item bid: highest offer price
+
+=item currency: currency of retrieved quote
+
+=item date, time: time of last trade
+
+=item exchange: always 'Mt.Gox'
+
 =item last: last trade price
 
-=item bid: highest offer
+=item method: fetching method used
 
-=item ask: lowest asking price
+=item timezone: always UTC
 
 =back
 
