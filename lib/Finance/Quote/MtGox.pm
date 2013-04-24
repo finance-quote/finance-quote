@@ -30,9 +30,8 @@ sub methods {
 	my %result;
 	foreach my $market (@markets) {
 		my $lmarket = lc $market;
-		# TODO: prepend $market to @_, then goto-&mtgox
-		$result{"mtgox_$lmarket"} = sub { mtgox ($market, @_) };
-		$result{"bitcoin_$lmarket"} = sub { mtgox ($market, @_) };
+		$result{"mtgox_$lmarket"} = sub { unshift (@_, $market); goto &mtgox; };
+		$result{"bitcoin_$lmarket"} = sub { unshift (@_, $market); goto &mtgox; };
 	}
 	return %result;
 }
