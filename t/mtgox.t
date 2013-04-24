@@ -23,10 +23,12 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 7;
+plan tests => 8;
 
-my $q = Finance::Quote->new ("MtGox");
+my $q = Finance::Quote->new;
+
 my %data = $q->fetch ("mtgox_EUR", "BTC", "xyz", "thisisfartoolong");
+ok(%data);
 
 is($data{"xyz","success"}, 0);
 is($data{"xyz","errormsg"}, "HTTP failure");
