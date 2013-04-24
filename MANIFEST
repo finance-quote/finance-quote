@@ -42,6 +42,8 @@ lib/Finance/Quote/IndiaMutual.pm
 lib/Finance/Quote/LeRevenu.pm
 lib/Finance/Quote/ManInvestments.pm
 lib/Finance/Quote/Morningstar.pm
+lib/Finance/Quote/MorningstarJP.pm
+lib/Finance/Quote/MtGox.pm
 lib/Finance/Quote/NZX.pm
 lib/Finance/Quote/Platinum.pm
 lib/Finance/Quote/SEB.pm
@@ -104,6 +106,8 @@ t/indiamutual.t
 t/lerevenu.t
 t/maninvestments.t
 t/morningstar.t
+t/morningstarJP.t
+t/mtgox.t
 t/nzx.t
 t/platinum.t
 t/quote.t
