@@ -45,6 +45,7 @@ requires(       'HTML::TreeBuilder'         => 0);
 requires(       'Encode'                    => 0);
 requires(       'JSON'                      => 0);
 requires(       'URI::Escape'               => 0);
+requires(       'POSIX'                     => 0);
 
 test_requires(  'Test::More'                => 0);
 
