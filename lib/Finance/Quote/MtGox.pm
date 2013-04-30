@@ -48,8 +48,8 @@ sub labels {
 
 sub mtgox {
 	@_ = (@_);
-	my $market = shift // "Missing market";
-	my $quoter = shift // "Missing quoter";
+	my $market = shift // die "Missing market";
+	my $quoter = shift // die "Missing quoter";
 	my @symbols = (@_);
 
 	my %info;
