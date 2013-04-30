@@ -71,10 +71,16 @@ sub mtgox {
 		if (!$r->is_success) {
 			$info{$symbol, "errormsg"} = "HTTP failure";
 			next;
+		} elsif ($r->headers->content_type ne 'application/json') {
+			$info{$symbol, 'errormsg'} = 'API failure: unparseable data';
 		}
-
-		my $ticker = decode_json ($r->decoded_content);
-		# TODO: catch JSON error
+		my $ticker;
+		eval {
+			$ticker = decode_json ($r->decoded_content);
+		}; if ($@) {
+			$info{$symbol, 'errormsg'} = "API failure: parse error: $@";
+			next;
+		}
 
 		if ($ticker->{"result"} ne "success") {
 			$info{$symbol, "errormsg"} = "API failure";
@@ -101,12 +107,14 @@ sub mtgox {
 		foreach my $cutoff (60, 60*60, 6*60*60, 24*60*60) {
 			my $url = sprintf("https://data.mtgox.com/api/2/%s${market}/money/trades/fetch?since=%s", uri_escape($symbol), 1000_000 * (time - $cutoff));
 			my $r2 = $quoter->user_agent->request(GET $url);
-			if (!$r2->is_success) {
+			if (!$r2->is_success || $r2->headers->content_type ne 'application/json') {
 				last;
 			}
 
-			my $trades = decode_json ($r2->decoded_content);
-			# TODO: catch JSON error
+			my $trades;
+			eval {
+				$trades = decode_json ($r2->decoded_content);
+			}; last if $@;
 
 			if ($trades->{"result"} ne "success") {
 				last;
