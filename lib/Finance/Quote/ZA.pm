@@ -2,25 +2,22 @@
 #
 # ZA.pm
 #
-# Version 0.1.2
+# 2013.05.01
 # Changes to table references to correct for new sharenet web page layout
 # Timothy Boyle
-# 2013.05.01
 
-# Version 0.1.1 -
+# 2008.02.18
 # This version corrects the data downloaded by removing spaces and converting
 # cent values into Rand values – this ensures that the Price Editor in GNUCash
 # can import the data. The rest of the module and all the hard work
 # remains that of Stephen Langenhoven!
 # Rolf Endres
-# 2008.02.18
 #
-# Version 0.1 - Download of South African (ZA) stocks from sharenet
+# 2005.07.19
+# Download of South African (ZA) stocks from sharenet
 # This version based largely upon FinanceCanada.pm module [any errors
 # are my own of course ;-) ]
-#
 # Stephen Langenhoven
-# 2005.07.19
 
 
 package Finance::Quote::ZA;
@@ -133,7 +130,7 @@ sub sharenet {
 #          my $date  = $rows[0][0]; # day/month plus time plus text
 #          $date =~ s/[^0-9\/]//g; # remove most unwanted characters
 #          $date =~ s/\d{4}$/\//; # remove last 4 digits = time and add / for the year
- 
+
           my $year = (localtime())[5]+1900; # extract year from system time vector
           $date = $date.$year; # add it to the day/month
 #          print $date, "\n"; # we now have the date of the trades as dd/mm/yyyy
