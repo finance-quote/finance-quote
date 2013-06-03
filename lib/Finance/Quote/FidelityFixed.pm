@@ -22,7 +22,13 @@ use HTML::TableExtract;
 $VERSION = '1.01';
 
 # e.g., http://fixedincome.fidelity.com/fi/FIIndividualBondsSearch?cusip=912810QT8
-my $FIDELITY_MAINURL = ("https://fixedincome.fidelity.com/");
+# This URL should really be "https://fixedincome.fidelity.com/", but that host name
+# maps to a number of different servers, some of which work with the Perl code and
+# some of which don't.  So instead we pick one that we know works as of 6/3/2013.
+# This might change, in which case we'll have to find another one that works.  One
+# way to do that is to try fixedincome.fidelity.com repeadedly while watching with
+# WireShark until you find one that works.
+my $FIDELITY_MAINURL = ("https://fixedincome6800rtp.fidelity.com/");
 my $FIDELITY_URL = ($FIDELITY_MAINURL."ftgw/fi/FIIndividualBondsSearch?cusip=");
 
 sub methods {
@@ -47,6 +53,7 @@ sub fidelityfixed {
     return unless @symbols;
 
     my $ua = $quoter->user_agent;
+    $ua->ssl_opts(verify_hostname => 0);
 
     foreach my $symbol (@symbols) {
         my $url = $FIDELITY_URL.$symbol;
