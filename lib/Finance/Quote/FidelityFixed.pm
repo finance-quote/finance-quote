@@ -126,11 +126,12 @@ sub fidelityfixed {
 	      $info{$symbol, 'bid'}      = $rows[$n][7];
 	      $info{$symbol, 'ask'}      = $rows[$n][8];
 	      $info{$symbol, 'askyield'} = $rows[$n][9];
+	      $info{$symbol, 'recent'}   = $rows[$n][11];
 
-	      ($_) = /(\d+\.\d+)/ for $info{$symbol, 'bid'}, $info{$symbol, 'ask'};
+	      ($_) = /(\d+\.\d+)/ for $info{$symbol, 'bid'}, $info{$symbol, 'ask'}, $info{$symbol, 'recent'};
 	      $info{$symbol, 'price'} = sprintf("%.2f", 0.5*($info{$symbol,'bid'} + $info{$symbol,'ask'}));
-	      if ($info{$symbol, 'price'} == 0) {
-	          $info{$symbol, 'price'} = $rows[$n][11];
+	      if ($info{$symbol, 'bid'} == 0 || $info{$symbol, 'ask'} == 0) {
+	          $info{$symbol, 'price'} = $info{$symbol, 'recent'};
 	      }
 	      $info{$symbol, 'currency'} = 'USD';
 
