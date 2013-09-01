@@ -7,7 +7,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 15;
+plan tests => 17;
 
 # Test za functions.
 
@@ -21,6 +21,8 @@ ok(%quotes);
 # Check that the last and date values are defined.
 ok($quotes{"AGL","success"});
 ok($quotes{"AGL","last"} > 0);
+ok($quotes{"AGL","high"} > 0);
+ok($quotes{"AGL","low"} > 0);
 ok(length($quotes{"AGL","date"}) > 0);
 ok(substr($quotes{"AGL","isodate"},0,4) == $year ||
    substr($quotes{"AGL","isodate"},0,4) == $lastyear);
