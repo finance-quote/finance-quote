@@ -749,6 +749,12 @@ sub store_date
       $year += 2000 if $year < 100;
       $year_specified = 1;
     }
+
+    if (defined ($piecesref->{epoch})) {
+      ($month, $day, $year) = (localtime($piecesref->{epoch}))[4,3,5];
+      $month++;
+      $year += 1900;
+    }
     $month = $piecesref->{month} if defined ($piecesref->{month});
     $month = $mnames{lc(substr($month,0,3))} if ($month =~ /\D/);
     $day  = $piecesref->{day} if defined ($piecesref->{day});
