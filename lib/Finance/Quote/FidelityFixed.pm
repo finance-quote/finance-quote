@@ -30,6 +30,7 @@ $VERSION = '1.01';
 # WireShark until you find one that works.
 my $FIDELITY_MAINURL = ("https://fixedincome6800rtp.fidelity.com/");
 my $FIDELITY_URL = ($FIDELITY_MAINURL."ftgw/fi/FIIndividualBondsSearch?cusip=");
+my $FIDELITY_URL2 = ($FIDELITY_MAINURL."ftgw/fi/FILastTradeData?cusip=");
 
 sub methods {
     return (fidelityfixed => \&fidelityfixed);
@@ -126,7 +127,49 @@ sub fidelityfixed {
 	      $info{$symbol, 'bid'}      = $rows[$n][7];
 	      $info{$symbol, 'ask'}      = $rows[$n][8];
 	      $info{$symbol, 'askyield'} = $rows[$n][9];
-	      $info{$symbol, 'recent'}   = $rows[$n][11];
+	      if ($rows[$n][11] =~ "View") {
+	          # price data is in a spearate window
+	          $url = $FIDELITY_URL2.$symbol;
+                  #print "[debug URL2]: ", $url, "\n";
+                  $response = $ua->request(GET $url);
+                  #print "[debug]: ", $response->content, "\n";
+
+                  if (!$response->is_success) {
+                      $info{$symbol, "success"} = 0;
+                      $info{$symbol, "errormsg"} = "Error contacting URL";
+                      next;
+                  }
+                  $te->parse($response->content);
+                  #print "[debug]: (parsed HTML)",$te, "\n";
+
+                  unless ($te->first_table_found()) {
+                    #print STDERR  "no tables on this page\n";
+                    $info{$symbol, "success"}  = 0;
+                    $info{$symbol, "errormsg"} = "Parse error";
+                    next;
+                  }
+                  #$te->tables_dump(1, "|");
+                  $ts = $te->table_state(0,4);
+                  if ($ts) {
+                      (@rows) = $ts->rows;
+                      if ($rows[0][0] =~ "Price" and $rows[0][3] =~ "Date/Time") {
+                          $info{$symbol, 'recent'} = $rows[1][0];
+                          if ($rows[1][3] =~ /(\d+)\/(\d+)\/(\d+) (\d+)\:(\d+):(\d+)/) {
+                              $info{$symbol, 'date'} = "$1/$2/$3";
+                              $info{$symbol, 'isodate'} = "$3-$2-$1";
+                              $info{$symbol, 'time'} = $6 eq 'a' ? "$4:$5" : ($4+12).":$5";
+                          }
+                      }
+                  }
+	      }
+	      else {
+                  $info{$symbol, 'recent'}   = $rows[$n][11];
+                  if ($response->content =~ /As of (\d+)\/(\d+)\/(\d+) at (\d+)\:(\d+) ([ap])\.m\./) {
+                      $info{$symbol, 'date'} = "$1/$2/$3";
+                      $info{$symbol, 'isodate'} = "$3-$2-$1";
+                      $info{$symbol, 'time'} = $6 eq 'a' ? "$4:$5" : ($4+12).":$5";
+                  }
+              }
 
 	      ($_) = /(\d+\.\d+)/ for $info{$symbol, 'bid'}, $info{$symbol, 'ask'}, $info{$symbol, 'recent'};
 	      $info{$symbol, 'price'} = sprintf("%.2f", 0.5*($info{$symbol,'bid'} + $info{$symbol,'ask'}));
@@ -139,12 +182,6 @@ sub fidelityfixed {
 	      $info{$symbol, 'name'} =~ s/^\s+//;
 	      $info{$symbol, 'name'} =~ s/\s+$//;
 	      ($_) = /(\d+\.\d+)/ for $info{$symbol, 'price'};
-
-	      if ($response->content =~ /As of (\d+)\/(\d+)\/(\d+) at (\d+)\:(\d+) ([ap])\.m\./) {
-		  $info{$symbol, 'date'} = "$1/$2/$3";
-		  $info{$symbol, 'isodate'} = "$3-$2-$1";
-		  $info{$symbol, 'time'} = $6 eq 'a' ? "$4:$5" : ($4+12).":$5";
-	      }
           }
 
           else { $info{$symbol, "errormsg"} = "no match"; }
