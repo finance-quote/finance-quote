@@ -51,7 +51,7 @@ test_requires(  'Test::More'                => 0);
 
 # Lowercase resource names have special meanings in the META.yml spec.
 
-resources(      repository => 'http://github.com/pfenwick/finance-quote/');
+resources(      repository => 'https://github.com/pjf/finance-quote');
 resources(      bugtracker => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=Finance-Quote');
 resources(      homepage   => 'http://finance-quote.sourceforge.net/');
 
