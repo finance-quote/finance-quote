@@ -77,7 +77,7 @@ ok($belgiumquotes{"SOLB.BR","last"}>=50); # this expected trades around 60-200 E
 ok($belgiumquotes{"SOLB.BR","last"}<=200);
 
 # Check if close is between year_range for LTI.L (expressed in GBp) for checking if conversion is correct
-my %ltiquotes = $q->fetch("yahoo","LTI.L");
+my %ltiquotes = $q->fetch("yahoo_europe","LTI.L");
 ok($ltiquotes{"LTI.L","success"});
 my ($min,$max) = (50,50000); # change this if quotes are not supposed to be in this range anymore
 if ($ltiquotes{"LTI.L","year_range"}=~ m/([\d\.]+)\s*-\s*([\d\.]+)/) {
