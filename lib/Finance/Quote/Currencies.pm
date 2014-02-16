@@ -21,7 +21,7 @@ use base 'Exporter';
 use vars qw/@EXPORT_OK $VERSION $YAHOO_CURRENCY_CONV_URL/;
 
 @EXPORT_OK = qw( known_currencies fetch_live_currencies );
-$VERSION = '1.18';
+$VERSION = '1.19';
 
 use HTTP::Request::Common;
 use LWP::UserAgent;

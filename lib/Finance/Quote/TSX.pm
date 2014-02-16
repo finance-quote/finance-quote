@@ -43,7 +43,7 @@ use URI::QueryParam;
 
 use vars qw/$VERSION/;
 
-$VERSION = '1.18';
+$VERSION = '1.19';
 
 # This URL is able to accept up to 10 symbols at a time
 my $TSX_URL = URI->new('http://cxa.marketwatch.com/tsx/en/market/getquote.aspx');

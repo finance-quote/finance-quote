@@ -38,7 +38,7 @@ use warnings;
 
 use vars qw/$VERSION/;
 
-$VERSION = '1.18';
+$VERSION = '1.19';
 
 sub methods {
 	return(goldmoney => \&goldmoney);

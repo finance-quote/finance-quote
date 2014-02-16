@@ -21,7 +21,7 @@ use strict;
 use HTML::TableExtract;
 
 use vars qw($VERSION);
-$VERSION = '1.18';
+$VERSION = '1.19';
 
 my $FINANZPARTNER_URL = "http://www.finanzpartner.de/fi/";
 
