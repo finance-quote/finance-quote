@@ -1,4 +1,4 @@
-Finance::Quote 
+Finance::Quote
 ==============
 
 IMPORTANT
@@ -11,9 +11,9 @@ Dependancies
 Finance::Quote depends upon a number of other perl modules to
 function correctly.  These modules include:
 
-	LWP::UserAgent
-	HTTP::Request::Common
-	HTML::TableExtract
+    LWP::UserAgent
+    HTTP::Request::Common
+    HTML::TableExtract
     HTML::TreeBuilder
 
 You will receive a warning during the make process if one or more of
@@ -22,25 +22,25 @@ these modules are missing.
 One easy way to install the modules that Finance::Quote requires is
 to use perl's CPAN module:
 
-	hostname$ perl -MCPAN -e shell (as root)
+    hostname$ perl -MCPAN -e shell (as root)
 
 If you haven't used the CPAN module before, then it may ask you a few
 simple configuration questions before you get to the cpan> prompt.
 You can install any module from CPAN using:
 
-	cpan> install my::module
+    cpan> install my::module
 
 Indeed, it's possible to install Finance::Quote and all the modules
 it depends upon using:
 
-	cpan> install Finance::Quote
+    cpan> install Finance::Quote
 
 Install instructions
 --------------------
 
 $ perl Makefile.PL
 $ make
-# make install		(as root)
+# make install    (as root)
 
 Couldn't be easier, could it?
 
@@ -58,7 +58,7 @@ $ ln -s test t
 $ perl Makefile.PL
 $ make
 $ make test
-# make install		(as root)
+# make install    (as root)
 
 The tests do take some time to run, so please be patient.
 
