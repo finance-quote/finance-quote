@@ -1,4 +1,10 @@
-XXXX-XX-XX  Erik Colson <eco@ecocode.net>
+2014-02-16  Erik Colson <eco@ecocode.net>
+
+	* MtGox support added by Sam Morris
+	* MorningstarJP support added by Christopher Hill
+	* Yahoo modules changed due to site change
+
+2010-02-16  Erik Colson <eco@ecocode.net>
 
 	* TSP.pm updated. Patch from Kevin Ryde.
 	* YAHOO/Base.pm added conversion from 'B' billions to
@@ -89,7 +95,7 @@ XXXX-XX-XX  Erik Colson <eco@ecocode.net>
 
 	* BUGFIX: Stephen Ebelt patch applied for goldmoney.pm
 	* BUGFIX: Encoding problem solved by Ashwin
-	
+
 2009-02-16  Bradley Dean <bjdean@bjdean.id.au>
 
 	* NEW: Function fetch_live_currencies.
