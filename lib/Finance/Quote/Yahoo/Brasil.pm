@@ -39,7 +39,7 @@ $VERSION = '1.18';
 
 # URLs of where to obtain information.
 
-$YAHOO_BRASIL_URL = ("http://br.finance.yahoo.com/d/quotes.csv");
+$YAHOO_BRASIL_URL = ("http://download.finance.yahoo.com/d/quotes.csv");
 
 sub methods {return (brasil       => \&yahoo_brasil,
 		     yahoo_brasil => \&yahoo_brasil)};
@@ -58,8 +58,7 @@ sub yahoo_brasil
 	return unless @symbols;	# Nothing if no symbols.
 
 	# This does all the hard work.
-        # Enabled the $uses_semicolon param
-        my %info = yahoo_request($quoter,$YAHOO_BRASIL_URL,\@symbols,".SA", 1);
+        my %info = yahoo_request($quoter,$YAHOO_BRASIL_URL,\@symbols,".SA");
 
 	foreach my $symbol (@symbols) {
 		next unless $info{$symbol,"success"};

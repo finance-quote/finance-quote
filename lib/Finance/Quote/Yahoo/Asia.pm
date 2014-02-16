@@ -42,7 +42,7 @@ $VERSION = '1.18';
 
 # URLs of where to obtain information.
 
-$YAHOO_ASIA_URL = ("http://sg.finance.yahoo.com/d/quotes.csv");
+$YAHOO_ASIA_URL = ("http://download.finance.yahoo.com/d/quotes.csv");
 
 sub methods {return (asia => \&yahoo_asia,yahoo_asia => \&yahoo_asia)};
 
