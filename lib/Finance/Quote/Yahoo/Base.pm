@@ -175,6 +175,7 @@ sub yahoo_request {
 
 		my $url = $base_url . join("$suffix+",@symbols);
 		chop $url;	# Chop off the final +
+                print "DEBUG - GET: $url\n" if $ENV{"FQ_DEBUG"};
 		my $response = $ua->request(GET $url);
 		return unless $response->is_success;
 
