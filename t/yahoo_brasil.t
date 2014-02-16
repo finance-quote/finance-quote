@@ -7,12 +7,12 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 16;
+plan tests => 23;
 
 # Test Yahoo_europe functions.
 
 my $q      = Finance::Quote->new();
-my @stocks = ("ELUM4","BAZA3");
+my @stocks = ("PDGR3","PETR4","BAZA3");
 my $year   = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
