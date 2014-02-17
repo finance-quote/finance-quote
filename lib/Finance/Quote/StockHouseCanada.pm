@@ -38,7 +38,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.19';
+$VERSION = '1.20' ;
 
 $STOCKHOUSE_LOOKUP_URL="http://www.stockhouse.com/mutualFunds/index.asp?asp=1&lang=&item=searchresult&country=CAN&by=symbol&searchtext=";
 $STOCKHOUSE_URL="http://www.stockhouse.com/MutualFunds/index.asp?item=snapshot&page=1&Lang=EN&fundkey=%s&source=Fundata&Symbol=%s&FundName=&CompanyName=&asp=1";

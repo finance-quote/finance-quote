@@ -30,7 +30,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION='1.19';
+$VERSION = '1.20' ;
 
 my $BSERO_URL = 'http://www.bvb.ro/mobile/m_SecurityDetails.aspx?';
 

@@ -26,7 +26,7 @@ use base 'Exporter';
 use Date::Calc qw(Add_Delta_Days Today);
 
 our @EXPORT_OK = qw(morningstarjp methods labels);
-our $VERSION   = 1.00;
+our $VERSION = '1.20' ;
 
 # NAV information (basis price)
 our $MORNINGSTAR_JP_URL =
@@ -166,14 +166,14 @@ symbol, date, nav.
 
 =head1 ACKNOWLEDGEMENTS
 
-Inspired by other modules already present with Finance::Quote 
+Inspired by other modules already present with Finance::Quote
 
 =head1 AUTHOR
 
 Christopher Hill
 
 =head1 LICENSE AND COPYRIGHT
- 
+
 Copyright (C) 2012, Christopher Hill.
 
 This program is free software: you can redistribute it and/or modify

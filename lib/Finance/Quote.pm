@@ -57,7 +57,7 @@ $YAHOO_CURRENCY_URL = "http://finance.yahoo.com/d/quotes.csv?e=.csv&f=l1&s=";
                 currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.19';
+$VERSION = '1.20' ;
 
 $USE_EXPERIMENTAL_UA = 0;
 

@@ -44,7 +44,7 @@ use HTML::TreeBuilder;
 
 use vars qw/$VERSION/;
 
-$VERSION = '1.19';
+$VERSION = '1.20' ;
 
 sub methods { return (vwd => \&vwd); }
 sub labels { return (vwd => [qw/currency date isodate

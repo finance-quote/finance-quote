@@ -21,7 +21,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.19';
+$VERSION = '1.20' ;
 
 # URLs of where to obtain information.
 
