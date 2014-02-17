@@ -1,3 +1,7 @@
+2014-02-17  Erik Colson <eco@ecocode.net>
+
+	* INSTALLATION FIX: Install Date::Calc as dependency
+
 2014-02-16  Erik Colson <eco@ecocode.net>
 
 	* MtGox support added by Sam Morris
