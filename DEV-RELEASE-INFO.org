@@ -19,4 +19,5 @@
 * RELEASE
 ** Upload tar.gz to pause.cpan.org
 ** Update the website ! update htdocs/index.html file
-** sftp ecocode,finance-quote@web.sourceforge.net
+** upload to sourceforge @ https://sourceforge.net/projects/finance-quote/files/finance-quote/
+sftp ecocode,finance-quote@web.sourceforge.net
