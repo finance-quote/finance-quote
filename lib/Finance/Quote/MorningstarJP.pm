@@ -25,11 +25,13 @@ use warnings;
 use base 'Exporter';
 use Date::Calc qw(Add_Delta_Days Today);
 
+use vars qw($VERSION $MORNINGSTAR_JP_URL);
+
 our @EXPORT_OK = qw(morningstarjp methods labels);
-our $VERSION = '1.20' ;
+$VERSION = '1.20' ;
 
 # NAV information (basis price)
-our $MORNINGSTAR_JP_URL =
+$MORNINGSTAR_JP_URL =
   ('http://www.morningstar.co.jp/FundData/DownloadStdYmd.do?fnc=');
 
 sub methods { return ( morningstarjp => \&morningstarjp ); }
