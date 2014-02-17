@@ -13,3 +13,4 @@ Makefile\.old
 Finance-Quote-.*
 \.orig$
 \.eml$
+DEV-RELEASE-INFO.org
