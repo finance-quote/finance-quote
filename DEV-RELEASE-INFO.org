@@ -1,0 +1,22 @@
+* Procedure for a CPAN release
+** finalize dev branch merges
+** check for debug code in modules
+** change version numbers in all modules
+** Modify Changelog
+** push all commits up to github
+** go to tmp
+** clone from github server
+*** git clone git@github.com:pjf/finance-quote.git
+** remove MANIFEST and inc directory
+** perl Makefile.PL
+** make manifest
+** create a commit for MANIFEST (if needed)
+** create version tag
+*** git tag -a "1.13_02" -m "version 1.13_02"
+** make dist
+** if dist ok -> push to github
+*** git push --tags
+* RELEASE
+** Upload tar.gz to pause.cpan.org
+** Update the website ! update htdocs/index.html file
+** sftp ecocode,finance-quote@web.sourceforge.net
