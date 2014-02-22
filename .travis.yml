@@ -1,0 +1,19 @@
+language: perl
+
+perl:
+    - "5.18"
+    - "5.16"
+    - "5.14"
+    - "5.12"
+    - "5.10"
+    - "5.8"
+
+install:
+
+    - cpanm --notest --skip-satisfied Dist::Zilla
+
+    - dzil authordeps         | cpanm --notest --skip-satisfied
+    - dzil listdeps --author  | cpanm --notest --skip-satisfied
+
+script:
+    - dzil test --all
