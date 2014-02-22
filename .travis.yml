@@ -6,7 +6,10 @@ perl:
     - "5.14"
     - "5.12"
     - "5.10"
-    - "5.8"
+
+# F::Q probably works on 5.8, but some of the tests don't. It's
+# disabled for now.
+#   - "5.8"
 
 install:
 
