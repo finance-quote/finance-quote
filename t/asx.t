@@ -28,18 +28,18 @@ cmp_ok( $quotes{"BHP","last"}, '>', 0
       , "Last price for BHP was > 0" );
 
 # Exercise the fetch function a little.
-%quotes = $q->fetch("asx","RZR");
+%quotes = $q->fetch("asx","BOQ");
 ok( %quotes, "Data returned for call to fetch" );
-ok( $quotes{"RZR","success"}, "RZR query was successful" );
-cmp_ok( $quotes{"RZR","last"}, '>', 0
-      , "Last price for RZR was > 0" );
+ok( $quotes{"BOQ","success"}, "BOQ query was successful" );
+cmp_ok( $quotes{"BOQ","last"}, '>', 0
+      , "Last price for BOQ was > 0" );
 
 # Check that we're getting currency information.
-cmp_ok( $quotes{"RZR", "currency"}, "eq", "AUD"
-      , "Currency of RZR is AUD" );
+cmp_ok( $quotes{"BOQ", "currency"}, "eq", "AUD"
+      , "Currency of BOQ is AUD" );
 
 # Check we're not getting bogus percentage signs.
-unlike( $quotes{"RZR","p_change"}
+unlike( $quotes{"BOQ","p_change"}
       , qr/%/
       , "No percentage sign in p_change value" );
 
