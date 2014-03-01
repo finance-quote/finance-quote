@@ -76,7 +76,7 @@ sub asx {
 	while (@stocks = splice(@all_stocks, 0, 10)) {
 		my $response = $ua->request(GET $ASX_URL.join("%20",@stocks));
 		unless ($response->is_success) {
-			foreach my $stock (@stocks) {
+			foreach my $stock (@stocks, @all_stocks) {
 				$info{$stock,"success"} = 0;
 				$info{$stock,"errormsg"} = "HTTP session failed";
 			}
@@ -93,7 +93,7 @@ sub asx {
 		# Extract table contents.
 		my @rows;
 		unless (($te->tables > 0) && ( @rows = $te->rows)) {
-			foreach my $stock (@stocks) {
+			foreach my $stock (@stocks, @all_stocks) {
 				$info{$stock,"success"} = 0;
 				$info{$stock,"errormsg"} = "Failed to parse HTML table.";
 			}
@@ -230,4 +230,3 @@ Australian Stock Exchange, http://www.asx.com.au/
 Finance::Quote::Yahoo::Australia.
 
 =cut
-
