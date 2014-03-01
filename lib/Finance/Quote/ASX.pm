@@ -38,6 +38,7 @@ package Finance::Quote::ASX;
 use HTTP::Request::Common;
 use LWP::UserAgent;
 use HTML::TableExtract;
+use Encode;
 
 use vars qw/$ASX_URL $VERSION/;
 
@@ -88,7 +89,7 @@ sub asx {
 			headers => ["Code", "Last", '\+/-', "Bid", "Offer",
 		            "Open", "High", "Low", "Vol"]);
 
-		$te->parse($response->content);
+		$te->parse(decode('utf-8',$response->content));
 
 		# Extract table contents.
 		my @rows;
