@@ -65,13 +65,13 @@ use strict;
 
 package Finance::Quote::Bourso;
 
-use vars qw($VERSION $Bourso_URL);
+use vars qw( $Bourso_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TreeBuilder; # Boursorama doesn't put data in table elements anymore but uses <div>
 
-$VERSION = '1.20' ;
+# VERSION
 
 my $Bourso_URL = 'http://www.boursorama.com/recherche/index.phtml';
 

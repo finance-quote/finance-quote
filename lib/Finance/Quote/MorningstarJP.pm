@@ -25,10 +25,10 @@ use warnings;
 use base 'Exporter';
 use Date::Calc qw(Add_Delta_Days Today);
 
-use vars qw($VERSION $MORNINGSTAR_JP_URL);
+use vars qw( $MORNINGSTAR_JP_URL);
 
 our @EXPORT_OK = qw(morningstarjp methods labels);
-$VERSION = '1.20' ;
+# VERSION
 
 # NAV information (basis price)
 $MORNINGSTAR_JP_URL =

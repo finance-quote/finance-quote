@@ -29,13 +29,13 @@ use strict;
 
 package Finance::Quote::BMONesbittBurns;
 
-use vars qw($VERSION $BMO_URL);
+use vars qw( $BMO_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.20' ;
+# VERSION
 
 # URLs of where to obtain information
 my $BMO_URL = 'http://bmonesbittburns.com/QuickQuote/QuickQuote.asp?Symbol=';

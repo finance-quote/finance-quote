@@ -24,13 +24,13 @@ use strict;
 
 package Finance::Quote::ASEGR;
 
-use vars qw($VERSION $ASEGR_URL);
+use vars qw( $ASEGR_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.20' ;
+# VERSION
 
 my $ASEGR_URL = 'http://www.ase.gr/content/en/MarketData/Stocks/Prices/Share_SearchResults.asp?';
 

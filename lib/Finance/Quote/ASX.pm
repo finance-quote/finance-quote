@@ -40,9 +40,9 @@ use LWP::UserAgent;
 use HTML::TableExtract;
 use Encode;
 
-use vars qw/$ASX_URL $VERSION/;
+use vars qw/$ASX_URL /;
 
-$VERSION = '1.20' ;
+# VERSION
 
 $ASX_URL = 'http://www.asx.com.au/asx/markets/priceLookup.do?by=asxCodes&asxCodes=';
 

@@ -33,13 +33,13 @@ require 5.004;
 
 use strict;
 
-use vars qw($VERSION $TRUSTNET_URL $TRUSTNET_ALL);
+use vars qw($TRUSTNET_URL $TRUSTNET_ALL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.20' ;
+# VERSION
 
 # URLs of where to obtain information.
 
@@ -66,7 +66,7 @@ sub trustnet
     return unless @symbols;
     my(@q,%aa,$ua,$url,$sym,$ts,$price,$currency,$reply,$trust,$trusto,$unittype,$suffix);
     my ($row, $datarow, $matches, $encoded);
-    my %curr_iso = (GBP => "GBP", "£" => "GBP", "\$" => "USD");
+    my %curr_iso = (GBP => "GBP", "Â£" => "GBP", "\$" => "USD");
 
     my %symbolhash;
     @symbolhash{@symbols} = map(1,@symbols);

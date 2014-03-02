@@ -36,9 +36,7 @@ use HTML::TableExtract;
 use strict;
 use warnings;
 
-use vars qw/$VERSION/;
-
-$VERSION = '1.20' ;
+# VERSION
 
 sub methods {
 	return(goldmoney => \&goldmoney);

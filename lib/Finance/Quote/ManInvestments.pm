@@ -39,9 +39,9 @@ use HTTP::Request::Common;
 use LWP::UserAgent;
 use HTML::TableExtract;
 
-use vars qw/$MANINV_URL $VERSION/;
+use vars qw/$MANINV_URL /;
 
-$VERSION = '1.20' ;
+# VERSION
 
 $MANINV_URL = 'http://www.maninvestments.com.au/index.cfm?action=productprices&cat_id=5';
 $MANINV_URL = 'http://www.maninvestments.com.au/netassetvalues-print.cfm';

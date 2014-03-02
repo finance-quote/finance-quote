@@ -38,9 +38,9 @@ use HTTP::Request::Common;
 use LWP::UserAgent;
 use Exporter;
 
-use vars qw/$FOOL_URL $VERSION @FIELDS $MAX_REQUEST_SIZE @ISA/;
+use vars qw/$FOOL_URL  @FIELDS $MAX_REQUEST_SIZE @ISA/;
 
-$VERSION = '1.20' ;
+# VERSION
 
 $FOOL_URL = 'http://quote.fool.com/quotes.csv?symbols=';
 

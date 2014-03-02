@@ -3,13 +3,13 @@ require 5.004;
 
 use strict;
 
-use vars qw($VERSION $MORNINGSTAR_SE_FUNDS_URL);
+use vars qw( $MORNINGSTAR_SE_FUNDS_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.20' ;
+# VERSION
 $MORNINGSTAR_SE_FUNDS_URL = 'http://morningstar.se/funds/overview.asp?cid=';
 
 sub methods { return (morningstar => \&morningstar); }
