@@ -173,11 +173,11 @@ sub new {
   if (!@reqmodules or $reqmodules[0] eq "-defaults") {
     shift(@reqmodules) if (@reqmodules);
     # Default modules
-    @modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns BSERO Bourso Cdnfundlibrary
-            Currencies Deka DWS FTPortfolios Fidelity FinanceCanada Fool HU
+    @modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns BSERO Bourso Cdnfundlibrary Citywire
+            Currencies Deka DWS FTPortfolios Fidelity FinanceCanada Fool FTfunds HU
             GoldMoney HEX
-            IndiaMutual LeRevenu ManInvestments Morningstar MorningstarJP MtGox NZX Platinum SEB
-            SIXfunds SIXshares StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref Troweprice
+            IndiaMutual LeRevenu ManInvestments Morningstar MorningstarJP MStaruk MtGox NZX Platinum SEB
+            SIXfunds SIXshares StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref TNetuk Troweprice
             Trustnet Union USFedBonds VWD ZA Cominvest Finanzpartner
             Yahoo::Asia Yahoo::Australia Yahoo::Brasil Yahoo::Europe Yahoo::NZ
             Yahoo::USA/; }
