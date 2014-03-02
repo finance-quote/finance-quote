@@ -46,7 +46,7 @@ use HTTP::Cookies;
 use HTML::TokeParser;
 use Data::Dumper;
 
-$VERSION = '1.17';
+# VERSION
 
 $CITYWIRE_MAIN_URL   =   "http://citywire.co.uk";
 $CITYWIRE_LOOK_UP    =   "http://citywire.co.uk/money/search.aspx?phrase=";

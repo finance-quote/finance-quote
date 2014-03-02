@@ -59,7 +59,7 @@ use HTTP::Cookies;
 use HTML::TokeParser;
 use Data::Dumper;
 
-$VERSION = '1.17';
+# VERSION
 
 $FTFUNDS_MAIN_URL   =   "http://funds.ft.com";
 $FTFUNDS_LOOK_LD    =   "http://funds.ft.com/UK/Tearsheet/Summary?s=";

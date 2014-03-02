@@ -40,7 +40,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTTP::Cookies;
 
-$VERSION = '1.17';
+# VERSION
 
 $MSTARUK_MAIN_URL   =   "http://www.morningstar.co.uk";
 $MSTARUK_LOOK_UP    =   "http://www.morningstar.co.uk/uk/funds/SecuritySearchResults.aspx?search=";
