@@ -2,19 +2,19 @@
 
 #  ftfunds.pm
 #
-#  Obtains quotes for UK Unit Trusts from http://funds.ft.com/ - please 
+#  Obtains quotes for UK Unit Trusts from http://funds.ft.com/ - please
 #  refer to the end of this file for further information.
 #
 #  author: Martin Sadler (martinsadler@users.sourceforge.net)
-#  
+#
 #  Version 0.1 Initial version - 06 Sep 2010
 #
 #  Version 0.2 Better look-up  - 19 Sep 2010
 #
-#  Version 0.3 name changed to "ftfunds" 
+#  Version 0.3 name changed to "ftfunds"
 #              (all lower case) and tidy-up - 31 Jan 2011
 #
-#  Version 0.4 Allows alphanumerics MEXIDs 
+#  Version 0.4 Allows alphanumerics MEXIDs
 #              and back to "FTfunds"        - 28 Feb 2011
 #
 #  Version 1.0 Changed to work with the new
@@ -29,7 +29,7 @@
 #    (at your option) any later version.
 #
 #    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of 
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
 #
@@ -47,7 +47,7 @@ use strict;
 use warnings;
 
 # Set DEBUG => 1 for no debug messages, => 1 for first level, => 2 for 2nd level, etc.
- 
+
 use constant DEBUG => 0;
 
 # URLs
@@ -67,9 +67,9 @@ $FTFUNDS_LOOK_UD    =	"http://funds.ft.com/UnlistedTearsheet/Summary?s=";
 
                         # this will work with ISIN codes only.
 
-# FIXME - 
+# FIXME -
 
-sub methods { return (ftfunds => \&ftfunds_fund, 
+sub methods { return (ftfunds => \&ftfunds_fund,
 		      ukfunds => \&ftfunds_fund); }
 
 {
@@ -94,24 +94,24 @@ sub ftfunds_fund  {
     my $cj = HTTP::Cookies->new();
     $ua->cookie_jar( $cj );
 
-    foreach (@symbols) 
+    foreach (@symbols)
     {
 		my $code = $_;
-	    
+
 		my $code_type = "** Invalid **";
 		if ($code =~ m/^[a-zA-Z]{2}[a-zA-Z0-9]{9}\d(.*)/ && !$1) { $code_type = "ISIN";  }
 		elsif ($code =~ m/^[a-zA-Z0-9]{6}\d(.*)/ && !$1 )        { $code_type = "SEDOL"; }
 		elsif ($code =~ m/^[a-zA-Z0-9]{4,6}(.*)/ && !$1)         { $code_type = "MEXID"; }
-	    
+
 # current version can only use ISIN - report an error and exit if any other type
 
 		if ($code_type ne "ISIN")
     	{
-			$fundquote {$code,"success"} = 0;	
+			$fundquote {$code,"success"} = 0;
 			$fundquote {$code,"errormsg"} = "Error - invalid symbol";
-			next; 
+			next;
     	}
-                    
+
 		$fundquote {$code,"success"} = 1; # ever the optimist....
 		$fundquote {$code,"errormsg"} = "Success";
 
@@ -123,10 +123,10 @@ sub ftfunds_fund  {
     	if (!$webdoc->is_success)
 		{
 	        # serious error, report it and give up
-			$fundquote {$code,"success"} = 0;	
-			$fundquote {$code,"errormsg"} = 
+			$fundquote {$code,"success"} = 0;
+			$fundquote {$code,"errormsg"} =
 		       		"Error - failed to retrieve fund data : HTTP status = ".$webdoc->status_line;
-			next; 
+			next;
 		}
 
 DEBUG and print "\nTitle  = ",$webdoc->title,"\n";
@@ -138,20 +138,20 @@ DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 # if page contains "<h2>0 results</h2>" it's not found...
 # ... try unlisted funds...
 
-		if ($webdoc->content =~ 
-        m[<h2>(0 results)</h2>] ) 
-    	{ 
+		if ($webdoc->content =~
+        m[<h2>(0 results)</h2>] )
+    	{
 DEBUG and print "\nTrying unlisted funds for ",$code," : ",$1,"\n";
 			$webdoc  = $ua->get($FTFUNDS_LOOK_UD.$code);
 			if (!$webdoc->is_success)
         	{
 	        	# serious error, report it and give up
-				$fundquote {$code,"success"} = 0;	
-				$fundquote {$code,"errormsg"} = 
+				$fundquote {$code,"success"} = 0;
+				$fundquote {$code,"errormsg"} =
 		        		"Error - failed to retrieve fund data : HTTP status = ".$webdoc->status_line;
-				next; 
+				next;
 			}
-			
+
 DEBUG and print "\nTitle  = ",$webdoc->title,"\n";
 DEBUG and print "\nStatus = ",$webdoc->status_line, "\n";
 DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
@@ -160,14 +160,14 @@ DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 		}
 
 		$fundquote {$code, "symbol"} = $code;
-  
+
 # Find name by simple regexp
 
         my $name;
-		if ($webdoc->content =~ 
-        m[<title>(.*) Summary - FT.com] ) 
-        { 
-            $name = $1 ; 
+		if ($webdoc->content =~
+        m[<title>(.*) Summary - FT.com] )
+        {
+            $name = $1 ;
         }
 		if (!defined($name)) {
 			# not a serious error - don't report it ....
@@ -175,88 +175,88 @@ DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 			$fundquote {$code,"errormsg"} = "Warning - failed to find fund name";
 			$name = "*** UNKNOWN ***";
 			# ... and continue
-		}		
+		}
 		$fundquote {$code, "name"} = $name;	# set name
 
 # Find price
 		my $price;
-		if ($webdoc->content =~ 
-		m[<div class="contains wsodModuleContent"><table><tbody><tr><td class="text first">([\.\,0-9]*)</td>]  ) 
+		if ($webdoc->content =~
+		m[<div class="contains wsodModuleContent"><table><tbody><tr><td class="text first">([\.\,0-9]*)</td>]  )
         {
 			$price   = $1;
         }
 		if (!defined($price)) {
 			# serious error, report it and give up
-			$fundquote {$code,"success"} = 0;	
+			$fundquote {$code,"success"} = 0;
 			$fundquote {$code,"errormsg"} = "Error - failed to find a price";
 			next;
-		}		
-		if ($price =~ m[([0-9]*),([\.0-9]*)]) 
-		{ 
-				$price	  = $1 * 1000 + $2; 
+		}
+		if ($price =~ m[([0-9]*),([\.0-9]*)])
+		{
+				$price	  = $1 * 1000 + $2;
 		}
 
 # Find net and percent-age change
 		my $net;
 		my $pchange;
-		if ($webdoc->content =~ 
-		m[<span class="(pos|neg) color ">([\.0-9]*) / ([\.0-9]*)%</span>] ) 
+		if ($webdoc->content =~
+		m[<span class="(pos|neg) color ">([\.0-9]*) / ([\.0-9]*)%</span>] )
         {
             $net = $2 ;     # allow for alternates in match string
             $pchange = $3;
-        } 
+        }
 		if (!defined($net)) {
 			# not a serious error - don't report it ....
-#			$fundquote {$code,"success"} = 0;	
+#			$fundquote {$code,"success"} = 0;
 			# ... but set a useful message ....
 			$fundquote {$code,"errormsg"} = "Warning - failed to find a net change.";
 			$net = "-0.00";					# ???? is this OK ????
 			# ... and continue
-		}		
+		}
 		if (!defined($pchange)) {
 			# not a serious error - don't report it ....
-#			$fundquote {$code,"success"} = 0;	
+#			$fundquote {$code,"success"} = 0;
 			# ... but set a useful message ....
 			$fundquote {$code,"errormsg"} = "Warning - failed to find a %-change";
 			$pchange = "-0.00";					# ???? is this OK ????
 			# ... and continue
-		}		
-		if ($net =~ m[([0-9]*),([\.0-9]*)]) 
-		{ 
-			$net	  = $1 * 1000 + $2; 
 		}
-		if ($pchange =~ m[([0-9]*),([\.0-9]*)]) 
-		{ 
-			$pchange	  = $1 * 1000 + $2; 
+		if ($net =~ m[([0-9]*),([\.0-9]*)])
+		{
+			$net	  = $1 * 1000 + $2;
+		}
+		if ($pchange =~ m[([0-9]*),([\.0-9]*)])
+		{
+			$pchange	  = $1 * 1000 + $2;
 		}
 
 # Find the currency
 		my $currency;
-		if ($webdoc->content =~ 
-		m[($code):([A-Z]{3})]  ) 
+		if ($webdoc->content =~
+		m[($code):([A-Z]{3})]  )
         {
-        	
+
 			$currency    = $2;
         }
 
 		if (!defined($currency)) {
 			# serious error, report it and give up
-			$fundquote {$code,"success"} = 0;	
+			$fundquote {$code,"success"} = 0;
 			$fundquote {$code,"errormsg"} = "Error - failed to find a currency";
 			next;
 		}
 
 # deal with GBX pricing of UK unit trusts
-		
-		if ($currency eq "GBX") 
-		{ 
-			$currency = "GBP" ; 
+
+		if ($currency eq "GBX")
+		{
+			$currency = "GBP" ;
 			$price = $price / 100 ;
             $net   = $net   / 100 ;
-		}	
+		}
 
 	# now set prices, net change and currency
-		
+
 		$fundquote {$code, "price"} = $price;
 		$fundquote {$code, "last"} = $price;
 		$fundquote {$code, "nav"} = $price;
@@ -270,36 +270,36 @@ DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 # ... this code left in in case it is available in later revisions of the page
 
 		my $time;
-		if ($webdoc->content =~ m[......... some string that will identify the time ............] ) 
+		if ($webdoc->content =~ m[......... some string that will identify the time ............] )
         {
             if ($1 =~ m[(\d\d:\d\d)] )  # strip any trailing text (Timezone, etc.)
-            { 
-                $time = $1; 
+            {
+                $time = $1;
             }
         }
 		if (!defined($time)) {
 			# not a serious error - don't report it ....
-#			$fundquote {$code,"success"} = 0;	
+#			$fundquote {$code,"success"} = 0;
 			# ... but set a useful message ....
 			$fundquote {$code,"errormsg"} = "Warning - failed to find a time";
 			$time = "17:00";	# set to 17:00 if no time supplied ???
                                	# gnucash insists on having a valid-format
 			# ... and continue
 		}
-		
+
 		$fundquote {$code, "time"} = $time; # set time
 
 # Find date
 
 		my $date;
-		if ($webdoc->content =~ 
-		m[([A-Za-z]{3}) ([0-9]{2}) ([0-9]{4})] ) 
+		if ($webdoc->content =~
+		m[([A-Za-z]{3}) ([0-9]{2}) ([0-9]{4})] )
         {
         	$date = "$2/$1/$3" ;
         }
 		if (!defined($date)) {
 			# not a serious error - don't report it ....
-#			$fundquote {$code,"success"} = 0;	
+#			$fundquote {$code,"success"} = 0;
 			# ... but set a useful message ....
 			$fundquote {$code,"errormsg"} = "Warning - failed to find a date";
 			# use today's date
@@ -334,40 +334,40 @@ Finance::Quote::FTfunds - Obtain UK Unit Trust quotes from FT.com (Financial Tim
 =head1 DESCRIPTION
 
 This module fetches information from the Financial Times Funds service,
-http://funds.ft.com. There are over 47,000 UK Unit Trusts and OEICs quoted, 
-as well as many Offshore Funds and Exhange Traded Funds (ETFs). It converts 
-any funds quoted in GBX (pence) to GBP, dividing the price by 100 in the 
+http://funds.ft.com. There are over 47,000 UK Unit Trusts and OEICs quoted,
+as well as many Offshore Funds and Exhange Traded Funds (ETFs). It converts
+any funds quoted in GBX (pence) to GBP, dividing the price by 100 in the
 process.
 
-Funds are identified by their ISIN code, a 12 character alphanumeric code.  
-Although the web site also allows searching by fund name, this version of 
-Finance::Quote::FTfunds only implements ISIN lookup. To determine the ISIN for 
-funds of interest to you, visit the funds.ft.com site and use the flexible search 
-facilities to identify the funds of interest. The factsheet display for any given 
+Funds are identified by their ISIN code, a 12 character alphanumeric code.
+Although the web site also allows searching by fund name, this version of
+Finance::Quote::FTfunds only implements ISIN lookup. To determine the ISIN for
+funds of interest to you, visit the funds.ft.com site and use the flexible search
+facilities to identify the funds of interest. The factsheet display for any given
 fund displays the ISIN along with other useful information.
 
-This module is loaded by default on a Finance::Quote object. It's 
+This module is loaded by default on a Finance::Quote object. It's
 also possible to load it explicity by placing "ftfunds" in the argument
 list to Finance::Quote->new().
 
-Information obtained by this module may be covered by funds.ft.com 
+Information obtained by this module may be covered by funds.ft.com
 terms and conditions See http://funds.ft.com/ and http://ft.com for details.
 
 =head2 Stocks And Indices
 
-This module provides both the "ftfunds" and "ukfunds" fetch methods for 
-fetching UK and Offshore Unit Trusts and OEICs prices and other information 
-from funds.ft.com. Please use the "ukfunds" fetch method if you wish to have 
-failover with future sources for UK and Offshore Unit Trusts and OEICs - the 
-author has plans to develop Finance::Quote modules for the London Stock Exchange 
-and Morningstar unit trust services. Using the "ftfunds" method will guarantee 
+This module provides both the "ftfunds" and "ukfunds" fetch methods for
+fetching UK and Offshore Unit Trusts and OEICs prices and other information
+from funds.ft.com. Please use the "ukfunds" fetch method if you wish to have
+failover with future sources for UK and Offshore Unit Trusts and OEICs - the
+author has plans to develop Finance::Quote modules for the London Stock Exchange
+and Morningstar unit trust services. Using the "ftfunds" method will guarantee
 that your information only comes from the funds.ft.com website.
 
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::ftfunds :
 
-    name, currency, last, date, time, price, nav, source, method, 
+    name, currency, last, date, time, price, nav, source, method,
     iso_date, net, p_change, success, errormsg.
 
 
@@ -392,4 +392,3 @@ at your option, any later version of Perl 5 you may have available.
 =cut
 
 __END__
-

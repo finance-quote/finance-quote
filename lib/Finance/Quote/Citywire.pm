@@ -2,11 +2,11 @@
 
 #  Citywire.pm
 #
-#  Obtains quotes for UK Unit Trusts from http://morningstar.co.uk/ - please 
+#  Obtains quotes for UK Unit Trusts from http://morningstar.co.uk/ - please
 #  refer to the end of this file for further information.
 #
 #  author: Martin Sadler (martinsadler@users.sourceforge.net)
-#  
+#
 #  version: 0.1 Initial version - 01 April 2013
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -33,7 +33,7 @@ use strict;
 use warnings;
 
 # Set DEBUG => 0 for no debug messages, => 1 for first level, => 2 for 2nd level, etc.
- 
+
 use constant DEBUG => 0;
 
 # URLs
@@ -52,14 +52,14 @@ $CITYWIRE_MAIN_URL   =   "http://citywire.co.uk";
 $CITYWIRE_LOOK_UP    =   "http://citywire.co.uk/money/search.aspx?phrase=";
 $CITYWIRE_NEXT_URL	=	"";
 
-# FIXME - 
+# FIXME -
 
-sub methods { return (citywire => \&citywire_fund, 
+sub methods { return (citywire => \&citywire_fund,
 		      			ukfunds => \&citywire_fund); }
 
 {
     my @labels = qw/name currency last date time price nav source iso_date method net p_change success errormsg/;
-                    
+
     sub labels { return (citywire => \@labels,
 			 				ukfunds => \@labels); }
 }
@@ -79,7 +79,7 @@ sub citywire_fund  {
     my $cj = HTTP::Cookies->new();
     $ua->cookie_jar( $cj );
 
-    foreach (@symbols) 
+    foreach (@symbols)
     {
 	    my $code = $_;
 
@@ -92,11 +92,11 @@ sub citywire_fund  {
 
         if ($code_type ne "ISIN")
         {
-		    $fundquote {$code,"success"} = 0;	
+		    $fundquote {$code,"success"} = 0;
 		    $fundquote {$code,"errormsg"} = "Error - invalid symbol";
-		    next; 
+		    next;
         }
-                    
+
 	    $fundquote {$code,"success"} = 1; # ever the optimist....
 	    $fundquote {$code,"errormsg"} = "Success";
 
@@ -106,14 +106,14 @@ sub citywire_fund  {
         if (!$webdoc->is_success)
         {
 	        # serious error, report it and give up
-		    $fundquote {$code,"success"} = 0;	
-		    $fundquote {$code,"errormsg"} = 
+		    $fundquote {$code,"success"} = 0;
+		    $fundquote {$code,"errormsg"} =
 		        "Error - failed to retrieve fund data : HTTP Status = ",$webdoc->status_line;
-		    next; 
+		    next;
 	    }
 	    $fundquote {$code, "symbol"} = $code;
 	    $fundquote {$code, "source"} = $CITYWIRE_MAIN_URL;
-	    
+
 DEBUG and print "\nTitle  = ",$webdoc->title,"\n";
 DEBUG and print "\nStatus = ",$webdoc->status_line, "\n";
 DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
@@ -121,7 +121,7 @@ DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 # Find name and next url using TokeParser
 
 		my $htmlstream	=	HTML::TokeParser->new(\$webdoc->content);
-		
+
         my ($name, $nexturl);
 		while ( (my $tag = $htmlstream->get_tag('a')) && !$nexturl)
 		{
@@ -134,27 +134,27 @@ DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 				}
 			}
 		}
-		
+
 DEBUG and print "\nNext URL = ",$nexturl,"\n";
 DEBUG and print "\bName     = ",$name,"\n";
 
 		if (!defined($name)) {
 			# not a serious error - don't report it ....
-#			$fundquote {$code,"success"} = 0;	
+#			$fundquote {$code,"success"} = 0;
 			# ... but set a useful message ....
 			$fundquote {$code,"errormsg"} = "Warning - failed to find fund name";
 			$name = "*** UNKNOWN ***";
 			# ... and continue
-		}		
+		}
 		$fundquote {$code, "name"} = $name;	# set name
 
 		if (!defined($nexturl)) {
 	        # serious error, report it and give up
-		    $fundquote {$code,"success"} = 0;	
+		    $fundquote {$code,"success"} = 0;
 		    $fundquote {$code,"errormsg"} = "Error - failed to retrieve fund data";
-		    next; 
+		    next;
 		}
-		
+
 # modify $nexturl to remove html escape encoding for the Ampersand (&) character
 
 		$nexturl =~ s/&amp;/&/;
@@ -165,10 +165,10 @@ DEBUG and print "\bName     = ",$name,"\n";
         if (!$webdoc->is_success)
         {
 	        # serious error, report it and give up
-		    $fundquote {$code,"success"} = 0;	
-		    $fundquote {$code,"errormsg"} = 
+		    $fundquote {$code,"success"} = 0;
+		    $fundquote {$code,"errormsg"} =
 		        "Error - failed to retrieve fund data : HTTP Status = ",$webdoc->status_line;
-		    next; 
+		    next;
 	    }
 
 DEBUG and print "\nTitle  = ",$webdoc->title,"\n";
@@ -179,7 +179,7 @@ DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 
 		my ($currency, $date, $price, $pchange);
 		$htmlstream	=	HTML::TokeParser->new(\$webdoc->content);
-		
+
 		my $done = 0;
 		while ( (my $tag = $htmlstream->get_tag('div')) && !$done)
 		{
@@ -212,15 +212,15 @@ DEBUG and print "\n\$text = ",$text,"\n";
 							$price = $2;
 DEBUG and print "\n\$1 = ",$1,"\n";
 DEBUG and print "\n\$2 = ",$2,"\n";
-							if ( $1 eq "£" ) 
-							{ 
-								$currency = "GBP"; 
+							if ( $1 eq "£" )
+							{
+								$currency = "GBP";
 							}
-							else 
-							{ 
+							else
+							{
 								if( $1 =~ m[([A-Z]{3})] ) { $currency = $1; }
 							}
-						} 
+						}
 					}
 					$tag = $htmlstream->get_tag('h5');
 					$text = $htmlstream->get_trimmed_text('/h5');
@@ -241,7 +241,7 @@ DEBUG and print "\nFound tag : ",$tag->[3],$text,"</li>\n";
 							{
 								$pchange = 0 - $pchange;
 							}
-						} 
+						}
 					}
 				}
 			}
@@ -250,7 +250,7 @@ DEBUG and print "\nFound tag : ",$tag->[3],$text,"</li>\n";
 DEBUG and print "\n\%-age change = ",$pchange,"\n";
 		if (!defined($pchange)) {
 			# not a serious error - don't report it ....
-#			$fundquote {$code,"success"} = 0;	
+#			$fundquote {$code,"success"} = 0;
 			# ... but set a useful message ....
 			$fundquote {$code,"errormsg"} = "Warning - failed to find net or %-age change";
 			# set to (minus)zero
@@ -262,7 +262,7 @@ DEBUG and print "\n\%-age change = ",$pchange,"\n";
 DEBUG and print "\nDate = ",$date,"\n";
 		if (!defined($date)) {
 			# not a serious error - don't report it ....
-#			$fundquote {$code,"success"} = 0;	
+#			$fundquote {$code,"success"} = 0;
 			# ... but set a useful message ....
 			$fundquote {$code,"errormsg"} = "Warning - failed to find a date";
 			# use today's date
@@ -277,15 +277,15 @@ DEBUG and print "\nDate = ",$date,"\n";
 DEBUG and print "\nPrice = ",$price,"\n";
 		if (!defined($price)) {
 	    	# serious error, report it and give up
-			$fundquote {$code,"success"} = 0;	
+			$fundquote {$code,"success"} = 0;
 			$fundquote {$code,"errormsg"} = "Error - failed to find a price";
 			next;
-		}		
+		}
 
 DEBUG and print "\nCCY = ",$currency,"\n";
 		if (!defined($currency)) {
 	    	# serious error, report it and give up
-			$fundquote {$code,"success"} = 0;	
+			$fundquote {$code,"success"} = 0;
 			$fundquote {$code,"errormsg"} = "Error - failed to find a currency";
 			next;
 		}
@@ -295,18 +295,18 @@ DEBUG and print "\nCCY = ",$currency,"\n";
 # Calculate net change - it's not included in the morningstar factsheets
 
 		my $net = ($price * $pchange) / 100 ;
-		
+
 # deal with GBX pricing of UK unit trusts
-		
-		if ($currency eq "GBX") 
-		{ 
-			$currency = "GBP" ; 
+
+		if ($currency eq "GBX")
+		{
+			$currency = "GBP" ;
 			$price = $price / 100 ;
             $net   = $net   / 100 ;
-		}	
-		
+		}
+
 		# now set prices and currency
-		
+
 		$fundquote {$code, "price"} = $price;
 		$fundquote {$code, "last"} = $price;
 		$fundquote {$code, "nav"} = $price;
@@ -317,7 +317,7 @@ DEBUG and print "\nCCY = ",$currency,"\n";
 
 		my $time = "12:00";     # set to Midday if no time supplied ???
                                 # gnucash insists on having a valid-format
-		
+
 		$fundquote {$code, "time"} = $time; # set time
 
 		$fundquote {$code, "method"} = "citywire";   # set method
@@ -338,40 +338,40 @@ Finance::Quote::citywire - Obtain UK Unit Trust quotes from morningstar.co.uk.
     $q = Finance::Quote->new;
 
     %info = Finance::Quote->fetch("citywire","<isin> ...");  # Only query morningstar.co.uk using ISINs
-    %info = Finance::Quote->fetch("ukfunds","<isin>|<sedol>|<mexid> ..."); # Failover to other sources 
+    %info = Finance::Quote->fetch("ukfunds","<isin>|<sedol>|<mexid> ..."); # Failover to other sources
 
 =head1 DESCRIPTION
 
 This module fetches information from the Citywire Funds service,
-http://citywire.co.uk. There are many UK Unit Trusts and OEICs quoted, 
-as well as many Offshore Funds and Exhange Traded Funds (ETFs). It converts 
-any funds quoted in GBX (pence) to GBP, dividing the price by 100 in the 
+http://citywire.co.uk. There are many UK Unit Trusts and OEICs quoted,
+as well as many Offshore Funds and Exhange Traded Funds (ETFs). It converts
+any funds quoted in GBX (pence) to GBP, dividing the price by 100 in the
 process.
 
-Funds are identified by their ISIN code. 
+Funds are identified by their ISIN code.
 
-This module is loaded by default on a Finance::Quote object. It's 
+This module is loaded by default on a Finance::Quote object. It's
 also possible to load it explicity by placing "citywire" in the argument
 list to Finance::Quote->new().
 
-Information obtained by this module may be covered by citywire.co.uk 
+Information obtained by this module may be covered by citywire.co.uk
 terms and conditions See http://citywire.co.uk for details.
 
 =head2 Stocks And Indices
 
-This module provides both the "citywire" and "ukfunds" fetch methods for 
-fetching UK and Offshore Unit Trusts and OEICs prices and other information 
-from funds.ft.com. Please use the "ukfunds" fetch method if you wish to have 
-failover with future sources for UK and Offshore Unit Trusts and OEICs - the 
+This module provides both the "citywire" and "ukfunds" fetch methods for
+fetching UK and Offshore Unit Trusts and OEICs prices and other information
+from funds.ft.com. Please use the "ukfunds" fetch method if you wish to have
+failover with future sources for UK and Offshore Unit Trusts and OEICs - the
 author has plans to develop Finance::Quote modules for other sources providing
-uk unit trust prices. Using the "citywire" method will guarantee 
+uk unit trust prices. Using the "citywire" method will guarantee
 that your information only comes from the citywire.co.uk website.
 
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::Citywire :
 
-    name, currency, last, date, time, price, nav, source, method, 
+    name, currency, last, date, time, price, nav, source, method,
     iso_date, net, p_change, success, errormsg.
 
 
@@ -396,4 +396,3 @@ at your option, any later version of Perl 5 you may have available.
 =cut
 
 __END__
-
