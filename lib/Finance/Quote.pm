@@ -648,6 +648,29 @@ sub parse_csv
 }
 
 # =======================================================================
+# parse_csv_semicolon (public object method)
+#
+# Grabbed from the Perl Cookbook. Parsing csv isn't as simple as you thought!
+#
+sub parse_csv_semicolon
+{
+    shift if (ref $_[0]); # Shift off the object if we have one.
+    my $text = shift;      # record containing comma-separated values
+    my @new  = ();
+
+    push(@new, $+) while $text =~ m{
+        # the first part groups the phrase inside the quotes.
+        # see explanation of this pattern in MRE
+        "([^\"\\]*(?:\\.[^\"\\]*)*)";?
+           |  ([^;]+);?
+           | ;
+       }gx;
+       push(@new, undef) if substr($text, -1,1) eq ';';
+
+       return @new;      # list of values that were comma-separated
+}
+
+# =======================================================================
 # store_date (public object method)
 #
 
