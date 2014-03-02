@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+1.25      2014-03-02 23:18:23+01:00 Europe/Brussels
+
         * AEX.pm : Some checking added. Not working yet
         * Quote.pm : readded sub parse_csv_semicolon.
 
