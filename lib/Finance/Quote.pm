@@ -36,7 +36,7 @@ use Carp;
 use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
 use Encode;
-use Data::Dumper;
+# use Data::Dumper;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $TIMEOUT %MODULES %METHODS $AUTOLOAD

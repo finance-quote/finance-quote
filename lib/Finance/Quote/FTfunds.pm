@@ -57,7 +57,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTTP::Cookies;
 use HTML::TokeParser;
-use Data::Dumper;
+# use Data::Dumper;
 
 # VERSION
 
