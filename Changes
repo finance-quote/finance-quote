@@ -1,8 +1,17 @@
 {{$NEXT}}
 
+        * Added module Citywire.pm written by Martin Sadler
+        * Added module FTfunds.pm written by Martin Sadler
+        * Added module MStaruk.pm written by Martin Sadler
+        * Added module TNetuk.pm written by Martin Sadler
+
 1.23_02   2014-03-02 14:46:41+01:00 Europe/Brussels (TRIAL RELEASE)
 
+        TEST RELEASE
+
 1.22      2014-03-02 10:38:18+01:00 Europe/Brussels (TRIAL RELEASE)
+
+        TEST RELEASE
 
 1.21      2014-03-02 09:56:38+01:00 Europe/Brussels (TRIAL RELEASE)
 
