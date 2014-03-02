@@ -39,7 +39,7 @@ use Encode;
 use Data::Dumper;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
-            $VERSION $TIMEOUT %MODULES %METHODS $AUTOLOAD
+            $TIMEOUT %MODULES %METHODS $AUTOLOAD
             $YAHOO_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
 
 # Call on the Yahoo API:
@@ -57,7 +57,7 @@ $YAHOO_CURRENCY_URL = "http://finance.yahoo.com/d/quotes.csv?e=.csv&f=l1&s=";
                 currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.20' ;
+# VERSION
 
 $USE_EXPERIMENTAL_UA = 0;
 

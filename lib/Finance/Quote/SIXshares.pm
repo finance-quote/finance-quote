@@ -9,6 +9,8 @@ package Finance::Quote::SIXshares;
 
 use HTTP::Request::Common;
 
+# VERSION
+
 my $url = 'http://www.six-swiss-exchange.com/shares/security_info_en.html?id=';
 
 sub methods { return ( sixshares => \&sixshares ); }

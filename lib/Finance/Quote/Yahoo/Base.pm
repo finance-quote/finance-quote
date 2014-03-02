@@ -37,14 +37,14 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use Exporter;
 
-use vars qw/$VERSION @FIELDS @FIELD_ENCODING $MAX_REQUEST_SIZE @ISA
+use vars qw/ @FIELDS @FIELD_ENCODING $MAX_REQUEST_SIZE @ISA
             @EXPORT @EXPORT_OK/;
 
 @ISA = qw/Exporter/;
 @EXPORT = qw//;
 @EXPORT_OK = qw/yahoo_request base_yahoo_labels/;
 
-$VERSION = '1.20' ;
+# VERSION
 
 # This is the maximum number of stocks we'll batch into one operation.
 # If this gets too big (>50 or thereabouts) things will break because

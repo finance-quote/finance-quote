@@ -32,13 +32,13 @@ require 5.004;
 
 use strict;
 
-use vars qw($VERSION $STOCKHOUSE_LOOKUP_URL $STOCKHOUSE_URL $STOCKHOUSE_MAIN_URL);
+use vars qw( $STOCKHOUSE_LOOKUP_URL $STOCKHOUSE_URL $STOCKHOUSE_MAIN_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.20' ;
+# VERSION
 
 $STOCKHOUSE_LOOKUP_URL="http://www.stockhouse.com/mutualFunds/index.asp?asp=1&lang=&item=searchresult&country=CAN&by=symbol&searchtext=";
 $STOCKHOUSE_URL="http://www.stockhouse.com/MutualFunds/index.asp?item=snapshot&page=1&Lang=EN&fundkey=%s&source=Fundata&Symbol=%s&FundName=&CompanyName=&asp=1";

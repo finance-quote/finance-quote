@@ -13,13 +13,11 @@ require 5.004;
 
 use strict;
 
-use vars qw/ $VERSION / ;
-
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.20' ;
+# VERSION
 my $FINANCECANADA_MAINURL = ("http://finance.canada.com/");
 my $FINANCECANADA_URL = "http://stockgroup.canada.com/sn_overview.asp?symbol=T.";
 

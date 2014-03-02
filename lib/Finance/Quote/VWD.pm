@@ -6,7 +6,7 @@
 #    Copyright (C) 2000, Paul Fenwick <pjf@cpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2000, Volker Stuerzl <volker.stuerzl@gmx.de>
-#    Copyright (C) 2003,2005,2006 Jörg Sommer <joerg@alea.gnuu.de>
+#    Copyright (C) 2003,2005,2006 JÃ¶rg Sommer <joerg@alea.gnuu.de>
 #    Copyright (C) 2008 Martin Kompf (skaringa at users.sourceforge.net)
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -40,11 +40,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TreeBuilder;
 
-# use vars qw/$VERSION $VWD_FUNDS_URL/;
-
-use vars qw/$VERSION/;
-
-$VERSION = '1.20' ;
+# VERSION
 
 sub methods { return (vwd => \&vwd); }
 sub labels { return (vwd => [qw/currency date isodate
@@ -55,7 +51,7 @@ sub labels { return (vwd => [qw/currency date isodate
 # vwd Vereinigte Wirtschaftsdienste GmbH.
 #
 # This subroutine was written by Volker Stuerzl <volker.stuerzl@gmx.de>
-# and adjusted to match the new vwd interface by Jörg Sommer
+# and adjusted to match the new vwd interface by JÃ¶rg Sommer
 
 # Trim leading and tailing whitespaces (also non-breakable whitespaces)
 sub trim

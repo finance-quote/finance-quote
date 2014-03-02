@@ -31,12 +31,12 @@ package Finance::Quote::Fidelity;
 require 5.005;
 
 use strict;
-use vars qw/$FIDELITY_URL $VERSION/;
+use vars qw/$FIDELITY_URL /;
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 
-$VERSION = '1.20' ;
+# VERSION
 
 $FIDELITY_URL = ("http://activequote.fidelity.com/nav/fulllist.csv");
 

@@ -33,13 +33,13 @@ use strict;
 
 package Finance::Quote::TSP;
 
-use vars qw($VERSION $TSP_URL $TSP_MAIN_URL %TSP_FUND_COLUMNS %TSP_FUND_NAMES);
+use vars qw( $TSP_URL $TSP_MAIN_URL %TSP_FUND_COLUMNS %TSP_FUND_NAMES);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.20' ;
+# VERSION
 
 # URLs of where to obtain information
 

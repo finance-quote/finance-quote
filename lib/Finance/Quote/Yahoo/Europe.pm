@@ -34,9 +34,9 @@ use HTTP::Request::Common;
 use LWP::UserAgent;
 use Finance::Quote::Yahoo::Base qw/yahoo_request base_yahoo_labels/;
 
-use vars qw($VERSION $YAHOO_EUROPE_URL);
+use vars qw( $YAHOO_EUROPE_URL);
 
-$VERSION = '1.20' ;
+# VERSION
 
 # URLs of where to obtain information.
 
