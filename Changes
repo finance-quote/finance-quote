@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+1.21      2014-03-02 09:56:38+01:00 Europe/Brussels (TRIAL RELEASE)
+
         * ASX.pm now supports querying more than 10 symbols (goodvibes2)
         * Travis config added for automated test build
         * BUILD: Updated to use Dist::Zilla
