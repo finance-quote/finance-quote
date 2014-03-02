@@ -117,7 +117,12 @@ sub aex {
         my $found = 0;
 
         # Match Fund's name, ISIN or symbol
-        if ( @$row[0] eq $symbol || @$row[1] eq $symbol || @$row[4] eq $symbol ) {
+        my $currentSymbol = 0;
+        foreach my $i (0,1,4) {
+            $currentSymbol = ( @$row[$i] eq $symbol ) if defined(@$row[$i]);
+            last if $currentSymbol;
+        }
+        if ( $currentSymbol ) {
           $info {$symbol, "exchange"} = "Amsterdam Euronext eXchange";
           $info {$symbol, "method"} = "aex";
           $info {$symbol, "symbol"} = @$row[4];
