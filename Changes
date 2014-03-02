@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+        * AEX.pm : Some checking added. Not working yet
+        * Quote.pm : readded sub parse_csv_semicolon.
+
 1.24      2014-03-02 21:39:00+01:00 Europe/Brussels
 
         * Added module Citywire.pm written by Martin Sadler
