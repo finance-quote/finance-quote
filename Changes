@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+        * ASX.pm now supports querying more than 10 symbols (goodvibes2)
+        * Travis config added for automated test build
         * BUILD: Updated to use Dist::Zilla
 
 2014-02-17  Erik Colson <eco@ecocode.net>
