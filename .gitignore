@@ -7,3 +7,4 @@ blib
 pm_to_blib
 .build
 .~*
+.DS_Store
