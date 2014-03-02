@@ -13,7 +13,7 @@ my $q      = Finance::Quote->new();
 my $year   = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my %quotes = $q->ftfunds("GB0031835118","GB0030880032","GB0004842737","BOGUS");
+my %quotes = $q->mstaruk("GB0031835118","GB0030880032","GB0004842737","BOGUS");
 ok(%quotes);
 
 # Check the last values are defined.  These are the most
