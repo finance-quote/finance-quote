@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+1.22      2014-03-02 10:38:18+01:00 Europe/Brussels (TRIAL RELEASE)
+
 1.21      2014-03-02 09:56:38+01:00 Europe/Brussels (TRIAL RELEASE)
 
         * ASX.pm now supports querying more than 10 symbols (goodvibes2)
