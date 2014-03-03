@@ -39,6 +39,7 @@ use strict;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TreeBuilder;
+use HTML::TableExtract;
 
 # VERSION
 
@@ -87,29 +88,31 @@ sub vwd
   return unless (@funds);
   my %info;
 
+  # LOGGING - set to 1 to enable log file
+  my $logging = 0;
+  if ($logging) {
+    open(LOG, ">>/tmp/vwd.log");  
+  }
+
+  my $max_retry = 30;
   foreach my $fund (@funds)
   {
     $info{$fund, "source"} = "VWD";
     $info{$fund, "success"} = 0;
     $info{$fund, "errormsg"} = "Parse error";
 
-    my $response = $ua->get("http://www.finanztreff.de/".
-   "kurse_einzelkurs_uebersicht.htn?s=".$fund);
+    my $request = "http://www.finanztreff.de/".
+      "kurse_einzelkurs_uebersicht.htn?s=".$fund;
+    if ($logging) {
+        print LOG "Request='$request'\n";
+    }
+    my $response = $ua->get($request);
     if ($response->is_success)
     {
-      my $html = $response->content;
+      my $html = $response->decoded_content;
 
       my $tree = HTML::TreeBuilder->new;
       $tree->parse($html);
-
-      # date from the top of the page
-      my $date_time = $tree->look_down(
-         "_tag", "span",
-         "class", "time");
-      next if not $date_time;
-      if ($date_time->as_text =~ /(\d\d)\.(\d\d)\. \d\d:\d\d/) {
-         $quoter->store_date(\%info, $fund, {day => $1, month => $2});
-      }
 
       # all other info below <div class=contentContainer>
       my $content = $tree->look_down(
@@ -118,66 +121,88 @@ sub vwd
       );
       next if not $content;
 
-      # <h1> contains price, time, name, and symbol
-      my $head = $content->look_down(
-	 "_tag", "div",
-	 "class", "wpHeadline"
-      );
-      next if not $head;
-
-      my $wpkurs = $head->look_down(
+      my $wpkurs = $content->look_down(
          "_tag", "div",
-         "class", "wpKurs"
+         "class", qr/wpKurs/
       );
       next if not $wpkurs;
-      my $time = $wpkurs->look_down(
-         "_tag", "div",
-         "class", "datum"
-      );
-      if ($time) {
-         $info{$fund, "time"} = $time->as_trimmed_text;
+
+      my $title = $wpkurs->find("h1");
+      $title->find("span")->delete_content;
+      $info{$fund, "name"} = $title->as_trimmed_text;
+
+      my $te = new HTML::TableExtract(depth => 0, count => 0);
+      $te->parse($wpkurs->as_HTML);
+      my $table = $te->first_table_found;
+
+      my $datum = $table->cell(0,1);
+      if ($logging) {
+         print LOG "datum: $datum\n";
       }
-      my $kurs = $wpkurs->look_down(
-         "_tag", "div",
-         "class", "kurs");
+      if ($datum =~ /([(0123]\d)\.([01]\d)\.(\d\d)/) {
+         # datum contains date
+         $quoter->store_date(\%info, $fund, {day => $1, month => $2, year => $3});
+         $info{$fund, "time"} = $quoter->isoTime("18:00");
+      } elsif ($datum =~ /([012]\d:[0-5]\d:[0-5]\d)/) {
+         #datum contains time
+         $quoter->store_date(\%info, $fund);
+         $info{$fund, "time"} = $quoter->isoTime($1);
+      }
+      my $kurs = $table->cell(0,2);
       next if not $kurs;
-      $info{$fund, "price"} = $info{$fund, "last"} = trimtr($kurs->as_text);
+      $info{$fund, "price"} = $info{$fund, "last"} = trimtr($kurs);
 
-      foreach ($head->descendants) {
-         $_->delete;
+      # Currency
+      my $portrait = $tree->look_down(
+         "_tag", "table",
+         "class", "portraitKurse");
+      if ($portrait) {
+         my @tds = $portrait->find('td');
+         $info{$fund, "currency"} = $tds[2]->as_trimmed_text(); 
+      } else {
+         $info{$fund, "currency"} = "EUR";
       }
 
-      my $wpsymbol = $content->look_down(
-         "_tag", "ul",
-         "class", "wpInfo"
-      );
-      if ($wpsymbol) {
-         my @li = $wpsymbol->find("li");
-         if ($li[4]->as_text =~ /WKN:(\w+)/) {
-            $info{$fund, "symbol"} = $1;
-         }
-      }
-
-      # <ul> contains currency as 3rd <li>
-      my $wpinfo = $content->look_down(
-         "_tag", "span",
-         "class", "whrg"
+      my $wpinfo = $wpkurs->look_down(
+         "_tag", "h2"
       );
       if ($wpinfo) {
-         $info{$fund, "currency"} = substr($wpinfo->as_text, 0, 3);
+         if ($logging) {
+            print LOG "wpinfo: " . $wpinfo->as_trimmed_text . "\n";
+         }
+         if ($wpinfo->as_trimmed_text =~ /Symbol:([^ ]*)$/) {
+            $info{$fund, "symbol"} = trim($1);
+         }
       }
 
       # fund ok
       $info{$fund, "success"}  = 1;
       $info{$fund, "errormsg"} = "";
 
+      # log
+    if ($logging) {
+        print LOG join(':', $info{$fund, "name"}, $info{$fund, "symbol"}, $info{$fund, "date"}, $info{$fund, "time"}, $info{$fund,"price"}, $info{$fund,"currency"});
+        print LOG "\n";
+      }
+
       $tree->delete;
     } else {
       $info{$fund, "success"}  = 0;
-      $info{$fund, "errormsg"} = "HTTP error";
+      $info{$fund, "errormsg"} = "HTTP error " . $response->status_line;
+      if ($logging) {
+        print LOG "ERROR $fund: ". $info{$fund, "errormsg"} . "\n";
+      }
+      if ($response->code == 503 && $max_retry-- > 0) {
+         # The server limits the number of request per time and client
+         sleep 5;
+         redo;
+      }
     }
   }
 
+  if ($logging) {
+    close LOG;
+  }
   return wantarray() ? %info : \%info;
 }
 
