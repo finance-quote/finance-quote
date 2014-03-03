@@ -20,37 +20,38 @@ use Test::More;
 use Finance::Quote;
 
 my @methods = qw/mtgox bitcoin/;
-my @markets = qw/USD EUR JPY CAD GBP CHF RUB AUD SEK DKK HKD PLN CNY SGD THB NZD NOK/;
+my @markets =
+    qw/USD EUR JPY CAD GBP CHF RUB AUD SEK DKK HKD PLN CNY SGD THB NZD NOK/;
 
 plan tests => 48;
 
 my $q = Finance::Quote->new;
 
 for my $method (@methods) {
-	for my $market (@markets) {
-		cmp_ok(sprintf("%s_%s", $method, lc $market), '~~', $q->sources);
-	}
+    for my $market (@markets) {
+        cmp_ok( sprintf( "%s_%s", $method, lc $market ), '~~', $q->sources );
+    }
 }
 
 SKIP: {
-	skip 'Set $ENV{ONLINE_TEST} to run these tests', 14 unless $ENV{ONLINE_TEST};
+    skip 'Set $ENV{ONLINE_TEST} to run these tests', 14
+        unless $ENV{ONLINE_TEST};
 
-	my %data = $q->fetch ("mtgox_eur", "BTC", "xyz", "thisisfartoolong");
-	ok(%data);
+    my %data = $q->fetch( "mtgox_eur", "BTC", "xyz", "thisisfartoolong" );
+    ok(%data);
+    is( $data{ "xyz", "success" },  0 );
+    is( $data{ "xyz", "errormsg" }, "HTTP failure" );
 
-	is($data{"xyz","success"}, 0);
-	is($data{"xyz","errormsg"}, "HTTP failure");
+    is( $data{ "thisisfartoolong", "success" },  0 );
+    is( $data{ "thisisfartoolong", "errormsg" }, "Symbol too long" );
 
-	is($data{"thisisfartoolong","success"}, 0);
-	is($data{"thisisfartoolong","errormsg"}, "Symbol too long");
-
-	is($data{"BTC","success"}, 1);
-	is($data{"BTC","symbol"}, "BTC");
-	like($data{"BTC","last"}, '/^[\d]+\.?[\d]*$/');
-	cmp_ok($data{"BTC","bid"}, "<", $data{"BTC","ask"});
-	like($data{"BTC","date"}, '/^\d{1,2}\/\d{1,2}\/\d{1,2}$/');
-	like($data{"BTC","time"}, '/^\d{1,2}:\d{1,2}:\d{1,2}$/');
-	is($data{"BTC","method"}, "mtgox_eur");
-	is($data{"BTC","exchange"}, "Mt.Gox");
-	is($data{"BTC","timezone"}, "UTC");
+    is( $data{ "BTC", "success" }, 1 );
+    is( $data{ "BTC", "symbol" },  "BTC" );
+    like( $data{ "BTC", "last" }, '/^[\d]+\.?[\d]*$/' );
+    cmp_ok( $data{ "BTC", "bid" }, "<", $data{ "BTC", "ask" } );
+    like( $data{ "BTC", "date" }, '/^\d{1,2}\/\d{1,2}\/\d{1,2}$/' );
+    like( $data{ "BTC", "time" }, '/^\d{1,2}:\d{1,2}:\d{1,2}$/' );
+    is( $data{ "BTC", "method" },   "mtgox_eur" );
+    is( $data{ "BTC", "exchange" }, "Mt.Gox" );
+    is( $data{ "BTC", "timezone" }, "UTC" );
 }
