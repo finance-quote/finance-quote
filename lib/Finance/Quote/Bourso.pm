@@ -146,7 +146,7 @@ sub bourso {
 		$info{$stocks,"name"}=$name;
         # set method
         $info{$stocks,"method"} = "bourso" ;
-		
+
 		#holds table data
 		my %tempinfo;
 
