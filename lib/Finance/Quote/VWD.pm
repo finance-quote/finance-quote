@@ -43,9 +43,11 @@ use HTML::TableExtract;
 
 # VERSION
 
-sub methods { return (vwd => \&vwd); }
-sub labels { return (vwd => [qw/currency date isodate
-            name price last symbol time/]); }
+sub methods { return ( vwd => \&vwd ); }
+
+sub labels {
+    return ( vwd => [ qw/currency date isodate name price last symbol time/ ] );
+}
 
 # =======================================================================
 # The vwd routine gets quotes of funds from the website of
@@ -55,8 +57,7 @@ sub labels { return (vwd => [qw/currency date isodate
 # and adjusted to match the new vwd interface by Jörg Sommer
 
 # Trim leading and tailing whitespaces (also non-breakable whitespaces)
-sub trim
-{
+sub trim {
     $_ = shift();
     s/^\s*//;
     s/\s*$//;
@@ -68,8 +69,7 @@ sub trim
 # and tailing &plusmn; (plus minus) and translate german separators into
 # english separators. Also removes the thousands separator in returned
 # values.
-sub trimtr
-{
+sub trimtr {
     $_ = shift();
     s/&nbsp;//g;
     s/&plusmn;//g;
@@ -80,130 +80,135 @@ sub trimtr
     return $_;
 }
 
-sub vwd
-{
-  my $quoter = shift;
-  my $ua = $quoter->user_agent();
-  my @funds = @_;
-  return unless (@funds);
-  my %info;
+sub vwd {
+    my $quoter = shift;
+    my $ua     = $quoter->user_agent();
+    my @funds  = @_;
+    return unless (@funds);
+    my %info;
 
-  # LOGGING - set to 1 to enable log file
-  my $logging = 0;
-  if ($logging) {
-    open(LOG, ">>/tmp/vwd.log");  
-  }
-
-  my $max_retry = 30;
-  foreach my $fund (@funds)
-  {
-    $info{$fund, "source"} = "VWD";
-    $info{$fund, "success"} = 0;
-    $info{$fund, "errormsg"} = "Parse error";
-
-    my $request = "http://www.finanztreff.de/".
-      "kurse_einzelkurs_uebersicht.htn?s=".$fund;
+    # LOGGING - set to 1 to enable log file
+    my $logging = 0;
     if ($logging) {
-        print LOG "Request='$request'\n";
+        open( LOG, ">>/tmp/vwd.log" );
     }
-    my $response = $ua->get($request);
-    if ($response->is_success)
-    {
-      my $html = $response->decoded_content;
 
-      my $tree = HTML::TreeBuilder->new;
-      $tree->parse($html);
+    my $max_retry = 30;
+    foreach my $fund (@funds) {
+        $info{ $fund, "source" }   = "VWD";
+        $info{ $fund, "success" }  = 0;
+        $info{ $fund, "errormsg" } = "Parse error";
 
-      # all other info below <div class=contentContainer>
-      my $content = $tree->look_down(
-         "_tag", "div",
-         "class", "contentContainer"
-      );
-      next if not $content;
+        my $request =
+              "http://www.finanztreff.de/"
+            . "kurse_einzelkurs_uebersicht.htn?s="
+            . $fund;
+        if ($logging) {
+            print LOG "Request='$request'\n";
+        }
+        my $response = $ua->get($request);
+        if ( $response->is_success ) {
+            my $html = $response->decoded_content;
 
-      my $wpkurs = $content->look_down(
-         "_tag", "div",
-         "class", qr/wpKurs/
-      );
-      next if not $wpkurs;
+            my $tree = HTML::TreeBuilder->new;
+            $tree->parse($html);
 
-      my $title = $wpkurs->find("h1");
-      $title->find("span")->delete_content;
-      $info{$fund, "name"} = $title->as_trimmed_text;
+            # all other info below <div class=contentContainer>
+            my $content =
+                $tree->look_down( "_tag", "div", "class", "contentContainer" );
+            next if not $content;
 
-      my $te = new HTML::TableExtract(depth => 0, count => 0);
-      $te->parse($wpkurs->as_HTML);
-      my $table = $te->first_table_found;
+            my $wpkurs =
+                $content->look_down( "_tag", "div", "class", qr/wpKurs/ );
+            next if not $wpkurs;
 
-      my $datum = $table->cell(0,1);
-      if ($logging) {
-         print LOG "datum: $datum\n";
-      }
-      if ($datum =~ /([(0123]\d)\.([01]\d)\.(\d\d)/) {
-         # datum contains date
-         $quoter->store_date(\%info, $fund, {day => $1, month => $2, year => $3});
-         $info{$fund, "time"} = $quoter->isoTime("18:00");
-      } elsif ($datum =~ /([012]\d:[0-5]\d:[0-5]\d)/) {
-         #datum contains time
-         $quoter->store_date(\%info, $fund);
-         $info{$fund, "time"} = $quoter->isoTime($1);
-      }
-      my $kurs = $table->cell(0,2);
-      next if not $kurs;
-      $info{$fund, "price"} = $info{$fund, "last"} = trimtr($kurs);
+            my $title = $wpkurs->find("h1");
+            $title->find("span")->delete_content;
+            $info{ $fund, "name" } = $title->as_trimmed_text;
 
-      # Currency
-      my $portrait = $tree->look_down(
-         "_tag", "table",
-         "class", "portraitKurse");
-      if ($portrait) {
-         my @tds = $portrait->find('td');
-         $info{$fund, "currency"} = $tds[2]->as_trimmed_text(); 
-      } else {
-         $info{$fund, "currency"} = "EUR";
-      }
+            my $te = new HTML::TableExtract( depth => 0, count => 0 );
+            $te->parse( $wpkurs->as_HTML );
+            my $table = $te->first_table_found;
 
-      my $wpinfo = $wpkurs->look_down(
-         "_tag", "h2"
-      );
-      if ($wpinfo) {
-         if ($logging) {
-            print LOG "wpinfo: " . $wpinfo->as_trimmed_text . "\n";
-         }
-         if ($wpinfo->as_trimmed_text =~ /Symbol:([^ ]*)$/) {
-            $info{$fund, "symbol"} = trim($1);
-         }
-      }
+            my $datum = $table->cell( 0, 1 );
+            if ($logging) {
+                print LOG "datum: $datum\n";
+            }
+            if ( $datum =~ /([(0123]\d)\.([01]\d)\.(\d\d)/ ) {
 
-      # fund ok
-      $info{$fund, "success"}  = 1;
-      $info{$fund, "errormsg"} = "";
+                # datum contains date
+                $quoter->store_date( \%info, $fund,
+                                     { day => $1, month => $2, year => $3 } );
+                $info{ $fund, "time" } = $quoter->isoTime("18:00");
+            }
+            elsif ( $datum =~ /([012]\d:[0-5]\d:[0-5]\d)/ ) {
 
-      # log
+                #datum contains time
+                $quoter->store_date( \%info, $fund );
+                $info{ $fund, "time" } = $quoter->isoTime($1);
+            }
+            my $kurs = $table->cell( 0, 2 );
+            next if not $kurs;
+            $info{ $fund, "price" } = $info{ $fund, "last" } = trimtr($kurs);
+
+            # Currency
+            my $portrait =
+                $tree->look_down( "_tag", "table", "class", "portraitKurse" );
+            if ($portrait) {
+                my @tds = $portrait->find('td');
+                $info{ $fund, "currency" } = $tds[2]->as_trimmed_text();
+            }
+            else {
+                $info{ $fund, "currency" } = "EUR";
+            }
+
+            my $wpinfo = $wpkurs->look_down( "_tag", "h2" );
+            if ($wpinfo) {
+                if ($logging) {
+                    print LOG "wpinfo: " . $wpinfo->as_trimmed_text . "\n";
+                }
+                if ( $wpinfo->as_trimmed_text =~ /Symbol:([^ ]*)$/ ) {
+                    $info{ $fund, "symbol" } = trim($1);
+                }
+            }
+
+            # fund ok
+            $info{ $fund, "success" }  = 1;
+            $info{ $fund, "errormsg" } = "";
+
+            # log
+            if ($logging) {
+                print LOG join( ':',
+                                $info{ $fund, "name" },
+                                $info{ $fund, "symbol" },
+                                $info{ $fund, "date" },
+                                $info{ $fund, "time" },
+                                $info{ $fund, "price" },
+                                $info{ $fund, "currency" } );
+                print LOG "\n";
+            }
+
+            $tree->delete;
+        }
+        else {
+            $info{ $fund, "success" }  = 0;
+            $info{ $fund, "errormsg" } = "HTTP error " . $response->status_line;
+            if ($logging) {
+                print LOG "ERROR $fund: " . $info{ $fund, "errormsg" } . "\n";
+            }
+            if ( $response->code == 503 && $max_retry-- > 0 ) {
+
+                # The server limits the number of request per time and client
+                sleep 5;
+                redo;
+            }
+        }
+    }
+
     if ($logging) {
-        print LOG join(':', $info{$fund, "name"}, $info{$fund, "symbol"}, $info{$fund, "date"}, $info{$fund, "time"}, $info{$fund,"price"}, $info{$fund,"currency"});
-        print LOG "\n";
-      }
-
-      $tree->delete;
-    } else {
-      $info{$fund, "success"}  = 0;
-      $info{$fund, "errormsg"} = "HTTP error " . $response->status_line;
-      if ($logging) {
-        print LOG "ERROR $fund: ". $info{$fund, "errormsg"} . "\n";
-      }
-      if ($response->code == 503 && $max_retry-- > 0) {
-         # The server limits the number of request per time and client
-         sleep 5;
-         redo;
-      }
+        close LOG;
     }
-  }
-
-  if ($logging) {
-    close LOG;
-  }
-  return wantarray() ? %info : \%info;
+    return wantarray() ? %info : \%info;
 }
 
 1;
