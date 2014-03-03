@@ -123,7 +123,7 @@ sub vwd
 
       my $wpkurs = $content->look_down(
          "_tag", "div",
-         "class", "wpKurs "
+         "class", qr/wpKurs/
       );
       next if not $wpkurs;
 
