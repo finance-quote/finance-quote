@@ -23,6 +23,8 @@ use LWP::UserAgent;
 use POSIX;
 use URI::Escape;
 
+require 5.010;
+
 # VERSION
 
 my @markets = qw/USD EUR JPY CAD GBP CHF RUB AUD SEK DKK HKD PLN CNY SGD THB NZD NOK/;
