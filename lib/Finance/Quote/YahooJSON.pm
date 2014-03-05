@@ -50,7 +50,7 @@ sub methods {
 
     sub labels {
         return ( india => \@labels,
-                 bomse => \@labels,
+                 yahoo_json => \@labels,
                  ind   => \@labels
         );
     }
