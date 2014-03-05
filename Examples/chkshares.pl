@@ -24,12 +24,12 @@ format STDOUT_TOP =
 
                                  STOCK REPORT
 
-TICKER         DATE      LAST  %CHANGE       HIGH      LOW    VOLUME     CLOSE
--------------------------------------------------------------------------------
+TICKER         DATE       LAST  %CHANGE        HIGH       LOW    VOLUME      CLOSE
+----------------------------------------------------------------------------------
 .
 
 format STDOUT =
-@<<<<<< @>>>>>>>>>>  @###.### @###.###   @###.### @###.### @>>>>>>>>  @###.###
+@<<<<<< @>>>>>>>>>>  @####.### @###.###   @####.### @####.### @>>>>>>>>  @####.###
 $name,  $date,       $last,   $p_change, $high,   $low,    $volume,   $close
 .
 
