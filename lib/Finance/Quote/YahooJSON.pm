@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #    This module is based on the Finance::Quote::BSERO module
-#    It was first called BOMSE but has been renamed to yahoo_json
+#    It was first called BOMSE but has been renamed to yahooJSON
 #    since it gets a lot of quotes besides Indian
 #
 #    The code has been modified by Abhijit K to
@@ -35,112 +35,124 @@ use Time::Piece;
 
 # VERSION
 
-my $YIND_URL_HEAD	= 'http://finance.yahoo.com/webservice/v1/symbols/';
-my $YIND_URL_TAIL 	= '/quote?format=json';
+my $YIND_URL_HEAD = 'http://finance.yahoo.com/webservice/v1/symbols/';
+my $YIND_URL_TAIL = '/quote?format=json';
 
-
-sub methods { return ( india => \&yahoo_json,
-                       yahoo_json => \&yahoo_json,
-                       ind => \&yahoo_json); }
+sub methods {
+    return ( india      => \&yahoo_json,
+             yahoo_json => \&yahoo_json,
+             ind        => \&yahoo_json
+    );
+}
 {
-  my @labels = qw/name last date isodate p_change open high low close volume currency method exchange/;
+    my @labels = qw/name last date isodate p_change open high low close
+        volume currency method exchange/;
 
-  sub labels { return (india => \@labels,
-                       bomse => \@labels,
-                       ind => \@labels); }
+    sub labels {
+        return ( india => \@labels,
+                 bomse => \@labels,
+                 ind   => \@labels
+        );
+    }
 }
 
 sub yahoo_json {
 
-  my $quoter = shift;
-  my @stocks = @_;
-  my (%info,$reply,$url,$te,$ts,$row,@cells, $ce);
-  my($my_date,$my_last,$my_p_change,$my_volume,$my_high,$my_low,$my_open);
-  my $ua = $quoter->user_agent();
+    my $quoter = shift;
+    my @stocks = @_;
+    my ( %info, $reply, $url, $te, $ts, $row, @cells, $ce );
+    my ( $my_date, $my_last, $my_p_change, $my_volume, $my_high, $my_low,
+         $my_open );
+    my $ua = $quoter->user_agent();
 
+    foreach my $stocks (@stocks) {
 
-foreach my $stocks (@stocks)
-    {
+        $url   = $YIND_URL_HEAD . $stocks . $YIND_URL_TAIL;
+        $reply = $ua->request( GET $url);
 
-      $url = $YIND_URL_HEAD.$stocks.$YIND_URL_TAIL;
-      $reply = $ua->request(GET $url);
+        my $code    = $reply->code;
+        my $desc    = HTTP::Status::status_message($code);
+        my $headers = $reply->headers_as_string;
+        my $body    = $reply->content;
 
-      my $code=$reply->code;
-      my $desc = HTTP::Status::status_message($code);
-      my $headers=$reply->headers_as_string;
-      my $body =  $reply->content;
+        #Response variables available:
+        #Response code: 			$code
+        #Response description: 	$desc
+        #HTTP Headers:				$headers
+        #Response body				$body
 
+        if ( $code == 200 ) {
 
-      #Response variables available:
-      #Response code: 			$code
-      #Response description: 	$desc
-      #HTTP Headers:				$headers
-      #Response body				$body
+            #HTTP_Response succeeded - parse the data
+            my $json_data = JSON::decode_json $body;
 
-		if ( $code == 200 )
-			{
-			#HTTP_Response succeeded - parse the data
-			my $json_data = JSON::decode_json $body;
-			#print ref($json_data);
-			#print "size of hash:  " . keys( $json_data ) . ".\n";
+            #print ref($json_data);
+            #print "size of hash:  " . keys( $json_data ) . ".\n";
 
-			my $json_data_count= $json_data->{'list'}{'meta'}{'count'};
+            my $json_data_count = $json_data->{'list'}{'meta'}{'count'};
 
-			if ($json_data_count != 1 )
-			{
-			 $info{$stocks, "success"}  =0;
-			 $info{$stocks, "errormsg"}="Error retrieving quote for $stocks - no listing for this name found. Please check scrip name and the two letter extension (if any)";
+            if ( $json_data_count != 1 ) {
+                $info{ $stocks, "success" } = 0;
+                $info{ $stocks, "errormsg" } =
+                    "Error retrieving quote for $stocks - no listing for this name found. Please check scrip name and the two letter extension (if any)";
 
-			}
-		else
-			{
+            }
+            else {
 
+                my $json_resources = $json_data->{'list'}{'resources'}[0];
+                my $json_response_type =
+                    $json_resources->{'resource'}{classname};
 
-          my $json_resources = $json_data->{'list'}{'resources'}[0];
-          my $json_response_type =  $json_resources->{'resource'}{classname};
-          #TODO: Check if $json_response_type is "Quote" before attempting anything else
-          my $json_symbol 		=  $json_resources->{'resource'}{'fields'}{'symbol_requested'} || $json_resources->{'resource'}{'fields'}{'symbol'};
-          my $json_volume 		=  $json_resources->{'resource'}{'fields'}{'volume'};
-          my $json_timestamp 	=  $json_resources->{'resource'}{'fields'}{'ts'};
-          my $json_name 		=  $json_resources->{'resource'}{'fields'}{'name'};
-          my $json_type 		=  $json_resources->{'resource'}{'fields'}{'type'};
-          my $json_price 		=  $json_resources->{'resource'}{'fields'}{'price'};
+                # TODO: Check if $json_response_type is "Quote"
+                # before attempting anything else
+                my $json_symbol =
+                    $json_resources->{'resource'}{'fields'}{'symbol_requested'}
+                    || $json_resources->{'resource'}{'fields'}{'symbol'};
+                my $json_volume =
+                    $json_resources->{'resource'}{'fields'}{'volume'};
+                my $json_timestamp =
+                    $json_resources->{'resource'}{'fields'}{'ts'};
+                my $json_name = $json_resources->{'resource'}{'fields'}{'name'};
+                my $json_type = $json_resources->{'resource'}{'fields'}{'type'};
+                my $json_price =
+                    $json_resources->{'resource'}{'fields'}{'price'};
 
-          $my_p_change = +0.0;
+                $my_p_change = +0.0;
 
-          $info{$stocks, "success"}  =1;
-          $info{$stocks, "exchange"} ="Sourced from Yahoo Finance (as JSON)";
-          $info{$stocks, "method"}   ="yahoo_json";
-          $info{$stocks, "name"}     =$stocks.' ('.$json_name.')';
-          $info{$stocks, "last"}     =$json_price;
-          $info{$stocks, "close"}    =$json_price;
-          $info{$stocks, "p_change"} =$my_p_change;
-          $info{$stocks, "volume"}   =$json_volume;
-          $info{$stocks, "high"}     =$json_price;
-          $info{$stocks, "low"}      =$json_price;
-          $info{$stocks, "open"}     =$json_price;
+                $info{ $stocks, "success" } = 1;
+                $info{ $stocks, "exchange" } =
+                    "Sourced from Yahoo Finance (as JSON)";
+                $info{ $stocks, "method" } = "yahoo_json";
+                $info{ $stocks, "name" }   = $stocks . ' (' . $json_name . ')';
+                $info{ $stocks, "last" }   = $json_price;
+                $info{ $stocks, "close" }  = $json_price;
+                $info{ $stocks, "p_change" } = $my_p_change;
+                $info{ $stocks, "volume" }   = $json_volume;
+                $info{ $stocks, "high" }     = $json_price;
+                $info{ $stocks, "low" }      = $json_price;
+                $info{ $stocks, "open" }     = $json_price;
 
-          $my_date = localtime($json_timestamp)->strftime('%d.%m.%Y %T');
+                $my_date = localtime($json_timestamp)->strftime('%d.%m.%Y %T');
 
-          $quoter->store_date(\%info, $stocks, {eurodate => $my_date});
+                $quoter->store_date( \%info, $stocks,
+                                     { eurodate => $my_date } );
 
-          $info{$stocks,"currency"} = "INR";
+                $info{ $stocks, "currency" } = "INR";
 
+            }
         }
-        }
 
-		  #HTTP request fail
-        else
-        {
-        $info{$stocks, "success"}=0;
-        $info{$stocks, "errormsg"}="Error retrieving quote for $stocks. Attempt to fetch the URL $url resulted in HTTP response $code ($desc)";
+        #HTTP request fail
+        else {
+            $info{ $stocks, "success" } = 0;
+            $info{ $stocks, "errormsg" } =
+                "Error retrieving quote for $stocks. Attempt to fetch the URL $url resulted in HTTP response $code ($desc)";
         }
-
 
     }
 
-	return wantarray() ? %info : \%info;
-	return \%info;
+    return wantarray() ? %info : \%info;
+    return \%info;
 }
 
 1;
