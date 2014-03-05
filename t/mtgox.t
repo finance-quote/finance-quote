@@ -19,6 +19,10 @@ use strict;
 use Test::More;
 use Finance::Quote;
 
+if (not $ENV{ONLINE_TEST}) {
+    plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
+}
+
 my @methods = qw/mtgox bitcoin/;
 my @markets =
     qw/USD EUR JPY CAD GBP CHF RUB AUD SEK DKK HKD PLN CNY SGD THB NZD NOK/;
