@@ -1,6 +1,7 @@
 {{$NEXT}}
 
         * New module YahooJSON added (Abhijit Kshirsagar)
+        * mtgox.t should not create errors when ONLINE_TEST is not defined
 
 1.26      2014-03-03 22:24:58+01:00 Europe/Brussels
 
