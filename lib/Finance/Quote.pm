@@ -913,6 +913,7 @@ for a given stock, you can specify that using require_labels().
     errormsg     If success is false, this field may contain the reason why.
     method       The module (as could be passed to fetch) which found this
                  information.
+    type         The type of equity returned
 
 If all stock lookups fail (possibly because of a failed connection) then
 the empty list may be returned, or undef in a scalar context.

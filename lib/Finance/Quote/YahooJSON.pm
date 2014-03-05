@@ -46,7 +46,7 @@ sub methods {
 }
 {
     my @labels = qw/name last date isodate p_change open high low close
-        volume currency method exchange/;
+        volume currency method exchange type/;
 
     sub labels {
         return ( india => \@labels,
@@ -124,6 +124,7 @@ sub yahoo_json {
                     "Sourced from Yahoo Finance (as JSON)";
                 $info{ $stocks, "method" } = "yahoo_json";
                 $info{ $stocks, "name" }   = $stocks . ' (' . $json_name . ')';
+                $info{ $stocks, "type" }   = $json_type;
                 $info{ $stocks, "last" }   = $json_price;
                 $info{ $stocks, "close" }  = $json_price;
                 $info{ $stocks, "p_change" } = $my_p_change;
