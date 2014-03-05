@@ -99,7 +99,7 @@ foreach my $stocks (@stocks)
           my $json_resources = $json_data->{'list'}{'resources'}[0];
           my $json_response_type =  $json_resources->{'resource'}{classname};
           #TODO: Check if $json_response_type is "Quote" before attempting anything else
-          my $json_symbol 		=  $json_resources->{'resource'}{'fields'}{'symbol'};
+          my $json_symbol 		=  $json_resources->{'resource'}{'fields'}{'symbol_requested'} || $json_resources->{'resource'}{'fields'}{'symbol'};
           my $json_volume 		=  $json_resources->{'resource'}{'fields'}{'volume'};
           my $json_timestamp 	=  $json_resources->{'resource'}{'fields'}{'ts'};
           my $json_name 		=  $json_resources->{'resource'}{'fields'}{'name'};
