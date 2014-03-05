@@ -4,10 +4,13 @@
 
 use strict;
 use Test::More;
-use Data::Dumper;
 use Finance::Quote;
 
-BEGIN { plan tests => 49 }
+if (not $ENV{ONLINE_TEST}) {
+    plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
+}
+
+plan tests => 49;
 
 my $q = Finance::Quote->new();
 
