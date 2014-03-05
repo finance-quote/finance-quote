@@ -1,8 +1,10 @@
 #!/usr/bin/perl -w
 #    This module is based on the Finance::Quote::BSERO module
+#    It was first called BOMSE but has been renamed to yahoo_json
+#    since it gets a lot of quotes besides Indian
 #
-#    The code has been modified by Abhijit K to 
-#    retrieve stock information for Indian Stocks from Yahoo Finance
+#    The code has been modified by Abhijit K to
+#    retrieve stock information from Yahoo Finance through json calls
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -19,7 +21,7 @@
 #    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #    02111-1307, USA
 
-package Finance::Quote::BOMSE;
+package Finance::Quote::YahooJSON;
 
 require 5.005;
 
@@ -31,15 +33,15 @@ use HTTP::Request::Common;
 use HTML::TableExtract;
 use Time::Piece;
 
-$VERSION='0.1';
+# VERSION
 
 my $YIND_URL_HEAD	= 'http://finance.yahoo.com/webservice/v1/symbols/';
 my $YIND_URL_TAIL 	= '/quote?format=json';
 
 
-sub methods { return ( india => \&bomse,
-                       bomse => \&bomse,
-                       ind => \&bomse); }
+sub methods { return ( india => \&yahoo_json,
+                       yahoo_json => \&yahoo_json,
+                       ind => \&yahoo_json); }
 {
   my @labels = qw/name last date isodate p_change open high low close volume currency method exchange/;
 
@@ -48,7 +50,7 @@ sub methods { return ( india => \&bomse,
                        ind => \@labels); }
 }
 
-sub bomse {
+sub yahoo_json {
 
   my $quoter = shift;
   my @stocks = @_;
@@ -59,7 +61,7 @@ sub bomse {
 
 foreach my $stocks (@stocks)
     {
-           
+
       $url = $YIND_URL_HEAD.$stocks.$YIND_URL_TAIL;
       $reply = $ua->request(GET $url);
 
@@ -78,20 +80,20 @@ foreach my $stocks (@stocks)
 		if ( $code == 200 )
 			{
 			#HTTP_Response succeeded - parse the data
-			my $json_data = JSON::decode_json $body;				
+			my $json_data = JSON::decode_json $body;
 			#print ref($json_data);
 			#print "size of hash:  " . keys( $json_data ) . ".\n";
-			
-			my $json_data_count= $json_data->{'list'}{'meta'}{'count'};			 			
-			
+
+			my $json_data_count= $json_data->{'list'}{'meta'}{'count'};
+
 			if ($json_data_count != 1 )
 			{
 			 $info{$stocks, "success"}  =0;
 			 $info{$stocks, "errormsg"}="Error retrieving quote for $stocks - no listing for this name found. Please check scrip name and the two letter extension (if any)";
-			 
-			}					
+
+			}
 		else
-			{			
+			{
 
 
           my $json_resources = $json_data->{'list'}{'resources'}[0];
@@ -108,7 +110,7 @@ foreach my $stocks (@stocks)
 
           $info{$stocks, "success"}  =1;
           $info{$stocks, "exchange"} ="Sourced from Yahoo Finance (as JSON)";
-          $info{$stocks, "method"}   ="bomse";
+          $info{$stocks, "method"}   ="yahoo_json";
           $info{$stocks, "name"}     =$stocks.' ('.$json_name.')';
           $info{$stocks, "last"}     =$json_price;
           $info{$stocks, "close"}    =$json_price;
@@ -134,7 +136,7 @@ foreach my $stocks (@stocks)
         $info{$stocks, "errormsg"}="Error retrieving quote for $stocks. Attempt to fetch the URL $url resulted in HTTP response $code ($desc)";
         }
 
-	
+
     }
 
 	return wantarray() ? %info : \%info;
@@ -145,7 +147,7 @@ foreach my $stocks (@stocks)
 
 =head1 NAME
 
-Finance::Quote::BOMSE - Obtain quotes from Yahoo Finance for Indian stocks
+Finance::Quote::YahooJSON - Obtain quotes from Yahoo Finance through JSON call
 
 =head1 SYNOPSIS
 
@@ -153,26 +155,24 @@ Finance::Quote::BOMSE - Obtain quotes from Yahoo Finance for Indian stocks
 
     $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("bomse","SBIIN.NS");
+    %info = Finance::Quote->fetch("yahoo_json","SBIIN.NS");
 
 =head1 DESCRIPTION
 
 This module fetches information from Yahoo as JSON
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "BOMSE" in the argument
+also possible to load it explicity by placing "YahooJSON" in the argument
 list to Finance::Quote->new().
 
-This module provides the "bomse" fetch method.
+This module provides the "yahoo_json" fetch method.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::BOMSE :
+The following labels may be returned by Finance::Quote::YahooJSON :
 name, last, date, p_change, open, high, low, close,
 volume, currency, method, exchange.
 
 =head1 SEE ALSO
-
-BSERO
 
 =cut
