@@ -7,57 +7,56 @@ use Test::More;
 use Data::Dumper;
 use Finance::Quote;
 
-BEGIN {plan tests => 49};
+BEGIN { plan tests => 49 }
 
-my $q      = Finance::Quote->new();
+my $q = Finance::Quote->new();
 
 #List of stocks to fetch. Feel free to change this during testing
-my @stocks = ("SUZLON.BO", "RECLTD.NS", "AMZN", "SOLB.BR", "^DJI", "BEL20.BR");
+my @stocks =
+    ( "SUZLON.BO", "RECLTD.NS", "AMZN", "SOLB.BR", "^DJI", "BEL20.BR" );
 
+my %quotes = $q->fetch( "yahoo_json", @stocks );
+ok( %quotes, "Data returned" );
 
-my %quotes = $q->fetch("yahoo_json", @stocks);
-ok(%quotes, "Data returned");
+foreach my $stock (@stocks) {
 
+    my $name = $quotes{ $stock, "name" };
+    ok( $quotes{ $stock, "success" }, "Retrieved $stock" );
+    if ( !$quotes{ $stock, "success" } ) {
+        my $errmsg = $quotes{ $stock, "errormsg" };
+        warn "Error Message:\n$errmsg\n";
+    }
+    else {
+        ok( $name, "Name is defined : $name" );
+        my $exchange = $quotes{ $stock, "exchange" };
+        ok( $exchange eq 'Sourced from Yahoo Finance (as JSON)',
+            "correctly retrieved through YahooJSON" );
 
-foreach my $stock (@stocks)
-	{
+        my $fetch_method = $quotes{ $stock, "method" };
+        ok( $fetch_method eq 'yahoo_json', "fetch_method is yahoo_json" );
 
-	my $name = $quotes{$stock, "name"};
-	ok($quotes{$stock, "success"}, "Retrieved $stock");
-	if(!$quotes{$stock, "success"})
-		{
-		my $errmsg = $quotes{$stock, "errormsg"};
-		warn "Error Message:\n$errmsg\n";
-		}
-	else
-		{
-                ok($name,"Name is defined : $name");
-		my $exchange = $quotes{$stock, "exchange"};
-		ok($exchange eq 'Sourced from Yahoo Finance (as JSON)',"correctly retrieved through YahooJSON");
+        my $last = $quotes{ $stock, "last" };
+        ok( $last > 0, "Last $last > 0" );
 
-		my $fetch_method = $quotes{$stock, "method"};
-		ok($fetch_method eq 'yahoo_json',"fetch_method is yahoo_json");
+        my $volume = $quotes{ $stock, "volume" };
+        ok( $volume > 0, "Volume $volume > 0" ) if ( $stock ne "BEL20.BR" );
 
-		my $last = $quotes{$stock, "last"};
-		ok($last > 0, "Last $last > 0");
+        my $currency = $quotes{ $stock, "currency" };
+        ok( $currency eq 'INR', "Currency ($currency) is INR" );
 
-		my $volume = $quotes{$stock, "volume"};
-		ok($volume > 0, "Volume $volume > 0") if ($stock ne "BEL20.BR");
+        my $type = $quotes{ $stock, "type" };
+        ok( $type, "Symbol type $type" );
 
-		my $currency = $quotes{$stock, "currency"};
-		ok($currency eq 'INR', "Currency ($currency) is INR");
+        #TODO: Add a test to raise a warning if the quote is excessively old
+        my $isodate = $quotes{ $stock, "isodate" };
 
-                my $type = $quotes{$stock,"type"};
-                ok($type, "Symbol type $type" );
+        # print "ISOdate: $isodate ";
+        my $date = $quotes{ $stock, "date" };
 
-		#TODO: Add a test to raise a warning if the quote is excessively old
-		my $isodate = $quotes{$stock, "isodate"};
-		# print "ISOdate: $isodate ";
-		my $date = $quotes{$stock, "date"};
-		# print "Date: $date ";
-		}
-	}
+        # print "Date: $date ";
+    }
+}
 
 # Check that a bogus stock returns no-success.
-%quotes = $q->fetch("yahoo_json", "BOGUS");
-ok(! $quotes{"BOGUS","success"},"BOGUS failed");
+%quotes = $q->fetch( "yahoo_json", "BOGUS" );
+ok( !$quotes{ "BOGUS", "success" }, "BOGUS failed" );
