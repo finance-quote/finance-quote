@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# A test script to check for working of the BOMSE module.
+# A test script to check for working of the YahooJSON module.
 
 use strict;
 use Test::More;
