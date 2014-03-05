@@ -179,8 +179,9 @@ sub new {
             ManInvestments Morningstar MorningstarJP MStaruk MtGox NZX Platinum
             SEB SIXfunds SIXshares StockHouseCanada TSP TSX Tdefunds
             Tdwaterhouse Tiaacref TNetuk Troweprice Trustnet Union USFedBonds
-            VWD ZA Cominvest Finanzpartner Yahoo::Asia Yahoo::Australia
-            Yahoo::Brasil Yahoo::Europe Yahoo::NZ Yahoo::USA/; }
+            VWD ZA Cominvest Finanzpartner YahooJSON Yahoo::Asia
+            Yahoo::Australia Yahoo::Brasil Yahoo::Europe Yahoo::NZ
+            Yahoo::USA/; }
 
   $this->_load_modules(@modules,@reqmodules);
 
@@ -912,6 +913,7 @@ for a given stock, you can specify that using require_labels().
     errormsg     If success is false, this field may contain the reason why.
     method       The module (as could be passed to fetch) which found this
                  information.
+    type         The type of equity returned
 
 If all stock lookups fail (possibly because of a failed connection) then
 the empty list may be returned, or undef in a scalar context.
