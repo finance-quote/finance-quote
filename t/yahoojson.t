@@ -7,7 +7,7 @@ use Test::More;
 use Data::Dumper;
 use Finance::Quote;
 
-BEGIN {plan tests => 43};
+BEGIN {plan tests => 49};
 
 my $q      = Finance::Quote->new();
 
@@ -46,6 +46,9 @@ foreach my $stock (@stocks)
 
 		my $currency = $quotes{$stock, "currency"};
 		ok($currency eq 'INR', "Currency ($currency) is INR");
+
+                my $type = $quotes{$stock,"type"};
+                ok($type, "Symbol type $type" );
 
 		#TODO: Add a test to raise a warning if the quote is excessively old
 		my $isodate = $quotes{$stock, "isodate"};
