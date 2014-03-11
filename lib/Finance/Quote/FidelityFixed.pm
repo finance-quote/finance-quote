@@ -13,13 +13,12 @@ package Finance::Quote::FidelityFixed;
 require 5.004;
 
 use strict;
-use vars qw /$VERSION/ ;
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.01';
+# VERSION
 
 # e.g., http://fixedincome.fidelity.com/fi/FIIndividualBondsSearch?cusip=912810QT8
 # This URL should really be "https://fixedincome.fidelity.com/", but that host name
