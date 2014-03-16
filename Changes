@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+1.28      2014-03-16 12:05:19+01:00 Europe/Brussels
+
+        * Removed some unnecessary dependencies
+
 1.27      2014-03-05 15:04:22+01:00 Europe/Brussels
 
         * New module YahooJSON added (Abhijit Kshirsagar)
