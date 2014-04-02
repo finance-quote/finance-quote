@@ -20,108 +20,111 @@ use HTTP::Request::Common;
 use HTML::TableExtract;
 
 my $EQUINOX_MAINURL = ("http://www.equinox.co.za/");
-my $EQUINOX_URL = ($EQUINOX_MAINURL."unittrusts/funds/funddetails.asp?fundid=");
+my $EQUINOX_URL =
+    ( $EQUINOX_MAINURL . "unittrusts/funds/funddetails.asp?fundid=" );
 
 sub methods {
-   return (asegt => \&asegt);
+    return ( asegt => \&asegt );
 }
-
 
 sub labels {
-   my @labels = qw/method source name symbol currency last date isodate high low p_change/;
-   return (EQUINOX => \@labels);
+    my @labels =
+        qw/method source name symbol currency last date isodate high low p_change/;
+    return ( EQUINOX => \@labels );
 }
-
 
 sub asegt {
 
-   my $quoter = shift;
-   my @symbols = @_;
-   my %info;
-   my ($te, $ts, $row);
-   my @rows;
+    my $quoter  = shift;
+    my @symbols = @_;
+    my %info;
+    my ( $te, $ts, $row );
+    my @rows;
 
-   return unless @symbols;
+    return unless @symbols;
 
-   my $ua = $quoter->user_agent;
+    my $ua = $quoter->user_agent;
 
-   foreach my $symbol (@symbols) {
-       my $url = $EQUINOX_URL.$symbol;
-       #print "[debug]: ", $url, "\n";
-       my $response = $ua->request(GET $url);
-       #print "[debug]: ", $response->content, "\n";
+    foreach my $symbol (@symbols) {
+        my $url = $EQUINOX_URL . $symbol;
 
-       if (!$response->is_success) {
-           $info{$symbol, "success"} = 0;
-           $info{$symbol, "errormsg"} = "Error contacting URL";
-           next;
-       }
+        #print "[debug]: ", $url, "\n";
+        my $response = $ua->request( GET $url);
 
-             $te = new HTML::TableExtract();
+        #print "[debug]: ", $response->content, "\n";
 
-       $te->parse($response->content);
-       #print "[debug]: (parsed HTML)",$te, "\n";
+        if ( !$response->is_success ) {
+            $info{ $symbol, "success" }  = 0;
+            $info{ $symbol, "errormsg" } = "Error contacting URL";
+            next;
+        }
 
-	unless ($te->first_table_found()) {
-	  #print STDERR  "no tables on this page\n";
-	  $info{$symbol, "success"}  = 0;
-	  $info{$symbol, "errormsg"} = "Parse error";
-	  next;
-	}
+        $te = new HTML::TableExtract();
 
+        $te->parse( $response->content );
 
-# GENERAL FIELDS
-       $info{$symbol, "success"} = 1;
-       $info{$symbol, "method"} = "Equinox";
-       $info{$symbol, "symbol"} = $symbol;
-       $info{$symbol, "currency"} = "ZAR";
-       $info{$symbol, "source"} = $EQUINOX_MAINURL;
+        #print "[debug]: (parsed HTML)",$te, "\n";
 
-# NAME
-       $ts = $te->table_state(0,0);
-       if($ts) {
-         (@rows) = $ts->rows;
-	$info{$symbol, "name"} = $rows[0][0];
-$info{$symbol, "name"} =~ s/Funds//;
-$info{$symbol, "name"} =~ s/Performances//;
-$info{$symbol, "name"} =~ s/Companies//;
-$info{$symbol, "name"} =~ s/Summary//;
-$info{$symbol, "name"} =~ s/Company//;
-$info{$symbol, "name"} =~ s/Management//;
-$info{$symbol, "name"} =~ s/A//;
-$info{$symbol, "name"} =~ s/Z//;
-$info{$symbol, "name"} =~ s/Risk//;
-$info{$symbol, "name"} =~ s/Funds//;
-$info{$symbol, "name"} =~ s/Sector//;
-$info{$symbol, "name"} =~ s/Funds//;
-$info{$symbol, "name"} =~ s/Domestic(.*)//s;
-$info{$symbol, "name"} =~ s/Foreign(.*)//s;
-$info{$symbol, "name"} =~ s/[^A-Za-z ()]//sg;
-$info{$symbol, "name"} =~ s/  //sg;
-$info{$symbol, "name"} =~ s/  //sg;
-$info{$symbol, "name"} =~ s/  //sg;
-$info{$symbol, "name"} =~ s/  //sg;
+        unless ( $te->first_table_found() ) {
 
-       };
+            #print STDERR  "no tables on this page\n";
+            $info{ $symbol, "success" }  = 0;
+            $info{ $symbol, "errormsg" } = "Parse error";
+            next;
+        }
 
-# LAST
-       $ts = $te->table_state(1,0);
-       if($ts) {
-         (@rows) = $ts->rows;
-	$info{$symbol, "last"} = $rows[0][1];
-           $info{$symbol, "last"} =~ tr/R //d;
+        # GENERAL FIELDS
+        $info{ $symbol, "success" }  = 1;
+        $info{ $symbol, "method" }   = "Equinox";
+        $info{ $symbol, "symbol" }   = $symbol;
+        $info{ $symbol, "currency" } = "ZAR";
+        $info{ $symbol, "source" }   = $EQUINOX_MAINURL;
 
-        };
+        # NAME
+        $ts = $te->table_state( 0, 0 );
+        if ($ts) {
+            (@rows) = $ts->rows;
+            $info{ $symbol, "name" } = $rows[0][0];
+            $info{ $symbol, "name" } =~ s/Funds//;
+            $info{ $symbol, "name" } =~ s/Performances//;
+            $info{ $symbol, "name" } =~ s/Companies//;
+            $info{ $symbol, "name" } =~ s/Summary//;
+            $info{ $symbol, "name" } =~ s/Company//;
+            $info{ $symbol, "name" } =~ s/Management//;
+            $info{ $symbol, "name" } =~ s/A//;
+            $info{ $symbol, "name" } =~ s/Z//;
+            $info{ $symbol, "name" } =~ s/Risk//;
+            $info{ $symbol, "name" } =~ s/Funds//;
+            $info{ $symbol, "name" } =~ s/Sector//;
+            $info{ $symbol, "name" } =~ s/Funds//;
+            $info{ $symbol, "name" } =~ s/Domestic(.*)//s;
+            $info{ $symbol, "name" } =~ s/Foreign(.*)//s;
+            $info{ $symbol, "name" } =~ s/[^A-Za-z ()]//sg;
+            $info{ $symbol, "name" } =~ s/  //sg;
+            $info{ $symbol, "name" } =~ s/  //sg;
+            $info{ $symbol, "name" } =~ s/  //sg;
+            $info{ $symbol, "name" } =~ s/  //sg;
 
-# DATE
-       if($ts) {
-         (@rows) = $ts->rows;
+        }
 
-	  $quoter->store_date(\%info, $symbol, {eurodate => $rows[0][0]});
-       };
-   }
+        # LAST
+        $ts = $te->table_state( 1, 0 );
+        if ($ts) {
+            (@rows) = $ts->rows;
+            $info{ $symbol, "last" } = $rows[0][1];
+            $info{ $symbol, "last" } =~ tr/R //d;
 
-   return wantarray() ? %info : \%info;
+        }
+
+        # DATE
+        if ($ts) {
+            (@rows) = $ts->rows;
+
+            $quoter->store_date( \%info, $symbol, { eurodate => $rows[0][0] } );
+        }
+    }
+
+    return wantarray() ? %info : \%info;
 }
 
 1;
