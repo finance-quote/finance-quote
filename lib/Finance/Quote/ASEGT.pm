@@ -10,7 +10,7 @@
 # Rolf Endres
 # 2009.10.09
 
-package Finance::Quote::ASEGR;
+package Finance::Quote::ASEGT;
 require 5.004;
 
 use strict;
@@ -23,7 +23,7 @@ my $EQUINOX_MAINURL = ("http://www.equinox.co.za/");
 my $EQUINOX_URL = ($EQUINOX_MAINURL."unittrusts/funds/funddetails.asp?fundid=");
 
 sub methods {
-   return (asegr => \&asegr);
+   return (asegt => \&asegt);
 }
 
 
@@ -33,7 +33,7 @@ sub labels {
 }
 
 
-sub asegr {
+sub asegt {
 
    my $quoter = shift;
    my @symbols = @_;
