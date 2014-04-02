@@ -1,10 +1,5 @@
 #!/usr/bin/perl -w
-#
-# ASEGT.pm
-#
 
-
-# Version 0.1.1 -
 # This file is based purely on Stephen Langenhoven's original ZA.pm file.
 # In order to use this file, rather than using a stock code/number, the user
 # must look for the unit trust ID number in the path of the Equinox site that
@@ -148,7 +143,7 @@ $info{$symbol, "name"} =~ s/  //sg;
 
 =head1 NAME
 
-Finance::Quote::asegr - Obtain South African unit trust prices from
+Finance::Quote::asegt - Obtain South African unit trust prices from
 www.equinox.co.za
 
 =head1 SYNOPSIS
