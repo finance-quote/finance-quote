@@ -10,7 +10,7 @@
 # Rolf Endres
 # 2009.10.09
 
-package Finance::Quote::ASEGT;
+package Finance::Quote::za_unittrusts;
 require 5.004;
 
 use strict;
@@ -24,7 +24,7 @@ my $EQUINOX_URL =
     ( $EQUINOX_MAINURL . "unittrusts/funds/funddetails.asp?fundid=" );
 
 sub methods {
-    return ( asegt => \&asegt );
+    return ( za_unittrusts => \&za_unittrusts );
 }
 
 sub labels {
@@ -33,7 +33,7 @@ sub labels {
     return ( EQUINOX => \@labels );
 }
 
-sub asegt {
+sub za_unittrusts {
 
     my $quoter  = shift;
     my @symbols = @_;
@@ -131,7 +131,7 @@ sub asegt {
 
 =head1 NAME
 
-Finance::Quote::asegt - Obtain South African unit trust prices from
+Finance::Quote::za_unittrusts - Obtain South African unit trust prices from
 www.equinox.co.za
 
 =head1 SYNOPSIS

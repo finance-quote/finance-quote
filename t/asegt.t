@@ -9,13 +9,13 @@ if (not $ENV{ONLINE_TEST}) {
 
 plan tests => 10;
 
-# Test ASEGT functions.
+# Test za_unittrusts functions.
 
 my $q      = Finance::Quote->new();
 my $year   = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my %quotes = $q->asegt("15740");
+my %quotes = $q->za_unittrusts("15740");
 ok(%quotes);
 
 # Check the last values are defined.  These are the most used and most
@@ -26,7 +26,7 @@ ok(substr($quotes{"15740","date"},6,4) == $year ||
    substr($quotes{"15740","date"},6,4) == $lastyear);
 
 # Exercise the fetch function a little.
-%quotes = $q->fetch("asegt","15740");
+%quotes = $q->fetch("za_unittrusts","15740");
 ok(%quotes);
 ok($quotes{"15740","last"} > 0);
 ok($quotes{"15740","success"} > 0);
@@ -39,5 +39,5 @@ $quotes{"15740","p_change"} ||= "";	# Avoid warning if undefined.
 ok($quotes{"15740","p_change"} !~ /%/);
 
 # Check that looking up a bogus stock returns failure:
-%quotes = $q->asegt("BOGUS");
+%quotes = $q->za_unittrusts("BOGUS");
 ok(! $quotes{"BOGUS","success"});
