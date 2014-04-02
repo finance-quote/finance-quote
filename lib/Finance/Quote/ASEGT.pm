@@ -10,17 +10,6 @@
 # Rolf Endres
 # 2009.10.09
 
-#
-# Version 0.1 - Download of South African (ZA) stocks from sharenet
-# This version based largely upon FinanceCanada.pm module [any errors
-# are my own of course ;-) ]
-#
-# Stephen Langenhoven
-# 2005.07.19
-
-
-
-
 package Finance::Quote::ASEGR;
 require 5.004;
 
@@ -93,10 +82,6 @@ sub asegr {
        if($ts) {
          (@rows) = $ts->rows;
 	$info{$symbol, "name"} = $rows[0][0];
-#             $info{$symbol, "name"} = substr($rows[0][1], 25, 85);
-#	$info{$symbol, "name"} =~ s/(.*)\Code/$1/s;
-#
-#	$info{$symbol, "name"} =~ s/(.*)\Code/$1/s;
 $info{$symbol, "name"} =~ s/Funds//;
 $info{$symbol, "name"} =~ s/Performances//;
 $info{$symbol, "name"} =~ s/Companies//;
