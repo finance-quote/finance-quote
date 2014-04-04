@@ -36,10 +36,10 @@ use Carp;
 use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
 use Encode;
-use Data::Dumper;
+# use Data::Dumper;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
-            $VERSION $TIMEOUT %MODULES %METHODS $AUTOLOAD
+            $TIMEOUT %MODULES %METHODS $AUTOLOAD
             $YAHOO_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
 
 # Call on the Yahoo API:
@@ -57,7 +57,7 @@ $YAHOO_CURRENCY_URL = "http://finance.yahoo.com/d/quotes.csv?e=.csv&f=l1&s=";
                 currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-$VERSION = '1.18';
+# VERSION
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -173,14 +173,15 @@ sub new {
   if (!@reqmodules or $reqmodules[0] eq "-defaults") {
     shift(@reqmodules) if (@reqmodules);
     # Default modules
-    @modules = qw/AEX AIAHK ASEGR ASX Bitstamp BMONesbittBurns BSERO Bourso Cdnfundlibrary
-            Currencies Deka DWS FTPortfolios Fidelity FinanceCanada Fool HU
-            GoldMoney HEX
-            IndiaMutual LeRevenu ManInvestments Morningstar MorningstarJP MtGox NZX Platinum SEB
-            SIXfunds SIXshares StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref Troweprice
-            Trustnet Union USFedBonds VWD ZA Cominvest Finanzpartner
-            Yahoo::Asia Yahoo::Australia Yahoo::Brasil Yahoo::Europe Yahoo::NZ
-            Yahoo::USA/; }
+    @modules = qw/AEX AIAHK ASEGR ASX Bitstamp BMONesbittBurns BSERO Bourso
+            Cdnfundlibrary Citywire Currencies Deka DWS FTPortfolios Fidelity
+            FinanceCanada Fool FTfunds HU GoldMoney HEX IndiaMutual LeRevenu
+            ManInvestments Morningstar MorningstarJP MStaruk MtGox NZX Platinum
+            SEB SIXfunds SIXshares StockHouseCanada TSP TSX Tdefunds
+            Tdwaterhouse Tiaacref TNetuk Troweprice Trustnet Union USFedBonds
+            VWD ZA Cominvest Finanzpartner YahooJSON Yahoo::Asia
+            Yahoo::Australia Yahoo::Brasil Yahoo::Europe Yahoo::NZ
+            Yahoo::USA za_unittrusts/; }
 
   $this->_load_modules(@modules,@reqmodules);
 
@@ -890,8 +891,8 @@ for a given stock, you can specify that using require_labels().
 
     name         Company or Mutual Fund Name
     last         Last Price
-    high   Highest trade today
-    low    Lowest trade today
+    high         Highest trade today
+    low          Lowest trade today
     date         Last Trade Date  (MM/DD/YY format)
     time         Last Trade Time
     net          Net Change
@@ -910,17 +911,70 @@ for a given stock, you can specify that using require_labels().
     div          Dividend per Share
     div_yield    Dividend Yield
     cap          Market Capitalization
-    ex_div   Ex-Dividend Date.
+    ex_div       Ex-Dividend Date.
     nav          Net Asset Value
     yield        Yield (usually 30 day avg)
-    exchange   The exchange the information was obtained from.
-    success  Did the stock successfully return information? (true/false)
-    errormsg   If success is false, this field may contain the reason why.
-    method   The module (as could be passed to fetch) which found
-     this information.
+    exchange     The exchange the information was obtained from.
+    success      Did the stock successfully return information? (true/false)
+    errormsg     If success is false, this field may contain the reason why.
+    method       The module (as could be passed to fetch) which found this
+                 information.
+    type         The type of equity returned
 
 If all stock lookups fail (possibly because of a failed connection) then
 the empty list may be returned, or undef in a scalar context.
+
+=head1 INSTALLATION
+
+To install this module, run the following commands:
+
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+For more detailed instructions, please see the INSTALL file.
+
+=head1 SUPPORT AND DOCUMENTATION
+
+After installing, you can find documentation for this module with the
+perldoc command.
+
+    perldoc Finance::Quote
+
+You can also look for information at:
+
+=over
+
+=item RT, CPAN's request tracker
+
+http://rt.cpan.org/NoAuth/Bugs.html?Dist=Finance-Quote
+
+=item AnnoCPAN, Annotated CPAN documentation
+
+http://annocpan.org/dist/Finance-Quote
+
+=item CPAN Ratings
+
+http://cpanratings.perl.org/d/Finance-Quote
+
+=item Search CPAN
+
+http://search.cpan.org/dist/Finance-Quote
+
+=item The Finance::Quote home page
+
+http://finance-quote.sourceforge.net/
+
+=item The Finance::YahooQuote home page
+
+http://www.padz.net/~djpadz/YahooQuote/
+
+=item The GnuCash home page
+
+http://www.gnucash.org/
+
+=back
 
 =head1 AVAILABLE METHODS
 

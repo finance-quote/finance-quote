@@ -39,9 +39,9 @@ use HTTP::Request::Common;
 use LWP::UserAgent;
 use HTML::TableExtract;
 
-use vars qw/$HEX_URL $VERSION/;
+use vars qw/$HEX_URL /;
 
-$VERSION = '1.18';
+# VERSION
 
 $HEX_URL = 'http://omxgroup.is-teledata.com/html/securitypricelistequities.html?language=fi';
 

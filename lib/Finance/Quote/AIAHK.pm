@@ -28,13 +28,13 @@ use strict;
 
 package Finance::Quote::AIAHK;
 
-use vars qw($VERSION $AIAHK_URL);
+use vars qw( $AIAHK_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.18';
+# VERSION
 $AIAHK_URL = 'http://www.aia.com.hk/daily/fund_mst_rightb.asp?cat=BR_AC';
 
 

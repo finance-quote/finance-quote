@@ -23,130 +23,151 @@ use LWP::UserAgent;
 use POSIX;
 use URI::Escape;
 
-my @markets = qw/USD EUR JPY CAD GBP CHF RUB AUD SEK DKK HKD PLN CNY SGD THB NZD NOK/;
-my @labels = qw/ask bid currency date exchange last method source success symbol time timezone/;
+require 5.010;
+
+# VERSION
+
+my @markets =
+    qw/USD EUR JPY CAD GBP CHF RUB AUD SEK DKK HKD PLN CNY SGD THB NZD NOK/;
+my @labels =
+    qw/ask bid currency date exchange last method source success symbol time
+       timezone/;
 
 sub methods {
-	my %result;
-	foreach my $market (@markets) {
-		my $lmarket = lc $market;
-		$result{"mtgox_$lmarket"} = sub { unshift (@_, $market); goto &mtgox; };
-		$result{"bitcoin_$lmarket"} = sub { unshift (@_, $market); goto &mtgox; };
-	}
-	return %result;
+    my %result;
+    foreach my $market (@markets) {
+        my $lmarket = lc $market;
+        $result{"mtgox_$lmarket"} =
+            sub { unshift( @_, $market ); goto &mtgox; };
+        $result{"bitcoin_$lmarket"} =
+            sub { unshift( @_, $market ); goto &mtgox; };
+    }
+    return %result;
 }
 
 sub labels {
-	my %result;
-	foreach my $market (@markets) {
-		my $lmarket = lc $market;
-		$result{"mtgox_$lmarket"} = \@labels;
-		$result{"bitcoin_$lmarket"} = \@labels;
-	}
-	return %result;
+    my %result;
+    foreach my $market (@markets) {
+        my $lmarket = lc $market;
+        $result{"mtgox_$lmarket"}   = \@labels;
+        $result{"bitcoin_$lmarket"} = \@labels;
+    }
+    return %result;
 }
 
 sub mtgox {
-	@_ = (@_);
-	my $market = shift // die "Missing market";
-	my $quoter = shift // die "Missing quoter";
-	my @symbols = (@_);
+    @_ = (@_);
+    my $market = shift // die "Missing market";
+    my $quoter = shift // die "Missing quoter";
+    my @symbols = (@_);
 
-	my %info;
-	foreach my $symbol (@symbols) {
-		if (exists $info{$symbol,"symbol"}) {
-			next;
-		}
+    my %info;
+    foreach my $symbol (@symbols) {
+        if ( exists $info{ $symbol, "symbol" } ) {
+            next;
+        }
 
-		$info{$symbol,"success"} = 0;
-		$info{$symbol,"source"} = "MtGox";
-		$info{$symbol,"symbol"} = $symbol;
+        $info{ $symbol, "success" } = 0;
+        $info{ $symbol, "source" }  = "MtGox";
+        $info{ $symbol, "symbol" }  = $symbol;
 
-		if (length $symbol > 10) {
-			$info{$symbol, "errormsg"} = "Symbol too long";
-			next;
-		}
+        if ( length $symbol > 10 ) {
+            $info{ $symbol, "errormsg" } = "Symbol too long";
+            next;
+        }
 
-		my $r = $quoter->user_agent->request(GET sprintf "https://data.mtgox.com/api/2/%s${market}/money/ticker_fast", uri_escape $symbol);
-		if (!$r->is_success) {
-			$info{$symbol, "errormsg"} = "HTTP failure";
-			next;
-		} elsif ($r->headers->content_type ne 'application/json') {
-			$info{$symbol, 'errormsg'} = 'API failure: unparseable data';
-		}
-		my $ticker;
-		eval {
-			$ticker = decode_json ($r->decoded_content);
-		}; if ($@) {
-			$info{$symbol, 'errormsg'} = "API failure: parse error: $@";
-			next;
-		}
+        my $r =
+            $quoter->user_agent->request(
+               GET sprintf
+                   "https://data.mtgox.com/api/2/%s${market}/money/ticker_fast",
+               uri_escape $symbol);
+        if ( !$r->is_success ) {
+            $info{ $symbol, "errormsg" } = "HTTP failure";
+            next;
+        }
+        elsif ( $r->headers->content_type ne 'application/json' ) {
+            $info{ $symbol, 'errormsg' } = 'API failure: unparseable data';
+        }
+        my $ticker;
+        eval { $ticker = decode_json( $r->decoded_content ); };
+        if ($@) {
+            $info{ $symbol, 'errormsg' } = "API failure: parse error: $@";
+            next;
+        }
 
-		if ($ticker->{"result"} ne "success") {
-			$info{$symbol, "errormsg"} = "API failure";
-			next;
-		}
+        if ( $ticker->{"result"} ne "success" ) {
+            $info{ $symbol, "errormsg" } = "API failure";
+            next;
+        }
 
-		# last_all gives us the last trade in any currency, converted
-		# to the local currency
-		if ($ticker->{"data"}{"last_all"}{"currency"} eq $market) {
-			$info{$symbol, "last"} = $ticker->{"data"}{"last_all"}{"value"};
-		}
-		if ($ticker->{"data"}{"buy"}{"currency"} eq $market) {
-			$info{$symbol, "bid"} = $ticker->{"data"}{"buy"}{"value"};
-		}
-		if ($ticker->{"data"}{"sell"}{"currency"} eq $market) {
-			$info{$symbol, "ask"} = $ticker->{"data"}{"sell"}{"value"};
-		}
+        # last_all gives us the last trade in any currency, converted
+        # to the local currency
+        if ( $ticker->{"data"}{"last_all"}{"currency"} eq $market ) {
+            $info{ $symbol, "last" } = $ticker->{"data"}{"last_all"}{"value"};
+        }
+        if ( $ticker->{"data"}{"buy"}{"currency"} eq $market ) {
+            $info{ $symbol, "bid" } = $ticker->{"data"}{"buy"}{"value"};
+        }
+        if ( $ticker->{"data"}{"sell"}{"currency"} eq $market ) {
+            $info{ $symbol, "ask" } = $ticker->{"data"}{"sell"}{"value"};
+        }
 
-		# The ticker data not supply a timestamp. Fetch the latest
-		# trade data and use the date from that instead. To avoid a
-		# time-consuming transfer, only request trades from the last
-		# minute, falling back to requesting more and more, up to 24
-		# hours' worth.
-		foreach my $cutoff (60, 60*60, 6*60*60, 24*60*60) {
-			my $url = sprintf("https://data.mtgox.com/api/2/%s${market}/money/trades/fetch?since=%s", uri_escape($symbol), 1000_000 * (time - $cutoff));
-			my $r2 = $quoter->user_agent->request(GET $url);
-			if (!$r2->is_success || $r2->headers->content_type ne 'application/json') {
-				last;
-			}
+        # The ticker data not supply a timestamp. Fetch the latest
+        # trade data and use the date from that instead. To avoid a
+        # time-consuming transfer, only request trades from the last
+        # minute, falling back to requesting more and more, up to 24
+        # hours' worth.
+        foreach my $cutoff ( 60, 60 * 60, 6 * 60 * 60, 24 * 60 * 60 ) {
+            my $url = sprintf(
+                "https://data.mtgox.com/api/2/%s${market}/money/trades/fetch?since=%s",
+                uri_escape($symbol), 1000_000 * ( time - $cutoff ) );
+            my $r2 = $quoter->user_agent->request( GET $url);
+            if (   !$r2->is_success
+                 || $r2->headers->content_type ne 'application/json' )
+            {
+                last;
+            }
 
-			my $trades;
-			eval {
-				$trades = decode_json ($r2->decoded_content);
-			}; last if $@;
+            my $trades;
+            eval { $trades = decode_json( $r2->decoded_content ); };
+            last if $@;
 
-			if ($trades->{"result"} ne "success") {
-				last;
-			}
+            if ( $trades->{"result"} ne "success" ) {
+                last;
+            }
 
-			# If there are no trades, try again. This is the only
-			# time we use next, as opposed to last.
-			my $last = $trades->{"data"}[-1];
-			if (!$last) {
-				next;
-			}
+            # If there are no trades, try again. This is the only
+            # time we use next, as opposed to last.
+            my $last = $trades->{"data"}[-1];
+            if ( !$last ) {
+                next;
+            }
 
-			if ($last->{"item"} ne $symbol || $last->{"price_currency"} ne $market) {
-				last;
-			}
+            if (    $last->{"item"} ne $symbol
+                 || $last->{"price_currency"} ne $market )
+            {
+                last;
+            }
 
-			$info{$symbol, "last"} = $last->{"price"};
-			my @ts = gmtime $last->{"date"};
-			$info{$symbol, "date"} = strftime("%m/%d/%y", @ts);
-			$info{$symbol, "time"} = strftime("%H:%M:%S", @ts);
-			$info{$symbol, "timezone"} = "UTC";
-			last;
-		}
+            $info{ $symbol, "last" } = $last->{"price"};
+            my @ts = gmtime $last->{"date"};
+            $info{ $symbol, "date" } = strftime( "%m/%d/%y", @ts );
+            $info{ $symbol, "time" } = strftime( "%H:%M:%S", @ts );
+            $info{ $symbol, "timezone" } = "UTC";
+            last;
+        }
 
-		if ($info{$symbol, "last"} || $info{$symbol, "buy"} || $info{$symbol, "sell"}) {
-			$info{$symbol, "success"} = 1;
-			$info{$symbol, "currency"} = $market;
-			$info{$symbol, "exchange"} = "Mt.Gox";
-			$info{$symbol, "method"} = sprintf("mtgox_%s", lc $market);
-		}
-	}
-	return wantarray() ? %info : \%info;
+        if (    $info{ $symbol, "last" }
+             || $info{ $symbol, "buy" }
+             || $info{ $symbol, "sell" } )
+        {
+            $info{ $symbol, "success" }  = 1;
+            $info{ $symbol, "currency" } = $market;
+            $info{ $symbol, "exchange" } = "Mt.Gox";
+            $info{ $symbol, "method" }   = sprintf( "mtgox_%s", lc $market );
+        }
+    }
+    return wantarray() ? %info : \%info;
 }
 
 1;
@@ -250,4 +271,3 @@ the price.
 =item timezone: always UTC
 
 =back
-

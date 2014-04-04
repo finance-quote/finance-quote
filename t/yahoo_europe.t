@@ -7,7 +7,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 29;
+plan tests => 34;
 
 # Test Yahoo_europe functions.
 
@@ -38,11 +38,11 @@ ok(! $quotes{"BOGUS","success"});
 
 # London stocks can be returned in a variety of currencies
 
-my %londonquotes = $q->fetch("yahoo_europe","ATG.L");
-ok($londonquotes{"ATG.L","success"});
-ok($londonquotes{"ATG.L","currency"} eq "GBP");
-ok(($londonquotes{"ATG.L","currency"} eq "GBP") &&
-   !defined($londonquotes{"ATG.L","currency_set_by_fq"}));
+my %londonquotes = $q->fetch("yahoo_europe","RDSB.L");
+ok($londonquotes{"RDSB.L","success"});
+ok($londonquotes{"RDSB.L","currency"} eq "GBP");
+ok(($londonquotes{"RDSB.L","currency"} eq "GBP") &&
+   !defined($londonquotes{"RDSB.L","currency_set_by_fq"}));
 
 %londonquotes = $q->fetch("yahoo_europe","CCR.L");
 ok($londonquotes{"CCR.L","success"});
@@ -66,8 +66,18 @@ ok($xetraquotes{"DBK.DE","currency"} eq "EUR");
 ok(($xetraquotes{"DBK.DE","currency"} eq "EUR") &&
    !defined($xetraquotes{"DBK.DE","currency_set_by_fq"}));
 
+# a stock from the Belgium Euronext market.
+
+my %belgiumquotes = $q->fetch("yahoo_europe","SOLB.BR");
+ok($belgiumquotes{"SOLB.BR","success"});
+ok($belgiumquotes{"SOLB.BR","currency"} eq "EUR");
+ok(($belgiumquotes{"SOLB.BR","currency"} eq "EUR") &&
+   !defined($belgiumquotes{"SOLB.BR","currency_set_by_fq"}));
+ok($belgiumquotes{"SOLB.BR","last"}>=50); # this expected trades around 60-200 EUR
+ok($belgiumquotes{"SOLB.BR","last"}<=200);
+
 # Check if close is between year_range for LTI.L (expressed in GBp) for checking if conversion is correct
-my %ltiquotes = $q->fetch("yahoo","LTI.L");
+my %ltiquotes = $q->fetch("yahoo_europe","LTI.L");
 ok($ltiquotes{"LTI.L","success"});
 my ($min,$max) = (50,50000); # change this if quotes are not supposed to be in this range anymore
 if ($ltiquotes{"LTI.L","year_range"}=~ m/([\d\.]+)\s*-\s*([\d\.]+)/) {

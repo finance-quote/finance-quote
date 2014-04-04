@@ -3,18 +3,18 @@
 # Version 0.1 preliminary version using Cdnfundlibrary.pm v0.4 as an example
 
 package Finance::Quote::IndiaMutual;
-require 5.004;
+require 5.010;
 
 use strict;
 
-use vars qw($VERSION $AMFI_URL $AMFI_NAV_LIST $AMFI_MAIN_URL);
+use vars qw( $AMFI_URL $AMFI_NAV_LIST $AMFI_MAIN_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTTP::Status;
 use HTML::TableExtract;
 
-$VERSION = '1.18';
+# VERSION
 
 # URLs of where to obtain information.
 

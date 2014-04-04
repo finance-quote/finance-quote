@@ -15,13 +15,13 @@ require 5.004;
 
 use strict;
 
-use vars qw($VERSION $FUNDLIB_URL $FUNDLIB_MAIN_URL);
+use vars qw( $FUNDLIB_URL $FUNDLIB_MAIN_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.18';
+# VERSION
 
 # URLs of where to obtain information.
 

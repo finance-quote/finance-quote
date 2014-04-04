@@ -37,14 +37,14 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use Exporter;
 
-use vars qw/$VERSION @FIELDS @FIELD_ENCODING $MAX_REQUEST_SIZE @ISA
+use vars qw/ @FIELDS @FIELD_ENCODING $MAX_REQUEST_SIZE @ISA
             @EXPORT @EXPORT_OK/;
 
 @ISA = qw/Exporter/;
 @EXPORT = qw//;
 @EXPORT_OK = qw/yahoo_request base_yahoo_labels/;
 
-$VERSION = '1.18';
+# VERSION
 
 # This is the maximum number of stocks we'll batch into one operation.
 # If this gets too big (>50 or thereabouts) things will break because
@@ -157,8 +157,6 @@ sub yahoo_request {
 	# The suffix is used to specify particular markets.
 	my $suffix = shift || "";
 
-	my $uses_semicolon = shift || 0;
-
 	my %info;
 	my $ua = $quoter->user_agent;
 
@@ -175,6 +173,7 @@ sub yahoo_request {
 
 		my $url = $base_url . join("$suffix+",@symbols);
 		chop $url;	# Chop off the final +
+                print "DEBUG - GET: $url\n" if $ENV{"FQ_DEBUG"};
 		my $response = $ua->request(GET $url);
 		return unless $response->is_success;
 
@@ -183,11 +182,7 @@ sub yahoo_request {
 
 		foreach (split('\015?\012',$response->content)) {
 			my @q;
-			if ($uses_semicolon) {
-				@q = $quoter->parse_csv_semicolon($_);
-			} else {
-				@q = $quoter->parse_csv($_);
-			}
+                        @q = $quoter->parse_csv($_);
 			my $symbol = $q[0];
 			my ($exchange) = $symbol =~ m/\.([A-Z]+)/;
 

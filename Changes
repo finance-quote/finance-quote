@@ -1,4 +1,58 @@
-XXXX-XX-XX  Erik Colson <eco@ecocode.net>
+{{$NEXT}}
+        * New module za_unittrusts. kudos to Rolf Endres.
+
+1.28      2014-03-16 12:05:19+01:00 Europe/Brussels
+
+        * Removed some unnecessary dependencies
+
+1.27      2014-03-05 15:04:22+01:00 Europe/Brussels
+
+        * New module YahooJSON added (Abhijit Kshirsagar)
+        * mtgox.t should not create errors when ONLINE_TEST is not defined
+
+1.26      2014-03-03 22:24:58+01:00 Europe/Brussels
+
+        * VWD adapted to current website (skaringa)
+        * Boursorama module mostly fixed (Arnaud Gardelein)
+
+1.25      2014-03-02 23:18:23+01:00 Europe/Brussels
+
+        * AEX.pm : Some checking added. Not working yet
+        * Quote.pm : readded sub parse_csv_semicolon.
+
+1.24      2014-03-02 21:39:00+01:00 Europe/Brussels
+
+        * Added module Citywire.pm written by Martin Sadler
+        * Added module FTfunds.pm written by Martin Sadler
+        * Added module MStaruk.pm written by Martin Sadler
+        * Added module TNetuk.pm written by Martin Sadler
+        * Data::Dumper is no more required to build
+
+1.23_02   2014-03-02 14:46:41+01:00 Europe/Brussels (TRIAL RELEASE)
+
+        TEST RELEASE
+
+1.22      2014-03-02 10:38:18+01:00 Europe/Brussels (TRIAL RELEASE)
+
+        TEST RELEASE
+
+1.21      2014-03-02 09:56:38+01:00 Europe/Brussels (TRIAL RELEASE)
+
+        * ASX.pm now supports querying more than 10 symbols (goodvibes2)
+        * Travis config added for automated test build
+        * BUILD: Updated to use Dist::Zilla
+
+2014-02-17  Erik Colson <eco@ecocode.net>
+
+	* INSTALLATION FIX: Install Date::Calc as dependency
+
+2014-02-16  Erik Colson <eco@ecocode.net>
+
+	* MtGox support added by Sam Morris
+	* MorningstarJP support added by Christopher Hill
+	* Yahoo modules changed due to site change
+
+2010-02-16  Erik Colson <eco@ecocode.net>
 
 	* TSP.pm updated. Patch from Kevin Ryde.
 	* YAHOO/Base.pm added conversion from 'B' billions to
@@ -89,7 +143,7 @@ XXXX-XX-XX  Erik Colson <eco@ecocode.net>
 
 	* BUGFIX: Stephen Ebelt patch applied for goldmoney.pm
 	* BUGFIX: Encoding problem solved by Ashwin
-	
+
 2009-02-16  Bradley Dean <bjdean@bjdean.id.au>
 
 	* NEW: Function fetch_live_currencies.

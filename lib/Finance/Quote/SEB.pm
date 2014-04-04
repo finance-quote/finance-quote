@@ -29,13 +29,13 @@ require 5.004;
 
 use strict;
 
-use vars qw($VERSION $SEB_FUNDS_URL);
+use vars qw( $SEB_FUNDS_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use utf8;
 
-$VERSION = '1.18';
+# VERSION
 $SEB_FUNDS_URL = 'http://taz.vv.sebank.se/cgi-bin/pts3/pow/fmk/2100/Senaste_fondkurserna.TXT';
 
 sub methods { return (seb_funds => \&seb_funds); }

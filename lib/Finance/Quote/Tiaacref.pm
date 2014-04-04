@@ -34,7 +34,7 @@ require Mozilla::CA;
 
 use strict;
 
-use vars qw($VERSION $CREF_URL $TIAA_URL
+use vars qw( $CREF_URL $TIAA_URL
 			%tiaacref_ids %tiaacref_locs %tiaacref_vals);
 
 use LWP::UserAgent;
@@ -42,7 +42,7 @@ use HTTP::Request::Common;
 use Carp;
 use Encode;
 
-$VERSION = '1.18';
+# VERSION
 
 # URLs of where to obtain information.
 # This used to be different for the CREF and TIAA annuities, but this changed.

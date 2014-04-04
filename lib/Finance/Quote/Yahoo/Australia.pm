@@ -33,13 +33,13 @@ use HTTP::Request::Common;
 use LWP::UserAgent;
 use Finance::Quote::Yahoo::Base qw/yahoo_request base_yahoo_labels/;
 
-use vars qw/$VERSION $YAHOO_AUSTRALIA_URL/;
+use vars qw/ $YAHOO_AUSTRALIA_URL/;
 
-$VERSION = '1.18';
+# VERSION
 
 # URLs of where to obtain information.
 
-$YAHOO_AUSTRALIA_URL = ("http://au.finance.yahoo.com/d/quotes.csv");
+$YAHOO_AUSTRALIA_URL = ("http://download.finance.yahoo.com/d/quotes.csv");
 
 sub methods {return (australia       => \&yahoo_australia,
 		     yahoo_australia => \&yahoo_australia)};

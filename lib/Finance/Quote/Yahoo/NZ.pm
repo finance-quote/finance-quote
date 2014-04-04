@@ -32,13 +32,13 @@ use HTTP::Request::Common;
 use LWP::UserAgent;
 use Finance::Quote::Yahoo::Base qw/yahoo_request base_yahoo_labels/;
 
-use vars qw/$VERSION $YAHOO_NZ_URL/;
+use vars qw/$YAHOO_NZ_URL/;
 
-$VERSION = '1.18';
+# VERSION
 
 # URLs of where to obtain information.
 
-$YAHOO_NZ_URL = ("http://au.finance.yahoo.com/d/quotes.csv");
+$YAHOO_NZ_URL = ("http://download.finance.yahoo.com/d/quotes.csv");
 
 sub methods {return (nz => \&yahoo_nz, yahoo_nz => \&yahoo_nz)};
 

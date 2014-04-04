@@ -35,13 +35,13 @@ use strict;
 
 package Finance::Quote::LeRevenu;
 
-use vars qw($VERSION $LR_URL);
+use vars qw( $LR_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.18';
+# VERSION
 
 my $LR_URL = 'http://bourse.lerevenu.com/recherchenom.hts';
 

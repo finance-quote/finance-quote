@@ -34,13 +34,13 @@ use HTTP::Request::Common;
 use LWP::UserAgent;
 use Finance::Quote::Yahoo::Base qw/yahoo_request base_yahoo_labels/;
 
-use vars qw($VERSION $YAHOO_EUROPE_URL);
+use vars qw( $YAHOO_EUROPE_URL);
 
-$VERSION = '1.18';
+# VERSION
 
 # URLs of where to obtain information.
 
-$YAHOO_EUROPE_URL = ("http://uk.finance.yahoo.com/d/quotes.csv");
+$YAHOO_EUROPE_URL = ("http://download.finance.yahoo.com/d/quotes.csv");
 
 # Yahoo Europe switched date and time. sending t1d1 or d1t1
 # returns the same : Time followed by date. This is a short

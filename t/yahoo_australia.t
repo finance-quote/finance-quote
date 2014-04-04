@@ -7,7 +7,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 9;
+plan tests => 13;
 
 # Test Yahoo_europe functions.
 
@@ -32,6 +32,15 @@ ok(substr($quotes{"BHP","date"},6,4) == $year ||
 # Make sure we don't have spurious % signs.
 
 ok($quotes{"BHP","p_change"} !~ /%/);
+
+TODO: {
+    local $TODO = "Get quotes when '.AX' suffix is added";
+    my %suffix_quotes = $q->yahoo_australia("BHP.AX");
+    ok(%suffix_quotes);
+    ok($suffix_quotes{"BHP.AX","last"} == $quotes{"BHP","last"});
+    ok($suffix_quotes{"BHP.AX","name"} eq $quotes{"BHP","name"});
+    ok($suffix_quotes{"BHP.AX","success"});
+}
 
 # Check that a bogus stock returns no-success.
 ok(! $quotes{"BOGUS","success"});

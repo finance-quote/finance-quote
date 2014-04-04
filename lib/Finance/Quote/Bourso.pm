@@ -33,6 +33,10 @@
 #
 # Changelog
 #
+# 2014-01-12  Arnaud Gardelein
+#
+#     *       changes on website
+#
 # 2009-04-12  Erik Colson
 #
 #     *       Major site change.
@@ -65,13 +69,13 @@ use strict;
 
 package Finance::Quote::Bourso;
 
-use vars qw($VERSION $Bourso_URL);
+use vars qw( $Bourso_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TreeBuilder; # Boursorama doesn't put data in table elements anymore but uses <div>
 
-$VERSION = '1.18';
+# VERSION
 
 my $Bourso_URL = 'http://www.boursorama.com/recherche/index.phtml';
 
@@ -104,7 +108,7 @@ sub bourso {
 
   foreach my $stocks (@stocks)
 	{
-	  my $queryUrl = $url.join('',"?search[query]=", $stocks).
+	  my $queryUrl = $url.join('',"?q=", $stocks).
 		"&search[type]=rapide&search[categorie]=STK&search[bourse]=country:33";
 	  $reply = $ua->request(GET $queryUrl);
 
@@ -112,13 +116,12 @@ sub bourso {
 
 	  if ($reply->is_success) {
 		# print $reply->content;
-
 		$info{$stocks,"success"} = 1;
 
 		my $tree = HTML::TreeBuilder->new_from_content($reply->content);
 
 		# retrieve SYMBOL
-		my @symbolline = $tree->look_down('class','isin');
+		my @symbolline = $tree->look_down('class','fv-isin ellipsis');
 
 		unless (@symbolline) {
 		  $info {$stocks,"success"} = 0;
@@ -131,7 +134,7 @@ sub bourso {
 		$info{$stocks,"symbol"}=$symbol;
 
 		# retrieve NAME
-		my @nameline = $tree->look_down('class','nomste');
+		my @nameline = $tree->look_down('class','fv-name');
 
 		unless (@nameline) {
 		  $info {$stocks,"success"} = 0;
@@ -141,7 +144,6 @@ sub bourso {
 
 		my $name = $nameline[0]->as_text;
 		$info{$stocks,"name"}=$name;
-
         # set method
         $info{$stocks,"method"} = "bourso" ;
 
@@ -149,9 +151,9 @@ sub bourso {
 		my %tempinfo;
 
 		# retrieve other data
-		my $infoclass = ($tree->look_down('class','info1'))[0];
+		my $infoclass = ($tree->look_down('class','fv-extras'))[0];
 		unless ($infoclass) {
-		  my $opcvm = ($tree->look_down('id','opcvm_headerFund_0'))[0];
+		  my $opcvm = ($tree->look_down('class','opcvm-partners block'))[0];
 		  unless ($opcvm) {
 			$info {$stocks,"success"} = 0;
 			$info {$stocks,"errormsg"} = "$stocks retrieval not supported.";
@@ -160,8 +162,8 @@ sub bourso {
 
 		  # the stock is a delayed OPCVM
 
-		  my $infoelem = ($tree->look_down('id','content-gauche'))[0];
-		  $infoelem = ($infoelem->look_down('class','TabContenu'))[0];
+		  my $infoelem = ($tree->look_down('id','quote-infos-page'))[0];
+		  $infoelem = ($infoelem->look_down('class','q-details'))[0];
 
 		  my @rows = $infoelem->look_down('_tag','tr');
 		  foreach my $i (0..$#rows) {
@@ -180,7 +182,8 @@ sub bourso {
 		else {
 		  # regular stock
 
-		  my $infoelem = ($infoclass->look_down('class','info-valeur'))[0];
+		  my $infoelem = ($tree->look_down('id','quote-infos-page'))[0];
+		  $infoelem = ($infoelem->look_down('class','q-details'))[0];
 
 		  my @rows = $infoelem->look_down('_tag','tr');
 		  foreach my $i (0..$#rows) {

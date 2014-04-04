@@ -8,7 +8,7 @@
 
 # 2008.02.18
 # This version corrects the data downloaded by removing spaces and converting
-# cent values into Rand values – this ensures that the Price Editor in GNUCash
+# cent values into Rand values Â– this ensures that the Price Editor in GNUCash
 # can import the data. The rest of the module and all the hard work
 # remains that of Stephen Langenhoven!
 # Rolf Endres
@@ -23,13 +23,12 @@ package Finance::Quote::ZA;
 require 5.004;
 
 use strict;
-use vars qw /$VERSION/;
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 
-$VERSION = '1.18';
+# VERSION
 
 my $SHARENET_MAINURL = ("http://www.sharenet.co.za/");
 my $SHARENET_URL     = ( $SHARENET_MAINURL . "jse/" );

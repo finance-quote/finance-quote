@@ -1,0 +1,23 @@
+* Procedure for a CPAN release
+** finalize dev branch merges
+** check for debug code in modules
+** Modify Changelog
+** OBSOLETE : change version numbers in all modules
+** OBSOLETE : push all commits up to github
+** OBSOLETE : go to tmp
+** OBSOLETE : clone from github server
+*** git clone git@github.com:pjf/finance-quote.git
+** OBSOLETE : remove MANIFEST and inc directory
+** OBSOLETE : perl Makefile.PL
+** OBSOLETE : make manifest
+** OBSOLETE : create a commit for MANIFEST (if needed)
+** OBSOLETE : create version tag
+*** git tag -a "1.13_02" -m "version 1.13_02"
+** OBSOLETE : make dist
+** OBSOLETE : if dist ok -> push to github
+*** git push --tags
+* RELEASE
+** OBSOLETE : Upload tar.gz to pause.cpan.org
+** Update the website ! update htdocs/index.html file
+** upload to sourceforge @ https://sourceforge.net/projects/finance-quote/files/finance-quote/
+sftp ecocode,finance-quote@web.sourceforge.net
