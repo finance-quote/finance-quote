@@ -18,10 +18,9 @@ use HTML::TableExtract;
 
 # URLs of where to obtain information.
 
-#$AMFI_MAIN_URL = ("http://localhost/");
 $AMFI_MAIN_URL = ("http://www.amfiindia.com/");
-$AMFI_URL = ("${AMFI_MAIN_URL}NavReport.aspx?type=0");
-#$AMFI_URL = ("${AMFI_MAIN_URL}spages/NAV0.txt"); #This page seems to do the job also. Keep for reference
+$AMFI_URL = ("http://portal.amfiindia.com/NAVReport.aspx?type=0");
+#$AMFI_URL = ("http://portal.amfiindia.com/spages/NAV0.txt"); #This page seems to do the job also. Keep for reference
 
 # amfinavlist.txt is a cache-file. keep it until updated on the website since this is a 1meg file.
 my $cachedir = $ENV{TMPDIR} // $ENV{TEMP} // '/tmp/';
@@ -70,13 +69,19 @@ sub amfiindia   {
 
     open NAV, $AMFI_NAV_LIST or die "Unexpected error in opening file: $!\n";
 
-    # Scheme Code;Scheme Name;Net Asset Value;Repurchase Price;Sale Price;Date
+    #Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Net Asset Value;Repurchase Price;Sale Price;Date
     while (<NAV>) {
 	next if !/\;/;
 	chomp;
 	s/\r//;
-        my ($symbol, @data) = split /\s*\;\s*/;
-	$allquotes{$symbol} = \@data;
+        my ($symbol1, $symbol2, $symbol3, @data) = split /\s*\;\s*/;
+	$allquotes{$symbol1} = \@data;
+	if ($symbol2 ne "-") {
+	    $allquotes{$symbol2} = \@data;
+	}
+	if ($symbol3 ne "-") {
+	    $allquotes{$symbol3} = \@data;
+	}
     }
     close(NAV);
 
@@ -89,11 +94,11 @@ sub amfiindia   {
 
 	my $data = $allquotes{$symbol};
 	if ($data) {
-            $fundquote{$symbol, "name"} = $data->[4];
-            $fundquote{$symbol, "nav"} = $data->[5];
-            $fundquote{$symbol, "rprice"} = $data->[6];
-            $fundquote{$symbol, "sprice"} = $data->[7];
-            $quoter->store_date(\%fundquote, $symbol, {eurodate => $data->[8]});
+            $fundquote{$symbol, "name"} = $data->[0];
+            $fundquote{$symbol, "nav"} = $data->[1];
+            $fundquote{$symbol, "rprice"} = $data->[2];
+            $fundquote{$symbol, "sprice"} = $data->[3];
+            $quoter->store_date(\%fundquote, $symbol, {eurodate => $data->[4]});
             $fundquote{$symbol, "success"} = 1;
 	} else {
 	    $fundquote{$symbol, "success"} = 0;
@@ -131,13 +136,11 @@ The information source "indiamutual" can be used
 if the source of prices is irrelevant, and "amfiindia" if you
 specifically want to use information downloaded from amfiindia.com.
 
-=head1 AMFIINDIA-CODE
+=head1 AMFIINDIA-CODE/ISIN
 
-In India a mutual fund does not have a unique global symbol identifier.
-
-This module uses an id that represents the mutual fund on an id used by
-amfiindia.com.  You can the fund is from the AMFI web site
-http://amfiindia.com/downloadnavopen.asp.
+In India, not all funds have an ISIN. However, they do have a scheme code.
+You can use those if you can't find the ISIN. See AMFI site for details.
+http://www.amfiindia.com/nav-history-download
 
 =head1 LABELS RETURNED
 
@@ -148,15 +151,13 @@ label will be a url location for the NAV list table for all funds.
 
 =head1 NOTES
 
-amfiindia.com provides a link to download a text file containing all the
+AMFI provides a link to download a text file containing all the
 NAVs. This file is mirrored in a local file /tmp/amfinavlist.txt. The local
 mirror serves only as a cache and can be safely removed.
 
-Currently NAVs of Open-Ended funds are supported.
-
 =head1 SEE ALSO
 
-AMFI india website - http://amfiindia.com/
+AMFI india website - http://www.amfiindia.com/
 
 Finance::Quote
 
