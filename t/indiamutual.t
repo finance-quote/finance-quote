@@ -13,7 +13,7 @@ plan tests => 50;
 
 my $q      = Finance::Quote->new();
 my @funds = ("102676", "103131", "101599", "102732", "100151",
-	     "102849", "101560", "106524");
+	     "INF194K01W88", "INF090I01FN7", "INF082J01127");
 my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
