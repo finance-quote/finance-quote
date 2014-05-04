@@ -163,7 +163,7 @@ sub bourso {
 		  # the stock is a delayed OPCVM
 
 		  my $infoelem = ($tree->look_down('id','quote-infos-page'))[0];
-		  $infoelem = ($infoelem->look_down('class','q-details'))[0];
+		  $infoelem = ($infoelem->look_down('class','q-details span-1-2'))[0];
 
 		  my @rows = $infoelem->look_down('_tag','tr');
 		  foreach my $i (0..$#rows) {
@@ -182,8 +182,10 @@ sub bourso {
 		else {
 		  # regular stock
 
-		  my $infoelem = ($tree->look_down('id','quote-infos-page'))[0];
-		  $infoelem = ($infoelem->look_down('class','q-details'))[0];
+                  my $infoelem;
+		  my $quote_infos_page = ($tree->look_down('id','quote-infos-page'))[0];
+                  $infoelem = ($quote_infos_page->look_down('class','q-details span-1-2'))[0];
+                  $infoelem = ($quote_infos_page->look_down('class','bd'))[0] if (! defined $infoelem); # needed for warrants
 
 		  my @rows = $infoelem->look_down('_tag','tr');
 		  foreach my $i (0..$#rows) {
