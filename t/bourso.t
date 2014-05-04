@@ -47,20 +47,26 @@ my %quotes;
 foreach my $stock (@stocks) {
   eval{
   %quotes = $q->fetch("bourso", $stock);
-  ok(%quotes);
+  ok(%quotes,"$stock \%quotes defined");
 
-  ok($quotes{$stock,"last"} > 0);
-  ok(length($quotes{$stock,"name"}));
-  ok(length($quotes{$stock,"symbol"}));
-  ok($quotes{$stock,"success"});
+  my $last = $quotes{$stock,"last"};
+  ok($last > 0,"$stock last ($last) > 0");
+  ok(length($quotes{$stock,"name"}),"$stock name is defined");
+  ok(length($quotes{$stock,"symbol"}),"$stock symbol is defined");
+  ok($quotes{$stock,"success"},"$stock returned success");
   ok( # indexes are quoted in percents
 	  ($stock eq "FR0003500008") ||
 	  (($stock eq "MSFT") && ($quotes{$stock, "currency"} eq "USD")) ||
-	  ($quotes{$stock, "currency"} eq "EUR") );
-  ok(substr($quotes{$stock,"isodate"},0,4) == $year ||
-       substr($quotes{$stock,"isodate"},0,4) == $lastyear);
-  ok(substr($quotes{$stock,"date"},6,4) == $year ||
-       substr($quotes{$stock,"date"},6,4) == $lastyear);
+	  ($quotes{$stock, "currency"} eq "EUR"), "Index is quoted in percents");
+
+  SKIP:
+  {
+      skip "date is not defined for warrants",2 if ($stock eq "FR0010707414" );
+      ok(substr($quotes{$stock,"isodate"},0,4) == $year ||
+             substr($quotes{$stock,"isodate"},0,4) == $lastyear, "$stock isodate defined");
+      ok(substr($quotes{$stock,"date"},6,4) == $year ||
+             substr($quotes{$stock,"date"},6,4) == $lastyear, "$stock date defined");
+      }
   };
   if ($@){
     print STDERR "Error fetching stock ", $stock, "\n", $@;
@@ -70,4 +76,4 @@ foreach my $stock (@stocks) {
 
 # Check that a bogus stock returns no-success.
 %quotes = $q->fetch("bourso", "BOGUS");
-ok(! $quotes{"BOGUS","success"});
+ok(! $quotes{"BOGUS","success"},"BOGUS failed correctly");
