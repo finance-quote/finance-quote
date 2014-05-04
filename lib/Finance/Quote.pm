@@ -173,7 +173,7 @@ sub new {
   if (!@reqmodules or $reqmodules[0] eq "-defaults") {
     shift(@reqmodules) if (@reqmodules);
     # Default modules
-    @modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns BSERO Bourso
+    @modules = qw/AEX AIAHK ASEGR ASX Bitstamp BMONesbittBurns BSERO Bourso
             Cdnfundlibrary Citywire Currencies Deka DWS FTPortfolios Fidelity
             FinanceCanada Fool FTfunds HU GoldMoney HEX IndiaMutual LeRevenu
             ManInvestments Morningstar MorningstarJP MStaruk MtGox NZX Platinum
@@ -749,6 +749,12 @@ sub store_date
       $year = $piecesref->{year};
       $year += 2000 if $year < 100;
       $year_specified = 1;
+    }
+
+    if (defined ($piecesref->{epoch})) {
+      ($month, $day, $year) = (localtime($piecesref->{epoch}))[4,3,5];
+      $month++;
+      $year += 1900;
     }
     $month = $piecesref->{month} if defined ($piecesref->{month});
     $month = $mnames{lc(substr($month,0,3))} if ($month =~ /\D/);
