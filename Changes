@@ -1,4 +1,7 @@
 {{$NEXT}}
+        * Bourso.pm works on current website changes. Thanks to Guillaume
+        * New module CSE.pm by Hiranya Samarasekera. Covers Colombo Stock
+          Exchange (CSE) in Sri Lanka.
 
 1.29      2014-04-08 08:28:25+02:00 Europe/Brussels
         * New module za_unittrusts. kudos to Rolf Endres.
