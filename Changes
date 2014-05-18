@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.32      2014-05-18 21:55:12+02:00 Europe/Brussels
         * return "symbol" for yahoo_json module
         * allow to retrieve ISIN codes with VWD module
 
