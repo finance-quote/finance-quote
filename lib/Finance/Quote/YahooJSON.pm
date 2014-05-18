@@ -81,6 +81,8 @@ sub yahoo_json {
         #HTTP Headers:				$headers
         #Response body				$body
 
+        $info{ $stocks, "symbol" } = $stocks;
+
         if ( $code == 200 ) {
 
             #HTTP_Response succeeded - parse the data
