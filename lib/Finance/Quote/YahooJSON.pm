@@ -39,9 +39,7 @@ my $YIND_URL_HEAD = 'http://finance.yahoo.com/webservice/v1/symbols/';
 my $YIND_URL_TAIL = '/quote?format=json';
 
 sub methods {
-    return ( india      => \&yahoo_json,
-             yahoo_json => \&yahoo_json,
-             ind        => \&yahoo_json
+    return ( yahoo_json => \&yahoo_json,
     );
 }
 {
@@ -49,9 +47,7 @@ sub methods {
         volume currency method exchange type/;
 
     sub labels {
-        return ( india => \@labels,
-                 yahoo_json => \@labels,
-                 ind   => \@labels
+        return ( yahoo_json => \@labels,
         );
     }
 }
@@ -118,8 +114,8 @@ sub yahoo_json {
                 my $json_type = $json_resources->{'resource'}{'fields'}{'type'};
                 my $json_price =
                     $json_resources->{'resource'}{'fields'}{'price'};
-
-                $my_p_change = +0.0;
+                my $json_utctime =
+                    $json_resources->{'resource'}{'fields'}{'utctime'};
 
                 $info{ $stocks, "success" } = 1;
                 $info{ $stocks, "exchange" } =
@@ -128,19 +124,16 @@ sub yahoo_json {
                 $info{ $stocks, "name" }   = $stocks . ' (' . $json_name . ')';
                 $info{ $stocks, "type" }   = $json_type;
                 $info{ $stocks, "last" }   = $json_price;
-                $info{ $stocks, "close" }  = $json_price;
-                $info{ $stocks, "p_change" } = $my_p_change;
                 $info{ $stocks, "volume" }   = $json_volume;
-                $info{ $stocks, "high" }     = $json_price;
-                $info{ $stocks, "low" }      = $json_price;
-                $info{ $stocks, "open" }     = $json_price;
+                $info{ $stocks, "isodate" } = ( $json_utctime =~ /dddd-dd-dd/ );
 
                 $my_date = localtime($json_timestamp)->strftime('%d.%m.%Y %T');
+                if ( $json_utctime =~ /(\d\d\d\d)-(\d\d)-(\d\d)/ ) {
+                    $my_date = $3.".".$2.".".$1.".";
+                }
 
                 $quoter->store_date( \%info, $stocks,
                                      { eurodate => $my_date } );
-
-                $info{ $stocks, "currency" } = "INR";
 
             }
         }
@@ -185,8 +178,7 @@ This module provides the "yahoo_json" fetch method.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::YahooJSON :
-name, last, date, p_change, open, high, low, close,
-volume, currency, method, exchange.
+name, last, isodate, volume, method, exchange.
 
 =head1 SEE ALSO
 

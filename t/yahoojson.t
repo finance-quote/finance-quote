@@ -10,7 +10,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 49;
+plan tests => 43;
 
 my $q = Finance::Quote->new();
 
@@ -43,9 +43,6 @@ foreach my $stock (@stocks) {
 
         my $volume = $quotes{ $stock, "volume" };
         ok( $volume > 0, "Volume $volume > 0" ) if ( $stock ne "BEL20.BR" );
-
-        my $currency = $quotes{ $stock, "currency" };
-        ok( $currency eq 'INR', "Currency ($currency) is INR" );
 
         my $type = $quotes{ $stock, "type" };
         ok( $type, "Symbol type $type" );
