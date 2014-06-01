@@ -1,4 +1,6 @@
 {{$NEXT}}
+        * BUGFIX: yahoo_json never returns currency. so don't set a default.
+                  yahoo_json returned current timestamp instead of quote date.
 
 1.32      2014-05-18 21:55:12+02:00 Europe/Brussels
         * return "symbol" for yahoo_json module
