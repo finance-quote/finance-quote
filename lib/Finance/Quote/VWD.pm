@@ -8,6 +8,7 @@
 #    Copyright (C) 2000, Volker Stuerzl <volker.stuerzl@gmx.de>
 #    Copyright (C) 2003,2005,2006 Jörg Sommer <joerg@alea.gnuu.de>
 #    Copyright (C) 2008 Martin Kompf (skaringa at users.sourceforge.net)
+#    Copyright (C) 2014, Erik Colson <ecocode@cpan.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -113,14 +114,18 @@ sub vwd {
             my $tree = HTML::TreeBuilder->new;
             $tree->parse($html);
 
-            # all other info below <div class=contentContainer>
+            # all other info below <div class=contentBox>
             my $content =
-                $tree->look_down( "_tag", "div", "class", "contentContainer" );
+                $tree->look_down( "_tag", "div", "class", "contentBox" );
             next if not $content;
 
             my $wpkurs =
                 $content->look_down( "_tag", "div", "class", qr/wpKurs/ );
             next if not $wpkurs;
+
+            my $wpfacts =
+                $content->look_down( "_tag", "div", "class", qr/wpFacts/ );
+            next if not $wpfacts;
 
             my $title = $wpkurs->find("h1");
             $title->find("span")->delete_content;
@@ -130,7 +135,10 @@ sub vwd {
             $te->parse( $wpkurs->as_HTML );
             my $table = $te->first_table_found;
 
-            my $datum = $table->cell( 0, 1 );
+            # class val contains data. hopefully order and quantity won't change
+            my @wpfacts_vals = $wpfacts->look_down( "_tag", "span","class", qr/val/);
+            my $datum = $wpfacts_vals[1]->as_trimmed_text;
+
             if ($logging) {
                 print LOG "datum: $datum\n";
             }
@@ -147,7 +155,7 @@ sub vwd {
                 $quoter->store_date( \%info, $fund );
                 $info{ $fund, "time" } = $quoter->isoTime($1);
             }
-            my $kurs = $table->cell( 0, 2 );
+            my $kurs = $table->cell( 0, 1 );
             next if not $kurs;
             $info{ $fund, "price" } = $info{ $fund, "last" } = trimtr($kurs);
 
@@ -162,15 +170,8 @@ sub vwd {
                 $info{ $fund, "currency" } = "EUR";
             }
 
-            my $wpinfo = $wpkurs->look_down( "_tag", "h2" );
-            if ($wpinfo) {
-                if ($logging) {
-                    print LOG "wpinfo: " . $wpinfo->as_trimmed_text . "\n";
-                }
-                if ( $wpinfo->as_trimmed_text =~ /Symbol:([^ ]*)$/ ) {
-                    $info{ $fund, "symbol" } = trim($1);
-                }
-            }
+            my $symbol = $wpfacts_vals[4]->as_trimmed_text;
+            $info{ $fund, "symbol" } = $symbol;
 
             # fund ok
             $info{ $fund, "success" }  = 1;
