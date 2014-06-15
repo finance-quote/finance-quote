@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+1.34      2014-06-15 21:30:03+02:00 Europe/Brussels
+        * VWD adapted to recent website change.
+
 1.33      2014-06-01 11:24:24+02:00 Europe/Brussels
         * BUGFIX: yahoo_json never returns currency. so don't set a default.
                   yahoo_json returned current timestamp instead of quote date.
