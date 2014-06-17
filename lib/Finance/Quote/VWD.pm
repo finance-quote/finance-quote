@@ -159,12 +159,13 @@ sub vwd {
             next if not $kurs;
             $info{ $fund, "price" } = $info{ $fund, "last" } = trimtr($kurs);
 
-            # Currency
-            my $portrait =
-                $tree->look_down( "_tag", "table", "class", "portraitKurse" );
-            if ($portrait) {
-                my @tds = $portrait->find('td');
-                $info{ $fund, "currency" } = $tds[2]->as_trimmed_text();
+            # Currency (Währung)
+            my $whrg =
+                $tree->look_down( "_tag", "div", "class", "whrg" );
+            if ($whrg) {
+                my $whrgtext = $whrg->as_trimmed_text();
+                $whrgtext =~ s/.*hrung: // ;
+                $info{ $fund, "currency" } = $whrgtext;
             }
             else {
                 $info{ $fund, "currency" } = "EUR";
