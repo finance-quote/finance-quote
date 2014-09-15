@@ -33,7 +33,7 @@
 
 package Finance::Quote::DWS;
 require 5.005;
-require Crypt::SSLeay;
+require LWP::Protocol::https;
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
