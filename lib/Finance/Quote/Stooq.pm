@@ -134,7 +134,7 @@ letter ticker.
 For example:
 "GPW" for Warsaw Stock Exchange itself,
 "TPE" for Tauron Polska Energia,
-"PZU" for Polski Zakład Ubezpieczeń (most valuable equity is stocks on GPW).
+"PZU" for Polski Zaklad Ubezpieczen (most valuable equity is stocks on GPW).
 
 =head1 LABELS RETURNED
 
