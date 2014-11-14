@@ -37,7 +37,8 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use utf8;
 
-$VERSION = '0.10';
+# VERSION
+
 $STOOQ_STOCKS_URL = 'http://stooq.com/q/l/';
 
 sub methods { return (stooq_stocks => \&stooq_stocks); }
