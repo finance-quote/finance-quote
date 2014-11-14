@@ -181,7 +181,7 @@ sub new {
             Tdwaterhouse Tiaacref TNetuk Troweprice Trustnet Union USFedBonds
             VWD ZA Cominvest Finanzpartner YahooJSON Yahoo::Asia
             Yahoo::Australia Yahoo::Brasil Yahoo::Europe Yahoo::NZ
-            Yahoo::USA ZA_UnitTrusts/; }
+            Yahoo::USA ZA_UnitTrusts Stooq/; }
 
   $this->_load_modules(@modules,@reqmodules);
 
