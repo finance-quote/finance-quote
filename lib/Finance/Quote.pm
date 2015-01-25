@@ -176,7 +176,7 @@ sub new {
     @modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns BSERO Bourso
             Cdnfundlibrary Citywire CSE Currencies Deka DWS FTPortfolios Fidelity
             FinanceCanada Fool FTfunds HU GoldMoney HEX IndiaMutual LeRevenu
-            ManInvestments Morningstar MorningstarJP MStaruk MtGox NZX Platinum
+            ManInvestments Morningstar MorningstarJP MStaruk MtGox NZX Platinum PseJSON
             SEB SIXfunds SIXshares StockHouseCanada TSP TSX Tdefunds
             Tdwaterhouse Tiaacref TNetuk Troweprice Trustnet Union USFedBonds
             VWD ZA Cominvest Finanzpartner YahooJSON Yahoo::Asia
