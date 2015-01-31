@@ -23,7 +23,7 @@ require 5.006;
 use strict;
 use warnings;
 use base 'Exporter';
-use Date::Calc qw(Add_Delta_Days Today);
+use DateTime;
 
 use vars qw( $MORNINGSTAR_JP_URL);
 
@@ -49,16 +49,21 @@ sub morningstarjp
 
   $ua = $quoter->user_agent;
 
+  # calculate beginning and end date
+  # Starting from 10 days prior (to cover any recent holiday gaps)
+
+  my $calcDay = DateTime->now();
+  $year  = $calcDay->year();
+  $month = $calcDay->month();
+  $day   = $calcDay->day();
+  $calcDay->subtract( days => 10 );
+  $fmyear  = $calcDay->year();
+  $fmmonth = $calcDay->month();
+  $fmday   = $calcDay->day();
+
 # Iterate over each symbol as site only permits query by single security
   foreach my $symbol (@symbols)
   {
-
-    # Search upto and including today
-    ( $year, $month, $day ) = Today();
-
-    # Starting from 10 days prior (to cover any recent holiday gaps)
-    ( $fmyear, $fmmonth, $fmday ) = Add_Delta_Days( $year, $month, $day, -10 );
-
     # Query the server via a POST request
     $response = $ua->post(
       $MORNINGSTAR_JP_URL . $symbol,

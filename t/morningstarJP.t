@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use Test::More;
-use Date::Calc qw(Today Delta_Days);
+use DateTime;
 use Finance::Quote;
 
 if (not $ENV{ONLINE_TEST}) {
@@ -11,7 +11,10 @@ if (not $ENV{ONLINE_TEST}) {
 plan tests => 9 * 2;
 
 # Find out today
-my ( $year, $month, $day ) = Today();
+my $calcDay = DateTime->now();
+my $year  = $calcDay->year();
+my $month = $calcDay->month();
+my $day   = $calcDay->day();
 
 # Test Morningstar JP functions.
 
@@ -31,10 +34,11 @@ foreach my $fund (@funds)
   my $fndmonth = substr( $info{ $fund, "isodate" }, 5, 2 );
   my $fndday   = substr( $info{ $fund, "isodate" }, 8, 2 );
 
-  cmp_ok( Delta_Days( $fndyear, $fndmonth, $fndday, $year, $month, $day ),
-          '<=', 11, 'not more than 11 days before today' );
-  cmp_ok( Delta_Days( $fndyear, $fndmonth, $fndday, $year, $month, $day ),
-          '>=', -1, 'not more than 1 day in the future' );
+  my $fnd = DateTime->new(year=>$fndyear,month=>$fndmonth,day=>$fndday);
+  my $deltadays = $calcDay->subtract_datetime($fnd)->in_units('days');
+
+  cmp_ok( $deltadays,'<=', 11, 'not more than 11 days before today' );
+  cmp_ok( $deltadays,'>=', -1, 'not more than 1 day in the future' );
 
   cmp_ok( $info{ $fund, 'currency' }, 'eq', 'JPY',           'currency' );
   cmp_ok( $info{ $fund, 'method' },   'eq', 'MorningstarJP', 'method' );
