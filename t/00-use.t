@@ -4,7 +4,7 @@
 
 use strict;
 use Test;
-BEGIN {plan tests => 19};
+BEGIN {plan tests => 20};
 
 use Finance::Quote;
 ok(1);			# Yup.  It loaded okay.  Good.  :)
