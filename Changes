@@ -1,4 +1,7 @@
 {{$NEXT}}
+        * Remove Crypt::SSLeay dependency in favor of LWP::Protocol::https (Geert Janssens)
+
+1.36      2015-01-31
         * MorningstarJP : changed dependency from Date::Calc to DateTime
 
 1.35      2014-06-17 08:06:14+02:00 Europe/Brussels
