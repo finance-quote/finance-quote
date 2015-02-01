@@ -28,7 +28,6 @@
 
 package Finance::Quote::GoldMoney;
 require 5.005;
-require Crypt::SSLeay;
 
 use HTTP::Request::Common;
 use HTML::TableExtract;

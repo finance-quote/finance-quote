@@ -29,7 +29,7 @@
 
 package Finance::Quote::Tiaacref;
 require 5.005;
-require Crypt::SSLeay;
+require LWP::Protocol::https;
 require Mozilla::CA;
 
 use strict;

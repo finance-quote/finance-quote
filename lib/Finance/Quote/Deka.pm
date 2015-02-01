@@ -20,7 +20,7 @@ package Finance::Quote::Deka;
 use strict;
 use HTML::TableExtract;
 
-require Crypt::SSLeay;
+require LWP::Protocol::https;
 
 # VERSION
 my $DEKA_URL = "https://www.deka.de/dn/useCases/fundsearch/UCFundsSearch.shtml?ACTION_FIELD=quickSearch";
