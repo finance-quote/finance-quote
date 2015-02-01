@@ -1,5 +1,6 @@
 {{$NEXT}}
         * Remove Crypt::SSLeay dependency in favor of LWP::Protocol::https (Geert Janssens)
+        * Updated HU.pm and test file to current website (Kristof Marussy)
 
 1.36      2015-01-31
         * MorningstarJP : changed dependency from Date::Calc to DateTime
