@@ -53,7 +53,7 @@ $YAHOO_CURRENCY_URL = "http://finance.yahoo.com/d/quotes.csv?e=.csv&f=l1&s=";
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
-@EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref
+@EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx
                 currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
@@ -1217,9 +1217,8 @@ http://www.gnucash.org/
 
 Finance::Quote::AEX, Finance::Quote::ASX, Finance::Quote::Cdnfundlibrary,
 Finance::Quote::DWS, Finance::Quote::Fidelity, Finance::Quote::FinanceCanada,
-Finance::Quote::Fool,
-Finance::Quote::FTPortfolios, Finance::Quote::Tdefunds,
-Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
+Finance::Quote::Fool, Finance::Quote::FTPortfolios, 
+Finance::Quote::Tdefunds, Finance::Quote::Tdwaterhouse,
 Finance::Quote::Troweprice, Finance::Quote::Trustnet,
 Finance::Quote::VWD, Finance::Quote::Yahoo::Australia,
 Finance::Quote::Yahoo::Europe, Finance::Quote::Yahoo::USA,
