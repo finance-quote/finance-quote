@@ -49,6 +49,7 @@ sub methods {return (canada   => \&yahoo,
 		     nyse     => \&yahoo,
 		     nasdaq   => \&yahoo,
 		     vanguard => \&yahoo,
+		     tiaacref => \&yahoo_tiaacref,
 		     fidelity => \&yahoo_fidelity)};
 
 {
@@ -60,6 +61,7 @@ sub methods {return (canada   => \&yahoo,
 			     nyse	=> \@labels,
 			     nasdaq	=> \@labels,
 			     vanguard	=> \@labels,
+			     tiaacref	=> \@labels,
 			     fidelity   => [@labels,'yield','nav']); }
 }
 
@@ -97,6 +99,72 @@ sub methods {return (canada   => \&yahoo,
 				$info{$symbol,"yield"}=$info{$symbol,"price"};
 			} else {
 				$info{$symbol,"nav"} = $info{$symbol,"price"};
+			}
+		}
+
+		return wantarray ? %info : \%info;
+	}
+}
+
+# This is a replacement for the old tiaacref module since Yahoo now provides
+# quotes for TIAA/CREF and the old web site used by that module is forzen in time
+# at 31 December 2014
+{
+	# The old tiaacref module used fake symbols for some funds.  This
+	# array maps them to the ones used by Yahoo
+	my %sym_map;
+	$sym_map{"crefbond"} = "QCBMRX";
+	$sym_map{"crefequi"} = "QCEQRX";
+	$sym_map{"crefglob"} = "QCGLRX";
+	$sym_map{"crefgrow"} = "QCGRRX";
+	$sym_map{"crefinfb"} = "QCILRX";
+	$sym_map{"crefmony"} = "QCMMRX";
+	$sym_map{"crefsoci"} = "QCSCRX";
+	$sym_map{"crefstok"} = "QCSTRX";
+	$sym_map{"tiaareal"} = "QREARX";
+	#  And reverse map
+	my %old_sym;
+	$old_sym{"qcbmrx"} = "CREFbond";
+	$old_sym{"qceqrx"} = "CREFequi";
+	$old_sym{"qcglrx"} = "CREFglob";
+	$old_sym{"qcgrrx"} = "CREFgrow";
+	$old_sym{"qcilrx"} = "CREFinfb";
+	$old_sym{"qcmmrx"} = "CREFmony";
+	$old_sym{"qcscrx"} = "CREFsoci";
+	$old_sym{"qcstrx"} = "CREFstok";
+	$old_sym{"qrearx"} = "TIAAreal";
+	
+	sub yahoo_tiaacref {
+		my $quoter = shift;
+		my @symbols = @_;
+		my @newsyms = ();
+		return unless @symbols;
+
+		# Map the old symbols to the Yahoo ones
+		foreach my $sym (@symbols) {
+			my $lcsym = $sym;
+			$lcsym =~ tr/A-Z/a-z/;
+			if (defined($sym_map{$lcsym})) {
+				push(@newsyms, $sym_map{$lcsym});
+			} else {
+				push(@newsyms, $sym);
+			}
+		}
+		
+		# Call the normal yahoo function (defined later in this file).
+		my %info = yahoo($quoter,@newsyms);
+		
+		# Map the results back to the  old symbols
+		foreach my $keyname (keys %info) {
+			my ($sym, $attr) = split('\034', $keyname);
+			my  $lcsym = $sym;
+			$lcsym =~ tr/A-Z/a-z/;
+			if (defined($old_sym{$lcsym})) {
+				if ($attr eq "symbol") {
+					$info{$old_sym{$lcsym}, $attr} = $old_sym{$lcsym};
+				} else {
+					$info{$old_sym{$lcsym}, $attr} = $info{$sym, $attr};
+				}
 			}
 		}
 

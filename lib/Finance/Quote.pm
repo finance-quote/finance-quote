@@ -178,7 +178,7 @@ sub new {
             FinanceCanada Fool FTfunds HU GoldMoney HEX IndiaMutual LeRevenu
             ManInvestments Morningstar MorningstarJP MStaruk MtGox NZX Platinum
             SEB SIXfunds SIXshares StockHouseCanada TSP TSX Tdefunds
-            Tdwaterhouse Tiaacref TNetuk Troweprice Trustnet Union USFedBonds
+            Tdwaterhouse TNetuk Troweprice Trustnet Union USFedBonds
             VWD ZA Cominvest Finanzpartner YahooJSON Yahoo::Asia
             Yahoo::Australia Yahoo::Brasil Yahoo::Europe Yahoo::NZ
             Yahoo::USA ZA_UnitTrusts/; }
