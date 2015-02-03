@@ -126,7 +126,7 @@ sub fidelityfixed {
 	      $info{$symbol, 'bid'}      = $rows[$n][7];
 	      $info{$symbol, 'ask'}      = $rows[$n][8];
 	      $info{$symbol, 'askyield'} = $rows[$n][9];
-	      if ($rows[$n][11] =~ "View") {
+	      if ($rows[$n][12] =~ "View") {
 	          # price data is in a spearate window
 	          $url = $FIDELITY_URL2.$symbol;
                   #print "[debug URL2]: ", $url, "\n";
