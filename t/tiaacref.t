@@ -52,7 +52,7 @@ ok(substr($quotes{"TCMVX","date"},6,4) == $year ||
 ok($quotes{"TLGRX","success"} > 0);
 
 ok($quotes{"BOGOname","success"} == 0);
-ok($quotes{"BOGOname","errormsg"} eq "Bad symbol");
+ok($quotes{"BOGOname","errormsg"} eq "Stock lookup failed");
 
 ok($quotes{"CREFbond","success"} > 0);
 ok($quotes{"CREFbond","nav"} > 0);
