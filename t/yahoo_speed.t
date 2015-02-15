@@ -20,4 +20,4 @@ foreach my $q (@q) {
   ok( $last > 0, "$q: $last>0" );
 }
 
-done_testing( 1+$#q );
+done_testing( 1+@q );
