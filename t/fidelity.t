@@ -16,7 +16,7 @@ my @funds = qw/FGRIX FNMIX FASGX/;
 my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my %quotes = $q->fidelity_direct(@funds);
+my %quotes = $q->fetch("fidelityfixed",@funds);
 ok(%quotes);
 
 # Check that the name and nav are defined for all of the funds.
