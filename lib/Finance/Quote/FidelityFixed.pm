@@ -39,7 +39,7 @@ sub methods {
 sub labels {
     my @labels = qw/ method source name symbol coupon bid bidyield askyield ask date isodate time price /;
     return (fidelityfixed => \@labels);
-}   
+}
 
 
 sub fidelityfixed {
@@ -123,8 +123,8 @@ sub fidelityfixed {
 	      $info{$symbol, 'coupon'}   = $rows[$n][2];
 	      $info{$symbol, 'maturity'} = $rows[$n][3];
 	      $info{$symbol, 'bidyield'} = $rows[$n][6];
-	      $info{$symbol, 'bid'}      = $rows[$n][7];
-	      $info{$symbol, 'ask'}      = $rows[$n][8];
+              $info{$symbol, 'bid'}      = $rows[$n][7];
+              $info{$symbol, 'ask'}      = $rows[$n][8];
 	      $info{$symbol, 'askyield'} = $rows[$n][9];
 	      if ($rows[$n][12] =~ "View") {
 	          # price data is in a spearate window
@@ -169,14 +169,15 @@ sub fidelityfixed {
                       $info{$symbol, 'time'} = $6 eq 'a' ? "$4:$5" : ($4+12).":$5";
                   }
               }
-
-	      ($_) = /(\d+\.\d+)/ for $info{$symbol, 'bid'}, $info{$symbol, 'ask'}, $info{$symbol, 'recent'};
-	      $info{$symbol, 'price'} = sprintf("%.2f", 0.5*($info{$symbol,'bid'} + $info{$symbol,'ask'}));
-	      if ($info{$symbol, 'bid'} == 0 || $info{$symbol, 'ask'} == 0) {
+              $info{$symbol,'bid'} = ($info{$symbol,'bid'} =~ /^\s*(\d+(?:\.\d+)?)/) ? $1 : undef ;
+              $info{$symbol,'ask'} = ($info{$symbol,'ask'} =~ /^\s*(\d+(?:\.\d+)?)/) ? $1 : undef ;
+              $info{$symbol,'recent'} = ($info{$symbol,'recent'} =~ /^\s*(\d+(?:\.\d+)?)/) ? $1 : undef ;
+              if (!$info{$symbol,'bid'} || !$info{$symbol,'ask'}  ) {
 	          $info{$symbol, 'price'} = $info{$symbol, 'recent'};
-	      }
+              } else {
+                  $info{$symbol, 'price'} = sprintf("%.2f", 0.5*($info{$symbol, 'bid'} + $info{$symbol, 'ask'}));
+              }
 	      $info{$symbol, 'currency'} = 'USD';
-
 	      # clean things up a bit
 	      $info{$symbol, 'name'} =~ s/^\s+//;
 	      $info{$symbol, 'name'} =~ s/\s+$//;
@@ -197,6 +198,10 @@ sub fidelityfixed {
 =head1 NAME
 
 Finance::Quote::FidelityFixed- Obtain individual bond quotes from Fidelity
+
+=head1 NOTE
+
+This is not a 'fixed' version of the Fidelity.pm module
 
 =head1 SYNOPSIS
 
@@ -219,7 +224,7 @@ method source name symbol coupon bid bidyield askyield ask date isodate time pri
 =head1 SEE ALSO
 
 fidelity.com
-
+https://www.fidelity.com/fixed-income-bonds/overview
 Finance::Quote
 
 =cut
