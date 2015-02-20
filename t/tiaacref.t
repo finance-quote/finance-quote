@@ -7,7 +7,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 27;
+plan tests => 39;
 
 # Test TIAA-CREF functions.
 
@@ -15,47 +15,20 @@ my $q      = Finance::Quote->new();
 my $year   = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my %quotes = $q->tiaacref("CREFmony","TIAAreal","TLSRX","TCMVX","TLGRX","BOGOname","CREFbond");
-ok(%quotes);
+my @symbols = qw / CREFmony TIAAreal TLSRX TCMVX TLGRX CREFbond /;
+my %quotes = $q->tiaacref(@symbols,"BOGOname");
+ok(%quotes,"quotes got retrieved");
 
-ok($quotes{"CREFmony","nav"} > 0);
-ok($quotes{"CREFmony", "currency"} eq "USD");
-ok(length($quotes{"CREFmony","date"}) > 0);
-ok(substr($quotes{"CREFmony","isodate"},0,4) == $year ||
-   substr($quotes{"CREFmony","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"CREFmony","date"},6,4) == $year ||
-   substr($quotes{"CREFmony","date"},6,4) == $lastyear);
+foreach my $symbol (@symbols) {
+    ok($quotes{$symbol,"success"} > 0,"$symbol got retrieved");
+    ok($quotes{$symbol,"nav"} > 0,"$symbol has a nav");
+    ok($quotes{$symbol, "currency"} eq "USD","$symbol currency is valid");
+    ok(length($quotes{$symbol,"date"}) > 0,"$symbol has a valid date : ".$quotes{$symbol,"date"});
+    ok(substr($quotes{$symbol,"isodate"},0,4) == $year ||
+           substr($quotes{$symbol,"isodate"},0,4) == $lastyear,"$symbol isodate is recent");
+    ok(substr($quotes{$symbol,"date"},6,4) == $year ||
+           substr($quotes{$symbol,"date"},6,4) == $lastyear,"$symbol date is recent");
+};
 
-ok($quotes{"TIAAreal","nav"} > 0);
-ok(length($quotes{"TIAAreal","date"}) > 0);
-ok(substr($quotes{"TIAAreal","isodate"},0,4) == $year ||
-   substr($quotes{"TIAAreal","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"TIAAreal","date"},6,4) == $year ||
-   substr($quotes{"TIAAreal","date"},6,4) == $lastyear);
-
-ok($quotes{"TLSRX","success"} > 0);
-ok($quotes{"TLSRX","nav"} > 0);
-ok(length($quotes{"TLSRX","date"}) > 0);
-ok(substr($quotes{"TLSRX","isodate"},0,4) == $year ||
-   substr($quotes{"TLSRX","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"TLSRX","date"},6,4) == $year ||
-   substr($quotes{"TLSRX","date"},6,4) == $lastyear);
-
-ok($quotes{"TCMVX","success"} > 0);
-ok($quotes{"TCMVX","nav"} > 0);
-ok(length($quotes{"TCMVX","date"}) > 0);
-ok(substr($quotes{"TCMVX","isodate"},0,4) == $year ||
-   substr($quotes{"TCMVX","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"TCMVX","date"},6,4) == $year ||
-   substr($quotes{"TCMVX","date"},6,4) == $lastyear);
-
-ok($quotes{"TLGRX","success"} > 0);
-
-ok($quotes{"BOGOname","success"} == 0);
-ok($quotes{"BOGOname","errormsg"} eq "Bad symbol");
-
-ok($quotes{"CREFbond","success"} > 0);
-ok($quotes{"CREFbond","nav"} > 0);
-ok($quotes{"CREFbond", "currency"} eq "USD");
-ok(substr($quotes{"CREFbond","date"},6,4) == $year ||
-   substr($quotes{"CREFbond","date"},6,4) == $lastyear);
+ok($quotes{"BOGOname","success"} == 0,"BOGUS failed");
+ok($quotes{"BOGOname","errormsg"} eq "Bad symbol","BOGUS returned errornsg");
