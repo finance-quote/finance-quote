@@ -23,6 +23,7 @@ foreach my $symbol (@symbols) {
     ok($quotes{$symbol,"success"} > 0,"$symbol got retrieved");
     ok($quotes{$symbol,"nav"} > 0,"$symbol has a nav");
     ok($quotes{$symbol, "currency"} eq "USD","$symbol currency is valid");
+    ok($quotes{$symbol,"price"} > 0,"$symbol price (".$quotes{$symbol,"price"}.")> 0");
     ok(length($quotes{$symbol,"date"}) > 0,"$symbol has a valid date : ".$quotes{$symbol,"date"});
     ok(substr($quotes{$symbol,"isodate"},0,4) == $year ||
            substr($quotes{$symbol,"isodate"},0,4) == $lastyear,"$symbol isodate is recent");
