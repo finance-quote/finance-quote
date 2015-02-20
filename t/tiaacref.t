@@ -32,4 +32,4 @@ foreach my $symbol (@symbols) {
 };
 
 ok($quotes{"BOGOname","success"} == 0,"BOGUS failed");
-ok($quotes{"BOGOname","errormsg"} eq "Stock lookup failed","BOGUS returned errornsg");
+ok($quotes{"BOGOname","errormsg"} eq "Bad symbol","BOGUS returned errornsg");
