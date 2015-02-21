@@ -31,5 +31,5 @@ foreach my $fund (@funds) {
 }
 
 # Check that a bogus fund returns no-success.
-%quotes = $q->fidelity_direct("BOGUS");
+%quotes = $q->fetch("fidelityfixed","BOGUS");
 ok(! $quotes{"BOGUS","success"});
