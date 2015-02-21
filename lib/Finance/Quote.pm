@@ -174,7 +174,7 @@ sub new {
     shift(@reqmodules) if (@reqmodules);
     # Default modules
     @modules = qw/AEX AIAHK ASEGR ASX BMONesbittBurns BSERO Bourso
-            Cdnfundlibrary Citywire CSE Currencies Deka DWS FTPortfolios Fidelity
+            Cdnfundlibrary Citywire CSE Currencies Deka DWS FTPortfolios Fidelity FidelityFixed
             FinanceCanada Fool FTfunds HU GoldMoney HEX IndiaMutual LeRevenu
             ManInvestments Morningstar MorningstarJP MStaruk MtGox NZX Platinum
             SEB SIXfunds SIXshares StockHouseCanada TSP TSX Tdefunds
