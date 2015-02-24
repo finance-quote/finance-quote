@@ -233,7 +233,7 @@ DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 # Find the currency
 		my $currency;
 		if ($webdoc->content =~
-		m[($code):([A-Z]{3})]  )
+                m[<th>(Price currency)</th><td>([A-Z]{3})</td>]  )
         {
 
 			$currency    = $2;
