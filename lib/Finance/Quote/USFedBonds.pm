@@ -23,8 +23,8 @@ use HTML::TableExtract;
 use HTML::Parser;
 
 # VERSION
-my $TREASURY_MAINURL = ("http://www.publicdebt.treas.gov/");
-my $TREASURY_URL = ($TREASURY_MAINURL."sav/");
+my $TREASURY_MAINURL = ("http://www.treasurydirect.gov/");
+my $TREASURY_URL = ($TREASURY_MAINURL."indiv/tools/");
 
 sub methods {
     return (usfedbonds => \&treasury);
@@ -52,7 +52,7 @@ sub treasury {
     foreach my $symbol (@symbols) {
 
        #print STDERR "[debug]: Parsing:", $symbol, "\n";
-       my ($series, $issueyear, $issuemonth) = ( $symbol =~ m!^(.)(\d{4})(\d{2})! );
+       my ($series, $issueyear, $issuemonth) = ( $symbol =~ m!^(\w{1,2})(\d{4})(\d{2})! );
        if (!defined($series) || !defined($issueyear) || !defined($issuemonth)) {
 	 $info{$symbol, "success"} = 0;
 	 $info{$symbol, "errormsg"} = "Parse error";
@@ -64,8 +64,12 @@ sub treasury {
 	 my ($a,$b,$c,$d,$e,$f,$g);
 	 ($a,$b,$c,$d,$redemptionmonth,$redemptionyear,$e,$f,$g) = localtime;
 	 $redemptionmonth = $redemptionmonth + 1;
+	 $redemptionmonth = sprintf("%02d", $redemptionmonth);
 	 $redemptionyear = $redemptionyear + 1900;
 	 #print "[debug]: (Setting redemption date)\n";
+       }
+       if ($series eq "EE") {
+         $series = "N"
        }
        #print "[debug]: (Series):", $series, "\n";
        #print "[debug]: (Issue Year):", $issueyear, "\n";
@@ -128,6 +132,7 @@ sub treasury {
 
 	    #print "[debug]: (Month): ", $issuemonth, " Redemption Value ", $redemptionvalues[$issuemonth - 1];
 	    $info{$symbol, "price"} = $redemptionvalues[$issuemonth - 1]/100;
+	    $info{$symbol, "last"} = $info{$symbol, "price"};
 	    $info{$symbol, "symbol"} = $symbol;
 	    $info{$symbol, "currency"} = "USD";
 	    $info{$symbol, "source"} = $TREASURY_MAINURL;
