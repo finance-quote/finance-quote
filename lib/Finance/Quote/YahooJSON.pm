@@ -126,6 +126,17 @@ sub yahoo_json {
                 $info{ $stocks, "last" }   = $json_price;
                 $info{ $stocks, "volume" }   = $json_volume;
                 $info{ $stocks, "isodate" } = ( $json_utctime =~ /dddd-dd-dd/ );
+                my %suffix_to_currency = (
+                    NS => 'INR',
+                    CL => 'INR',
+                    BO => 'INR',
+                );
+
+                if (($stocks =~ m/([^.]+)\.([^.]+)/) ) {
+                    if (exists $suffix_to_currency{$2}) {
+                        $info{ $stocks, "currency" } = $suffix_to_currency{$2};
+                    }
+                }
 
                 $my_date = localtime($json_timestamp)->strftime('%d.%m.%Y %T');
                 if ( $json_utctime =~ /(\d\d\d\d)-(\d\d)-(\d\d)/ ) {

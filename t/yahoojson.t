@@ -10,7 +10,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 43;
+plan tests => 44;
 
 my $q = Finance::Quote->new();
 
@@ -54,6 +54,12 @@ foreach my $stock (@stocks) {
         my $date = $quotes{ $stock, "date" };
 
         # print "Date: $date ";
+
+		if ($stock =~ m/\.NS$/) {
+			my $currency = $quotes{$stock, "currency"};
+			ok($currency, "$stock has currency $currency");
+		}
+
     }
 }
 
