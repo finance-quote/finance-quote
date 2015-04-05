@@ -945,15 +945,15 @@ sub tiaacref
 			s/ +$//g;
 #			@line = split(/,/,$_);
 			@line = $quoter->parse_csv($_);
-			if($line[0] eq "CREF Bond Market Account"){$line[0] = "CREFbond";}
-			if($line[0] eq "CREF Equity Index Account"){$line[0] = "CREFequi";}
-			if($line[0] eq "CREF Global Equities Account"){$line[0] = "CREFglob";}
-			if($line[0] eq "CREF Growth Account"){$line[0] = "CREFgrow";}
-			if($line[0] eq "CREF Inflation-Linked Bond Account"){$line[0] = "CREFinfb";}
-			if($line[0] eq "CREF Money Market Account"){$line[0] = "CREFmony";}
-			if($line[0] eq "CREF Social Choice Account"){$line[0] = "CREFsoci";}
-			if($line[0] eq "CREF Stock Account"){$line[0] = "CREFstok";}
-			if($line[0] eq "TIAA Real Estate Account"){$line[0] = "TIAAreal";}
+			if($line[0] eq "QCBMRX"){$line[0] = "CREFbond";}
+			if($line[0] eq "QCEQRX"){$line[0] = "CREFequi";}
+			if($line[0] eq "QCGLRX"){$line[0] = "CREFglob";}
+			if($line[0] eq "QCGRRX"){$line[0] = "CREFgrow";}
+			if($line[0] eq "QCILRX"){$line[0] = "CREFinfb";}
+			if($line[0] eq "QCMMRX"){$line[0] = "CREFmony";}
+			if($line[0] eq "QCSCRX"){$line[0] = "CREFsoci";}
+			if($line[0] eq "QCSTRX"){$line[0] = "CREFstok";}
+			if($line[0] eq "QREARX"){$line[0] = "TIAAreal";}
 			if (exists $check{$line[0]}) { #did we ask for this data?
 				if($check{$line[0]} == 1){next} #calcisme: this prevents getting more than the first of the quotes
 				$info{$line[0],"symbol"} = $line[0]; #in case the caller needs this in the hash
