@@ -954,8 +954,8 @@ sub tiaacref
 			if($line[0] eq "CREF Social Choice Account"){$line[0] = "CREFsoci";}
 			if($line[0] eq "CREF Stock Account"){$line[0] = "CREFstok";}
 			if($line[0] eq "TIAA Real Estate Account"){$line[0] = "TIAAreal";}
-			if($check{$line[0]} == 1){next} #calcisme: this prevents getting more than the first of the quotes
 			if (exists $check{$line[0]}) { #did we ask for this data?
+				if($check{$line[0]} == 1){next} #calcisme: this prevents getting more than the first of the quotes
 				$info{$line[0],"symbol"} = $line[0]; #in case the caller needs this in the hash
 				$info{$line[0],"exchange"} = "TIAA-CREF";
 				$info{$line[0],"name"} = $tiaacref_ids{$line[0]};
