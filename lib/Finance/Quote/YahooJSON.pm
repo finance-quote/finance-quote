@@ -96,7 +96,6 @@ sub yahoo_json {
 
             }
             else {
-
                 my $json_resources = $json_data->{'list'}{'resources'}[0];
                 my $json_response_type =
                     $json_resources->{'resource'}{classname};
@@ -116,6 +115,8 @@ sub yahoo_json {
                     $json_resources->{'resource'}{'fields'}{'price'};
                 my $json_utctime =
                     $json_resources->{'resource'}{'fields'}{'utctime'};
+                my $json_currency =
+                    $json_resources->{'resource'}{'fields'}{'currency'};
 
                 $info{ $stocks, "success" } = 1;
                 $info{ $stocks, "exchange" } =
@@ -126,6 +127,13 @@ sub yahoo_json {
                 $info{ $stocks, "last" }   = $json_price;
                 $info{ $stocks, "volume" }   = $json_volume;
                 $info{ $stocks, "isodate" } = ( $json_utctime =~ /dddd-dd-dd/ );
+                if (defined $json_currency and length $json_currency) {
+                    $info{ $stocks, "currency" } = $json_currency;
+                } else {
+                    if ($stocks =~ /\.BO$/ ) { # bombay exchange
+                        $info{ $stocks, "currency" } = 'INR';
+                    }
+                }
 
                 $my_date = localtime($json_timestamp)->strftime('%d.%m.%Y %T');
                 if ( $json_utctime =~ /(\d\d\d\d)-(\d\d)-(\d\d)/ ) {
