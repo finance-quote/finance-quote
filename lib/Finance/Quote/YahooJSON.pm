@@ -37,6 +37,11 @@ use Time::Piece;
 
 my $YIND_URL_HEAD = 'http://finance.yahoo.com/webservice/v1/symbols/';
 my $YIND_URL_TAIL = '/quote?format=json';
+my %suffix_to_currency = (
+    NS => 'INR',
+    CL => 'INR',
+    BO => 'INR',
+);
 
 sub methods {
     return ( yahoo_json => \&yahoo_json,
@@ -130,8 +135,10 @@ sub yahoo_json {
                 if (defined $json_currency and length $json_currency) {
                     $info{ $stocks, "currency" } = $json_currency;
                 } else {
-                    if ($stocks =~ /\.BO$/ ) { # bombay exchange
-                        $info{ $stocks, "currency" } = 'INR';
+                    if ($stocks =~ /\.([^.]+)$/ ) { # find suffix
+                        if (exists $suffix_to_currency{$1}) {
+                            $info{ $stocks, "currency" } = $suffix_to_currency{$1};
+                        }
                     }
                 }
 
