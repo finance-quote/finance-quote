@@ -1,4 +1,8 @@
 {{$NEXT}}
+        * module updates: tiaacref, yahooJSON, FTfunds, MStaruk, USFedBonds, GoldMoney
+        * new modules: fidelityfixed (Peter Ratzlaff), yahooYQL
+        * removed modules: MTGox
+        * more tests: yahoo_speed.t, tiaacref.t
 
 1.37      2015-02-01 20:24:32+01:00 Europe/Brussels
         * modified 00-use.t to show more info
