@@ -61,18 +61,35 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 #       ..etc.
 # where bogus_symbol takes on the following values for the various annuities:
 #
-# CREF Bond Market Account:	CREFbond	41081991
-# CREF Equity Index Account:	CREFequi	41082540
-# CREF Global Equities Account:	CREFglob	41081992
-# CREF Growth Account:	CREFgrow	41082544
-# CREF Inflation-Linked Bond Account:	CREFinfb	41088773
-# CREF Money Market Account:	CREFmony	41081993
-# CREF Social Choice Account:	CREFsoci	41081994
-# CREF Stock Account:	CREFstok	41081995
-# TIAA Real Estate Account:	TIAAreal	41091375
+# CREF Bond Market Account (R1):	CREFbond (QCBMRX)	41081991
+# CREF Bond Market Account (R2):	QCBMPX	268585732
+# CREF Bond Market Account (R3):	QCBMIX	268581927
+# CREF Equity Index Account (R1):	CREFequi (QCEQRX)	41082540
+# CREF Equity Index Account (R2):	QCEQPX	268568309
+# CREF Equity Index Account (R3):	QCEQIX	268561119
+# CREF Global Equities Account (R1):	CREFglob (QCGLRX)	41081992
+# CREF Global Equities Account (R2):	QCGLPX	268563498
+# CREF Global Equities Account (R3):	QCGLIX	268551676
+# CREF Growth Account (R1):	CREFgrow (QCGRRX)	41082544
+# CREF Growth Account (R2):	QCGRPX	268527829
+# CREF Growth Account (R3):	QCGRIX	268576313
+# CREF Inflation-Linked Bond Account (R1):	CREFinfb (QCILRX)	41088773
+# CREF Inflation-Linked Bond Account (R2):	QCILPX	268587933
+# CREF Inflation-Linked Bond Account (R3):	QCILIX	268572721
+# CREF Money Market Account (R1):	CREFmony (QCMMRX)	41081993
+# CREF Money Market Account (R2):	QCMMPX	268532453
+# CREF Money Market Account (R3):	QCMMIX	268569116
+# CREF Social Choice Account (R1):	CREFsoci (QCSCRX)	41081994
+# CREF Social Choice Account (R2):	QCSCPX	268580724
+# CREF Social Choice Account (R3):	QCSCIX	268585136
+# CREF Stock Account (R1):	CREFstok (QCSTRX)	41081995
+# CREF Stock Account (R2):	QCSTPX	268540687
+# CREF Stock Account (R3):	QCSTIX	268555492
+# TIAA Real Estate Account:	TIAAreal (QREARX)	41091375
 # TIAA-CREF Bond Fund (Retirement):	TIDRX	4530828
 # TIAA-CREF Bond Index Fund (Retirement):	TBIRX	20739662
 # TIAA-CREF Bond Plus Fund (Retirement):	TCBRX	4530816
+# TIAA-CREF Emerging Markets Debt Fund (Retirement):	TEDTX	78873869
 # TIAA-CREF Emerging Markets Equity Fund (Retirement):	TEMSX	26176543
 # TIAA-CREF Emerging Markets Equity Index Fund (Retirement):	TEQSX	26176547
 # TIAA-CREF Equity Index Fund (Retirement):	TIQRX	4530786
@@ -82,6 +99,7 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 # TIAA-CREF Inflation-Linked Bond Fund (Retirement):	TIKRX	4530829
 # TIAA-CREF International Equity Fund (Retirement):	TRERX	302323
 # TIAA-CREF International Equity Index Fund (Retirement):	TRIEX	300269
+# TIAA-CREF International Opportunities Fund (Retirement):	TIOTX	57085015
 # TIAA-CREF Large-Cap Growth Fund (Retirement):	TILRX	4530785
 # TIAA-CREF Large-Cap Growth Index Fund (Retirement):	TRIRX	299525
 # TIAA-CREF Large-Cap Value Fund (Retirement):	TRLCX	301332
@@ -96,6 +114,7 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 # TIAA-CREF Lifecycle 2045 Fund (Retirement):	TTFRX	9467597
 # TIAA-CREF Lifecycle 2050 Fund (Retirement):	TLFRX	9467596
 # TIAA-CREF Lifecycle 2055 Fund (Retirement):	TTRLX	34211330
+# TIAA-CREF Lifecycle 2060 Fund (Retirement):	TLXRX	78873871
 # TIAA-CREF Lifecycle Index 2010 Fund (Retirement):	TLTRX	21066482
 # TIAA-CREF Lifecycle Index 2015 Fund (Retirement):	TLGRX	21066496
 # TIAA-CREF Lifecycle Index 2020 Fund (Retirement):	TLWRX	21066479
@@ -106,6 +125,7 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 # TIAA-CREF Lifecycle Index 2045 Fund (Retirement):	TLMRX	21066488
 # TIAA-CREF Lifecycle Index 2050 Fund (Retirement):	TLLRX	21066490
 # TIAA-CREF Lifecycle Index 2055 Fund (Retirement):	TTIRX	34211328
+# TIAA-CREF Lifecycle Index 2060 Fund (Retirement):	TVITX	78873875
 # TIAA-CREF Lifecycle Index Retirement Income Fund (Retirement):	TRCIX	21066468
 # TIAA-CREF Lifecycle Retirement Income Fund (Retirement):	TLIRX	9467594
 # TIAA-CREF Lifestyle Aggressive Growth Fund (Retirement):	TSARX	40508431
@@ -122,10 +142,12 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 # TIAA-CREF Short-Term Bond Fund (Retirement):	TISRX	4530818
 # TIAA-CREF Small-Cap Blend Index Fund (Retirement):	TRBIX	314644
 # TIAA-CREF Small-Cap Equity Fund (Retirement):	TRSEX	299968
+# TIAA-CREF Social Choice Bond Fund (Retirement):	TSBBX	49604881
 # TIAA-CREF Social Choice Equity Fund (Retirement):	TRSCX	300078
 # TIAA-CREF Bond Fund (Institutional):	TIBDX	307276
 # TIAA-CREF Bond Index Fund (Institutional):	TBIIX	20739664
 # TIAA-CREF Bond Plus Fund (Institutional):	TIBFX	4530820
+# TIAA-CREF Emerging Markets Debt Fund (Institutional):	TEDNX	78873868
 # TIAA-CREF Emerging Markets Equity Fund (Institutional):	TEMLX	26176540
 # TIAA-CREF Emerging Markets Equity Index Fund (Institutional):	TEQLX	26176544
 # TIAA-CREF Enhanced International Equity Index Fund (Institutional):	TFIIX	9467603
@@ -138,6 +160,7 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 # TIAA-CREF Inflation-Linked Bond Fund (Institutional):	TIILX	316693
 # TIAA-CREF International Equity Fund (Institutional):	TIIEX	305980
 # TIAA-CREF International Equity Index Fund (Institutional):	TCIEX	303673
+# TIAA-CREF International Opportunities Fund (Institutional):	TIOIX	57085012
 # TIAA-CREF Large-Cap Growth Fund (Institutional):	TILGX	4530800
 # TIAA-CREF Large-Cap Growth Index Fund (Institutional):	TILIX	297809
 # TIAA-CREF Large-Cap Value Fund (Institutional):	TRLIX	300692
@@ -152,6 +175,7 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 # TIAA-CREF Lifecycle 2045 Fund (Institutional):	TTFIX	9467607
 # TIAA-CREF Lifecycle 2050 Fund (Institutional):	TFTIX	9467601
 # TIAA-CREF Lifecycle 2055 Fund (Institutional):	TTRIX	34211329
+# TIAA-CREF Lifecycle 2060 Fund (Institutional):	TLXNX	78873872
 # TIAA-CREF Lifecycle Index 2010 Fund (Institutional):	TLTIX	21066484
 # TIAA-CREF Lifecycle Index 2015 Fund (Institutional):	TLFIX	21066498
 # TIAA-CREF Lifecycle Index 2020 Fund (Institutional):	TLWIX	21066480
@@ -162,6 +186,7 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 # TIAA-CREF Lifecycle Index 2045 Fund (Institutional):	TLXIX	21066478
 # TIAA-CREF Lifecycle Index 2050 Fund (Institutional):	TLLIX	21066492
 # TIAA-CREF Lifecycle Index 2055 Fund (Institutional):	TTIIX	34211326
+# TIAA-CREF Lifecycle Index 2060 Fund (Institutional):	TVIIX	78873873
 # TIAA-CREF Lifecycle Index Retirement Income Fund (Institutional):	TRILX	21066463
 # TIAA-CREF Lifecycle Retirement Income Fund (Institutional):	TLRIX	9467595
 # TIAA-CREF Lifestyle Aggressive Growth Fund (Institutional):	TSAIX	40508428
@@ -178,11 +203,13 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 # TIAA-CREF Short-Term Bond Fund (Institutional):	TISIX	4530784
 # TIAA-CREF Small-Cap Blend Index Fund (Institutional):	TISBX	309018
 # TIAA-CREF Small-Cap Equity Fund (Institutional):	TISEX	301622
+# TIAA-CREF Social Choice Bond Fund (Institutional):	TSBIX	49604882
 # TIAA-CREF Social Choice Equity Fund (Institutional):	TISCX	301897
 # TIAA-CREF Tax-Exempt Bond Fund (Institutional):	TITIX	4530819
 # TIAA-CREF Bond Fund (Retail):	TIORX	4530794
 # TIAA-CREF Bond Index Fund (Retail):	TBILX	20739663
 # TIAA-CREF Bond Plus Fund (Retail):	TCBPX	4530788
+# TIAA-CREF Emerging Markets Debt Fund (Retail):	TEDLX	78873866
 # TIAA-CREF Emerging Markets Equity Fund (Retail):	TEMRX	26176542
 # TIAA-CREF Emerging Markets Equity Index Fund (Retail):	TEQKX	26176545
 # TIAA-CREF Equity Index Fund (Retail):	TINRX	4530797
@@ -191,6 +218,7 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 # TIAA-CREF High Yield Fund (Retail):	TIYRX	4530830
 # TIAA-CREF Inflation-Linked Bond Fund (Retail):	TCILX	313727
 # TIAA-CREF International Equity Fund (Retail):	TIERX	4530827
+# TIAA-CREF International Opportunities Fund (Retail):	TIOSX	57085014
 # TIAA-CREF Large-Cap Growth Fund (Retail):	TIRTX	4530791
 # TIAA-CREF Large-Cap Value Fund (Retail):	TCLCX	302696
 # TIAA-CREF Lifecycle Retirement Income Fund (Retail):	TLRRX	9467600
@@ -206,11 +234,13 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 # TIAA-CREF Real Estate Securities Fund (Retail):	TCREX	309567
 # TIAA-CREF Short-Term Bond Fund (Retail):	TCTRX	4530822
 # TIAA-CREF Small-Cap Equity Fund (Retail):	TCSEX	297477
+# TIAA-CREF Social Choice Bond Fund (Retail):	TSBRX	49604884
 # TIAA-CREF Social Choice Equity Fund (Retail):	TICRX	4530792
 # TIAA-CREF Tax-Exempt Bond Fund (Retail):	TIXRX	4530793
 # TIAA-CREF Bond Fund (Premier):	TIDPX	21066506
 # TIAA-CREF Bond Index Fund (Premier):	TBIPX	21066534
 # TIAA-CREF Bond Plus Fund (Premier):	TBPPX	21066533
+# TIAA-CREF Emerging Markets Debt Fund (Premier):	TEDPX	78873867
 # TIAA-CREF Emerging Markets Equity Fund (Premier):	TEMPX	26176541
 # TIAA-CREF Emerging Markets Equity Index Fund (Premier):	TEQPX	26176546
 # TIAA-CREF Equity Index Fund (Premier):	TCEPX	21066530
@@ -220,6 +250,7 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 # TIAA-CREF Inflation-Linked Bond Fund (Premier):	TIKPX	21066500
 # TIAA-CREF International Equity Fund (Premier):	TREPX	21066466
 # TIAA-CREF International Equity Index Fund (Premier):	TRIPX	21066462
+# TIAA-CREF International Opportunities Fund (Premier):	TIOPX	57085013
 # TIAA-CREF Large-Cap Growth Fund (Premier):	TILPX	21066499
 # TIAA-CREF Large-Cap Value Fund (Premier):	TRCPX	21066467
 # TIAA-CREF Lifecycle 2010 Fund (Premier):	TCTPX	21066521
@@ -232,6 +263,7 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 # TIAA-CREF Lifecycle 2045 Fund (Premier):	TTFPX	21066444
 # TIAA-CREF Lifecycle 2050 Fund (Premier):	TCLPX	21066526
 # TIAA-CREF Lifecycle 2055 Fund (Premier):	TTRPX	34211331
+# TIAA-CREF Lifecycle 2060 Fund (Premier):	TLXPX	78873870
 # TIAA-CREF Lifecycle Index 2010 Fund (Premier):	TLTPX	21066483
 # TIAA-CREF Lifecycle Index 2015 Fund (Premier):	TLFPX	21066497
 # TIAA-CREF Lifecycle Index 2020 Fund (Premier):	TLWPX	21066434
@@ -242,6 +274,7 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 # TIAA-CREF Lifecycle Index 2045 Fund (Premier):	TLMPX	21066489
 # TIAA-CREF Lifecycle Index 2050 Fund (Premier):	TLLPX	21066491
 # TIAA-CREF Lifecycle Index 2055 Fund (Premier):	TTIPX	34211327
+# TIAA-CREF Lifecycle Index 2060 Fund (Premier):	TVIPX	78873874
 # TIAA-CREF Lifecycle Index Retirement Income Fund (Premier):	TLIPX	21066493
 # TIAA-CREF Lifecycle Retirement Income Fund (Premier):	TPILX	21066470
 # TIAA-CREF Lifestyle Aggressive Growth Fund (Premier):	TSAPX	40508430
@@ -255,6 +288,7 @@ sub labels { return (tiaacref => [qw/method symbol exchange name date isodate na
 # TIAA-CREF Real Estate Securities Fund (Premier):	TRRPX	21066459
 # TIAA-CREF Short-Term Bond Fund (Premier):	TSTPX	21066445
 # TIAA-CREF Small-Cap Equity Fund (Premier):	TSRPX	21066446
+# TIAA-CREF Social Choice Bond Fund (Premier):	TSBPX	49604883
 # TIAA-CREF Social Choice Equity Fund (Premier):	TRPSX	21066460
 
 #
@@ -274,18 +308,35 @@ sub tiaacref
 {
 	my $quoter = shift;
 	if (! %tiaacref_ids ) { #build a name hash for the annuities (once only)
-		$tiaacref_ids{"CREFbond"} = "CREF Bond Market Account";
-		$tiaacref_ids{"CREFequi"} = "CREF Equity Index Account";
-		$tiaacref_ids{"CREFglob"} = "CREF Global Equities Account";
-		$tiaacref_ids{"CREFgrow"} = "CREF Growth Account";
-		$tiaacref_ids{"CREFinfb"} = "CREF Inflation-Linked Bond Account";
-		$tiaacref_ids{"CREFmony"} = "CREF Money Market Account";
-		$tiaacref_ids{"CREFsoci"} = "CREF Social Choice Account";
-		$tiaacref_ids{"CREFstok"} = "CREF Stock Account";
+		$tiaacref_ids{"CREFbond"} = "CREF Bond Market Account (R1)";
+		$tiaacref_ids{"QCBMPX"} = "CREF Bond Market Account (R2)";
+		$tiaacref_ids{"QCBMIX"} = "CREF Bond Market Account (R3)";
+		$tiaacref_ids{"CREFequi"} = "CREF Equity Index Account (R1)";
+		$tiaacref_ids{"QCEQPX"} = "CREF Equity Index Account (R2)";
+		$tiaacref_ids{"QCEQIX"} = "CREF Equity Index Account (R3)";
+		$tiaacref_ids{"CREFglob"} = "CREF Global Equities Account (R1)";
+		$tiaacref_ids{"QCGLPX"} = "CREF Global Equities Account (R2)";
+		$tiaacref_ids{"QCGLIX"} = "CREF Global Equities Account (R3)";
+		$tiaacref_ids{"CREFgrow"} = "CREF Growth Account (R1)";
+		$tiaacref_ids{"QCGRPX"} = "CREF Growth Account (R2)";
+		$tiaacref_ids{"QCGRIX"} = "CREF Growth Account (R3)";
+		$tiaacref_ids{"CREFinfb"} = "CREF Inflation-Linked Bond Account (R1)";
+		$tiaacref_ids{"QCILPX"} = "CREF Inflation-Linked Bond Account (R2)";
+		$tiaacref_ids{"QCILIX"} = "CREF Inflation-Linked Bond Account (R3)";
+		$tiaacref_ids{"CREFmony"} = "CREF Money Market Account (R1)";
+		$tiaacref_ids{"QCMMPX"} = "CREF Money Market Account (R2)";
+		$tiaacref_ids{"QCMMIX"} = "CREF Money Market Account (R3)";
+		$tiaacref_ids{"CREFsoci"} = "CREF Social Choice Account (R1)";
+		$tiaacref_ids{"QCSCPX"} = "CREF Social Choice Account (R2)";
+		$tiaacref_ids{"QCSCIX"} = "CREF Social Choice Account (R3)";
+		$tiaacref_ids{"CREFstok"} = "CREF Stock Account (R1)";
+		$tiaacref_ids{"QCSTPX"} = "CREF Stock Account (R2)";
+		$tiaacref_ids{"QCSTIX"} = "CREF Stock Account (R3)";
 		$tiaacref_ids{"TIAAreal"} = "TIAA Real Estate Account";
 		$tiaacref_ids{"TIDRX"} = "TIAA-CREF Bond Fund (Retirement)";
 		$tiaacref_ids{"TBIRX"} = "TIAA-CREF Bond Index Fund (Retirement)";
 		$tiaacref_ids{"TCBRX"} = "TIAA-CREF Bond Plus Fund (Retirement)";
+		$tiaacref_ids{"TEDTX"} = "TIAA-CREF Emerging Markets Debt Fund (Retirement)";
 		$tiaacref_ids{"TEMSX"} = "TIAA-CREF Emerging Markets Equity Fund (Retirement)";
 		$tiaacref_ids{"TEQSX"} = "TIAA-CREF Emerging Markets Equity Index Fund (Retirement)";
 		$tiaacref_ids{"TIQRX"} = "TIAA-CREF Equity Index Fund (Retirement)";
@@ -295,6 +346,7 @@ sub tiaacref
 		$tiaacref_ids{"TIKRX"} = "TIAA-CREF Inflation-Linked Bond Fund (Retirement)";
 		$tiaacref_ids{"TRERX"} = "TIAA-CREF International Equity Fund (Retirement)";
 		$tiaacref_ids{"TRIEX"} = "TIAA-CREF International Equity Index Fund (Retirement)";
+		$tiaacref_ids{"TIOTX"} = "TIAA-CREF International Opportunities Fund (Retirement)";
 		$tiaacref_ids{"TILRX"} = "TIAA-CREF Large-Cap Growth Fund (Retirement)";
 		$tiaacref_ids{"TRIRX"} = "TIAA-CREF Large-Cap Growth Index Fund (Retirement)";
 		$tiaacref_ids{"TRLCX"} = "TIAA-CREF Large-Cap Value Fund (Retirement)";
@@ -309,6 +361,7 @@ sub tiaacref
 		$tiaacref_ids{"TTFRX"} = "TIAA-CREF Lifecycle 2045 Fund (Retirement)";
 		$tiaacref_ids{"TLFRX"} = "TIAA-CREF Lifecycle 2050 Fund (Retirement)";
 		$tiaacref_ids{"TTRLX"} = "TIAA-CREF Lifecycle 2055 Fund (Retirement)";
+		$tiaacref_ids{"TLXRX"} = "TIAA-CREF Lifecycle 2060 Fund (Retirement)";
 		$tiaacref_ids{"TLTRX"} = "TIAA-CREF Lifecycle Index 2010 Fund (Retirement)";
 		$tiaacref_ids{"TLGRX"} = "TIAA-CREF Lifecycle Index 2015 Fund (Retirement)";
 		$tiaacref_ids{"TLWRX"} = "TIAA-CREF Lifecycle Index 2020 Fund (Retirement)";
@@ -319,6 +372,7 @@ sub tiaacref
 		$tiaacref_ids{"TLMRX"} = "TIAA-CREF Lifecycle Index 2045 Fund (Retirement)";
 		$tiaacref_ids{"TLLRX"} = "TIAA-CREF Lifecycle Index 2050 Fund (Retirement)";
 		$tiaacref_ids{"TTIRX"} = "TIAA-CREF Lifecycle Index 2055 Fund (Retirement)";
+		$tiaacref_ids{"TVITX"} = "TIAA-CREF Lifecycle Index 2060 Fund (Retirement)";
 		$tiaacref_ids{"TRCIX"} = "TIAA-CREF Lifecycle Index Retirement Income Fund (Retirement)";
 		$tiaacref_ids{"TLIRX"} = "TIAA-CREF Lifecycle Retirement Income Fund (Retirement)";
 		$tiaacref_ids{"TSARX"} = "TIAA-CREF Lifestyle Aggressive Growth Fund (Retirement)";
@@ -335,10 +389,12 @@ sub tiaacref
 		$tiaacref_ids{"TISRX"} = "TIAA-CREF Short-Term Bond Fund (Retirement)";
 		$tiaacref_ids{"TRBIX"} = "TIAA-CREF Small-Cap Blend Index Fund (Retirement)";
 		$tiaacref_ids{"TRSEX"} = "TIAA-CREF Small-Cap Equity Fund (Retirement)";
+		$tiaacref_ids{"TSBBX"} = "TIAA-CREF Social Choice Bond Fund (Retirement)";
 		$tiaacref_ids{"TRSCX"} = "TIAA-CREF Social Choice Equity Fund (Retirement)";
 		$tiaacref_ids{"TIBDX"} = "TIAA-CREF Bond Fund (Institutional)";
 		$tiaacref_ids{"TBIIX"} = "TIAA-CREF Bond Index Fund (Institutional)";
 		$tiaacref_ids{"TIBFX"} = "TIAA-CREF Bond Plus Fund (Institutional)";
+		$tiaacref_ids{"TEDNX"} = "TIAA-CREF Emerging Markets Debt Fund (Institutional)";
 		$tiaacref_ids{"TEMLX"} = "TIAA-CREF Emerging Markets Equity Fund (Institutional)";
 		$tiaacref_ids{"TEQLX"} = "TIAA-CREF Emerging Markets Equity Index Fund (Institutional)";
 		$tiaacref_ids{"TFIIX"} = "TIAA-CREF Enhanced International Equity Index Fund (Institutional)";
@@ -351,6 +407,7 @@ sub tiaacref
 		$tiaacref_ids{"TIILX"} = "TIAA-CREF Inflation-Linked Bond Fund (Institutional)";
 		$tiaacref_ids{"TIIEX"} = "TIAA-CREF International Equity Fund (Institutional)";
 		$tiaacref_ids{"TCIEX"} = "TIAA-CREF International Equity Index Fund (Institutional)";
+		$tiaacref_ids{"TIOIX"} = "TIAA-CREF International Opportunities Fund (Institutional)";
 		$tiaacref_ids{"TILGX"} = "TIAA-CREF Large-Cap Growth Fund (Institutional)";
 		$tiaacref_ids{"TILIX"} = "TIAA-CREF Large-Cap Growth Index Fund (Institutional)";
 		$tiaacref_ids{"TRLIX"} = "TIAA-CREF Large-Cap Value Fund (Institutional)";
@@ -365,6 +422,7 @@ sub tiaacref
 		$tiaacref_ids{"TTFIX"} = "TIAA-CREF Lifecycle 2045 Fund (Institutional)";
 		$tiaacref_ids{"TFTIX"} = "TIAA-CREF Lifecycle 2050 Fund (Institutional)";
 		$tiaacref_ids{"TTRIX"} = "TIAA-CREF Lifecycle 2055 Fund (Institutional)";
+		$tiaacref_ids{"TLXNX"} = "TIAA-CREF Lifecycle 2060 Fund (Institutional)";
 		$tiaacref_ids{"TLTIX"} = "TIAA-CREF Lifecycle Index 2010 Fund (Institutional)";
 		$tiaacref_ids{"TLFIX"} = "TIAA-CREF Lifecycle Index 2015 Fund (Institutional)";
 		$tiaacref_ids{"TLWIX"} = "TIAA-CREF Lifecycle Index 2020 Fund (Institutional)";
@@ -375,6 +433,7 @@ sub tiaacref
 		$tiaacref_ids{"TLXIX"} = "TIAA-CREF Lifecycle Index 2045 Fund (Institutional)";
 		$tiaacref_ids{"TLLIX"} = "TIAA-CREF Lifecycle Index 2050 Fund (Institutional)";
 		$tiaacref_ids{"TTIIX"} = "TIAA-CREF Lifecycle Index 2055 Fund (Institutional)";
+		$tiaacref_ids{"TVIIX"} = "TIAA-CREF Lifecycle Index 2060 Fund (Institutional)";
 		$tiaacref_ids{"TRILX"} = "TIAA-CREF Lifecycle Index Retirement Income Fund (Institutional)";
 		$tiaacref_ids{"TLRIX"} = "TIAA-CREF Lifecycle Retirement Income Fund (Institutional)";
 		$tiaacref_ids{"TSAIX"} = "TIAA-CREF Lifestyle Aggressive Growth Fund (Institutional)";
@@ -391,11 +450,13 @@ sub tiaacref
 		$tiaacref_ids{"TISIX"} = "TIAA-CREF Short-Term Bond Fund (Institutional)";
 		$tiaacref_ids{"TISBX"} = "TIAA-CREF Small-Cap Blend Index Fund (Institutional)";
 		$tiaacref_ids{"TISEX"} = "TIAA-CREF Small-Cap Equity Fund (Institutional)";
+		$tiaacref_ids{"TSBIX"} = "TIAA-CREF Social Choice Bond Fund (Institutional)";
 		$tiaacref_ids{"TISCX"} = "TIAA-CREF Social Choice Equity Fund (Institutional)";
 		$tiaacref_ids{"TITIX"} = "TIAA-CREF Tax-Exempt Bond Fund (Institutional)";
 		$tiaacref_ids{"TIORX"} = "TIAA-CREF Bond Fund (Retail)";
 		$tiaacref_ids{"TBILX"} = "TIAA-CREF Bond Index Fund (Retail)";
 		$tiaacref_ids{"TCBPX"} = "TIAA-CREF Bond Plus Fund (Retail)";
+		$tiaacref_ids{"TEDLX"} = "TIAA-CREF Emerging Markets Debt Fund (Retail)";
 		$tiaacref_ids{"TEMRX"} = "TIAA-CREF Emerging Markets Equity Fund (Retail)";
 		$tiaacref_ids{"TEQKX"} = "TIAA-CREF Emerging Markets Equity Index Fund (Retail)";
 		$tiaacref_ids{"TINRX"} = "TIAA-CREF Equity Index Fund (Retail)";
@@ -404,6 +465,7 @@ sub tiaacref
 		$tiaacref_ids{"TIYRX"} = "TIAA-CREF High Yield Fund (Retail)";
 		$tiaacref_ids{"TCILX"} = "TIAA-CREF Inflation-Linked Bond Fund (Retail)";
 		$tiaacref_ids{"TIERX"} = "TIAA-CREF International Equity Fund (Retail)";
+		$tiaacref_ids{"TIOSX"} = "TIAA-CREF International Opportunities Fund (Retail)";
 		$tiaacref_ids{"TIRTX"} = "TIAA-CREF Large-Cap Growth Fund (Retail)";
 		$tiaacref_ids{"TCLCX"} = "TIAA-CREF Large-Cap Value Fund (Retail)";
 		$tiaacref_ids{"TLRRX"} = "TIAA-CREF Lifecycle Retirement Income Fund (Retail)";
@@ -419,11 +481,13 @@ sub tiaacref
 		$tiaacref_ids{"TCREX"} = "TIAA-CREF Real Estate Securities Fund (Retail)";
 		$tiaacref_ids{"TCTRX"} = "TIAA-CREF Short-Term Bond Fund (Retail)";
 		$tiaacref_ids{"TCSEX"} = "TIAA-CREF Small-Cap Equity Fund (Retail)";
+		$tiaacref_ids{"TSBRX"} = "TIAA-CREF Social Choice Bond Fund (Retail)";
 		$tiaacref_ids{"TICRX"} = "TIAA-CREF Social Choice Equity Fund (Retail)";
 		$tiaacref_ids{"TIXRX"} = "TIAA-CREF Tax-Exempt Bond Fund (Retail)";
 		$tiaacref_ids{"TIDPX"} = "TIAA-CREF Bond Fund (Premier)";
 		$tiaacref_ids{"TBIPX"} = "TIAA-CREF Bond Index Fund (Premier)";
 		$tiaacref_ids{"TBPPX"} = "TIAA-CREF Bond Plus Fund (Premier)";
+		$tiaacref_ids{"TEDPX"} = "TIAA-CREF Emerging Markets Debt Fund (Premier)";
 		$tiaacref_ids{"TEMPX"} = "TIAA-CREF Emerging Markets Equity Fund (Premier)";
 		$tiaacref_ids{"TEQPX"} = "TIAA-CREF Emerging Markets Equity Index Fund (Premier)";
 		$tiaacref_ids{"TCEPX"} = "TIAA-CREF Equity Index Fund (Premier)";
@@ -431,6 +495,7 @@ sub tiaacref
 		$tiaacref_ids{"TRPGX"} = "TIAA-CREF Growth & Income Fund (Premier)";
 		$tiaacref_ids{"TIHPX"} = "TIAA-CREF High Yield Fund (Premier)";
 		$tiaacref_ids{"TIKPX"} = "TIAA-CREF Inflation-Linked Bond Fund (Premier)";
+		$tiaacref_ids{"TIOPX"} = "TIAA-CREF International Opportunities Fund (Premier)";
 		$tiaacref_ids{"TREPX"} = "TIAA-CREF International Equity Fund (Premier)";
 		$tiaacref_ids{"TRIPX"} = "TIAA-CREF International Equity Index Fund (Premier)";
 		$tiaacref_ids{"TILPX"} = "TIAA-CREF Large-Cap Growth Fund (Premier)";
@@ -445,6 +510,7 @@ sub tiaacref
 		$tiaacref_ids{"TTFPX"} = "TIAA-CREF Lifecycle 2045 Fund (Premier)";
 		$tiaacref_ids{"TCLPX"} = "TIAA-CREF Lifecycle 2050 Fund (Premier)";
 		$tiaacref_ids{"TTRPX"} = "TIAA-CREF Lifecycle 2055 Fund (Premier)";
+		$tiaacref_ids{"TLXPX"} = "TIAA-CREF Lifecycle 2060 Fund (Premier)";
 		$tiaacref_ids{"TLTPX"} = "TIAA-CREF Lifecycle Index 2010 Fund (Premier)";
 		$tiaacref_ids{"TLFPX"} = "TIAA-CREF Lifecycle Index 2015 Fund (Premier)";
 		$tiaacref_ids{"TLWPX"} = "TIAA-CREF Lifecycle Index 2020 Fund (Premier)";
@@ -455,6 +521,7 @@ sub tiaacref
 		$tiaacref_ids{"TLMPX"} = "TIAA-CREF Lifecycle Index 2045 Fund (Premier)";
 		$tiaacref_ids{"TLLPX"} = "TIAA-CREF Lifecycle Index 2050 Fund (Premier)";
 		$tiaacref_ids{"TTIPX"} = "TIAA-CREF Lifecycle Index 2055 Fund (Premier)";
+		$tiaacref_ids{"TVIPX"} = "TIAA-CREF Lifecycle Index 2060 Fund (Premier)";
 		$tiaacref_ids{"TLIPX"} = "TIAA-CREF Lifecycle Index Retirement Income Fund (Premier)";
 		$tiaacref_ids{"TPILX"} = "TIAA-CREF Lifecycle Retirement Income Fund (Premier)";
 		$tiaacref_ids{"TSAPX"} = "TIAA-CREF Lifestyle Aggressive Growth Fund (Premier)";
@@ -468,22 +535,40 @@ sub tiaacref
 		$tiaacref_ids{"TRRPX"} = "TIAA-CREF Real Estate Securities Fund (Premier)";
 		$tiaacref_ids{"TSTPX"} = "TIAA-CREF Short-Term Bond Fund (Premier)";
 		$tiaacref_ids{"TSRPX"} = "TIAA-CREF Small-Cap Equity Fund (Premier)";
+		$tiaacref_ids{"TSBPX"} = "TIAA-CREF Social Choice Bond Fund (Premier)";
 		$tiaacref_ids{"TRPSX"} = "TIAA-CREF Social Choice Equity Fund (Premier)";
 	}
 
 	if (! %tiaacref_vals) {
 		$tiaacref_vals{"CREFbond"} = "41081991";
+		$tiaacref_vals{"QCBMPX"} = "268585732";
+		$tiaacref_vals{"QCBMIX"} = "268581927";
 		$tiaacref_vals{"CREFequi"} = "41082540";
+		$tiaacref_vals{"QCEQPX"} = "268568309";
+		$tiaacref_vals{"QCEQIX"} = "268561119";
 		$tiaacref_vals{"CREFglob"} = "41081992";
+		$tiaacref_vals{"QCGLPX"} = "268563498";
+		$tiaacref_vals{"QCGLIX"} = "268551676";
 		$tiaacref_vals{"CREFgrow"} = "41082544";
+		$tiaacref_vals{"QCGRPX"} = "268527829";
+		$tiaacref_vals{"QCGRIX"} = "268576313";
 		$tiaacref_vals{"CREFinfb"} = "41088773";
+		$tiaacref_vals{"QCILPX"} = "268587933";
+		$tiaacref_vals{"QCILIX"} = "268572721";
 		$tiaacref_vals{"CREFmony"} = "41081993";
+		$tiaacref_vals{"QCMMPX"} = "268532453";
+		$tiaacref_vals{"QCMMIX"} = "268569116";
 		$tiaacref_vals{"CREFsoci"} = "41081994";
+		$tiaacref_vals{"QCSCPX"} = "268580724";
+		$tiaacref_vals{"QCSCIX"} = "268585136";
 		$tiaacref_vals{"CREFstok"} = "41081995";
+		$tiaacref_vals{"QCSTPX"} = "268540687";
+		$tiaacref_vals{"QCSTIX"} = "268555492";
 		$tiaacref_vals{"TIAAreal"} = "41091375";
 		$tiaacref_vals{"TIDRX"} = "4530828";
 		$tiaacref_vals{"TBIRX"} = "20739662";
 		$tiaacref_vals{"TCBRX"} = "4530816";
+		$tiaacref_vals{"TEDTX"} = "78873869";
 		$tiaacref_vals{"TEMSX"} = "26176543";
 		$tiaacref_vals{"TEQSX"} = "26176547";
 		$tiaacref_vals{"TIQRX"} = "4530786";
@@ -493,6 +578,7 @@ sub tiaacref
 		$tiaacref_vals{"TIKRX"} = "4530829";
 		$tiaacref_vals{"TRERX"} = "302323";
 		$tiaacref_vals{"TRIEX"} = "300269";
+		$tiaacref_vals{"TIOTX"} = "57085015";
 		$tiaacref_vals{"TILRX"} = "4530785";
 		$tiaacref_vals{"TRIRX"} = "299525";
 		$tiaacref_vals{"TRLCX"} = "301332";
@@ -507,6 +593,7 @@ sub tiaacref
 		$tiaacref_vals{"TTFRX"} = "9467597";
 		$tiaacref_vals{"TLFRX"} = "9467596";
 		$tiaacref_vals{"TTRLX"} = "34211330";
+		$tiaacref_vals{"TLXRX"} = "78873871";
 		$tiaacref_vals{"TLTRX"} = "21066482";
 		$tiaacref_vals{"TLGRX"} = "21066496";
 		$tiaacref_vals{"TLWRX"} = "21066479";
@@ -517,6 +604,7 @@ sub tiaacref
 		$tiaacref_vals{"TLMRX"} = "21066488";
 		$tiaacref_vals{"TLLRX"} = "21066490";
 		$tiaacref_vals{"TTIRX"} = "34211328";
+		$tiaacref_vals{"TVITX"} = "78873875";
 		$tiaacref_vals{"TRCIX"} = "21066468";
 		$tiaacref_vals{"TLIRX"} = "9467594";
 		$tiaacref_vals{"TSARX"} = "40508431";
@@ -533,10 +621,12 @@ sub tiaacref
 		$tiaacref_vals{"TISRX"} = "4530818";
 		$tiaacref_vals{"TRBIX"} = "314644";
 		$tiaacref_vals{"TRSEX"} = "299968";
+		$tiaacref_vals{"TSBBX"} = "49604881";
 		$tiaacref_vals{"TRSCX"} = "300078";
 		$tiaacref_vals{"TIBDX"} = "307276";
 		$tiaacref_vals{"TBIIX"} = "20739664";
 		$tiaacref_vals{"TIBFX"} = "4530820";
+		$tiaacref_vals{"TEDNX"} = "78873868";
 		$tiaacref_vals{"TEMLX"} = "26176540";
 		$tiaacref_vals{"TEQLX"} = "26176544";
 		$tiaacref_vals{"TFIIX"} = "9467603";
@@ -549,6 +639,7 @@ sub tiaacref
 		$tiaacref_vals{"TIILX"} = "316693";
 		$tiaacref_vals{"TIIEX"} = "305980";
 		$tiaacref_vals{"TCIEX"} = "303673";
+		$tiaacref_vals{"TIOIX"} = "57085012";
 		$tiaacref_vals{"TILGX"} = "4530800";
 		$tiaacref_vals{"TILIX"} = "297809";
 		$tiaacref_vals{"TRLIX"} = "300692";
@@ -563,6 +654,7 @@ sub tiaacref
 		$tiaacref_vals{"TTFIX"} = "9467607";
 		$tiaacref_vals{"TFTIX"} = "9467601";
 		$tiaacref_vals{"TTRIX"} = "34211329";
+		$tiaacref_vals{"TLXNX"} = "78873872";
 		$tiaacref_vals{"TLTIX"} = "21066484";
 		$tiaacref_vals{"TLFIX"} = "21066498";
 		$tiaacref_vals{"TLWIX"} = "21066480";
@@ -573,6 +665,7 @@ sub tiaacref
 		$tiaacref_vals{"TLXIX"} = "21066478";
 		$tiaacref_vals{"TLLIX"} = "21066492";
 		$tiaacref_vals{"TTIIX"} = "34211326";
+		$tiaacref_vals{"TVIIX"} = "78873873";
 		$tiaacref_vals{"TRILX"} = "21066463";
 		$tiaacref_vals{"TLRIX"} = "9467595";
 		$tiaacref_vals{"TSAIX"} = "40508428";
@@ -589,11 +682,13 @@ sub tiaacref
 		$tiaacref_vals{"TISIX"} = "4530784";
 		$tiaacref_vals{"TISBX"} = "309018";
 		$tiaacref_vals{"TISEX"} = "301622";
+		$tiaacref_vals{"TSBIX"} = "49604882";
 		$tiaacref_vals{"TISCX"} = "301897";
 		$tiaacref_vals{"TITIX"} = "4530819";
 		$tiaacref_vals{"TIORX"} = "4530794";
 		$tiaacref_vals{"TBILX"} = "20739663";
 		$tiaacref_vals{"TCBPX"} = "4530788";
+		$tiaacref_vals{"TEDLX"} = "78873866";
 		$tiaacref_vals{"TEMRX"} = "26176542";
 		$tiaacref_vals{"TEQKX"} = "26176545";
 		$tiaacref_vals{"TINRX"} = "4530797";
@@ -602,6 +697,7 @@ sub tiaacref
 		$tiaacref_vals{"TIYRX"} = "4530830";
 		$tiaacref_vals{"TCILX"} = "313727";
 		$tiaacref_vals{"TIERX"} = "4530827";
+		$tiaacref_vals{"TIOSX"} = "57085014";
 		$tiaacref_vals{"TIRTX"} = "4530791";
 		$tiaacref_vals{"TCLCX"} = "302696";
 		$tiaacref_vals{"TLRRX"} = "9467600";
@@ -617,11 +713,13 @@ sub tiaacref
 		$tiaacref_vals{"TCREX"} = "309567";
 		$tiaacref_vals{"TCTRX"} = "4530822";
 		$tiaacref_vals{"TCSEX"} = "297477";
+		$tiaacref_vals{"TSBRX"} = "49604884";
 		$tiaacref_vals{"TICRX"} = "4530792";
 		$tiaacref_vals{"TIXRX"} = "4530793";
 		$tiaacref_vals{"TIDPX"} = "21066506";
 		$tiaacref_vals{"TBIPX"} = "21066534";
 		$tiaacref_vals{"TBPPX"} = "21066533";
+		$tiaacref_vals{"TEDPX"} = "78873867";
 		$tiaacref_vals{"TEMPX"} = "26176541";
 		$tiaacref_vals{"TEQPX"} = "26176546";
 		$tiaacref_vals{"TCEPX"} = "21066530";
@@ -631,6 +729,7 @@ sub tiaacref
 		$tiaacref_vals{"TIKPX"} = "21066500";
 		$tiaacref_vals{"TREPX"} = "21066466";
 		$tiaacref_vals{"TRIPX"} = "21066462";
+		$tiaacref_vals{"TIOPX"} = "57085013";
 		$tiaacref_vals{"TILPX"} = "21066499";
 		$tiaacref_vals{"TRCPX"} = "21066467";
 		$tiaacref_vals{"TCTPX"} = "21066521";
@@ -643,6 +742,7 @@ sub tiaacref
 		$tiaacref_vals{"TTFPX"} = "21066444";
 		$tiaacref_vals{"TCLPX"} = "21066526";
 		$tiaacref_vals{"TTRPX"} = "34211331";
+		$tiaacref_vals{"TLXPX"} = "78873870";
 		$tiaacref_vals{"TLTPX"} = "21066483";
 		$tiaacref_vals{"TLFPX"} = "21066497";
 		$tiaacref_vals{"TLWPX"} = "21066434";
@@ -653,6 +753,7 @@ sub tiaacref
 		$tiaacref_vals{"TLMPX"} = "21066489";
 		$tiaacref_vals{"TLLPX"} = "21066491";
 		$tiaacref_vals{"TTIPX"} = "34211327";
+		$tiaacref_vals{"TVIPX"} = "78873874";
 		$tiaacref_vals{"TLIPX"} = "21066493";
 		$tiaacref_vals{"TPILX"} = "21066470";
 		$tiaacref_vals{"TSAPX"} = "40508430";
@@ -666,6 +767,7 @@ sub tiaacref
 		$tiaacref_vals{"TRRPX"} = "21066459";
 		$tiaacref_vals{"TSTPX"} = "21066445";
 		$tiaacref_vals{"TSRPX"} = "21066446";
+		$tiaacref_vals{"TSBPX"} = "49604883";
 		$tiaacref_vals{"TRPSX"} = "21066460";
 	}
 
@@ -675,17 +777,34 @@ sub tiaacref
 
 	if (! %tiaacref_locs) {
 		$tiaacref_locs{"CREFbond"} = 1;
+		$tiaacref_locs{"QCBMPX"} = 1;
+		$tiaacref_locs{"QCBMIX"} = 1;
 		$tiaacref_locs{"CREFequi"} = 1;
+		$tiaacref_locs{"QCEQPX"} = 1;
+		$tiaacref_locs{"QCEQIX"} = 1;
 		$tiaacref_locs{"CREFglob"} = 1;
+		$tiaacref_locs{"QCGLPX"} = 1;
+		$tiaacref_locs{"QCGLIX"} = 1;
 		$tiaacref_locs{"CREFgrow"} = 1;
+		$tiaacref_locs{"QCGRPX"} = 1;
+		$tiaacref_locs{"QCGRIX"} = 1;
 		$tiaacref_locs{"CREFinfb"} = 1;
+		$tiaacref_locs{"QCILPX"} = 1;
+		$tiaacref_locs{"QCILIX"} = 1;
 		$tiaacref_locs{"CREFmony"} = 1;
+		$tiaacref_locs{"QCMMPX"} = 1;
+		$tiaacref_locs{"QCMMIX"} = 1;
 		$tiaacref_locs{"CREFsoci"} = 1;
+		$tiaacref_locs{"QCSCPX"} = 1;
+		$tiaacref_locs{"QCSCIX"} = 1;
 		$tiaacref_locs{"CREFstok"} = 1;
+		$tiaacref_locs{"QCSTPX"} = 1;
+		$tiaacref_locs{"QCSTIX"} = 1;
 		$tiaacref_locs{"TIAAreal"} = 1;
 		$tiaacref_locs{"TIDRX"} = 1;
 		$tiaacref_locs{"TBIRX"} = 1;
 		$tiaacref_locs{"TCBRX"} = 1;
+		$tiaacref_locs{"TEDTX"} = 1;
 		$tiaacref_locs{"TEMSX"} = 1;
 		$tiaacref_locs{"TEQSX"} = 1;
 		$tiaacref_locs{"TIQRX"} = 1;
@@ -695,6 +814,7 @@ sub tiaacref
 		$tiaacref_locs{"TIKRX"} = 1;
 		$tiaacref_locs{"TRERX"} = 1;
 		$tiaacref_locs{"TRIEX"} = 1;
+		$tiaacref_locs{"TIOTX"} = 1;
 		$tiaacref_locs{"TILRX"} = 1;
 		$tiaacref_locs{"TRIRX"} = 1;
 		$tiaacref_locs{"TRLCX"} = 1;
@@ -709,6 +829,7 @@ sub tiaacref
 		$tiaacref_locs{"TTFRX"} = 1;
 		$tiaacref_locs{"TLFRX"} = 1;
 		$tiaacref_locs{"TTRLX"} = 1;
+		$tiaacref_locs{"TLXRX"} = 1;
 		$tiaacref_locs{"TLTRX"} = 1;
 		$tiaacref_locs{"TLGRX"} = 1;
 		$tiaacref_locs{"TLWRX"} = 1;
@@ -719,6 +840,7 @@ sub tiaacref
 		$tiaacref_locs{"TLMRX"} = 1;
 		$tiaacref_locs{"TLLRX"} = 1;
 		$tiaacref_locs{"TTIRX"} = 1;
+		$tiaacref_locs{"TVITX"} = 1;
 		$tiaacref_locs{"TRCIX"} = 1;
 		$tiaacref_locs{"TLIRX"} = 1;
 		$tiaacref_locs{"TSARX"} = 1;
@@ -735,10 +857,12 @@ sub tiaacref
 		$tiaacref_locs{"TISRX"} = 1;
 		$tiaacref_locs{"TRBIX"} = 1;
 		$tiaacref_locs{"TRSEX"} = 1;
+		$tiaacref_locs{"TSBBX"} = 1;
 		$tiaacref_locs{"TRSCX"} = 1;
 		$tiaacref_locs{"TIBDX"} = 1;
 		$tiaacref_locs{"TBIIX"} = 1;
 		$tiaacref_locs{"TIBFX"} = 1;
+		$tiaacref_locs{"TEDNX"} = 1;
 		$tiaacref_locs{"TEMLX"} = 1;
 		$tiaacref_locs{"TEQLX"} = 1;
 		$tiaacref_locs{"TFIIX"} = 1;
@@ -751,6 +875,7 @@ sub tiaacref
 		$tiaacref_locs{"TIILX"} = 1;
 		$tiaacref_locs{"TIIEX"} = 1;
 		$tiaacref_locs{"TCIEX"} = 1;
+		$tiaacref_locs{"TIOIX"} = 1;
 		$tiaacref_locs{"TILGX"} = 1;
 		$tiaacref_locs{"TILIX"} = 1;
 		$tiaacref_locs{"TRLIX"} = 1;
@@ -765,6 +890,7 @@ sub tiaacref
 		$tiaacref_locs{"TTFIX"} = 1;
 		$tiaacref_locs{"TFTIX"} = 1;
 		$tiaacref_locs{"TTRIX"} = 1;
+		$tiaacref_locs{"TLXNX"} = 1;
 		$tiaacref_locs{"TLTIX"} = 1;
 		$tiaacref_locs{"TLFIX"} = 1;
 		$tiaacref_locs{"TLWIX"} = 1;
@@ -775,6 +901,7 @@ sub tiaacref
 		$tiaacref_locs{"TLXIX"} = 1;
 		$tiaacref_locs{"TLLIX"} = 1;
 		$tiaacref_locs{"TTIIX"} = 1;
+		$tiaacref_locs{"TVIIX"} = 1;
 		$tiaacref_locs{"TRILX"} = 1;
 		$tiaacref_locs{"TLRIX"} = 1;
 		$tiaacref_locs{"TSAIX"} = 1;
@@ -791,11 +918,13 @@ sub tiaacref
 		$tiaacref_locs{"TISIX"} = 1;
 		$tiaacref_locs{"TISBX"} = 1;
 		$tiaacref_locs{"TISEX"} = 1;
+		$tiaacref_locs{"TSBIX"} = 1;
 		$tiaacref_locs{"TISCX"} = 1;
 		$tiaacref_locs{"TITIX"} = 1;
 		$tiaacref_locs{"TIORX"} = 1;
 		$tiaacref_locs{"TBILX"} = 1;
 		$tiaacref_locs{"TCBPX"} = 1;
+		$tiaacref_locs{"TEDLX"} = 1;
 		$tiaacref_locs{"TEMRX"} = 1;
 		$tiaacref_locs{"TEQKX"} = 1;
 		$tiaacref_locs{"TINRX"} = 1;
@@ -804,6 +933,7 @@ sub tiaacref
 		$tiaacref_locs{"TIYRX"} = 1;
 		$tiaacref_locs{"TCILX"} = 1;
 		$tiaacref_locs{"TIERX"} = 1;
+		$tiaacref_locs{"TIOSX"} = 1;
 		$tiaacref_locs{"TIRTX"} = 1;
 		$tiaacref_locs{"TCLCX"} = 1;
 		$tiaacref_locs{"TLRRX"} = 1;
@@ -819,11 +949,13 @@ sub tiaacref
 		$tiaacref_locs{"TCREX"} = 1;
 		$tiaacref_locs{"TCTRX"} = 1;
 		$tiaacref_locs{"TCSEX"} = 1;
+		$tiaacref_locs{"TSBRX"} = 1;
 		$tiaacref_locs{"TICRX"} = 1;
 		$tiaacref_locs{"TIXRX"} = 1;
 		$tiaacref_locs{"TIDPX"} = 1;
 		$tiaacref_locs{"TBIPX"} = 1;
 		$tiaacref_locs{"TBPPX"} = 1;
+		$tiaacref_locs{"TEDPX"} = 1;
 		$tiaacref_locs{"TEMPX"} = 1;
 		$tiaacref_locs{"TEQPX"} = 1;
 		$tiaacref_locs{"TCEPX"} = 1;
@@ -833,6 +965,7 @@ sub tiaacref
 		$tiaacref_locs{"TIKPX"} = 1;
 		$tiaacref_locs{"TREPX"} = 1;
 		$tiaacref_locs{"TRIPX"} = 1;
+		$tiaacref_locs{"TIOPX"} = 1;
 		$tiaacref_locs{"TILPX"} = 1;
 		$tiaacref_locs{"TRCPX"} = 1;
 		$tiaacref_locs{"TCTPX"} = 1;
@@ -845,6 +978,7 @@ sub tiaacref
 		$tiaacref_locs{"TTFPX"} = 1;
 		$tiaacref_locs{"TCLPX"} = 1;
 		$tiaacref_locs{"TTRPX"} = 1;
+		$tiaacref_locs{"TLXPX"} = 1;
 		$tiaacref_locs{"TLTPX"} = 1;
 		$tiaacref_locs{"TLFPX"} = 1;
 		$tiaacref_locs{"TLWPX"} = 1;
@@ -855,6 +989,7 @@ sub tiaacref
 		$tiaacref_locs{"TLMPX"} = 1;
 		$tiaacref_locs{"TLLPX"} = 1;
 		$tiaacref_locs{"TTIPX"} = 1;
+		$tiaacref_locs{"TVIPX"} = 1;
 		$tiaacref_locs{"TLIPX"} = 1;
 		$tiaacref_locs{"TPILX"} = 1;
 		$tiaacref_locs{"TSAPX"} = 1;
@@ -868,6 +1003,7 @@ sub tiaacref
 		$tiaacref_locs{"TRRPX"} = 1;
 		$tiaacref_locs{"TSTPX"} = 1;
 		$tiaacref_locs{"TSRPX"} = 1;
+		$tiaacref_locs{"TSBPX"} = 1;
 		$tiaacref_locs{"TRPSX"} = 1;
 	}
 	my(@funds) = @_;
@@ -945,17 +1081,17 @@ sub tiaacref
 			s/ +$//g;
 #			@line = split(/,/,$_);
 			@line = $quoter->parse_csv($_);
-			if($line[0] eq "CREF Bond Market Account"){$line[0] = "CREFbond";}
-			if($line[0] eq "CREF Equity Index Account"){$line[0] = "CREFequi";}
-			if($line[0] eq "CREF Global Equities Account"){$line[0] = "CREFglob";}
-			if($line[0] eq "CREF Growth Account"){$line[0] = "CREFgrow";}
-			if($line[0] eq "CREF Inflation-Linked Bond Account"){$line[0] = "CREFinfb";}
-			if($line[0] eq "CREF Money Market Account"){$line[0] = "CREFmony";}
-			if($line[0] eq "CREF Social Choice Account"){$line[0] = "CREFsoci";}
-			if($line[0] eq "CREF Stock Account"){$line[0] = "CREFstok";}
-			if($line[0] eq "TIAA Real Estate Account"){$line[0] = "TIAAreal";}
-			if($check{$line[0]} == 1){next} #calcisme: this prevents getting more than the first of the quotes
+			if($line[0] eq "QCBMRX"){$line[0] = "CREFbond";}
+			if($line[0] eq "QCEQRX"){$line[0] = "CREFequi";}
+			if($line[0] eq "QCGLRX"){$line[0] = "CREFglob";}
+			if($line[0] eq "QCGRRX"){$line[0] = "CREFgrow";}
+			if($line[0] eq "QCILRX"){$line[0] = "CREFinfb";}
+			if($line[0] eq "QCMMRX"){$line[0] = "CREFmony";}
+			if($line[0] eq "QCSCRX"){$line[0] = "CREFsoci";}
+			if($line[0] eq "QCSTRX"){$line[0] = "CREFstok";}
+			if($line[0] eq "QREARX"){$line[0] = "TIAAreal";}
 			if (exists $check{$line[0]}) { #did we ask for this data?
+				if($check{$line[0]} == 1){next} #calcisme: this prevents getting more than the first of the quotes
 				$info{$line[0],"symbol"} = $line[0]; #in case the caller needs this in the hash
 				$info{$line[0],"exchange"} = "TIAA-CREF";
 				$info{$line[0],"name"} = $tiaacref_ids{$line[0]};
