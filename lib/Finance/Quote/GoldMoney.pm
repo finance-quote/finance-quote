@@ -30,7 +30,7 @@ package Finance::Quote::GoldMoney;
 require 5.005;
 
 use HTTP::Request::Common;
-use HTML::TableExtract;
+use JSON;
 
 use strict;
 use warnings;
@@ -55,7 +55,11 @@ sub goldmoney {
 	my @symbols = @_;
 	return unless @symbols;
 
+
 	my $ua = $quoter->user_agent;
+	# Set the ua to be blank. GoldMOney are using CloudFlare who block
+	# the default useragent.
+	$ua->agent('');
 	my (%symbolhash, @q, %info);
 	my (
 		$html_string, $te, $table_gold, $table_silver, $table_platinum,
@@ -86,21 +90,19 @@ sub goldmoney {
 		}
 	}
 
-	# get the page
-	# - but only if we want either gold, silver or platinum (there is nothing else there)
+	# get the JSON of the prices. Currently getting sell price, 
 	if( $_want_gold or $_want_silver or $_want_platinum) {
-		my $GOLDMONEY_URL = "http://goldmoney.com";
+		my $GOLDMONEY_URL = "http://www.goldmoney.com/metal/prices/currentSpotPrices?currency=usd&units=grams&price=bid";
 		my $response = $ua->request(GET $GOLDMONEY_URL);
 
 		if ($response->is_success) {
 			$html_string =$response->content;
 
-			# we want the 'Current Spot Rates' table
-			$te = new HTML::TableExtract->new( attribs=>{class=>'spot'}, subtables=>1);
-			$te->parse($html_string);
-			$table_gold=$te->table(3,0);
-			$table_silver=$te->table(3,1);
-			$table_platinum=$te->table(3,2);
+			my $json = from_json( $html_string );
+	
+			$table_gold     = $json->{spotPrices}[0];
+			$table_silver   = $json->{spotPrices}[1];
+			$table_platinum = $json->{spotPrices}[2];
 		} else {
 			# retrieval error - flag an error and return right away
 			foreach my $s (@symbols) {
@@ -117,62 +119,41 @@ sub goldmoney {
 		#   know how please tell me
 		# - this assumption causes trouble when the module is used outside the
 		#   european region (F::Q considers every number it gets as EUR and converts it...)
-		$currency = 'EUR';
+		$currency = 'USD';
 
 		# get gold rate
 		#
 		if( $_want_gold ) {
-			$_ = $table_gold->cell(0,0);
-			if( /(\d*\.\d*).*\/gg/ ) {
-				$gold_gg = $1;
-			}
-
-			$_ = $table_gold->cell(0,0);
-			if( /(\d*\.\d*).*\/oz/ ) {
-				$gold_oz = $1;
-
 				# assemble final dataset
 				# - take "now" as date/time as the site is always current and does
 				#   not provide this explicitly - so there is a time-slip
 				$quoter->store_date(\%info, 'gold', {isodate => _goldmoney_time('isodate')});
+
 				$info{'gold','time'}     = _goldmoney_time('time');
 				$info{'gold','name'}     = 'Gold Spot';
-				$info{'gold','last'}     = $gold_oz;
-				$info{'gold','price'}    = $gold_oz;
-				$info{'gold','price_gg'} = $gold_gg;
+				$info{'gold','last'}     = $table_gold->{timestamp};
+				$info{'gold','price'}    = $table_gold->{spotPrice};
 				$info{'gold','currency'} = $currency;
 				$info{'gold','success'}  = 1;
-			}
 		}
 
 		# get silver rate
 		#
 		if( $_want_silver ) {
-			$_ = $table_silver->cell(0,0);
-			if( /(\d*\.\d*).*\/oz/ ) {
-				$silver_oz = $1;
-
+			
 				$quoter->store_date(\%info, 'silver', {isodate => _goldmoney_time('isodate')});
 				$info{'silver','time'}     = _goldmoney_time('time');
 				$info{'silver','name'}     = 'Silver Spot';
-				$info{'silver','last'}     = $silver_oz;
-				$info{'silver','price'}    = $silver_oz;
+				$info{'silver','last'}     = $table_silver->{timestamp};
+				$info{'silver','price'}    = $table_silver->{spotPrice};
 				$info{'silver','currency'} = $currency;
 				$info{'silver','success'}  = 1;
-			}
+			
 		}
 
 		# get platinum rate
 		#
 		if( $_want_platinum ) {
-			$_ = $table_platinum->cell(0,0);
-			if( /(\d*\.\d*).*\/pg/ ) {
-				$platinum_pg = $1;
-			}
-
-			$_ = $table_platinum->cell(0,0);
-			if( /(\d*\.\d*).*\/oz/ ) {
-				$platinum_oz = $1;
 
 				# assemble final dataset
 				# - take "now" as date/time as the site is always current and does
@@ -180,12 +161,11 @@ sub goldmoney {
 				$quoter->store_date(\%info, 'platinum', {isodate => _goldmoney_time('isodate')});
 				$info{'platinum','time'}     = _goldmoney_time('time');
 				$info{'platinum','name'}     = 'Platinum Spot';
-				$info{'platinum','last'}     = $platinum_oz;
-				$info{'platinum','price'}    = $platinum_oz;
-				$info{'platinum','price_pg'} = $platinum_pg;
+				$info{'platinum','last'}     = $table_platinum->{timestamp};
+				$info{'platinum','price'}    = $table_platinum->{spotPrice};
 				$info{'platinum','currency'} = $currency;
 				$info{'platinum','success'}  = 1;
-			}
+			
 		}
 	}
 
@@ -253,8 +233,7 @@ The following labels are returned by Finance::Quote::GoldMoney:
 	- exchange
 	- name
 	- date, time
-	- price (per ounce), price_gg (per goldgram, gold only),
-      price_pg (per platinumgram, platinum only)
+	- price (per gram),
     - currency
 
 =head1 SEE ALSO
