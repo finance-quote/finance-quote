@@ -133,7 +133,7 @@ sub goldmoney {
 
 				$info{'gold','time'}     = _goldmoney_time('time');
 				$info{'gold','name'}     = 'Gold Spot';
-				$info{'gold','last'}     = $table_gold->{timestamp};
+				$info{'gold','last'}     = $table_gold->{spotPrice};
 				$info{'gold','price'}    = $table_gold->{spotPrice};
 				$info{'gold','currency'} = $currency;
 				$info{'gold','success'}  = 1;
@@ -142,15 +142,15 @@ sub goldmoney {
 		# get silver rate
 		#
 		if( $_want_silver ) {
-			
+
 				$quoter->store_date(\%info, 'silver', {isodate => _goldmoney_time('isodate')});
 				$info{'silver','time'}     = _goldmoney_time('time');
 				$info{'silver','name'}     = 'Silver Spot';
-				$info{'silver','last'}     = $table_silver->{timestamp};
+				$info{'silver','last'}     = $table_silver->{spotPrice};
 				$info{'silver','price'}    = $table_silver->{spotPrice};
 				$info{'silver','currency'} = $currency;
 				$info{'silver','success'}  = 1;
-			
+
 		}
 
 		# get platinum rate
@@ -163,11 +163,11 @@ sub goldmoney {
 				$quoter->store_date(\%info, 'platinum', {isodate => _goldmoney_time('isodate')});
 				$info{'platinum','time'}     = _goldmoney_time('time');
 				$info{'platinum','name'}     = 'Platinum Spot';
-				$info{'platinum','last'}     = $table_platinum->{timestamp};
+				$info{'platinum','last'}     = $table_platinum->{spotPrice};
 				$info{'platinum','price'}    = $table_platinum->{spotPrice};
 				$info{'platinum','currency'} = $currency;
 				$info{'platinum','success'}  = 1;
-			
+
 		}
 	}
 
