@@ -114,15 +114,6 @@ sub goldmoney {
 			return wantarray() ? %info : \%info;
 		}
 
-		# get list of currencies
-		# FIXME:
-		# - assume euro since the site change in 01/2009
-		# - currency is JavaScript()ed since then and therefore hard to parse, if you
-		#   know how please tell me
-		# - this assumption causes trouble when the module is used outside the
-		#   european region (F::Q considers every number it gets as EUR and converts it...)
-		$currency = 'USD';
-
 		# get gold rate
 		#
 		if( $_want_gold ) {
