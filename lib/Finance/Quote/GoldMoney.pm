@@ -90,16 +90,18 @@ sub goldmoney {
 		}
 	}
 
-	# get the JSON of the prices. Currently getting sell price, 
+	# get the JSON of the prices. Currently getting sell price,
 	if( $_want_gold or $_want_silver or $_want_platinum) {
-		my $GOLDMONEY_URL = "http://www.goldmoney.com/metal/prices/currentSpotPrices?currency=usd&units=grams&price=bid";
+
+            my $currency = $quoter->{"currency"}||'EUR';
+		my $GOLDMONEY_URL = "http://www.goldmoney.com/metal/prices/currentSpotPrices?currency=".lc($currency)."&units=grams&price=bid";
 		my $response = $ua->request(GET $GOLDMONEY_URL);
 
 		if ($response->is_success) {
 			$html_string =$response->content;
 
 			my $json = from_json( $html_string );
-	
+
 			$table_gold     = $json->{spotPrices}[0];
 			$table_silver   = $json->{spotPrices}[1];
 			$table_platinum = $json->{spotPrices}[2];
