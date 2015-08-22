@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.38      2015-08-22 13:22:56+02:00 Europe/Brussels
         * module updates: tiaacref, yahooJSON, FTfunds, MStaruk, USFedBonds, GoldMoney
         * new modules: fidelityfixed (Peter Ratzlaff), yahooYQL
         * removed modules: MTGox
