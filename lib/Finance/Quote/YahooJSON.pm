@@ -193,7 +193,7 @@ This module provides the "yahoo_json" fetch method.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::YahooJSON :
-name, last, isodate, volume, method, exchange.
+name, last, isodate, volume, method, exchange, currency.
 
 =head1 SEE ALSO
 
