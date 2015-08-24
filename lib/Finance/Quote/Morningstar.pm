@@ -41,7 +41,7 @@ sub morningstar {
 	  return wantarray ? %funds : \%funds;
     }
 
-    $te = new HTML::TableExtract();
+    $te = HTML::TableExtract->new();
     $te->parse($reply->content);
     #print "Tables: " . $te->tables_report() . "\n";
     my $counter = 0;

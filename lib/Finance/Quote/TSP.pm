@@ -98,7 +98,7 @@ sub tsp {
 	$ua = $quoter->user_agent;
 	$reply = $ua->request(GET $TSP_URL);
 	return unless ($reply->is_success);
-	$te = new HTML::TableExtract( headers =>
+	$te = HTML::TableExtract->new( headers =>
 		["Date", values %TSP_FUND_COLUMNS] );
 
 	$te->parse($reply->content);

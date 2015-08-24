@@ -72,7 +72,7 @@ sub trustnet
     @symbolhash{@symbols} = map(1,@symbols);
     #
     for (@symbols) {
-      my $te = new HTML::TableExtract( headers => [("Fund Name", "Group Name", "Bid Price", "Offer Price", "Yield")]);
+      my $te = HTML::TableExtract->new( headers => [("Fund Name", "Group Name", "Bid Price", "Offer Price", "Yield")]);
       $trust = $_;
       # determine unit type
       $unittype = "all";

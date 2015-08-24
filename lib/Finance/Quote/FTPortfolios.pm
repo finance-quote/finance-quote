@@ -71,7 +71,7 @@ sub ftportfolios
     @symbolhash{@symbols} = map(1,@symbols);
     #
     for (@symbols) {
-      my $te = new HTML::TableExtract( );
+      my $te = HTML::TableExtract->new();
       $trust = $_;
       $url = "$FTPORTFOLIOS_URL";
 

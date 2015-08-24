@@ -62,7 +62,7 @@ sub fundlibrary   {
       $mutual = $_;
       $url = "$FUNDLIB_URL$mutual";
       $reply = $ua->request(GET $url);
-      $te = new HTML::TableExtract(headers => ["Date", "NAVPS"],
+      $te = HTML::TableExtract->new(headers => ["Date", "NAVPS"],
 				   slice_columns => 0);
 
       # Make sure something is returned  ##CAN exit more gracefully - add later##

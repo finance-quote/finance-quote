@@ -64,7 +64,7 @@ sub financecanada {
 
 	# Parse the page looking for the table containing the full
 	# name of the stock
-        my $te = new HTML::TableExtract( depth => 2, count => 0);
+        my $te = HTML::TableExtract->new( depth => 2, count => 0);
         $te->parse($response->content);
 
 	# debug
@@ -87,7 +87,7 @@ sub financecanada {
 
 	# Parse the page looking for the table containing the quote
 	# details
-        $te = new HTML::TableExtract(headers => [qw(Quote)],
+        $te = HTML::TableExtract->new(headers => [qw(Quote)],
 				     slice_columns => 0);
         $te->parse($response->content);
 

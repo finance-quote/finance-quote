@@ -62,7 +62,7 @@ sub asegr {
 		if ($reply->is_success)
 		{
 
-			$te= new HTML::TableExtract( headers =>
+			$te= HTML::TableExtract->new( headers =>
 			[("Date","Price","\%Change","Volume","Max","Min","Value","Trades","Open")]);
 
 			$te->parse($reply->content);

@@ -62,7 +62,7 @@ sub bmonesbittburns {
 
             #print STDERR $reply->content,"\n";
 
-            $te = new HTML::TableExtract( depth => 2);
+            $te = HTML::TableExtract->new( depth => 2);
 
             # parse table
             $te->parse($reply->content);

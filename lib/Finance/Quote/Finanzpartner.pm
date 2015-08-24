@@ -58,7 +58,7 @@ sub finanzpartner
 		if (!$response -> is_success()) {
 			$info{$stock,"errormsg"} = "HTTP failure";
 		} else {
-			my $te = new HTML::TableExtract(depth => 0, count => 2);
+			my $te = HTML::TableExtract->new(depth => 0, count => 2);
 			$te->parse($response->content);
 			my $table = $te->first_table_found;
 
