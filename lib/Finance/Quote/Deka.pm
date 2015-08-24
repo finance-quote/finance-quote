@@ -62,7 +62,7 @@ sub deka
       $info{$stock,"errormsg"} = "HTTP failure";
     } else {
       my @headers = [qw(Name ISIN Whg Datum)];
-      my $te = new HTML::TableExtract(headers => @headers, slice_columns => 0);
+      my $te = HTML::TableExtract->new(headers => @headers, slice_columns => 0);
       $te->parse($response->content);
       foreach my $ts ($te->table_states) {
 #        foreach my $row ($ts->rows) {

@@ -63,7 +63,7 @@ sub bsero {
       if ($reply->is_success)
         {
 
-          $te = new HTML::TableExtract();
+          $te = HTML::TableExtract->new();
 
           $te->parse($reply->content);
 

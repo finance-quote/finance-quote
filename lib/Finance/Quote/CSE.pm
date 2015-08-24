@@ -60,10 +60,10 @@ sub cse {
   $url = $CSE_URL;    		# base url
 
   # Create a user agent object and HTTP headers
-  my $ua  = new LWP::UserAgent(agent => 'Mozilla/4.0 (compatible; MSIE 5.5; Windows 98)');
+  my $ua = LWP::UserAgent->new(agent => 'Mozilla/4.0 (compatible; MSIE 5.5; Windows 98)');
 
   # Compose POST request
-  my $request = new HTTP::Request("GET", $url);
+  my $request = HTTP::Request->new("GET", $url);
 
   $reply = $ua->request( $request );
 

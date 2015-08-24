@@ -131,7 +131,7 @@ sub vwd {
             $title->find("span")->delete_content;
             $info{ $fund, "name" } = $title->as_trimmed_text;
 
-            my $te = new HTML::TableExtract( depth => 0, count => 0 );
+            my $te = HTML::TableExtract->new( depth => 0, count => 0 );
             $te->parse( $wpkurs->as_HTML );
             my $table = $te->first_table_found;
 

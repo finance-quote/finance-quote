@@ -72,7 +72,7 @@ sub lerevenu {
 		{
 			# print STDERR $reply->content,"\n";
 
-			$te= new HTML::TableExtract( );
+			$te = HTML::TableExtract->new();
 
 			$te->parse($reply->content);
 

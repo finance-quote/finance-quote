@@ -68,7 +68,7 @@ sub sharenet {
             next;
         }
 
-        $te = new HTML::TableExtract();
+        $te = HTML::TableExtract->new();
         $te->parse( $response->content );
 
         # print "[debug]: (parsed HTML)",$te, "\n";

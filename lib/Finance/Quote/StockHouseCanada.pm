@@ -115,7 +115,7 @@ sub stockhouse_fund  {
 		######################################################
 		# debug
 
-		#my $tetest= new HTML::TableExtract( headers => [qw(NAVPS CURRENCY)] );
+		#my $tetest= HTML::TableExtract->new( headers => [qw(NAVPS CURRENCY)] );
 		#$tetest->parse($reply->content);
 		#foreach my $tstest ($tetest->table_states) {
 		#    print "\n***\n*** Table (", join(',', $tstest->coords), "):\n***\n";
@@ -141,7 +141,7 @@ sub stockhouse_fund  {
 		$fundquote {$mutual, "name"} = $name;
 
 		# Find NAV and Currency via table header
-		my $te= new HTML::TableExtract( headers => [qw(NAVPS CURRENCY)] );
+		my $te = HTML::TableExtract->new( headers => [qw(NAVPS CURRENCY)] );
 		$te->parse($reply->content);
 
 		# There should only be one hit
