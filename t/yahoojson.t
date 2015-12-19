@@ -42,7 +42,7 @@ foreach my $stock (@stocks) {
         ok( $last > 0, "Last $last > 0" );
 
         my $volume = $quotes{ $stock, "volume" };
-        ok( $volume > 0, "Volume $volume > 0" ) if !( $stock ~~ ["BEL20.BR","INGDIRECTFNE.BC"] );
+        ok( $volume > 0, "Volume $volume > 0" ) if !( grep { $_ eq $stock } ("BEL20.BR","INGDIRECTFNE.BC") );
 
         my $type = $quotes{ $stock, "type" };
         ok( $type, "Symbol type $type" );
