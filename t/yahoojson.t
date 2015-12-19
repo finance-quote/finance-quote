@@ -10,13 +10,13 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 52;
+plan tests => 67;
 
 my $q = Finance::Quote->new();
 
 #List of stocks to fetch. Feel free to change this during testing
 my @stocks =
-    ( "SUZLON.BO", "ANDHRABANK.BO", "RECLTD.NS", "AMZN", "SOLB.BR", "^DJI", "BEL20.BR" );
+    ( "SUZLON.BO", "ANDHRABANK.BO", "RECLTD.NS", "AMZN", "SOLB.BR", "^DJI", "BEL20.BR", "INGDIRECTFNE.BC", "AENA.MC" );
 
 my %quotes = $q->fetch( "yahoo_json", @stocks );
 ok( %quotes, "Data returned" );
@@ -42,7 +42,7 @@ foreach my $stock (@stocks) {
         ok( $last > 0, "Last $last > 0" );
 
         my $volume = $quotes{ $stock, "volume" };
-        ok( $volume > 0, "Volume $volume > 0" ) if ( $stock ne "BEL20.BR" );
+        ok( $volume > 0, "Volume $volume > 0" ) if !( $stock ~~ ["BEL20.BR","INGDIRECTFNE.BC"] );
 
         my $type = $quotes{ $stock, "type" };
         ok( $type, "Symbol type $type" );
@@ -55,6 +55,8 @@ foreach my $stock (@stocks) {
 
         # currency for .BO stocks
         ok( $quotes { $stock, "currency" } eq 'INR', 'Bombay stocks have currency INR' ) if $stock =~ /\.BO$/ ;
+        ok( $quotes { $stock, "currency" } eq 'EUR', 'Barcelona stocks have currency EUR' ) if $stock =~ /\.BC$/ ;
+        ok( $quotes { $stock, "currency" } eq 'EUR', 'Madrid stocks have currency EUR' ) if $stock =~ /\.MC$/ ;
 
         # print "Date: $date ";
     }
