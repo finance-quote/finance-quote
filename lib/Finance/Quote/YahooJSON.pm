@@ -43,6 +43,8 @@ my %suffix_to_currency = (
     BO => 'INR',
     BR => 'EUR',
     PA => 'EUR',
+    BC => 'EUR',
+    MC => 'EUR',
 );
 
 sub methods {
