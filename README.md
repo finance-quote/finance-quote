@@ -81,12 +81,10 @@ the empty list may be returned, or undef in a scalar context.
 
 # INSTALLATION
 
-To install this module, run the following commands:
+To install this module, make sure you have Dist::Zilla installed, and then run the following commands:
 
-    perl Makefile.PL
-    make
-    make test
-    make install
+    dzil test
+    dzil install
 
 For more detailed instructions, please see the INSTALL file.
 

@@ -7,6 +7,7 @@
 
 package Finance::Quote::SIXfunds;
 
+use strict;
 use HTTP::Request::Common;
 
 # VERSION
