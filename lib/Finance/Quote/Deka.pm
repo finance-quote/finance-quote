@@ -56,7 +56,6 @@ sub deka
     # process csv data
     foreach (split('\015?\012',$response->content))
         {
-            use DDP; p $_;
 #      @q = $quoter->parse_csv($_) or next;
       @q = split(/;/) or next;
       next unless (defined $q[0]);
@@ -74,7 +73,7 @@ sub deka
         $info{$q[0], "last"}     = convert_price($q[4]);
 
         $info{$q[0], "method"}   = "deka";
-        $info{$q[0], "currency"} = "EUR";
+        $info{$q[0], "currency"} = $q[12];
         $info{$q[0], "success"}  = 1;
       }
     }
