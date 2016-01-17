@@ -39,4 +39,4 @@ TODO: {
 
 # Check that a bogus fund returns no-success.
 ok($quotes{"BOGUS","success"} == 0);
-ok($quotes{"BOGUS","errormsg"} eq "Couldn't parse deka website");
+ok($quotes{"BOGUS","errormsg"} eq "No data returned");
