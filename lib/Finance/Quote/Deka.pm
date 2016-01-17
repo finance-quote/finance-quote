@@ -1,122 +1,142 @@
-# Finance::Quote Perl module to retrieve prices of Deka funds
-#    Copyright (C) 2005  Knut Franke <Knut.Franke@gmx.de>
+#!/usr/bin/perl -w
 #
-#    This program is free software; you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#    Deka import modul based on Union.pm
+#    Version 2016-01-12
 
 package Finance::Quote::Deka;
+require 5.005;
 
 use strict;
-use HTML::TableExtract;
+use LWP::UserAgent;
+use HTTP::Request::Common;
 
-require LWP::Protocol::https;
+our $VERSION = '1.39'; # VERSION
 
-# VERSION
-my $DEKA_URL = "https://www.deka.de/dn/useCases/fundsearch/UCFundsSearch.shtml?ACTION_FIELD=quickSearch";
+sub methods { return (deka => \&deka); }
+sub labels { return (deka => [qw/exchange name date isodate price method/]); }
 
-sub methods {return (deka        => \&deka);}
-sub labels { return (deka=>[qw/name date price last method/]); }
-
-# Trim leading and tailing whitespaces (also non-breakable whitespaces)
-sub trim
-{
-    $_ = shift();
-    s/^\s*//;
-    s/\s*$//;
-    s/&nbsp;//g;
-    return $_;
-}
+# =======================================================================
+# The deka routine gets quotes of DEKA funds (Deka Investments)
+# On their website DEKA provides a csv file in the format
+#    label1;label2;...
+#    symbol1;name1;date1;date_before1;bid1;...
+#    symbol2;name2;date2;date_before2,bid2,...
+#    ...
+#
+# This subroutine was written by Andre Joost <andrejoost@gmx.de>
 
 # Convert number separators to US values
 sub convert_price {
 	$_ = shift;
-	s/\./@/g;
-	s/,/\./g;
-	s/@/,/g;
+        tr/.,/,./ ;
 	return $_;
 }
 
 sub deka
 {
-  my $quoter = shift;     # The Finance::Quote object.
-  my @stocks = @_;
-  my $ua = $quoter->user_agent();
-  my %info;
+  my $quoter = shift;
+  my @funds = @_;
+  return unless @funds;
+  my $ua = $quoter->user_agent;
+  my (%fundhash, @q, %info, $tempdate);
 
-  foreach my $stock (@stocks) {
-    my $response = $ua->get($DEKA_URL . "&isin=" . $stock);
-#    print $response->content, "\n";
-    $info{$stock,"success"} = 0;
-    if (!$response -> is_success()) {
-      $info{$stock,"errormsg"} = "HTTP failure";
-    } else {
-      my @headers = [qw(Name ISIN Whg Datum)];
-      my $te = HTML::TableExtract->new(headers => @headers, slice_columns => 0);
-      $te->parse($response->content);
-      foreach my $ts ($te->table_states) {
-#        foreach my $row ($ts->rows) {
-#	  next if !defined $$row[0] || !defined $$row[1];
-#	  print "Row: ", join('|', @$row), "\n";
-#	}
+  # create hash of all funds requested
+  foreach my $fund (@funds)
+  {
+    $fundhash{$fund} = 0;
+  }
 
-        foreach my $row ($ts->rows) {
-	  next if !defined $$row[0] || !defined $$row[1];
-	  $info{$stock,"name"} = $$row[0];
-	  $info{$stock,"currency"} = $$row[2];
-	  $quoter->store_date(\%info, $stock, {eurodate => $$row[6]});
-	  $info{$stock,"price"} = convert_price(trim($$row[4]));
-	  $info{$stock,"last"} = $info{$stock,"price"};
-	  $info{$stock,"success"} = 1;
-	  $info{$stock,"method"} = "deka";
-	  $info{$stock,"symbol"} = $stock;
-        }
+  # get csv data
+  my $response = $ua->request(GET &dekaurl);
+
+
+  if ($response->is_success)
+  {
+
+    # process csv data
+    foreach (split('\015?\012',$response->content))
+        {
+            use DDP; p $_;
+#      @q = $quoter->parse_csv($_) or next;
+      @q = split(/;/) or next;
+      next unless (defined $q[0]);
+      if (exists $fundhash{$q[0]})
+      {
+        $fundhash{$q[0]} = 1;
+
+
+        $info{$q[0], "exchange"} = "DEKA";
+        $info{$q[0], "name"}     = $q[1];
+        $info{$q[0], "symbol"}   = $q[0];
+        $tempdate  = $q[2];
+	$quoter->store_date(\%info, $q[0], {eurodate => $tempdate});
+        $info{$q[0], "price"}    = convert_price($q[4]);
+        $info{$q[0], "last"}     = convert_price($q[4]);
+
+        $info{$q[0], "method"}   = "deka";
+        $info{$q[0], "currency"} = "EUR";
+        $info{$q[0], "success"}  = 1;
       }
-      $info{$stock,"errormsg"} = "Couldn't parse deka website"
-	  if ($info{$stock,"success"} == 0);
+    }
+
+    # check to make sure a value was returned for every fund requested
+    foreach my $fund (keys %fundhash)
+    {
+      if ($fundhash{$fund} == 0)
+      {
+        $info{$fund, "success"}  = 0;
+        $info{$fund, "errormsg"} = "No data returned";
+      }
     }
   }
-  return wantarray ? %info : \%info;
+  else
+  {
+    foreach my $fund (@funds)
+    {
+      $info{$fund, "success"}  = 0;
+      $info{$fund, "errormsg"} = "HTTP error";
+    }
+  }
+
+  return wantarray() ? %info : \%info;
+}
+
+# DEKA provides a csv file named fondspreise.csv containing the prices of all
+# their funds for the most recent business day.
+
+sub dekaurl
+{
+  return "https://www.deka.de/privatkunden/pflichtseiten/fondspreise?service=fondspreislisteExportController&action=exportCsv&typ=inVertrieb";
 }
 
 1;
 
 =head1 NAME
 
-Finance::Quote::Deka - Obtain fonds quotes from DekaBank.
+Finance::Quote::Deka	- Obtain quotes from DEKA (Wertpapierhaus der Sparkassen).
 
 =head1 SYNOPSIS
 
     use Finance::Quote;
 
-    $q = Finance::Quote->new("Deka");
+    $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("deka","DE0008474511");
+    %stockinfo = $q->fetch("deka","DE0008474503");
 
 =head1 DESCRIPTION
 
-This module obtains fund prices from DekaBank,
-http://www.deka.de/. Deka website supports retrieval by name, WKN or ISIN.
+This module obtains information about DEKA managed funds.
+
+Information returned by this module is governed by DEKA's terms
+and conditions.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::Deka:
-name, date, price, last, method.
+The following labels may be returned by Finance::Quote::DEKA:
+exchange, name, date, price, last.
 
 =head1 SEE ALSO
 
-DekaBank, http://www.deka.de/
-
-Finance::Quote;
+DEKA (Deka Investments), http://www.deka.de/
 
 =cut
