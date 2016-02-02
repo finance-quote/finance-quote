@@ -36,7 +36,7 @@ use HTTP::Request::Common;
 use utf8;
 
 # VERSION
-$SEB_FUNDS_URL = 'http://taz.vv.sebank.se/cgi-bin/pts3/pow/fmk/2100/Senaste_fondkurserna.TXT';
+$SEB_FUNDS_URL = 'http://seb.se/pow/fmk/2100/Senaste_fondkurserna.TXT';
 
 sub methods { return (seb_funds => \&seb_funds); }
 
