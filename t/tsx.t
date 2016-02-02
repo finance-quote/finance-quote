@@ -13,12 +13,12 @@ plan tests => 26 ;
 # Test TSX functions.
 
 my $q      = Finance::Quote->new();
-my @stocks = ("NT", "BCE", "AER");
+my @stocks = ("STN", "BCE", "BMO");
 
 my %regexps = (
-	NT  => qr/\bNortel\b/,
+	STN => qr/\bStantec\b/,
 	BCE => qr/\b(BCE|Bell)\b/,
-	AER => qr/\bAeroplan\b/,
+	BMO => qr/\b(BMO|Montreal)\b/,
 );
 
 
