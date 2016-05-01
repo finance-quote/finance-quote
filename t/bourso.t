@@ -7,7 +7,7 @@ if ( not $ENV{ONLINE_TEST} ) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 65;
+plan tests => 73;
 
 # Test Bourso functions.
 
@@ -20,8 +20,9 @@ my @stocks = ( "FR0000441677",    # Fund
                "SOLB",            # Stock, EUR, BRUXELLES
                "CNP",             # Stock, EUR, Nyse Euronext
                "FR0010371401",    # Bond
-               "FR0010707414",    # Warrant
+               "FR0012773687",    # Warrant
                "FR0003500008",    # Index
+               "LU0207947044",    # Bond
 );
 
 # Bourso tests need to cover all the possible cases:
@@ -31,7 +32,7 @@ my @stocks = ( "FR0000441677",    # Fund
 #    cours-action	Stock		AF
 #    cours-obligation	Bond		FR0010371401
 #    opcvm/opcvm	Fund		FR0000441677
-#    cours-warrant	Warrant		FR0010707414
+#    cours-warrant	Warrant		FR0012773687
 #    cours-indice	Index		FR0003500008
 
 my $year     = ( localtime() )[5] + 1900;
@@ -51,7 +52,7 @@ foreach my $stock (@stocks) {
         my $last = $quotes{ $stock, "last" };
         ok( $last > 0, "$stock last ($last) > 0" );
         ok( length( $quotes{ $stock, "name" } ),   "$stock name is defined" );
-        ok( length( $quotes{ $stock, "symbol" } ), "$stock symbol is defined" );
+        ok( $quotes{ $stock, "symbol" } =~ /[A-Z]{2}\d{10}/, "$stock symbol is defined as ".$quotes{ $stock, "symbol" } );
         ok( $quotes{ $stock, "success" }, "$stock returned success" );
         ok(    # indexes are quoted in percents
             ( $stock eq "FR0003500008" )
@@ -64,7 +65,7 @@ foreach my $stock (@stocks) {
     SKIP:
         {
             skip "date is not defined for warrants", 2
-                if ( $stock eq "FR0010707414" );
+                if ( $stock eq "FR0012773687" );
             ok( substr( $quotes{ $stock, "isodate" }, 0, 4 ) == $year
                     || substr( $quotes{ $stock, "isodate" }, 0, 4 )
                     == $lastyear,
