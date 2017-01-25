@@ -48,9 +48,14 @@ use Encode;
 # This used to be different for the CREF and TIAA annuities, but this changed.
 $CREF_URL = ("https://www.tiaa-cref.org/public/tcfpi/Export/InvestmentDetails?Details=DailyPerformance");
 
-sub methods { return (tiaacref=>\&tiaacref); }
-
-sub labels { return (tiaacref => [qw/method symbol exchange name date isodate nav price/]); }
+sub methods { return (tiaacref=>\&tiaacref,
+                      tiaacref_direct=>\&tiaacref); }
+{
+    my @labels = qw/method symbol exchange name date isodate nav price/;
+    
+    sub labels { return (tiaacref => \@labels,
+                         tiaacref_direct => \@labels); }
+}
 
 # =======================================================================
 # TIAA-CREF Annuities are not listed on any exchange, unlike their mutual funds

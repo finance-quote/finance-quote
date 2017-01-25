@@ -16,7 +16,7 @@ my $year   = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
 my @symbols = qw / CREFmony TIAAreal TLSRX TCMVX TLGRX CREFbond /;
-my %quotes = $q->tiaacref(@symbols,"BOGOname");
+my %quotes = $q->tiaacref_direct(@symbols,"BOGOname");
 ok(%quotes,"quotes got retrieved");
 
 foreach my $symbol (@symbols) {
