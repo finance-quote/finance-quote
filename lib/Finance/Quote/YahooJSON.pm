@@ -41,10 +41,21 @@ my %suffix_to_currency = (
     NS => 'INR',
     CL => 'INR',
     BO => 'INR',
-    BR => 'EUR',
-    PA => 'EUR',
-    BC => 'EUR',
-    MC => 'EUR',
+    BC => 'EUR',    # Barcelona, Spain
+    BI => 'EUR',    # Bilbao, Italy
+    BR => 'EUR',    # Brussels, Belgium
+    D  => 'EUR',    # Dusseldorf, Germany
+    F  => 'EUR',    # Frankfurt, Germany
+    H  => 'EUR',    # Hamburg, Germany        
+    HA => 'EUR',    # Hannover, Germany        
+    MA => 'EUR',    # Madrid, Spain        
+    MC => 'EUR',    # Madrid (M.C.), Spain
+    MI => 'EUR',    # Milano, Italy
+    MU => 'EUR',    # Munich, Germany        
+    PA => 'EUR',    # Paris, France
+    SG => 'EUR',    # Stuttgart, Germany        
+    VA => 'EUR',    # Valencia, Spain
+    VI => 'EUR',    # Vienna, Austria
 );
 
 sub methods {
