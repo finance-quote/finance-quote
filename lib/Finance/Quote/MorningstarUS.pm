@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 package Finance::Quote::MorningstarUS;
-require 5.014;
+require 5.010;
 use strict;
 use warnings;
 use JSON qw( decode_json );
