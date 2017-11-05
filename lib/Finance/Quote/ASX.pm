@@ -113,7 +113,7 @@ sub asx {
         );
 
         # note that TableExtract decodes by default
-		$te->parse($response->content);
+		$te->parse(decode("UTF-8",$response->content));
 
 		# Extract table contents.
 		my @rows;
