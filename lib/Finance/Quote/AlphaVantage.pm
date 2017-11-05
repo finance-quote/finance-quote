@@ -20,6 +20,8 @@ package Finance::Quote::AlphaVantage;
 
 require 5.005;
 
+# VERSION
+
 use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
