@@ -34,10 +34,12 @@ die
     'Expected ALPHAVANTAGE_API_KEY to be set; get an API key at https://www.alphavantage.co'
     unless ( defined $ALPHAVANTAGE_API_KEY );
 
+my %currencies_by_suffix = ( '.BR' => 'EUR', );
+
 sub methods {
     return ( alphavantage => \&alphavantage, );
 
-    our @labels = qw/date isodate open high low close volume/;
+    our @labels = qw/date isodate open high low close volume last/;
 
     sub labels {
         return ( alphavantage => \@labels, );
@@ -92,11 +94,20 @@ sub alphavantage {
         $info{ $stock, 'success' } = 1;
         $info{ $stock, 'open' }    = $ts{'1. open'};
         $info{ $stock, 'close' }   = $ts{'4. close'};
+        $info{ $stock, 'last' }    = $ts{'4. close'};
         $info{ $stock, 'high' }    = $ts{'2. high'};
         $info{ $stock, 'low' }     = $ts{'3. low'};
         $info{ $stock, 'volume' }  = $ts{'5. volume'};
         $info{ $stock, 'method' }  = 'alphavantage';
         $quoter->store_date( \%info, $stock, { isodate => $isodate } );
+        # deduce currency
+        if ($stock =~ /\.(.*)/) {
+                my $suffix = $1;
+                $info{ $stock, 'currency' } = $currencies_by_suffix{$suffix}
+                    if ( $currencies_by_suffix{$suffix} );
+            } else {
+                $info{ $stock, 'currency' } = 'USD';
+            }
     }
 
     return wantarray() ? %info : \%info;

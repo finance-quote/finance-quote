@@ -18,7 +18,7 @@ my $lastyear = $year - 1;
 
 my @symbols =  qw/ IBM CSCO SOLB.BR /;
 
-plan tests => 8*(1+$#symbols)+2;
+plan tests => 9*(1+$#symbols)+5;
 
 my %quotes = $q->alphavantage( @symbols, "BOGUS" );
 ok(%quotes);
@@ -28,6 +28,7 @@ foreach my $symbol (@symbols) {
     ok( $quotes{ $symbol, "success" } );
     ok( $quotes{ $symbol, "open" } > 0 );
     ok( $quotes{ $symbol, "close" } > 0 );
+    ok( $quotes{ $symbol, "last" } > 0 );
     ok( $quotes{ $symbol, "high" } > 0 );
     ok( $quotes{ $symbol, "low" } > 0 );
     ok( $quotes{ $symbol, "volume" } > 0 );
@@ -36,5 +37,9 @@ foreach my $symbol (@symbols) {
     ok(    substr( $quotes{ $symbol, "date" }, 6, 4 ) == $year
                || substr( $quotes{ $symbol, "date" }, 6, 4 ) == $lastyear );
 }
+
+ok( $quotes{ "IBM", "currency" } = 'USD' );
+ok( $quotes{ "CSCO", "currency" } = 'USD' );
+ok( $quotes{ "SOLB.BR", "currency" } = 'EUR' );
 
 ok( !$quotes{ "BOGUS", "success" } );
