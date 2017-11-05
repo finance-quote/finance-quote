@@ -18,7 +18,7 @@ my $lastyear = $year - 1;
 
 my @symbols =  qw/ IBM CSCO SOLB.BR /;
 
-plan tests => 9*(1+$#symbols)+5;
+plan tests => 10*(1+$#symbols)+5;
 
 my %quotes = $q->alphavantage( @symbols, "BOGUS" );
 ok(%quotes);
@@ -26,6 +26,7 @@ ok(%quotes);
 foreach my $symbol (@symbols) {
     print "$symbol\n";
     ok( $quotes{ $symbol, "success" } );
+    ok ($quotes{ $symbol, "symbol" } eq $symbol );
     ok( $quotes{ $symbol, "open" } > 0 );
     ok( $quotes{ $symbol, "close" } > 0 );
     ok( $quotes{ $symbol, "last" } > 0 );

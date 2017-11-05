@@ -92,6 +92,7 @@ sub alphavantage {
         # }
 
         $info{ $stock, 'success' } = 1;
+        $info{ $stock, 'symbol' }  = $json_data->{'Meta Data'}->{'2. Symbol'};
         $info{ $stock, 'open' }    = $ts{'1. open'};
         $info{ $stock, 'close' }   = $ts{'4. close'};
         $info{ $stock, 'last' }    = $ts{'4. close'};
