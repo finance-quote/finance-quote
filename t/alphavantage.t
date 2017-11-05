@@ -12,29 +12,29 @@ if ( not $ENV{"ALPHAVANTAGE_API_KEY"} ) {
         'Set $ENV{ALPHAVANTAGE_API_KEY} to run this test; get one at https://www.alphavantage.co';
 }
 
-plan tests => 14;
-
 my $q        = Finance::Quote->new();
 my $year     = ( localtime() )[5] + 1900;
 my $lastyear = $year - 1;
 
-my %quotes = $q->alphavantage( "IBM", "CSCO", "BOGUS" );
+my @symbols =  qw/ IBM CSCO SOLB.BR /;
+
+plan tests => 8*(1+$#symbols)+2;
+
+my %quotes = $q->alphavantage( @symbols, "BOGUS" );
 ok(%quotes);
 
-ok( $quotes{ "IBM", "success" } );
-ok( $quotes{ "IBM", "open" } > 0 );
-ok( $quotes{ "IBM", "close" } > 0 );
-ok( $quotes{ "IBM", "high" } > 0 );
-ok( $quotes{ "IBM", "low" } > 0 );
-ok( $quotes{ "IBM", "volume" } > 0 );
-ok(    substr( $quotes{ "IBM", "isodate" }, 0, 4 ) == $year
-    || substr( $quotes{ "IBM", "isodate" }, 0, 4 ) == $lastyear );
-ok(    substr( $quotes{ "IBM", "date" }, 6, 4 ) == $year
-    || substr( $quotes{ "IBM", "date" }, 6, 4 ) == $lastyear );
-
-ok( $quotes{ "CSCO", "success" } );
-ok( $quotes{ "CSCO", "open" } > 0 );
-ok( $quotes{ "CSCO", "close" } > 0 );
-ok( $quotes{ "CSCO", "volume" } > 0 );
+foreach my $symbol (@symbols) {
+    print "$symbol\n";
+    ok( $quotes{ $symbol, "success" } );
+    ok( $quotes{ $symbol, "open" } > 0 );
+    ok( $quotes{ $symbol, "close" } > 0 );
+    ok( $quotes{ $symbol, "high" } > 0 );
+    ok( $quotes{ $symbol, "low" } > 0 );
+    ok( $quotes{ $symbol, "volume" } > 0 );
+    ok(    substr( $quotes{ $symbol, "isodate" }, 0, 4 ) == $year
+               || substr( $quotes{ $symbol, "isodate" }, 0, 4 ) == $lastyear );
+    ok(    substr( $quotes{ $symbol, "date" }, 6, 4 ) == $year
+               || substr( $quotes{ $symbol, "date" }, 6, 4 ) == $lastyear );
+}
 
 ok( !$quotes{ "BOGUS", "success" } );

@@ -9,17 +9,17 @@ use JSON qw( decode_json );
 use HTTP::Request::Common;
 
 my $ALPHAVANTAGE_URL =
-    'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&interval=1min';
-my $ALPHAVANTAGE_API_KEY = $ENV{"ALPHAVANTAGE_API_KEY"};
+    'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&datatype=json';
+my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
 
 die
-    "Expected ALPHAVANTAGE_API_KEY to be set; get an API key at https://www.alphavantage.co"
+    'Expected ALPHAVANTAGE_API_KEY to be set; get an API key at https://www.alphavantage.co'
     unless ( defined $ALPHAVANTAGE_API_KEY );
 
 sub methods {
     return ( alphavantage => \&alphavantage, );
 
-    my @labels = qw/date isodate open high low close volume/;
+    our @labels = qw/date isodate open high low close volume/;
 
     sub labels {
         return ( alphavantage => \@labels, );
@@ -46,32 +46,39 @@ sub alphavantage {
         my $body = $reply->content;
 
         my $json_data = JSON::decode_json $body;
-        my ($latest);
-
-        if ( $json_data->{"Time Series (1min)"} ) {
-            $info{ $stock, "success" } = 1;
-
-            $latest = ( keys( $json_data->{"Time Series (1min)"} ) )[0];
-
-            $info{ $stock, "open" } =
-                $json_data->{"Time Series (1min)"}->{$latest}->{"1. open"};
-            $info{ $stock, "close" } =
-                $json_data->{"Time Series (1min)"}->{$latest}->{"4. close"};
-            $info{ $stock, "high" } =
-                $json_data->{"Time Series (1min)"}->{$latest}->{"2. high"};
-            $info{ $stock, "low" } =
-                $json_data->{"Time Series (1min)"}->{$latest}->{"3. low"};
-            $info{ $stock, "volume" } =
-                $json_data->{"Time Series (1min)"}->{$latest}->{"5. volume"};
-            $info{ $stock, "isodate" } = substr( $latest, 0, 10 );
-
-            $quoter->store_date( \%info, $stock, { isodate => $latest } );
+        if ( !$json_data || $json_data->{'Error Message'} ) {
+            $info{ $stock, 'success' } = 0;
+            $info{ $stock, 'errormsg' } =
+                $json_data->{'Error Message'} || $json_data->{'Information'};
+            next;
         }
-        else {
-            $info{ $stock, "success" } = 0;
-            $info{ $stock, "errormsg" } =
-                $json_data->{"Error Message"} || $json_data->{"Information"};
+
+        my $last_refresh = $json_data->{'Meta Data'}->{'3. Last Refreshed'};
+        my $isodate = substr( $last_refresh, 0, 10 );
+        my %ts = %{ $json_data->{'Time Series (Daily)'}->{$last_refresh} };
+        if ( !%ts ) {
+            $info{ $stock, 'success' }  = 0;
+            $info{ $stock, 'errormsg' } = 'Could not extract Time Series data';
+            next;
         }
+
+        # %ts holds data as
+        #  {
+        #     '1. open'     151.5400,
+        #     '2. high'     151.5900,
+        #     '3. low'      151.5300,
+        #     '4. close'    151.5900,
+        #     '5. volume'   57620
+        # }
+
+        $info{ $stock, 'success' } = 1;
+        $info{ $stock, 'open' }    = $ts{'1. open'};
+        $info{ $stock, 'close' }   = $ts{'4. close'};
+        $info{ $stock, 'high' }    = $ts{'2. high'};
+        $info{ $stock, 'low' }     = $ts{'3. low'};
+        $info{ $stock, 'volume' }  = $ts{'5. volume'};
+        $info{ $stock, 'method' }  = 'alphavantage';
+        $quoter->store_date( \%info, $stock, { isodate => $isodate } );
     }
 
     return wantarray() ? %info : \%info;
