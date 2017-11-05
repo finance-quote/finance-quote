@@ -1,4 +1,7 @@
 {{$NEXT}}
+        * return symbol for AlphaVantage data
+
+1.39
         * added AlphaVantage module (Matthew Patterson)
         * some other module changes: yahoojson, Morningstar, Bourso, TSX (not working)
 
