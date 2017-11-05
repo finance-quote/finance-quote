@@ -1,4 +1,6 @@
 {{$NEXT}}
+        * added AlphaVantage module (Matthew Patterson)
+        * some other module changes: yahoojson, Morningstar, Bourso, TSX (not working)
 
 1.38      2015-08-22 13:22:56+02:00 Europe/Brussels
         * module updates: tiaacref, yahooJSON, FTfunds, MStaruk, USFedBonds, GoldMoney
