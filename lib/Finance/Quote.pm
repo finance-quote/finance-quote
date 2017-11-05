@@ -728,7 +728,6 @@ sub store_date
       ($year, $month, $day) = ($piecesref->{isodate} =~ m/(\d+)\W+(\w+)\W+(\d+)/);
       $year += 2000 if $year < 100;
       $year_specified = 1;
-      $inforef->{$symbol, "a"} = sprintf ("Defaults: Year %d, Month %s, Day %d\n", $year, $month, $day);
 #      printf ("ISO Date %s: Year %d, Month %s, Day %d\n", $piecesref->{isodate}, $year, $month, $day);
     }
 
