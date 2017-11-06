@@ -30,7 +30,7 @@ my $ALPHAVANTAGE_URL =
     'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&datatype=json';
 my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
 
-my %currencies_by_suffix = ( '.BR' => 'EUR', '.L' => 'GBP', );
+my %currencies_by_suffix = ( '.BR' => 'EUR', '.DE' => 'EUR', '.L' => 'GBP', );
 
 sub methods {
     return ( alphavantage => \&alphavantage, );
