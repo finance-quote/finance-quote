@@ -38,10 +38,10 @@ foreach my $symbol (@symbols) {
                || substr( $quotes{ $symbol, "date" }, 6, 4 ) == $lastyear );
 }
 
-ok( $quotes{ "IBM", "currency" } = 'USD' );
-ok( $quotes{ "CSCO", "currency" } = 'USD' );
-ok( $quotes{ "SOLB.BR", "currency" } = 'EUR' );
-ok( $quotes{ "LSE.L", "currency" } = 'GBP' );
+is( $quotes{ "IBM", "currency" }, 'USD' );
+is( $quotes{ "CSCO", "currency" }, 'USD' );
+is( $quotes{ "SOLB.BR", "currency" }, 'EUR' );
 is( $quotes{ "SAP.DE", "currency" }, 'EUR' );
+is( $quotes{ "LSE.L", "currency" }, 'GBP' );
 
 ok( !$quotes{ "BOGUS", "success" } );
