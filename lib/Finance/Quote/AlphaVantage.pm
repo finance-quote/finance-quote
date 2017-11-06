@@ -30,10 +30,6 @@ my $ALPHAVANTAGE_URL =
     'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&datatype=json';
 my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
 
-die
-    'Expected ALPHAVANTAGE_API_KEY to be set; get an API key at https://www.alphavantage.co'
-    unless ( defined $ALPHAVANTAGE_API_KEY );
-
 my %currencies_by_suffix = ( '.BR' => 'EUR', );
 
 sub methods {
@@ -53,6 +49,14 @@ sub alphavantage {
     my $ua = $quoter->user_agent();
 
     foreach my $stock (@stocks) {
+
+        if ( !defined $ALPHAVANTAGE_API_KEY ) {
+            $info{ $stock, 'success' } = 0;
+            $info{ $stock, 'errormsg' } =
+                'Expected ALPHAVANTAGE_API_KEY to be set; get an API key at https://www.alphavantage.co';
+            next;
+        }
+
         $url =
               $ALPHAVANTAGE_URL
             . '&apikey='
