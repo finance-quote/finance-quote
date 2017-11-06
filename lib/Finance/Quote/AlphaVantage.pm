@@ -124,7 +124,7 @@ sub alphavantage {
         $info{ $stock, 'method' }  = 'alphavantage';
         $quoter->store_date( \%info, $stock, { isodate => $isodate } );
         # deduce currency
-        if ($stock =~ /\.(.*)/) {
+        if ($stock =~ /(\..*)/) {
                 my $suffix = $1;
                 $info{ $stock, 'currency' } = $currencies_by_suffix{$suffix}
                     if ( $currencies_by_suffix{$suffix} );
