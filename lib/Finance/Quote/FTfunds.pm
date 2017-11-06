@@ -46,7 +46,7 @@ require 5.005;
 use strict;
 use warnings;
 
-# Set DEBUG => 1 for no debug messages, => 1 for first level, => 2 for 2nd level, etc.
+# Set DEBUG => 0 for no debug messages, => 1 for first level, => 2 for 2nd level, etc.
 
 use constant DEBUG => 0;
 
@@ -61,8 +61,8 @@ use HTML::TokeParser;
 
 # VERSION
 
-$FTFUNDS_MAIN_URL   =   "http://funds.ft.com";
-$FTFUNDS_LOOK_LD    =   "http://funds.ft.com/UK/Tearsheet/Summary?s=";
+$FTFUNDS_MAIN_URL   =   "https://markets.ft.com";
+$FTFUNDS_LOOK_LD    =   "https://markets.ft.com/data/funds/tearsheet/summary?s=";
 $FTFUNDS_LOOK_UD    =	"http://funds.ft.com/UnlistedTearsheet/Summary?s=";
 
                         # this will work with ISIN codes only.
@@ -165,7 +165,7 @@ DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 
         my $name;
 		if ($webdoc->content =~
-        m[<title>(.*) Summary - FT.com] )
+        m[<title>(.*) [Ss]ummary - FT.com] )
         {
             $name = $1 ;
         }
@@ -178,13 +178,21 @@ DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 		}
 		$fundquote {$code, "name"} = $name;	# set name
 
-# Find price
+# Find price and currency
+		my $currency;
 		my $price;
 		if ($webdoc->content =~
-		m[<div class="contains wsodModuleContent"><table><tbody><tr><td class="text first">([\.\,0-9]*)</td>]  )
+		m[<span class="mod-ui-data-list__label">Price [(]([A-Z]{3})[)]</span><span class="mod-ui-data-list__value">([\.\,0-9]*)</span>]  )
         {
-			$price   = $1;
+			$currency = $1;
+			$price    = $2;
         }
+		if (!defined($currency)) {
+			# serious error, report it and give up
+			$fundquote {$code,"success"} = 0;
+			$fundquote {$code,"errormsg"} = "Error - failed to find a currency";
+			next;
+		}
 		if (!defined($price)) {
 			# serious error, report it and give up
 			$fundquote {$code,"success"} = 0;
@@ -200,10 +208,10 @@ DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 		my $net;
 		my $pchange;
 		if ($webdoc->content =~
-		m[<span class="(pos|neg) color ">([\.0-9]*) / ([\.0-9]*)%</span>] )
+		m[<span class="mod-ui-data-list__label">Today's Change</span><span class="mod-ui-data-list__value"><span [^>]*><i [^>]*></i>(-?[\.0-9]*) / (-?[\.0-9]*)%</span>] )
         {
-            $net = $2 ;     # allow for alternates in match string
-            $pchange = $3;
+            $net = $1 ;
+            $pchange = $2;
         }
 		if (!defined($net)) {
 			# not a serious error - don't report it ....
@@ -230,24 +238,7 @@ DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 			$pchange	  = $1 * 1000 + $2;
 		}
 
-# Find the currency
-		my $currency;
-		if ($webdoc->content =~
-                m[<th>(Price currency)</th><td>([A-Z]{3})</td>]  )
-        {
-
-			$currency    = $2;
-        }
-
-		if (!defined($currency)) {
-			# serious error, report it and give up
-			$fundquote {$code,"success"} = 0;
-			$fundquote {$code,"errormsg"} = "Error - failed to find a currency";
-			next;
-		}
-
 # deal with GBX pricing of UK unit trusts
-
 		if ($currency eq "GBX")
 		{
 			$currency = "GBP" ;
