@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.43      2017-11-06 23:41:47+01:00 Europe/Brussels
         * Added currency for .DE market
         * BUGFIX in currency determination regex
 
