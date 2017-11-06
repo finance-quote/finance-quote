@@ -78,8 +78,25 @@ sub alphavantage {
             next;
         }
 
-        my $last_refresh = $json_data->{'Meta Data'}->{'3. Last Refreshed'};
+        my $last_refresh = $json_data->{'Meta Data'}->{'3. Last Refreshed'}; # when market is open this returns an isodate + time, otherwise only the isodate
+        $last_refresh = substr($last_refresh,0,10);  # remove time if returned
+        if ( !$last_refresh ) {
+            $info{ $stock, 'success' } = 0;
+            $info{ $stock, 'errormsg' } = "json_data doesn't contain Last Refreshed";
+            next;
+        }
         my $isodate = substr( $last_refresh, 0, 10 );
+        if ( !$json_data->{'Time Series (Daily)'} ) {
+            $info{ $stock, 'success' } = 0;
+            $info{ $stock, 'errormsg' } = "json_data doesn't contain Time Series hash";
+            next;
+        }
+        if ( !$json_data->{'Time Series (Daily)'}->{$last_refresh} ) {
+            $info{ $stock, 'success' } = 0;
+            $info{ $stock, 'errormsg' } = "json_data doesn't contain latest refresh data in Time Series hash";
+            next;
+        }
+
         my %ts = %{ $json_data->{'Time Series (Daily)'}->{$last_refresh} };
         if ( !%ts ) {
             $info{ $stock, 'success' }  = 0;

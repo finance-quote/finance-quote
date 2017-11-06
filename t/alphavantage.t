@@ -16,7 +16,7 @@ my $q        = Finance::Quote->new();
 my $year     = ( localtime() )[5] + 1900;
 my $lastyear = $year - 1;
 
-my @symbols =  qw/ IBM CSCO SOLB.BR LSE.L /;
+my @symbols =  qw/ IBM CSCO SOLB.BR LSE.L VFIAX T/;
 
 plan tests => 10*(1+$#symbols)+6;
 
@@ -24,14 +24,14 @@ my %quotes = $q->alphavantage( @symbols, "BOGUS" );
 ok(%quotes);
 
 foreach my $symbol (@symbols) {
-    ok( $quotes{ $symbol, "success" } );
-    ok( $quotes{ $symbol, "symbol" } eq $symbol );
-    ok( $quotes{ $symbol, "open" } > 0 );
-    ok( $quotes{ $symbol, "close" } > 0 );
-    ok( $quotes{ $symbol, "last" } > 0 );
-    ok( $quotes{ $symbol, "high" } > 0 );
-    ok( $quotes{ $symbol, "low" } > 0 );
-    ok( $quotes{ $symbol, "volume" } > 0 );
+    ok( $quotes{ $symbol, "success" }, "$symbol success" );
+    ok( $quotes{ $symbol, "symbol" } eq $symbol , "$symbol defined" );
+    ok( $quotes{ $symbol, "open" } > 0, "$symbol returned open" );
+    ok( $quotes{ $symbol, "close" } > 0, "$symbol returned close" );
+    ok( $quotes{ $symbol, "last" } > 0, "$symbol returned last" );
+    ok( $quotes{ $symbol, "high" } > 0, "$symbol returned high" );
+    ok( $quotes{ $symbol, "low" } > 0, "$symbol returned low" );
+    ok( $quotes{ $symbol, "volume" } >= 0, "$symbol returned volume" );
     ok(    substr( $quotes{ $symbol, "isodate" }, 0, 4 ) == $year
                || substr( $quotes{ $symbol, "isodate" }, 0, 4 ) == $lastyear );
     ok(    substr( $quotes{ $symbol, "date" }, 6, 4 ) == $year
