@@ -24,9 +24,8 @@ my %quotes = $q->alphavantage( @symbols, "BOGUS" );
 ok(%quotes);
 
 foreach my $symbol (@symbols) {
-    print "$symbol\n";
     ok( $quotes{ $symbol, "success" } );
-    ok ($quotes{ $symbol, "symbol" } eq $symbol );
+    ok( $quotes{ $symbol, "symbol" } eq $symbol );
     ok( $quotes{ $symbol, "open" } > 0 );
     ok( $quotes{ $symbol, "close" } > 0 );
     ok( $quotes{ $symbol, "last" } > 0 );

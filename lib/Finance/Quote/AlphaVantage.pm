@@ -44,6 +44,7 @@ sub methods {
 
 sub alphavantage {
     my $quoter = shift;
+
     my @stocks = @_;
     my ( %info, $reply, $url );
     my $ua = $quoter->user_agent();
