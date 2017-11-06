@@ -16,9 +16,9 @@ my $q        = Finance::Quote->new();
 my $year     = ( localtime() )[5] + 1900;
 my $lastyear = $year - 1;
 
-my @symbols =  qw/ IBM CSCO SOLB.BR /;
+my @symbols =  qw/ IBM CSCO SOLB.BR LSE.L /;
 
-plan tests => 10*(1+$#symbols)+5;
+plan tests => 10*(1+$#symbols)+6;
 
 my %quotes = $q->alphavantage( @symbols, "BOGUS" );
 ok(%quotes);
@@ -42,5 +42,6 @@ foreach my $symbol (@symbols) {
 ok( $quotes{ "IBM", "currency" } = 'USD' );
 ok( $quotes{ "CSCO", "currency" } = 'USD' );
 ok( $quotes{ "SOLB.BR", "currency" } = 'EUR' );
+ok( $quotes{ "LSE.L", "currency" } = 'GBP' );
 
 ok( !$quotes{ "BOGUS", "success" } );
