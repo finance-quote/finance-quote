@@ -1,4 +1,6 @@
 {{$NEXT}}
+        * Added currency for .DE market
+        * BUGFIX in currency determination regex
 
 1.42      2017-11-06 19:04:25+01:00 Europe/Brussels
         * more tests in alphavantage.t
