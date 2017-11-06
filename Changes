@@ -1,4 +1,6 @@
 {{$NEXT}}
+        * more tests in alphavantage.t
+        * BUG resolved: removed time from $last_refresh when markets are open
 
 1.41      2017-11-06 16:06:41+01:00 Europe/Brussels
         * return symbol for AlphaVantage data
