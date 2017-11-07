@@ -1,5 +1,6 @@
 {{$NEXT}}
         * Added currencies for .SA (Brazil) and .TO (Canada/Toronto) markets
+        * Setup a pause of .7s between queries in AlphaVantage.pm to limit queries
 
 1.43      2017-11-06 23:41:47+01:00 Europe/Brussels
         * Added currency for .DE market
