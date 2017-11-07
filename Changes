@@ -1,5 +1,20 @@
 {{$NEXT}}
 
+1.43      2017-11-06 23:41:47+01:00 Europe/Brussels
+        * Added currency for .DE market
+        * BUGFIX in currency determination regex
+
+1.42      2017-11-06 19:04:25+01:00 Europe/Brussels
+        * more tests in alphavantage.t
+        * BUG resolved: removed time from $last_refresh when markets are open
+
+1.41      2017-11-06 16:06:41+01:00 Europe/Brussels
+        * return symbol for AlphaVantage data
+
+1.39
+        * added AlphaVantage module (Matthew Patterson)
+        * some other module changes: yahoojson, Morningstar, Bourso, TSX (not working)
+
 1.38      2015-08-22 13:22:56+02:00 Europe/Brussels
         * module updates: tiaacref, yahooJSON, FTfunds, MStaruk, USFedBonds, GoldMoney
         * new modules: fidelityfixed (Peter Ratzlaff), yahooYQL
