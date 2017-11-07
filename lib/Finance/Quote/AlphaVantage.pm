@@ -69,6 +69,11 @@ sub alphavantage {
         my $code = $reply->code;
         my $desc = HTTP::Status::status_message($code);
         my $body = $reply->content;
+        if ($code != 200) {
+            $info{ $stock, 'success' } = 0;
+            $info{ $stock, 'errormsg' } = $desc;
+            next;
+        }
 
         my $json_data = JSON::decode_json $body;
         if ( !$json_data || $json_data->{'Error Message'} ) {
