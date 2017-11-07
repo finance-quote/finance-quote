@@ -47,6 +47,7 @@ sub alphavantage {
     my $quoter = shift;
 
     my @stocks = @_;
+    my $quantity = @stocks;
     my ( %info, $reply, $url );
     my $ua = $quoter->user_agent();
 
@@ -132,6 +133,8 @@ sub alphavantage {
             } else {
                 $info{ $stock, 'currency' } = 'USD';
             }
+        $quantity--;
+        select(undef, undef, undef, .7) if ($quantity);
     }
 
     return wantarray() ? %info : \%info;
