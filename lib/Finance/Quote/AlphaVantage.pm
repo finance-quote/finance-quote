@@ -31,7 +31,7 @@ my $ALPHAVANTAGE_URL =
 my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
 
 my %currencies_by_suffix =
-    ( '.BR' => 'EUR', '.DE' => 'EUR', '.L' => 'GBP', '.SA' => 'BRL', );
+    ( '.TO' => 'CAD', '.BR' => 'EUR', '.DE' => 'EUR', '.L' => 'GBP', '.SA' => 'BRL', );
 
 sub methods {
     return ( alphavantage => \&alphavantage, );
