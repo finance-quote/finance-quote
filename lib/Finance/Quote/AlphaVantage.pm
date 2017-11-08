@@ -135,14 +135,30 @@ sub alphavantage {
         $info{ $stock, 'volume' }  = $ts{'5. volume'};
         $info{ $stock, 'method' }  = 'alphavantage';
         $quoter->store_date( \%info, $stock, { isodate => $isodate } );
+
         # deduce currency
-        if ($stock =~ /(\..*)/) {
-                my $suffix = $1;
-                $info{ $stock, 'currency' } = $currencies_by_suffix{$suffix}
-                    if ( $currencies_by_suffix{$suffix} );
-            } else {
-                $info{ $stock, 'currency' } = 'USD';
+        if ( $stock =~ /(\..*)/ ) {
+            my $suffix = $1;
+            if ( $currencies_by_suffix{$suffix} ) {
+                $info{ $stock, 'currency' } = $currencies_by_suffix{$suffix};
+
+                # divide GBP quotes by 100
+                if ( $info{ $stock, 'currency' } eq 'GBP' ) {
+                    foreach my $field ( $quoter->default_currency_fields ) {
+                        next unless ( $info{ $stock, $field } );
+                        $info{ $stock, $field } =
+                            $quoter->scale_field( $info{ $stock, $field },
+                                                  0.01 );
+                    }
+                }
             }
+        }
+        else {
+            $info{ $stock, 'currency' } = 'USD';
+        }
+
+        $info{ $stock, "currency_set_by_fq" } = 1;
+
         $quantity--;
         select(undef, undef, undef, .7) if ($quantity);
     }
