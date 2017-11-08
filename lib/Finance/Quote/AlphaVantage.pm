@@ -41,6 +41,8 @@ my %currencies_by_suffix = ( '.TO' => 'CAD',
                              '.NS' => 'INR',
                              '.PA' => 'EUR',
                              '.SA' => 'BRL',
+                             '.TW' => 'TWD',
+                             '.TWO' => 'TWD',
 );
 
 sub methods {
