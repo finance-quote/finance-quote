@@ -196,7 +196,7 @@ sub alphavantage {
                 $info{ $stock, 'currency' } = $currencies_by_suffix{$suffix};
 
                 # divide GBP quotes by 100
-                if ( $info{ $stock, 'currency' } eq 'GBP' ) {
+                if ( ($info{ $stock, 'currency' } eq 'GBP') || ($info{$stock,'currency'} eq 'GBX') ) {
                     foreach my $field ( $quoter->default_currency_fields ) {
                         next unless ( $info{ $stock, $field } );
                         $info{ $stock, $field } =
