@@ -1,4 +1,7 @@
 {{$NEXT}}
+        * alphavantage
+          * more suffix - currency pairs added
+          * GBP and GBX divided by 100
 
 1.44      2017-11-07 21:57:57+01:00 Europe/Brussels
         * Added currencies for .SA (Brazil) and .TO (Canada/Toronto) markets
