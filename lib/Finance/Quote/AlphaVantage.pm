@@ -30,20 +30,71 @@ my $ALPHAVANTAGE_URL =
     'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&datatype=json';
 my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
 
-my %currencies_by_suffix = ( '.TO' => 'CAD',
-                             '.BC' => 'EUR',
-                             '.BO' => 'INR',
-                             '.BR' => 'EUR',
-                             '.CL' => 'INR',
-                             '.DE' => 'EUR',
-                             '.L'  => 'GBP',
-                             '.MC' => 'EUR',
-                             '.NS' => 'INR',
-                             '.PA' => 'EUR',
-                             '.SA' => 'BRL',
-                             '.TW' => 'TWD',
-                             '.TWO' => 'TWD',
+my %currencies_by_suffix = (
+
+                        # Country		City/Exchange Name
+    '.US'  => "USD",    # USA		AMEX, Nasdaq, NYSE
+    '.A'   => "USD",    # USA		American Stock Exchange (ASE)
+    '.B'   => "USD",    # USA		Boston Stock Exchange (BOS)
+    '.N'   => "USD",    # USA		Nasdaq Stock Exchange (NAS)
+    '.O'   => "USD",    # USA		NYSE Stock Exchange (NYS)
+    '.OB'  => "USD",    # USA		OTC Bulletin Board
+    '.PK'  => "USD",    # USA		Pink Sheets
+    '.X'   => "USD",    # USA		US Options
+    '.BA'  => "ARS",    # Argentina	Buenos Aires
+    '.VI'  => "EUR",    # Austria		Vienna
+    '.AX'  => "AUD",    # Australia
+    '.SA'  => "BRL",    # Brazil		Sao Paolo
+    '.BR'  => "EUR",    # Belgium		Brussels
+    '.TO'  => "CAD",    # Canada		Toronto
+    '.V'   => "CAD",    # 		Toronto Venture
+    '.SN'  => "CLP",    # Chile		Santiago
+    '.SS'  => "CNY",    # China		Shanghai
+    '.SZ'  => "CNY",    # 		Shenzhen
+    '.CO'  => "DKK",    # Denmark		Copenhagen
+    '.PA'  => "EUR",    # France		Paris
+    '.BE'  => "EUR",    # Germany		Berlin
+    '.BM'  => "EUR",    # 		Bremen
+    '.D'   => "EUR",    # 		Dusseldorf
+    '.F'   => "EUR",    # 		Frankfurt
+    '.H'   => "EUR",    # 		Hamburg
+    '.HA'  => "EUR",    # 		Hanover
+    '.MU'  => "EUR",    # 		Munich
+    '.SG'  => "EUR",    # 		Stuttgart
+    '.DE'  => "EUR",    # 		XETRA
+    '.HK'  => "HKD",    # Hong Kong
+    '.BO'  => "INR",    # India		Bombay
+    '.CL'  => "INR",    # 		Calcutta
+    '.NS'  => "INR",    # 		National Stock Exchange
+    '.JK'  => "IDR",    # Indonesia	Jakarta
+    '.I'   => "EUR",    # Ireland		Dublin
+    '.TA'  => "ILS",    # Israel		Tel Aviv
+    '.MI'  => "EUR",    # Italy		Milan
+    '.KS'  => "KRW",    # Korea		Stock Exchange
+    '.KQ'  => "KRW",    # 		KOSDAQ
+    '.KL'  => "MYR",    # Malaysia	Kuala Lampur
+    '.MX'  => "MXP",    # Mexico
+    '.NZ'  => "NZD",    # New Zealand
+    '.AS'  => "EUR",    # Netherlands	Amsterdam
+    '.OL'  => "NOK",    # Norway		Oslo
+    '.LM'  => "PEN",    # Peru		Lima
+    '.IN'  => "EUR",    # Portugal	Lisbon
+    '.SI'  => "SGD",    # Singapore
+    '.BC'  => "EUR",    # Spain		Barcelona
+    '.BI'  => "EUR",    # 		Bilbao
+    '.MF'  => "EUR",    # 		Madrid Fixed Income
+    '.MC'  => "EUR",    # 		Madrid SE CATS
+    '.MA'  => "EUR",    # 		Madrid
+    '.VA'  => "EUR",    # 		Valence
+    '.ST'  => "SEK",    # Sweden		Stockholm
+    '.S'   => "CHF",    # Switzerland	Zurich
+    '.TW'  => "TWD",    # Taiwan		Taiwan Stock Exchange
+    '.TWO' => "TWD",    # 		OTC
+    '.BK'  => "THB",    # Thialand	Thailand Stock Exchange
+    '.TH'  => "THB",    # 		??? From Asia.pm, (in Thai Baht)
+    '.L'   => "GBP",    # United Kingdom	London
 );
+
 
 sub methods {
     return ( alphavantage => \&alphavantage, );
