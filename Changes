@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.45      2017-11-08 21:35:51+01:00 Europe/Brussels
         * alphavantage
           * more suffix - currency pairs added
           * GBP and GBX divided by 100
