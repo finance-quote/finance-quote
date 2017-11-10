@@ -151,7 +151,7 @@ are available:
 	fidelity
 
 These methods all use the same information source, and hence can
-be considered somewhat interchangable.  However, the method "yahoo"
+be considered somewhat interchangeable.  However, the method "yahoo"
 should be passed to fetch if you wish to obtain information
 from any source that Yahoo tracks.
 

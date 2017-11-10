@@ -156,7 +156,7 @@ This module obtains information about managed funds from TD
 Waterhouse Canada. All TD Waterhouse funds are downloaded at once.
 
 The symbols for each mutual fund are the names of the fund with any
-unusal characters (not a letter, space or period) removed. For example;
+unusual characters (not a letter, space or period) removed. For example;
 a fund called "TD Health Sciences ($US)" would have the symbol
 "TD Health Sciences US".
 

@@ -192,7 +192,7 @@ This module obtains information from the Toronto Stock Exchange
 through the page http://www.TMXmoney.com/.
 
 This module is not loaded by default on a Finance::Quote object.
-It's possible to load it explicity by placing "TSX" in the argument
+It's possible to load it explicitly by placing "TSX" in the argument
 list to Finance::Quote->new().
 
 This module provides both the "tsx" and "toronto" fetch methods.

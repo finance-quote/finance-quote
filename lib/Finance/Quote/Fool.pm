@@ -135,7 +135,7 @@ This module obtains information from the Motley Fool website
 (www.fool.com). The site provides date from NASDAQ, NYSE and AMEX.
 
 This module is loaded by default on a Finance::Quote object.  It's
-also possible to load it explicity by placing "Fool" in the argument
+also possible to load it explicitly by placing "Fool" in the argument
 list to Finance::Quote->new().
 
 Information returned by this module is governed by the Motley Fool's

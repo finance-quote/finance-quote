@@ -233,7 +233,7 @@ available.  Indexes start with the letter 'X'.  For example, the
 All Ordinaries is "XAO".
 
 This module is loaded by default on a Finance::Quote object.  It's
-also possible to load it explicity by placing "ASX" in the argument
+also possible to load it explicitly by placing "ASX" in the argument
 list to Finance::Quote->new().
 
 This module provides both the "asx" and "australia" fetch methods.

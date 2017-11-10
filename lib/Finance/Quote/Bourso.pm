@@ -339,7 +339,7 @@ This module fetches information from the "Paris Stock Exchange",
 http://www.boursorama.com. All stocks are available.
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "bourso" in the argument
+also possible to load it explicitly by placing "bourso" in the argument
 list to Finance::Quote->new().
 
 This module provides both the "bourso" and "france" fetch methods.

@@ -155,7 +155,7 @@ This module obtains information from the Platinum Asset Management
 http://www.platinum.com.au/docs/pricing.htm.
 
 This module is loaded by default on a Finance::Quote object.  It's
-also possible to load it explicity by placing "Platinum" in the argument
+also possible to load it explicitly by placing "Platinum" in the argument
 list to Finance::Quote->new().
 
 =head1 LABELS RETURNED

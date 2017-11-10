@@ -188,7 +188,7 @@ This module obtains information from Man Investments Australia
 http://www.maninvestments.com.au/
 
 This module is loaded by default on a Finance::Quote object.  It's
-also possible to load it explicity by placing "ManInvestments" in the argument
+also possible to load it explicitly by placing "ManInvestments" in the argument
 list to Finance::Quote->new().
 
 =head1 LABELS RETURNED
