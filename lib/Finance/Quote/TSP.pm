@@ -152,7 +152,7 @@ sub tsp {
 
 =head1 NAME
 
-Finance::Quote::TSP Obtain fund prices for US Federal Government Thrift Savings Plan
+Finance::Quote::TSP - Obtain fund prices for US Federal Government Thrift Savings Plan
 
 =head1 SYNOPSIS
 

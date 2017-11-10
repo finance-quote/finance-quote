@@ -170,7 +170,7 @@ sub aex {
 
 =head1 NAME
 
-Finance::Quote::AEX Obtain quotes from Amsterdam Euronext eXchange
+Finance::Quote::AEX - Obtain quotes from Amsterdam Euronext eXchange
 
 =head1 SYNOPSIS
 

@@ -140,7 +140,7 @@ sub cse {
 
 =head1 NAME
 
-Finance::Quote::CSE Obtain quotes from Colombo Stock Exchange in Sri Lanka
+Finance::Quote::CSE - Obtain quotes from Colombo Stock Exchange in Sri Lanka
 
 =head1 SYNOPSIS
 

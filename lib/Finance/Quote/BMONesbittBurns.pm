@@ -174,7 +174,7 @@ sub bmonesbittburns {
 
 =head1 NAME
 
-Finance::Quote::BMONesbittBurns Obtain quotes from the BMO NesbittBurns site
+Finance::Quote::BMONesbittBurns - Obtain quotes from the BMO NesbittBurns site
 
 =head1 SYNOPSIS
 

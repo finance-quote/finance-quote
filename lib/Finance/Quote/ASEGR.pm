@@ -111,7 +111,7 @@ sub asegr {
 
 =head1 NAME
 
-Finance::Quote::ASEGR Obtain quotes from Athens Stock Exchange.
+Finance::Quote::ASEGR - Obtain quotes from Athens Stock Exchange.
 
 =head1 SYNOPSIS
 

@@ -96,8 +96,8 @@ sub fidelityfixed {
 
            print "\n \n \n \n[debug]: ++++ ==== ++++ ==== ++++ ==== ++++ ==== END OF TABLE DUMP ++++ ==== ++++ ==== ++++ ==== ++++ ==== \n \n \n \n";
 
+=end comment
 =cut
-
 
 # GENERAL FIELDS
         $info{$symbol, "method"} = "fidelityfixed";
@@ -197,7 +197,7 @@ sub fidelityfixed {
 
 =head1 NAME
 
-Finance::Quote::FidelityFixed- Obtain individual bond quotes from Fidelity
+Finance::Quote::FidelityFixed - Obtain individual bond quotes from Fidelity
 
 =head1 NOTE
 

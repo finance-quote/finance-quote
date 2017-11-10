@@ -142,7 +142,7 @@ sub bsero {
 
 =head1 NAME
 
-Finance::Quote::BSERO Obtain quotes from Bucharest Stock Exchange.
+Finance::Quote::BSERO - Obtain quotes from Bucharest Stock Exchange.
 
 =head1 SYNOPSIS
 

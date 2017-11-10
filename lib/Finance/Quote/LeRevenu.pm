@@ -411,7 +411,7 @@ sub lerevenu {
 
 =head1 NAME
 
-Finance::Quote::LeRevenu Obtain quotes from http://bourse.lerevenu.com.
+Finance::Quote::LeRevenu - Obtain quotes from http://bourse.lerevenu.com.
 
 =head1 SYNOPSIS
 
