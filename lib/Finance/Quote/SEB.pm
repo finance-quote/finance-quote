@@ -121,7 +121,7 @@ Unfortunately there is no unique identifier for the fund names.
 Therefore the complete fund name must be given, including spaces, case
 is important.
 
-Consult http://taz.vv.sebank.se/cgi-bin/pts3/pow/Fonder/kurser/kurslista_body.asp
+Consult https://seb.se/bors-och-finans/fonder/fondkurslista
 for all available funds.
 
 Example "SEB Aktiesparfond"
