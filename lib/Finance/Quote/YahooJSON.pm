@@ -32,20 +32,12 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 use Time::Piece;
+use Data::Dumper;
 
 # VERSION
 
-my $YIND_URL_HEAD = 'http://finance.yahoo.com/webservice/v1/symbols/';
-my $YIND_URL_TAIL = '/quote?format=json';
-my %suffix_to_currency = (
-    NS => 'INR',
-    CL => 'INR',
-    BO => 'INR',
-    BR => 'EUR',
-    PA => 'EUR',
-    BC => 'EUR',
-    MC => 'EUR',
-);
+my $YIND_URL_HEAD = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=';
+my $YIND_URL_TAIL = '';
 
 sub methods {
     return ( yahoo_json => \&yahoo_json,
@@ -96,36 +88,34 @@ sub yahoo_json {
             #print ref($json_data);
             #print "size of hash:  " . keys( $json_data ) . ".\n";
 
-            my $json_data_count = $json_data->{'list'}{'meta'}{'count'};
+            #my @json_data_count dd= $json_data->{'quoteResponse'}{'result'};
 
-            if ( $json_data_count != 1 ) {
-                $info{ $stocks, "success" } = 0;
-                $info{ $stocks, "errormsg" } =
-                    "Error retrieving quote for $stocks - no listing for this name found. Please check scrip name and the two letter extension (if any)";
+	    #print "[DEBUG] <<<<  $#json_data_count";
 
-            }
-            else {
-                my $json_resources = $json_data->{'list'}{'resources'}[0];
-                my $json_response_type =
-                    $json_resources->{'resource'}{classname};
+            #if ( $#json_data_count != 1 ) {
+            #    $info{ $stocks, "success" } = 0;
+            #    $info{ $stocks, "errormsg" } =
+            #        "Error retrieving quote for $stocks - no listing for this name found. Please check scrip name and the two letter extension (if any)";
+
+            #}
+            #else {
+
+                my $json_resources = $json_data->{'quoteResponse'}{'result'}[0];
+
+                #my $json_response_type =
+                 #   $json_resources->{'resource'}{classname};
 
                 # TODO: Check if $json_response_type is "Quote"
                 # before attempting anything else
-                my $json_symbol =
-                    $json_resources->{'resource'}{'fields'}{'symbol_requested'}
-                    || $json_resources->{'resource'}{'fields'}{'symbol'};
-                my $json_volume =
-                    $json_resources->{'resource'}{'fields'}{'volume'};
+                my $json_symbol = $json_resources->{'symbol'};
+                #    || $json_resources->{'resource'}{'fields'}{'symbol'};
+                my $json_volume = $json_resources->{'regularMarketVolume'};
                 my $json_timestamp =
-                    $json_resources->{'resource'}{'fields'}{'ts'};
-                my $json_name = $json_resources->{'resource'}{'fields'}{'name'};
-                my $json_type = $json_resources->{'resource'}{'fields'}{'type'};
+                    $json_resources->{'regularMarketTime'};
+                my $json_name = $json_resources->{'shortName'};
+                my $json_type = $json_resources->{'quoteType'};
                 my $json_price =
-                    $json_resources->{'resource'}{'fields'}{'price'};
-                my $json_utctime =
-                    $json_resources->{'resource'}{'fields'}{'utctime'};
-                my $json_currency =
-                    $json_resources->{'resource'}{'fields'}{'currency'};
+                    $json_resources->{'regularMarketPrice'};
 
                 $info{ $stocks, "success" } = 1;
                 $info{ $stocks, "exchange" } =
@@ -134,27 +124,15 @@ sub yahoo_json {
                 $info{ $stocks, "name" }   = $stocks . ' (' . $json_name . ')';
                 $info{ $stocks, "type" }   = $json_type;
                 $info{ $stocks, "last" }   = $json_price;
+		$info{ $stocks, "currency"} = $json_resources->{'currency'};
                 $info{ $stocks, "volume" }   = $json_volume;
-                $info{ $stocks, "isodate" } = ( $json_utctime =~ /dddd-dd-dd/ );
-                if (defined $json_currency and length $json_currency) {
-                    $info{ $stocks, "currency" } = $json_currency;
-                } else {
-                    if ($stocks =~ /\.([^.]+)$/ ) { # find suffix
-                        if (exists $suffix_to_currency{$1}) {
-                            $info{ $stocks, "currency" } = $suffix_to_currency{$1};
-                        }
-                    }
-                }
 
-                $my_date = localtime($json_timestamp)->strftime('%d.%m.%Y %T');
-                if ( $json_utctime =~ /(\d\d\d\d)-(\d\d)-(\d\d)/ ) {
-                    $my_date = $3.".".$2.".".$1.".";
-                }
+                $my_date =  localtime($json_timestamp)->strftime('%d.%m.%Y %T');
 
                 $quoter->store_date( \%info, $stocks,
                                      { eurodate => $my_date } );
 
-            }
+            #}
         }
 
         #HTTP request fail
