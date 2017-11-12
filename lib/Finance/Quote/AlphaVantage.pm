@@ -98,7 +98,13 @@ my %currencies_by_suffix = (
 
 
 sub methods {
-    return ( alphavantage => \&alphavantage, );
+    return ( alphavantage => \&alphavantage,
+             canada       => \&alphavantage,
+             usa          => \&alphavantage,
+             nyse         => \&alphavantage,
+             nasdaq       => \&alphavantage,
+             vanguard     => \&alphavantage,
+    );
 
     our @labels = qw/date isodate open high low close volume last/;
 
