@@ -140,7 +140,13 @@ sub alphavantage {
             next;
         }
 
-        my $json_data = JSON::decode_json $body;
+        my $json_data;
+        eval {$json_data = JSON::decode_json $body};
+        if ($@) {
+            $info{ $stock, 'success' } = 0;
+            $info{ $stock, 'errormsg' } = $@;
+        }
+
         if ( !$json_data || $json_data->{'Error Message'} ) {
             $info{ $stock, 'success' } = 0;
             $info{ $stock, 'errormsg' } =
