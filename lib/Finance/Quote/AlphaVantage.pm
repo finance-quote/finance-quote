@@ -209,7 +209,7 @@ sub alphavantage {
 
         # deduce currency
         if ( $stock =~ /(\..*)/ ) {
-            my $suffix = $1;
+            my $suffix = uc $1;
             if ( $currencies_by_suffix{$suffix} ) {
                 $info{ $stock, 'currency' } = $currencies_by_suffix{$suffix};
 
