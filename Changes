@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.47      2017-11-12 17:19:42+01:00 Europe/Brussels
         * Use AlphaVantage for currency quotes instead of Yahoo (Mike Alexander)
 
 1.46      2017-11-12 17:13:15+01:00 Europe/Brussels
