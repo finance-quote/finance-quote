@@ -1,4 +1,10 @@
 {{$NEXT}}
+        * Drop long-obsolete debian directory (Florian Schlichting)
+        * AlphaVantage:
+          - added support for .IL => USD currency and division (Adriano Baldi)
+          - graceful error catchup (Mike Alexander)
+        * Yahoojson:
+          - module adapted to new URL and returned json (Rafael Casali)
 
 1.45      2017-11-08 21:35:51+01:00 Europe/Brussels
         * alphavantage
