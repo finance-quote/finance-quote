@@ -32,7 +32,6 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 use Time::Piece;
-use Data::Dumper;
 
 # VERSION
 
