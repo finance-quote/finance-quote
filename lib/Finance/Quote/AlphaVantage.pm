@@ -93,6 +93,7 @@ my %currencies_by_suffix = (
     '.BK'  => "THB",    # Thialand	Thailand Stock Exchange
     '.TH'  => "THB",    # 		??? From Asia.pm, (in Thai Baht)
     '.L'   => "GBP",    # United Kingdom	London
+    '.IL'  => "USD",    # United Kingdom	London USD*100
 );
 
 
@@ -208,6 +209,15 @@ sub alphavantage {
 
                 # divide GBP quotes by 100
                 if ( ($info{ $stock, 'currency' } eq 'GBP') || ($info{$stock,'currency'} eq 'GBX') ) {
+                    foreach my $field ( $quoter->default_currency_fields ) {
+                        next unless ( $info{ $stock, $field } );
+                        $info{ $stock, $field } =
+                            $quoter->scale_field( $info{ $stock, $field },
+                                                  0.01 );
+                    }
+                }
+                # divide USD quotes by 100 if suffix is '.IL'
+                if ( ($suffix eq '.IL') && ($info{$stock,'currency'} eq 'USD') ) {
                     foreach my $field ( $quoter->default_currency_fields ) {
                         next unless ( $info{ $stock, $field } );
                         $info{ $stock, $field } =
