@@ -36,11 +36,12 @@ use Carp;
 use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
 use Encode;
+use JSON qw( decode_json );
 # use Data::Dumper;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $TIMEOUT %MODULES %METHODS $AUTOLOAD
-            $YAHOO_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
+            $ALPHAVANTAGE_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
 
 # Call on the Yahoo API:
 #  - "f=l1" should return a single value - the "Last Trade (Price Only)"
@@ -49,7 +50,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
 # Excample: http://finance.yahoo.com/d/quotes.csv?f=l1&s=AUDGBP=X
 # Documentation can be found here:
 #     http://code.google.com/p/yahoo-finance-managed/wiki/csvQuotesDownload
-$YAHOO_CURRENCY_URL = "http://finance.yahoo.com/d/quotes.csv?e=.csv&f=l1&s=";
+$ALPHAVANTAGE_CURRENCY_URL = "https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE";
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
@@ -248,14 +249,27 @@ sub currency {
 
   my $ua = $this->user_agent;
 
-  # The response should be a single value (the exchange rate)
-  my $data = $ua->request(GET "${YAHOO_CURRENCY_URL}${from}${to}=X")->content;
-  my $exchange_rate = $data;
+  my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
+  return undef unless ( defined $ALPHAVANTAGE_API_KEY );
+ 
+  my $reply = $ua->request(GET "${ALPHAVANTAGE_CURRENCY_URL}"
+    . "&from_currency=" . ${from}
+    . "&to_currency=" . ${to}
+    . "&apikey=" . ${ALPHAVANTAGE_API_KEY} );
 
-  $exchange_rate =~ s/,// ; # solve a bug when conversion rate
-                            # involves thousands. yahoo inserts
-                            # a comma when thousands occur
+  my $code = $reply->code;
+  my $desc = HTTP::Status::status_message($code);
+  return undef unless ($code == 200);
+  
+  my $body = $reply->content;
 
+  my $json_data = JSON::decode_json $body;
+  if ( !$json_data || $json_data->{'Error Message'} ) {
+    return undef;
+  }
+  
+  my $exchange_rate = $json_data->{'Realtime Currency Exchange Rate'}->{'5. Exchange Rate'};
+  
   {
     local $^W = 0;  # Avoid undef warnings.
 
