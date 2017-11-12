@@ -30,15 +30,15 @@ ok(($q->currency("10 AUD","AUD")) == (10 * ($q->currency("AUD","AUD"))));
 # converting correctly.
 
 # Test 6
-my %baseinfo = $q->fetch("yahoo_europe","UG.PA");
-ok($baseinfo{"UG.PA","success"});
+my %baseinfo = $q->fetch("alphavantage","BA.L");
+ok($baseinfo{"BA.L","success"});
 
 $q->set_currency("AUD");	# All new requests in Aussie Dollars.
 
-my %info = $q->fetch("yahoo_europe","UG.PA");
-ok($info{"UG.PA","success"});		# Test 7
-ok($info{"UG.PA","currency"} eq "AUD");	# Test 8
-ok($info{"UG.PA","price"} > 0);		# Test 9
+my %info = $q->fetch("alphavantage","BA.L");
+ok($info{"BA.L","success"});		# Test 7
+ok($info{"BA.L","currency"} eq "AUD");	# Test 8
+ok($info{"BA.L","last"} > 0);		# Test 9
 
 # Check if inverse is working ok
 ok(check_inverse("EUR","RUB"),"Inverse is calculated correctly: multiplication should be 1");
