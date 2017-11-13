@@ -60,6 +60,7 @@ my %currencies_by_suffix = (
     '.H'   => "EUR",    # 		Hamburg
     '.HA'  => "EUR",    # 		Hanover
     '.MU'  => "EUR",    # 		Munich
+    '.ME'  => "RUB",    # Russia	Moscow
     '.SG'  => "EUR",    # 		Stuttgart
     '.DE'  => "EUR",    # 		XETRA
     '.HK'  => "HKD",    # Hong Kong
