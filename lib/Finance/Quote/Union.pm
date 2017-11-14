@@ -128,7 +128,7 @@ sub unionfunds
 
 sub unionurl
 {
-  return "http://www.union-invest.de/preise.csv";
+  return "http://privatkunden.union-investment.de/preise.csv";
 }
 
 1;
