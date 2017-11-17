@@ -250,7 +250,7 @@ sub currency {
 
   my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
   return undef unless ( defined $ALPHAVANTAGE_API_KEY );
- 
+
   my $reply = $ua->request(GET "${ALPHAVANTAGE_CURRENCY_URL}"
     . "&from_currency=" . ${from}
     . "&to_currency=" . ${to}
@@ -259,16 +259,16 @@ sub currency {
   my $code = $reply->code;
   my $desc = HTTP::Status::status_message($code);
   return undef unless ($code == 200);
-  
+
   my $body = $reply->content;
 
   my $json_data = JSON::decode_json $body;
   if ( !$json_data || $json_data->{'Error Message'} ) {
     return undef;
   }
-  
+
   my $exchange_rate = $json_data->{'Realtime Currency Exchange Rate'}->{'5. Exchange Rate'};
-  
+
   {
     local $^W = 0;  # Avoid undef warnings.
 
