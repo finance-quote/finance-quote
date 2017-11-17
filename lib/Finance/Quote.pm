@@ -54,7 +54,7 @@ $ALPHAVANTAGE_CURRENCY_URL = "https://www.alphavantage.co/query?function=CURRENC
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
-@EXPORT_OK = qw/yahoo yahoo_europe fidelity troweprice asx tiaacref
+@EXPORT_OK = qw/fidelity troweprice asx tiaacref
                 currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
@@ -182,8 +182,7 @@ sub new {
             Platinum SEB SIXfunds SIXshares StockHouseCanada TSP TSX
             Tdefunds Tdwaterhouse Tiaacref TNetuk Troweprice Trustnet
             Union USFedBonds VWD ZA Cominvest Finanzpartner YahooJSON
-            Yahoo::Asia Yahoo::Australia Yahoo::Brasil Yahoo::Europe
-            Yahoo::NZ Yahoo::USA YahooYQL ZA_UnitTrusts/; }
+            YahooYQL ZA_UnitTrusts/; }
 
   $this->_load_modules(@modules,@reqmodules);
 
