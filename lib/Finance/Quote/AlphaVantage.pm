@@ -95,6 +95,8 @@ my %currencies_by_suffix = (
     '.TH'  => "THB",    # 		??? From Asia.pm, (in Thai Baht)
     '.L'   => "GBP",    # United Kingdom	London
     '.IL'  => "USD",    # United Kingdom	London USD*100
+    '.VX'  => "CHF",    # Switzerland
+    '.SW'  => "CHF",    # Switzerland
 );
 
 
