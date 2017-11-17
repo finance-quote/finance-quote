@@ -162,6 +162,12 @@ sub alphavantage {
             next;
         }
 
+        if (!$json_data->{'Meta Data'}) {
+            $info{ $stock, 'success' } = 0;
+            $info{ $stock, 'errormsg' } = ( $json_data->{'Information'} || "No useable data returned" ) ;
+            next;
+        }
+
         my $last_refresh = $json_data->{'Meta Data'}->{'3. Last Refreshed'}; # when market is open this returns an isodate + time, otherwise only the isodate
         $last_refresh = substr($last_refresh,0,10);  # remove time if returned
         if ( !$last_refresh ) {
