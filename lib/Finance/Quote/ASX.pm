@@ -41,6 +41,7 @@ use LWP::UserAgent;
 use HTML::TableExtract;
 use Encode;
 use HTTP::Cookies;
+use HTML::Parser;
 
 use vars qw/$ASX_URL @ASX_SEC_CODES/;
 
@@ -59,8 +60,8 @@ $ASX_URL = 'http://m.asx.com.au/m/prices/shares.xhtml?issuerCode=';
 sub methods {return (australia => \&asx,asx => \&asx)}
 
 {
-	my @labels = qw/name last net p_change bid offer high low volume
-	                price method exchange/;
+	my @labels = qw/date name last net p_change bid offer high low volume
+	                open price method exchange currency symbol success/;
 
 	sub labels { return (australia => \@labels,
 	                     asx       => \@labels); }
@@ -72,6 +73,7 @@ sub methods {return (australia => \&asx,asx => \&asx)}
 # Maintainer of this section is Paul Fenwick <pjf@cpan.org>
 # 5-May-2001 Updated by Leigh Wedding <leigh.wedding@telstra.com>
 # 24-Feb-2014 Updated by Chris Good <chris.good@@ozemail.com.au>
+# 13-Nov-2017 Updated by Frank Crawford <frank@crawford.emu.id.au>
 
 sub asx {
 	my $quoter = shift;
@@ -100,6 +102,44 @@ sub asx {
 				$info{$stock,"errormsg"} = "HTTP session failed";
 			}
 			return wantarray() ? %info : \%info;
+		}
+
+		# Get date/time info from page headers
+		our ($lasttag, %classline);
+
+		sub p_start {
+		    my ($tagname, $attr, $origtext) = @_;
+		    $lasttag = $attr->{'class'} if defined($attr->{'class'});
+		}
+		sub p_text {
+		    my ($origtext) = @_;
+		    $classline{$lasttag} = $origtext if defined($lasttag);
+		}
+		sub p_end {
+		    undef($lasttag);
+		}
+
+		my $p = HTML::Parser->new();
+		$p->handler(start => \&p_start, 'tagname, attr, text');
+		$p->handler(text => \&p_text, 'text');
+		$p->handler(end => \&p_end, 'tagname, text');
+		$p->parse(decode("UTF-8",$response->content));
+
+		# If it is a delayed update, use the date at the top
+		# of the page, otherwise it will be a closing date, so use it.
+		if (defined($classline{'data-latency-msg'})) {
+		    if ($classline{'data-latency-msg'} =~ /^Delayed/) {
+		    	if (defined($classline{'date'})) {
+			    $classline{'date'} =~ /^\w+ (\d+ \w+) (\d+:\d+) \w+/;
+			    # Try and make it a standard formate
+			    $info{$stock,"time"} = $2 . ":00";
+			    $info{$stock,"date"} = $1 . " " . (1900 + (localtime())[5]);
+			}
+		    } elsif ($classline{'data-latency-msg'} =~ /^(.*) (\d+ \w+ \d+)$/) {
+			# Fix up the time, otherwise it will cause errors
+			$info{$stock,"time"} = "18:00:00";
+			$info{$stock,"date"} = $2;
+		    }
 		}
 
 		my $te = HTML::TableExtract->new(
@@ -182,8 +222,11 @@ sub asx {
                 }
             }
 
-            # Remove trailing percentage sign from p_change
-            $info{$stock,"p_change"} =~ tr/%//d;
+            # Remove trailing percentage sign and other cruft from p_change
+            $info{$stock,"p_change"} =~ tr/-0-9.//cd;
+
+            # Remove trailing percentage sign and other cruft from net
+            $info{$stock,"net"} =~ tr/-0-9.//cd;
 
             # Australian indexes all begin with X, so don't tag them
             # as having currency info.
@@ -196,6 +239,9 @@ sub asx {
             if ( grep( /^$stock$/, @ASX_SEC_CODES ) ) {
                 $info{$stock, "currency"} = "AUD";
             }
+
+	    # Pick up stock name from header
+	    ($info{$stock, "name"} = ($t->hrow())[0]) =~ s/^$stock -\s+(\w.*\w)\s*$/$1/;
 
             $info{$stock, "method"} = "asx";
             $info{$stock, "exchange"} = "Australian Stock Exchange";
