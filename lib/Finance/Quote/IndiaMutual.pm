@@ -19,7 +19,8 @@ use HTML::TableExtract;
 # URLs of where to obtain information.
 
 $AMFI_MAIN_URL = ("http://www.amfiindia.com/");
-$AMFI_URL = ("http://portal.amfiindia.com/NAVReport.aspx?type=0");
+$AMFI_URL = ("https://www.amfiindia.com/spages/NAVAll.txt"); #from https://www.amfiindia.com/nav-history-download
+#$AMFI_URL = ("http://portal.amfiindia.com/NAVReport.aspx?type=0"); #Old URL does not seem to be working anymore
 #$AMFI_URL = ("http://portal.amfiindia.com/spages/NAV0.txt"); #This page seems to do the job also. Keep for reference
 
 # amfinavlist.txt is a cache-file. keep it until updated on the website since this is a 1meg file.
