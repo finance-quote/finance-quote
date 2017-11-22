@@ -126,6 +126,19 @@ sub yahoo_json {
 		$info{ $stocks, "currency"} = $json_resources->{'currency'};
                 $info{ $stocks, "volume" }   = $json_volume;
 
+                # The Yahoo JSON interface returns London prices in GBp (pence) instead of GBP (pounds)
+                # and the Yahoo Base had a hack to convert them to GBP.  In theory all the callers
+                # would correctly handle GBp as not the same as GBP, but they don't, and since
+                # we had the hack before, let's add it back now.
+                #
+                # Convert GBp or GBX to GBP (divide price by 100).
+
+                if ( ($info{$stocks,"currency"} eq "GBp") ||
+                     ($info{$stocks,"currency"} eq "GBX")) {
+                    $info{$stocks,"last"}=$info{$stocks,"last"}/100;
+                    $info{ $stocks, "currency"} = "GBP";
+                }
+            
                 $my_date =  localtime($json_timestamp)->strftime('%d.%m.%Y %T');
 
                 $quoter->store_date( \%info, $stocks,
