@@ -88,6 +88,7 @@ my %currencies_by_suffix = (
     '.MA'  => "EUR",    # 		Madrid
     '.VA'  => "EUR",    # 		Valence
     '.ST'  => "SEK",    # Sweden		Stockholm
+    '.HE'  => "EUR",    # Finland		Helsinki
     '.S'   => "CHF",    # Switzerland	Zurich
     '.TW'  => "TWD",    # Taiwan		Taiwan Stock Exchange
     '.TWO' => "TWD",    # 		OTC
