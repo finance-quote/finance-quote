@@ -18,10 +18,9 @@ Paul Fenwick (pjf at cpan.org)
 2. Where can I get a beginner's introduction to F::Q?
 =====================================================
 	A good beginner's guide is the Finance::Quote article in
-	The Perl Journal (http://www.tpj.com/) edition #19.  If you
-	don't have a subscription to TPJ, you can also read the
-	final draft of this essay at
-	<http://finance-quote.sourceforge.net/documentation.html>.
+	The Perl Journal edition #19.  You can read the	final draft of this
+	essay online at:
+	<http://finance-quote.sourceforge.net/tpj/finance-quote.txt>.
 
 3. How can I use proxyauth (experimental)?
 ==========================================
