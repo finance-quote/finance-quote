@@ -123,10 +123,13 @@ sub yahoo_json {
                 $info{ $stocks, "name" }   = $stocks . ' (' . $json_name . ')';
                 $info{ $stocks, "type" }   = $json_type;
                 $info{ $stocks, "last" }   = $json_price;
-		$info{ $stocks, "currency"} = $json_resources->{'currency'};
+                $info{ $stocks, "currency"} = $json_resources->{'currency'};
                 $info{ $stocks, "volume" }   = $json_volume;
 
-                $my_date =  localtime($json_timestamp)->strftime('%d.%m.%Y %T');
+                # MS Windows strftime() does not support %T so use %H:%M:%S
+                #  instead.
+                $my_date =
+                    localtime($json_timestamp)->strftime('%d.%m.%Y %H:%M:%S');
 
                 $quoter->store_date( \%info, $stocks,
                                      { eurodate => $my_date } );
