@@ -736,26 +736,26 @@ sub store_date
     $this_month = $month;
     $year_specified = 0;
 
-    # Proces the inputs
-    if (defined $piecesref->{isodate}) {
+    # Process the inputs
+    if ((defined $piecesref->{isodate}) && ($piecesref->{isodate})) {
       ($year, $month, $day) = ($piecesref->{isodate} =~ m/(\d+)\W+(\w+)\W+(\d+)/);
       $year += 2000 if $year < 100;
       $year_specified = 1;
-#      printf ("ISO Date %s: Year %d, Month %s, Day %d\n", $piecesref->{isodate}, $year, $month, $day);
+#      printf "ISO Date %s: Year %d, Month %s, Day %d\n", $piecesref->{isodate}, $year, $month, $day;
     }
 
-    if (defined $piecesref->{usdate}) {
+    if ((defined $piecesref->{usdate}) && ($piecesref->{usdate})) {
       ($month, $day, $year) = ($piecesref->{usdate} =~ /(\w+)\W+(\d+)\W+(\d+)/);
       $year += 2000 if $year < 100;
       $year_specified = 1;
-#      printf ("US Date %s: Month %s, Day %d, Year %d\n", $piecesref->{usdate}, $month, $day, $year);
+#      printf "US Date %s: Month %s, Day %d, Year %d\n", $piecesref->{usdate}, $month, $day, $year;
     }
 
-    if (defined $piecesref->{eurodate}) {
-      ($day, $month, $year) = ($piecesref->{eurodate} =~ /(\d+)\W+(\w+)\W+(\d+)/);
+    if ((defined $piecesref->{eurodate}) && ($piecesref->{eurodate})) {
+        ($day, $month, $year) = ($piecesref->{eurodate} =~ /(\d+)\W+(\w+)\W+(\d+)/);
       $year += 2000 if $year < 100;
       $year_specified = 1;
-#      printf ("Euro Date %s: Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year);
+#      printf "Euro Date %s: Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year;
     }
 
     if (defined ($piecesref->{year})) {
