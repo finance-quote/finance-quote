@@ -40,26 +40,17 @@ use HTTP::Request::Common;
 use LWP::UserAgent;
 use HTML::TableExtract;
 use Encode;
-use HTTP::Cookies;
 
 use vars qw/$ASX_URL @ASX_SEC_CODES/;
 
 # VERSION
 
-# mobile site:
-# Following URL seems to need javascript so does not work with LWP
-#$ASX_URL = 'http://m.asx.com.au/m/company-info.xhtml?issuerCode=';
-$ASX_URL = 'http://m.asx.com.au/m/prices/shares.xhtml?issuerCode=';
-
-# These are the ASX codes starting with X that are securities not indexes
-#  and thus need currency AUD returned
-# See http://www.asx.com.au/asx/research/listedCompanies.do
-@ASX_SEC_CODES = (qw/XAM XIP XRO XPD XPE XF1 XRF XST XTD XTE XTV/);
+$ASX_URL = 'http://www.asx.com.au/asx/markets/priceLookup.do?by=asxCodes&asxCodes=';
 
 sub methods {return (australia => \&asx,asx => \&asx)}
 
 {
-	my @labels = qw/name last net p_change bid offer high low volume
+	my @labels = qw/last net p_change bid offer high low volume
 	                price method exchange/;
 
 	sub labels { return (australia => \@labels,
@@ -75,27 +66,19 @@ sub methods {return (australia => \&asx,asx => \&asx)}
 
 sub asx {
 	my $quoter = shift;
-	my @stocks = @_;
-	return unless @stocks;
+	my @all_stocks = @_;
+	return unless @all_stocks;
+	my @stocks;
 	my %info;
 
 	my $ua = $quoter->user_agent;
 
-    # cookies are required for m.asx.com.au
-    my $cookies = HTTP::Cookies->new(
-#        file => "$ENV{HOME}/.asx_cookies.txt",
-#        autosave => 1,
-    );
-    $ua->cookie_jar($cookies);
+	# ASX webpage only handles up to 10 quote requests at once
 
-    # From 21 Apr 2017 www.asx.com.au/asx/markets/priceLookup.do no longer works
-    #  with LWP as requires javascript, so use mobile webpage m.asx.com.au which
-    #  only handles 1 stock at a time
-
-    foreach my $stock (@stocks) {
-		my $response = $ua->request(GET $ASX_URL . $stock);
+	while (@stocks = splice(@all_stocks, 0, 10)) {
+		my $response = $ua->request(GET $ASX_URL.join("%20",@stocks));
 		unless ($response->is_success) {
-			foreach my $stock (@stocks) {
+			foreach my $stock (@stocks, @all_stocks) {
 				$info{$stock,"success"} = 0;
 				$info{$stock,"errormsg"} = "HTTP session failed";
 			}
@@ -103,22 +86,16 @@ sub asx {
 		}
 
 		my $te = HTML::TableExtract->new(
-		    automap => 0,
-			slice_columns => 0,   # 0 = get all columns, 1 = get only hdr cols
-#			keep_headers => 1,    # we don't need the header row in the returned
-                                  # rows because we only match the 1 table with
-                                  # a header cell matching pattern "^$stock - "
-#			debug => 5,
-			headers => ["^$stock - "]
-        );
+			automap => 0,
+			headers => ["Code", "Last", '\+/-', "% Chg", "Bid",
+			    "Offer", "Open", "High", "Low", "Volume"]);
 
-        # note that TableExtract decodes by default
-		$te->parse(decode("UTF-8",$response->content));
+		$te->parse(decode('utf-8',$response->content));
 
 		# Extract table contents.
 		my @rows;
 		unless (($te->tables > 0) && ( @rows = $te->rows)) {
-			foreach my $stock (@stocks) {
+			foreach my $stock (@stocks, @all_stocks) {
 				$info{$stock,"success"} = 0;
 				$info{$stock,"errormsg"} = "Failed to parse HTML table.";
 			}
@@ -126,83 +103,78 @@ sub asx {
 		}
 
 		# Pack the resulting data into our structure.
+		foreach my $row (@rows) {
+			my $stock = shift(@$row);
 
-		{
-		    my $t = $te->first_table_found;
-		    my $row_index = 0;
+			# Skip any blank lines.
+			next unless $stock;
 
-            while ($row_index < @rows) {
+			# Delete spaces and '*' which sometimes appears after the code.
+			# Also delete high bit characters.
+			$stock =~ tr/* \200-\377//d;
 
-                # Delete spaces and '*' which sometimes appears after the code.
-                # Also delete high bit characters.
-                $stock =~ tr/* \200-\377//d;
+			# Delete any whitespace characters
+			$stock =~ s/\s//g;
 
-                # Delete any whitespace characters
-                $stock =~ s/\s//g;
+			$info{$stock,'symbol'} = $stock;
 
-                $info{$stock,'symbol'} = $stock;
+			foreach my $label (qw/last net p_change bid offer open
+				      high low volume/) {
+				$info{$stock,$label} = shift(@$row);
 
-                if ($t->cell($row_index, 0) eq 'Last') {
-                    $info{$stock, "last"} = $t->cell($row_index+1, 0);
-                    $info{$stock, "p_change"} = $t->cell($row_index+1, 1);
-                    $info{$stock, "net"} = $t->cell($row_index+1, 2);
-                    $info{$stock, "volume"} = $t->cell($row_index+1, 3);
-                }
-                elsif ($t->cell($row_index, 0) eq 'Bid') {
-                    $info{$stock, "bid"} = $t->cell($row_index+1, 0);
-                    $info{$stock, "offer"} = $t->cell($row_index+1, 1);
-                    $info{$stock, "open"} = $t->cell($row_index+1, 2);
-                    $info{$stock, "high"} = $t->cell($row_index+1, 3);
-                    $info{$stock, "low"} = $t->cell($row_index+1, 4);
-                }
-                $row_index++;
-            }
+				# Again, get rid of nasty high-bit characters.
+				$info{$stock,$label} =~ tr/ \200-\377//d
+					unless ($label eq "name");
+			}
 
-            # If that stock does not exist, it will have a empty
-            # string for all the fields.  The "last" price should
-            # always be defined (even if zero), if we see an empty
-            # string here then we know we've found a bogus stock.
+			# get rid of trailing whitespace after 'last'
+			$info{$stock,'last'} =~ s/\s//g;
 
-            if ($info{$stock,'last'} eq '') {
-                $info{$stock,'success'} = 0;
-                $info{$stock,'errormsg'}="Stock does not exist on ASX.";
-                next;
-            }
+			# If that stock does not exist, it will have a empty
+			# string for all the fields.  The "last" price should
+			# always be defined (even if zero), if we see an empty
+			# string here then we know we've found a bogus stock.
 
-            # Drop commas from volume.
-            $info{$stock,"volume"} =~ tr/,//d;
+			if ($info{$stock,'last'} eq '') {
+				$info{$stock,'success'} = 0;
+				$info{$stock,'errormsg'}="Stock does not exist on ASX.";
+				next;
+			}
 
-            # The ASX returns zeros for a number of things if there
-            # has been no trading.  This not only looks silly, but
-            # can break things later.  "correct" zero'd data.
+			# Drop commas from volume.
+			$info{$stock,"volume"} =~ tr/,//d;
 
-            foreach my $label (qw/open high low/) {
-                if ($info{$stock,$label} == 0) {
-                    $info{$stock,$label} = $info{$stock,"last"};
-                }
-            }
+			# The ASX returns zeros for a number of things if there
+			# has been no trading.  This not only looks silly, but
+			# can break things later.  "correct" zero'd data.
 
-            # Remove trailing percentage sign from p_change
-            $info{$stock,"p_change"} =~ tr/%//d;
+			foreach my $label (qw/open high low/) {
+				if ($info{$stock,$label} == 0) {
+					$info{$stock,$label} = $info{$stock,"last"};
+				}
+			}
 
-            # Australian indexes all begin with X, so don't tag them
-            # as having currency info.
+			# Remove trailing percentage sign from p_change
+			$info{$stock,"p_change"} =~ tr/%//d;
 
-            $info{$stock, "currency"} = "AUD" unless ($stock =~ /^X/);
+			# Australian indexes all begin with X, so don't tag them
+			# as having currency info.
 
-            # There are some companies starting with X, so DO tag
-            #  them with currency AUD
+			$info{$stock, "currency"} = "AUD" unless ($stock =~ /^X/);
 
-            if ( grep( /^$stock$/, @ASX_SEC_CODES ) ) {
-                $info{$stock, "currency"} = "AUD";
-            }
+			# There are some companies starting with X, so DO tag
+			#  them with currency AUD
 
-            $info{$stock, "method"} = "asx";
-            $info{$stock, "exchange"} = "Australian Stock Exchange";
-            $info{$stock, "price"} = $info{$stock,"last"};
-            $info{$stock, "success"} = 1;
-        }
-    }
+			if ( grep( /^$stock$/, @ASX_SEC_CODES ) ) {
+				$info{$stock, "currency"} = "AUD";
+			}
+
+			$info{$stock, "method"} = "asx";
+			$info{$stock, "exchange"} = "Australian Stock Exchange";
+			$info{$stock, "price"} = $info{$stock,"last"};
+			$info{$stock, "success"} = 1;
+		}
+	}
 
 	# All done.
 
@@ -248,8 +220,8 @@ Stock Exchange's terms and conditions.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::ASX:
-date, bid, ask, open, high, low, last, close, p_change, volume,
-net and price.
+bid, offer, open, high, low, last, net, p_change, volume,
+and price.
 
 =head1 SEE ALSO
 
