@@ -47,6 +47,11 @@ use vars qw/$ASX_URL @ASX_SEC_CODES/;
 
 $ASX_URL = 'http://www.asx.com.au/asx/markets/priceLookup.do?by=asxCodes&asxCodes=';
 
+# These are the ASX codes starting with X that are securities not indexes
+#  and thus need currency AUD returned
+# See http://www.asx.com.au/asx/research/listedCompanies.do
+@ASX_SEC_CODES = (qw/XAM XIP XRO XPD XPE XF1 XRF XST XTD XTE XTV/);
+
 sub methods {return (australia => \&asx,asx => \&asx)}
 
 {
