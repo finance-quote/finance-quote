@@ -44,7 +44,7 @@ sub methods {
 }
 {
     my @labels = qw/name last date isodate volume currency method exchange type
-        div_yield eps pe year_range/;
+        div_yield eps pe year_range open high low close/;
 
     sub labels {
         return ( yahoo_json => \@labels,
@@ -152,6 +152,14 @@ sub yahoo_json {
                     sprintf("%12s - %s",
                         $json_resources->{"fiftyTwoWeekLow"},
                         $json_resources->{'fiftyTwoWeekHigh'});
+                $info{ $stocks, "open"} =
+                    $json_resources->{'regularMarketOpen'};
+                $info{ $stocks, "high"} =
+                    $json_resources->{'regularMarketDayHigh'};
+                $info{ $stocks, "low"} =
+                    $json_resources->{'regularMarketDayLow'};
+                $info{ $stocks, "close"} =
+                    $json_resources->{'regularMarketPreviousClose'};
 
                 # MS Windows strftime() does not support %T so use %H:%M:%S
                 #  instead.
@@ -205,7 +213,7 @@ This module provides the "yahoo_json" fetch method.
 
 The following labels may be returned by Finance::Quote::YahooJSON :
 name, last, isodate, volume, currency, method, exchange, type,
-div_yield eps pe year_range.
+div_yield eps pe year_range open high low close.
 
 =head1 SEE ALSO
 
