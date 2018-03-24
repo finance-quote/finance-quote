@@ -272,6 +272,12 @@ sub alphavantage {
 
         $quantity--;
         select(undef, undef, undef, .7) if ($quantity);
+        
+        # Alpha Vantage recommends that API call frequency does not extend far
+        # beyond ~1 call per second so that they can continue to deliver
+        # optimal server-side performance:
+        #   https://www.alphavantage.co/support/#api-key
+        sleep(1);
     }
 
     return wantarray() ? %info : \%info;
