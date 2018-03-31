@@ -127,9 +127,9 @@ sub dwsfunds {
 	if ($response->is_success) {
 		$html_string =$response->content;
 
-		$te = new HTML::TableExtract->new( depth => 3, count => 1 );
-		$te->parse($html_string);
-		$ts=$te->table_state(3,1);
+		$te = new HTML::TableExtract->new( attribs => { id => 'FundsFinder_ResultTable'} );
+                $te->parse($html_string);
+                $ts=$te->first_table_found();
 	} else {
 		# retrieval error - flag an error and return right away
 		foreach my $fund (@funds) {
