@@ -73,7 +73,7 @@ sub deka
         $info{$q[0], "last"}     = convert_price($q[4]);
 
         $info{$q[0], "method"}   = "deka";
-        $info{$q[0], "currency"} = $q[12];
+        $info{$q[0], "currency"} = $q[8];
         $info{$q[0], "success"}  = 1;
       }
     }
