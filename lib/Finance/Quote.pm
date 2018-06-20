@@ -182,7 +182,7 @@ sub new {
             Platinum SEB SIXfunds SIXshares StockHouseCanada TSP TSX
             Tdefunds Tdwaterhouse Tiaacref TNetuk Troweprice Trustnet
             Union USFedBonds VWD ZA Cominvest Finanzpartner YahooJSON
-            YahooYQL ZA_UnitTrusts/; }
+            YahooYQL WorldTrading ZA_UnitTrusts/; }
 
   $this->_load_modules(@modules,@reqmodules);
 
