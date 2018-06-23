@@ -25,6 +25,14 @@ require 5.005;
 use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
+use Time::HiRes qw(usleep clock_gettime);
+
+# Alpha Vantage recommends that API call frequency does not extend far
+# beyond ~1 call per second so that they can continue to deliver
+# optimal server-side performance:
+#   https://www.alphavantage.co/support/#api-key
+our @alphaqueries=();
+my $maxQueries = { quantity =>20 , seconds => 65}; # no more than x queries per y seconds
 
 my $ALPHAVANTAGE_URL =
     'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&datatype=json';
@@ -116,12 +124,30 @@ sub methods {
     }
 }
 
+sub sleep_before_query {
+    # wait till we can query again
+    my $q = $maxQueries->{quantity};
+    if ( $#alphaqueries >= $q ) {
+        my $time_since_x_queries = clock_gettime()-$alphaqueries[$q];
+        # print STDERR "LAST QUERY $time_since_x_queries\n";
+        if ($time_since_x_queries < $maxQueries->{seconds}) {
+            my $sleeptime = ($maxQueries->{seconds} - $time_since_x_queries) * 1000000;
+            # print STDERR "SLEEP $sleeptime\n";
+            usleep( $sleeptime );
+            # print STDERR "CONTINUE\n";
+        }
+    }
+    unshift @alphaqueries, clock_gettime();
+    pop @alphaqueries while $#alphaqueries>$q; # remove unnecessary data
+    # print STDERR join(",",@alphaqueries)."\n";
+}
+
 sub alphavantage {
     my $quoter = shift;
 
     my @stocks = @_;
     my $quantity = @stocks;
-    my ( %info, $reply, $url );
+    my ( %info, $reply, $url, $code, $desc, $body );
     my $ua = $quoter->user_agent();
 
     foreach my $stock (@stocks) {
@@ -139,11 +165,18 @@ sub alphavantage {
             . $ALPHAVANTAGE_API_KEY
             . '&symbol='
             . $stock;
-        $reply = $ua->request( GET $url);
 
-        my $code = $reply->code;
-        my $desc = HTTP::Status::status_message($code);
-        my $body = $reply->content;
+        my $get_content = sub {
+            sleep_before_query();
+            $reply = $ua->request( GET $url);
+
+            $code = $reply->code;
+            $desc = HTTP::Status::status_message($code);
+            $body = $reply->content;
+        };
+
+        &$get_content();
+
         if ($code != 200) {
             $info{ $stock, 'success' } = 0;
             $info{ $stock, 'errormsg' } = $desc;
@@ -155,6 +188,16 @@ sub alphavantage {
         if ($@) {
             $info{ $stock, 'success' } = 0;
             $info{ $stock, 'errormsg' } = $@;
+        }
+
+        my $try_cnt = 0;
+        while (($try_cnt < 5) && ($json_data->{'Information'})) {
+            # print STDERR "INFORMATION:".$json_data->{'Information'}."\n";
+            # print STDERR "ADDITIONAL SLEEPING HERE !";
+            sleep (20);
+            &$get_content();
+            eval {$json_data = JSON::decode_json $body};
+            $try_cnt += 1;
         }
 
         if ( !$json_data || $json_data->{'Error Message'} ) {
@@ -248,8 +291,6 @@ sub alphavantage {
 
         $info{ $stock, "currency_set_by_fq" } = 1;
 
-        $quantity--;
-        select(undef, undef, undef, .7) if ($quantity);
     }
 
     return wantarray() ? %info : \%info;
