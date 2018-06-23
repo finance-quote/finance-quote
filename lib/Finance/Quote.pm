@@ -250,22 +250,31 @@ sub currency {
 
   my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
   return undef unless ( defined $ALPHAVANTAGE_API_KEY );
+ 
+  my $try_cnt = 0;
+  my $json_data;
+  do {
+    $try_cnt += 1;
+    my $reply = $ua->request(GET "${ALPHAVANTAGE_CURRENCY_URL}"
+      . "&from_currency=" . ${from}
+      . "&to_currency=" . ${to}
+      . "&apikey=" . ${ALPHAVANTAGE_API_KEY} );
 
-  my $reply = $ua->request(GET "${ALPHAVANTAGE_CURRENCY_URL}"
-    . "&from_currency=" . ${from}
-    . "&to_currency=" . ${to}
-    . "&apikey=" . ${ALPHAVANTAGE_API_KEY} );
+    my $code = $reply->code;
+    my $desc = HTTP::Status::status_message($code);
+    return undef unless ($code == 200);
 
-  my $code = $reply->code;
-  my $desc = HTTP::Status::status_message($code);
-  return undef unless ($code == 200);
+    my $body = $reply->content;
 
-  my $body = $reply->content;
-
-  my $json_data = JSON::decode_json $body;
-  if ( !$json_data || $json_data->{'Error Message'} ) {
-    return undef;
-  }
+    $json_data = JSON::decode_json $body;
+    if ( !$json_data || $json_data->{'Error Message'} ) {
+      return undef;
+    }
+#     print "Failed: " . $json_data->{'Information'} . "\n" if (($try_cnt < 5) && ($json_data->{'Information'}));
+    sleep (40) if (($try_cnt < 5) && ($json_data->{'Information'}));
+  } while (($try_cnt < 5) && ($json_data->{'Information'}));
+  
+  sleep(1);
 
   my $exchange_rate = $json_data->{'Realtime Currency Exchange Rate'}->{'5. Exchange Rate'};
 
