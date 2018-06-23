@@ -121,7 +121,7 @@ sub alphavantage {
 
     my @stocks = @_;
     my $quantity = @stocks;
-    my ( %info, $reply, $url );
+    my ( %info, $reply, $url, $code, $desc, $body );
     my $ua = $quoter->user_agent();
 
     foreach my $stock (@stocks) {
@@ -139,11 +139,17 @@ sub alphavantage {
             . $ALPHAVANTAGE_API_KEY
             . '&symbol='
             . $stock;
-        $reply = $ua->request( GET $url);
 
-        my $code = $reply->code;
-        my $desc = HTTP::Status::status_message($code);
-        my $body = $reply->content;
+        my $get_content = sub {
+            $reply = $ua->request( GET $url);
+
+            $code = $reply->code;
+            $desc = HTTP::Status::status_message($code);
+            $body = $reply->content;
+        };
+
+        &$get_content();
+
         if ($code != 200) {
             $info{ $stock, 'success' } = 0;
             $info{ $stock, 'errormsg' } = $desc;
@@ -159,22 +165,8 @@ sub alphavantage {
 
         my $try_cnt = 0;
         while (($try_cnt < 5) && ($json_data->{'Information'})) {
-            #my $handle   = undef;
-            ##my $filename = $ENV{'HOME'} . "/AlphaVantage.txt";
-            #my $filename = $ENV{'HOMEDRIVE'} . $ENV{'HOMEPATH'} .
-            #	'\\Documents\\AlphaVantage.txt';
-            #my $encoding = ":encoding(UTF-8)";
-            #open($handle, ">> $encoding", $filename)
-            #    || die "$0: can't open $filename in append mode: $!";
-            #print $handle "[DEBUG] Information=\r\n" .
-            #	$json_data->{'Information'} . "\r\n";
-            #close $handle;
-
             sleep (20);
-            $reply = $ua->request( GET $url);
-            $code = $reply->code;
-            $desc = HTTP::Status::status_message($code);
-            $body = $reply->content;
+            &$get_content();
             eval {$json_data = JSON::decode_json $body};
             $try_cnt += 1;
         }
@@ -272,7 +264,7 @@ sub alphavantage {
 
         $quantity--;
         select(undef, undef, undef, .7) if ($quantity);
-        
+
         # Alpha Vantage recommends that API call frequency does not extend far
         # beyond ~1 call per second so that they can continue to deliver
         # optimal server-side performance:
