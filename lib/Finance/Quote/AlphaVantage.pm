@@ -25,6 +25,14 @@ require 5.005;
 use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
+use Time::HiRes qw(usleep clock_gettime);
+
+# Alpha Vantage recommends that API call frequency does not extend far
+# beyond ~1 call per second so that they can continue to deliver
+# optimal server-side performance:
+#   https://www.alphavantage.co/support/#api-key
+our @alphaqueries=();
+my $maxQueries = { quantity =>20 , seconds => 65}; # no more than x queries per y seconds
 
 my $ALPHAVANTAGE_URL =
     'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&datatype=json';
@@ -116,6 +124,24 @@ sub methods {
     }
 }
 
+sub sleep_before_query {
+    # wait till we can query again
+    my $q = $maxQueries->{quantity};
+    if ( $#alphaqueries >= $q ) {
+        my $time_since_x_queries = clock_gettime()-$alphaqueries[$q];
+        # print STDERR "LAST QUERY $time_since_x_queries\n";
+        if ($time_since_x_queries < $maxQueries->{seconds}) {
+            my $sleeptime = ($maxQueries->{seconds} - $time_since_x_queries) * 1000000;
+            # print STDERR "SLEEP $sleeptime\n";
+            usleep( $sleeptime );
+            # print STDERR "CONTINUE\n";
+        }
+    }
+    unshift @alphaqueries, clock_gettime();
+    pop @alphaqueries while $#alphaqueries>$q; # remove unnecessary data
+    # print STDERR join(",",@alphaqueries)."\n";
+}
+
 sub alphavantage {
     my $quoter = shift;
 
@@ -141,6 +167,7 @@ sub alphavantage {
             . $stock;
 
         my $get_content = sub {
+            sleep_before_query();
             $reply = $ua->request( GET $url);
 
             $code = $reply->code;
@@ -165,6 +192,8 @@ sub alphavantage {
 
         my $try_cnt = 0;
         while (($try_cnt < 5) && ($json_data->{'Information'})) {
+            # print STDERR "INFORMATION:".$json_data->{'Information'}."\n";
+            # print STDERR "ADDITIONAL SLEEPING HERE !";
             sleep (20);
             &$get_content();
             eval {$json_data = JSON::decode_json $body};
@@ -262,14 +291,6 @@ sub alphavantage {
 
         $info{ $stock, "currency_set_by_fq" } = 1;
 
-        $quantity--;
-        select(undef, undef, undef, .7) if ($quantity);
-
-        # Alpha Vantage recommends that API call frequency does not extend far
-        # beyond ~1 call per second so that they can continue to deliver
-        # optimal server-side performance:
-        #   https://www.alphavantage.co/support/#api-key
-        sleep(1);
     }
 
     return wantarray() ? %info : \%info;
