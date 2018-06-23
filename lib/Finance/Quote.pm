@@ -250,7 +250,7 @@ sub currency {
 
   my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
   return undef unless ( defined $ALPHAVANTAGE_API_KEY );
- 
+
   my $try_cnt = 0;
   my $json_data;
   do {
@@ -271,10 +271,8 @@ sub currency {
       return undef;
     }
 #     print "Failed: " . $json_data->{'Information'} . "\n" if (($try_cnt < 5) && ($json_data->{'Information'}));
-    sleep (40) if (($try_cnt < 5) && ($json_data->{'Information'}));
+    sleep (20) if (($try_cnt < 5) && ($json_data->{'Information'}));
   } while (($try_cnt < 5) && ($json_data->{'Information'}));
-  
-  sleep(1);
 
   my $exchange_rate = $json_data->{'Realtime Currency Exchange Rate'}->{'5. Exchange Rate'};
 
