@@ -12,7 +12,7 @@ plan tests => 50;
 # Test IndiaMutual functions.
 
 my $q      = Finance::Quote->new();
-my @funds = ("102676", "103131", "101599", "102732", "100151",
+my @funds = ("102676", "103131", "101599", "102732",
 	     "INF194K01W88", "INF090I01FN7", "INF082J01127");
 my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
