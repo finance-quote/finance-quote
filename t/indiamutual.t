@@ -9,7 +9,7 @@ if (not $ENV{ONLINE_TEST}) {
 
 plan tests => 50;
 
-# Test Fidelity functions.
+# Test IndiaMutual functions.
 
 my $q      = Finance::Quote->new();
 my @funds = ("102676", "103131", "101599", "102732", "100151",
