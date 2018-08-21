@@ -24,7 +24,7 @@ our $VERSION = '1.00'; # VERSION
 
 use strict;
 use JSON qw( decode_json );
-use POSIX qw(strftime);
+#use POSIX qw(strftime);
 use HTTP::Request::Common;
 
 my $WORLDTRADING_URL =
@@ -129,8 +129,8 @@ sub wtdfunds {
         $info{ $stock, 'currency' } = $sd{'currency'} if ($sd{'currency'});
         $info{ $stock, 'method' }   = 'wtdfunds';
         # Kludge for date since it's not returned in the JSON data
-        my $isodate                 = strftime "%Y-%m-%d", localtime;
-        $quoter->store_date( \%info, $stock, { isodate => $isodate } );
+        # my $isodate                 = strftime "%Y-%m-%d", localtime;
+        $quoter->store_date( \%info, $stock, { today => 1 } );
         $quantity--;
         select(undef, undef, undef, .7) if ($quantity);
     }
