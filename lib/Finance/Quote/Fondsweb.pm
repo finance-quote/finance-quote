@@ -141,17 +141,17 @@ one would supply LU0804734787 as the symbol argument on the fetch API call.
 
 The following labels may be returned by Finance::Quote::Fondsweb:
 
-• name
-• isin
-• date
-• isodate
-• year_range
-• nav
-• last
-• currency
-• source
-• method
-• type
+- name
+- isin
+- date
+- isodate
+- year_range
+- nav
+- last
+- currency
+- source
+- method
+- type
 
 =head1 REQUIREMENTS
 
