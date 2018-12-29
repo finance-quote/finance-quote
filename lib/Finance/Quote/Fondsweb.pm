@@ -18,7 +18,7 @@
 #
 
 package Finance::Quote::Fondsweb;
-use v5.012;
+use v5.010;
 
 use warnings;
 use strict;
