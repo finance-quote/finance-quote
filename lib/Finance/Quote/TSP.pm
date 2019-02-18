@@ -43,7 +43,7 @@ use HTML::TableExtract;
 
 # URLs of where to obtain information
 
-$TSP_URL = 'https://www.tsp.gov/investmentfunds/shareprice/sharePriceHistory.shtml';
+$TSP_URL = 'https://www.tsp.gov/InvestmentFunds/FundPerformance/index.html';
 $TSP_MAIN_URL=("http://www.tsp.gov");
 
 # ENHANCE-ME: The decade target funds like 2020 appear and disappear.
