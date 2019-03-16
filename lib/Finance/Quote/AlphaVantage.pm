@@ -32,7 +32,10 @@ use Time::HiRes qw(usleep clock_gettime);
 # optimal server-side performance:
 #   https://www.alphavantage.co/support/#api-key
 our @alphaqueries=();
-my $maxQueries = { quantity =>20 , seconds => 65}; # no more than x queries per y seconds
+my $maxQueries = { quantity =>5 , seconds => 65}; # no more than x
+                                                  # queries per y
+                                                  # seconds, based on
+                                                  # https://www.alphavantage.co/support/#support
 
 my $ALPHAVANTAGE_URL =
     'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&datatype=json';
