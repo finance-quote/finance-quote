@@ -32,7 +32,7 @@ use Time::HiRes qw(usleep clock_gettime);
 # optimal server-side performance:
 #   https://www.alphavantage.co/support/#api-key
 our @alphaqueries=();
-my $maxQueries = { quantity =>5 , seconds => 65}; # no more than x
+my $maxQueries = { quantity =>5 , seconds => 60}; # no more than x
                                                   # queries per y
                                                   # seconds, based on
                                                   # https://www.alphavantage.co/support/#support
@@ -130,7 +130,7 @@ sub methods {
 
 sub sleep_before_query {
     # wait till we can query again
-    my $q = $maxQueries->{quantity};
+    my $q = $maxQueries->{quantity}-1;
     if ( $#alphaqueries >= $q ) {
         my $time_since_x_queries = clock_gettime()-$alphaqueries[$q];
         # print STDERR "LAST QUERY $time_since_x_queries\n";
@@ -153,6 +153,7 @@ sub alphavantage {
     my $quantity = @stocks;
     my ( %info, $reply, $url, $code, $desc, $body );
     my $ua = $quoter->user_agent();
+    my $launch_time = clock_gettime();
 
     foreach my $stock (@stocks) {
 
@@ -172,6 +173,8 @@ sub alphavantage {
 
         my $get_content = sub {
             sleep_before_query();
+            my $time=int(clock_gettime()-$launch_time);
+            # print STDERR "Query at:".$time."\n";
             $reply = $ua->request( GET $url);
 
             $code = $reply->code;
