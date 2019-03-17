@@ -120,8 +120,10 @@ sub methods {
              nasdaq       => \&alphavantage,
              vanguard     => \&alphavantage,
     );
+}
 
-    our @labels = qw/date isodate open high low close volume last/;
+{
+    my @labels = qw/date isodate open high low close volume last/;
 
     sub labels {
         return ( alphavantage => \@labels, );
