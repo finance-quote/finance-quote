@@ -200,8 +200,8 @@ sub alphavantage {
         }
 
         my $try_cnt = 0;
-        while (($try_cnt < 5) && ($json_data->{'Information'})) {
-            # print STDERR "INFORMATION:".$json_data->{'Information'}."\n";
+        while (($try_cnt < 5) && ($json_data->{'Note'})) {
+            # print STDERR "INFORMATION:".$json_data->{'Note'}."\n";
             # print STDERR "ADDITIONAL SLEEPING HERE !";
             sleep (20);
             &$get_content();
