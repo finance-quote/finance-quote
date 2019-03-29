@@ -1,0 +1,56 @@
+Getting Started
+---------------
+
+0. Clone the git repo
+
+  git clone https://github.com/finance-quote/finance-quote.git
+
+1. (Optional) Install latest stable copy of perl in ~/perl5
+
+  curl -L https://install.perlbrew.pl | bash
+  echo "source ~/perl5/perlbrew/etc/bashrc" >> ~/.bash_profile     # or the equivalent for your shell
+  perlbrew --notest install perl-5.28.1                            # --notest is risky, but significant speeds installation
+  perlbrew switch perl-5.28.1
+  perlbrew install-cpanm
+  cpanm install Dist::Zilla
+  
+  # inside the finance-quote directory
+
+  dzil authordeps --missing | cpanm --notest
+  dzil listdeps --missing | cpanm --notest
+
+2. Test out finance-quote
+
+  dzil test
+
+  # To run all the skipped tests
+  cpanm Test::Pod Test::Pod::Coverage Test::Kwalitee Test::Perl::Critic
+  TEST_AUTHOR=1 ONLINE_TEST=1 dzil test
+
+
+Procedure for a CPAN release
+----------------------------
+
+** finalize dev branch merges
+** check for debug code in modules
+** Modify Changelog
+** OBSOLETE : change version numbers in all modules
+** OBSOLETE : push all commits up to github
+** OBSOLETE : go to tmp
+** OBSOLETE : clone from github server
+*** git clone git@github.com:pjf/finance-quote.git
+** OBSOLETE : remove MANIFEST and inc directory
+** OBSOLETE : perl Makefile.PL
+** OBSOLETE : make manifest
+** OBSOLETE : create a commit for MANIFEST (if needed)
+** OBSOLETE : create version tag
+*** git tag -a "1.13_02" -m "version 1.13_02"
+** OBSOLETE : make dist
+** OBSOLETE : if dist ok -> push to github
+*** git push --tags
+* RELEASE
+** OBSOLETE : Upload tar.gz to pause.cpan.org
+** Update the website ! update htdocs/index.html file
+** upload to sourceforge @ https://sourceforge.net/projects/finance-quote/files/finance-quote/
+sftp ecocode,finance-quote@web.sourceforge.net
+
