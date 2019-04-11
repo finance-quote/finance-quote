@@ -139,6 +139,15 @@ sub yahoo_json {
                     $info{ $stocks, "currency"} = "GBP";
                 }
             
+	        # Apply the same hack for Johannesburg Stock Exchange (JSE) prices as they are returned in
+		# ZAc (cents) instead of ZAR (rands). JSE symbols are suffixed with ".JO" when querying 
+		# Yahoo e.g. ANG.JO
+		
+		if ( ($info{$stocks,"currency"} eq "ZAc") {
+                    $info{$stocks,"last"}=$info{$stocks,"last"}/100;
+                    $info{ $stocks, "currency"} = "ZAR";
+                }
+	    
                 $my_date =  localtime($json_timestamp)->strftime('%d.%m.%Y %T');
 
                 $quoter->store_date( \%info, $stocks,
