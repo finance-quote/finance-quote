@@ -16,7 +16,7 @@ my $q        = Finance::Quote->new();
 my $year     = ( localtime() )[5] + 1900;
 my $lastyear = $year - 1;
 
-my @symbols =  qw/ IBM CSCO SOLB.BR SAP.DE TD.TO LSE.L VFIAX T DIVO11.SA OGZD.IL/;
+my @symbols =  qw/ IBM CSCO ERIC-B.STO SOLB.BR SAP.DE TD.TO LSE.L VFIAX T DIVO11.SA OGZD.IL/;
 
 plan tests => 10*(1+$#symbols)+10;
 
@@ -40,6 +40,7 @@ foreach my $symbol (@symbols) {
 
 is( $quotes{ "IBM", "currency" }, 'USD' );
 is( $quotes{ "CSCO", "currency" }, 'USD' );
+is( $quotes{ "ERIC-B.STO", "currency" }, 'SEK' );
 is( $quotes{ "SOLB.BR", "currency" }, 'EUR' );
 is( $quotes{ "SAP.DE", "currency" }, 'EUR' );
 is( $quotes{ "TD.TO", "currency" }, 'CAD' );
