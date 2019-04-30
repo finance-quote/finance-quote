@@ -19,8 +19,7 @@ use HTML::TableExtract;
 # URLs of where to obtain information.
 
 $AMFI_MAIN_URL = ("http://www.amfiindia.com/");
-$AMFI_URL = ("http://portal.amfiindia.com/NAVReport.aspx?type=0");
-#$AMFI_URL = ("http://portal.amfiindia.com/spages/NAV0.txt"); #This page seems to do the job also. Keep for reference
+$AMFI_URL = ("https://www.amfiindia.com/spages/NAVAll.txt");
 
 # amfinavlist.txt is a cache-file. keep it until updated on the website since this is a 1meg file.
 my $cachedir = $ENV{TMPDIR} // $ENV{TEMP} // '/tmp/';
@@ -69,7 +68,7 @@ sub amfiindia   {
 
     open NAV, $AMFI_NAV_LIST or die "Unexpected error in opening file: $!\n";
 
-    #Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Net Asset Value;Repurchase Price;Sale Price;Date
+    #Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Net Asset Value;Date
     while (<NAV>) {
 	next if !/\;/;
 	chomp;
@@ -96,9 +95,7 @@ sub amfiindia   {
 	if ($data) {
             $fundquote{$symbol, "name"} = $data->[0];
             $fundquote{$symbol, "nav"} = $data->[1];
-            $fundquote{$symbol, "rprice"} = $data->[2];
-            $fundquote{$symbol, "sprice"} = $data->[3];
-            $quoter->store_date(\%fundquote, $symbol, {eurodate => $data->[4]});
+            $quoter->store_date(\%fundquote, $symbol, {eurodate => $data->[2]});
             $fundquote{$symbol, "success"} = 1;
 	} else {
 	    $fundquote{$symbol, "success"} = 0;

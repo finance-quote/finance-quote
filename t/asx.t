@@ -11,7 +11,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 34;
+plan tests => 35;
 
 # Test ASX functions.
 
@@ -41,6 +41,12 @@ cmp_ok( $quotes{"BOQ","last"}, '>', 0
 # Check that we're getting currency information.
 cmp_ok( $quotes{"BOQ", "currency"}, "eq", "AUD"
       , "Currency of BOQ is AUD" );
+
+# Check that we're getting currency information from Share starting with X
+# which is NOT an index
+%quotes = $q->fetch("asx","XRO");
+cmp_ok( $quotes{"XRO", "currency"}, "eq", "AUD"
+      , "Currency of XRO is AUD" );
 
 # Check we're not getting bogus percentage signs.
 unlike( $quotes{"BOQ","p_change"}
