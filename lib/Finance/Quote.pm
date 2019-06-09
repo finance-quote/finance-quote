@@ -178,8 +178,8 @@ sub new {
             BSERO Bourso Cdnfundlibrary Citywire CSE Currencies Deka
             DWS FTPortfolios Fidelity FidelityFixed FinanceCanada Fool
             FTfunds HU GoldMoney HEX IndiaMutual LeRevenu
-            ManInvestments Morningstar MorningstarJP MStaruk NZX
-            Platinum SEB SIXfunds SIXshares StockHouseCanada TSP TSX
+            ManInvestments Morningstar MorningstarAU MorningstarJP MStaruk
+            NZX Platinum SEB SIXfunds SIXshares StockHouseCanada TSP TSX
             Tdefunds Tdwaterhouse Tiaacref TNetuk Troweprice Trustnet
             Union USFedBonds VWD ZA Cominvest Finanzpartner YahooJSON
             YahooYQL ZA_UnitTrusts/; }
