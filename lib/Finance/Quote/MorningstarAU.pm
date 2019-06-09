@@ -31,7 +31,7 @@ use Scalar::Util qw(looks_like_number);
 
 use vars qw($MORNINGSTAR_AU_FUNDS_URL $MORNINGSTAR_AU_LOOKUP_URL);
 
-our $VERSION = '1.47'; # VERSION
+# VERSION
 
 $MORNINGSTAR_AU_LOOKUP_URL = 'https://www.morningstar.com.au/Ausearch/SecurityCodeAutoLookup?rows=2&fq=SecurityTypeId:(1)&q=';
 $MORNINGSTAR_AU_FUNDS_URL = 'https://www.morningstar.com.au/Funds/FundReport/';
@@ -88,7 +88,7 @@ sub process_symbol {
     my $lookup_url = $MORNINGSTAR_AU_LOOKUP_URL . $symbol;
     my $lookup_reply = $ua->request(GET $lookup_url);
     return "Fund lookup page not found" unless ($lookup_reply->is_success);
-    
+
     my $lookup_reply_json =  eval {JSON::Parse::parse_json($lookup_reply->decoded_content)};
     return "Lookup page JSON response not be parsed" unless (defined($lookup_reply_json));
     # print "Fund lookup result: " . Dumper($lookup_reply_json);
