@@ -1,4 +1,6 @@
-* Procedure for a CPAN release
+Procedure for a CPAN release
+----------------------------
+
 ** finalize dev branch merges
 ** check for debug code in modules
 ** Modify Changelog
@@ -21,3 +23,4 @@
 ** Update the website ! update htdocs/index.html file
 ** upload to sourceforge @ https://sourceforge.net/projects/finance-quote/files/finance-quote/
 sftp ecocode,finance-quote@web.sourceforge.net
+

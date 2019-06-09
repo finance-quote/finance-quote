@@ -32,7 +32,10 @@ use Time::HiRes qw(usleep clock_gettime);
 # optimal server-side performance:
 #   https://www.alphavantage.co/support/#api-key
 our @alphaqueries=();
-my $maxQueries = { quantity =>20 , seconds => 65}; # no more than x queries per y seconds
+my $maxQueries = { quantity =>5 , seconds => 60}; # no more than x
+                                                  # queries per y
+                                                  # seconds, based on
+                                                  # https://www.alphavantage.co/support/#support
 
 my $ALPHAVANTAGE_URL =
     'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&datatype=json';
@@ -96,6 +99,7 @@ my %currencies_by_suffix = (
     '.MA'  => "EUR",    # 		Madrid
     '.VA'  => "EUR",    # 		Valence
     '.ST'  => "SEK",    # Sweden		Stockholm
+    '.STO' => "SEK",    # Sweden		Stockholm
     '.HE'  => "EUR",    # Finland		Helsinki
     '.S'   => "CHF",    # Switzerland	Zurich
     '.TW'  => "TWD",    # Taiwan		Taiwan Stock Exchange
@@ -117,8 +121,10 @@ sub methods {
              nasdaq       => \&alphavantage,
              vanguard     => \&alphavantage,
     );
+}
 
-    our @labels = qw/date isodate open high low close volume last/;
+{
+    my @labels = qw/date isodate open high low close volume last/;
 
     sub labels {
         return ( alphavantage => \@labels, );
@@ -127,7 +133,7 @@ sub methods {
 
 sub sleep_before_query {
     # wait till we can query again
-    my $q = $maxQueries->{quantity};
+    my $q = $maxQueries->{quantity}-1;
     if ( $#alphaqueries >= $q ) {
         my $time_since_x_queries = clock_gettime()-$alphaqueries[$q];
         # print STDERR "LAST QUERY $time_since_x_queries\n";
@@ -150,6 +156,7 @@ sub alphavantage {
     my $quantity = @stocks;
     my ( %info, $reply, $url, $code, $desc, $body );
     my $ua = $quoter->user_agent();
+    my $launch_time = clock_gettime();
 
     foreach my $stock (@stocks) {
 
@@ -169,6 +176,8 @@ sub alphavantage {
 
         my $get_content = sub {
             sleep_before_query();
+            my $time=int(clock_gettime()-$launch_time);
+            # print STDERR "Query at:".$time."\n";
             $reply = $ua->request( GET $url);
 
             $code = $reply->code;
@@ -192,8 +201,8 @@ sub alphavantage {
         }
 
         my $try_cnt = 0;
-        while (($try_cnt < 5) && ($json_data->{'Information'})) {
-            # print STDERR "INFORMATION:".$json_data->{'Information'}."\n";
+        while (($try_cnt < 5) && ($json_data->{'Note'})) {
+            # print STDERR "INFORMATION:".$json_data->{'Note'}."\n";
             # print STDERR "ADDITIONAL SLEEPING HERE !";
             sleep (20);
             &$get_content();
