@@ -43,8 +43,8 @@ sub methods {
     );
 }
 {
-    my @labels = qw/name last date isodate p_change open high low close
-        volume currency method exchange type/;
+    my @labels = qw/name last date isodate volume currency method exchange type
+        div_yield eps pe year_range open high low close/;
 
     sub labels {
         return ( yahoo_json => \@labels,
@@ -57,8 +57,7 @@ sub yahoo_json {
     my $quoter = shift;
     my @stocks = @_;
     my ( %info, $reply, $url, $te, $ts, $row, @cells, $ce );
-    my ( $my_date, $my_last, $my_p_change, $my_volume, $my_high, $my_low,
-         $my_open );
+    my ( $my_date );
     my $ua = $quoter->user_agent();
 
     foreach my $stocks (@stocks) {
@@ -70,6 +69,16 @@ sub yahoo_json {
         my $desc    = HTTP::Status::status_message($code);
         my $headers = $reply->headers_as_string;
         my $body    = $reply->content;
+
+#       my $handle   = undef;
+##      my $filename = "/tmp/yahoo_JSON_content.txt";
+#       my $filename = "C:\\Users\\cgood\\Documents\\yahoo_JSON_content.txt";
+#       my $encoding = ":encoding(UTF-8)";
+#       open($handle, "> $encoding", $filename)
+#             || die "$0: can't open $filename in write-open mode: $!";
+#       print $handle "[DEBUG] headers=\r\n" . $headers . "\r\nbody=\r\n" .
+#             $body;
+#       close $handle;
 
         #Response variables available:
         #Response code: 			$code
@@ -123,7 +132,7 @@ sub yahoo_json {
                 $info{ $stocks, "name" }   = $stocks . ' (' . $json_name . ')';
                 $info{ $stocks, "type" }   = $json_type;
                 $info{ $stocks, "last" }   = $json_price;
-		$info{ $stocks, "currency"} = $json_resources->{'currency'};
+                $info{ $stocks, "currency"} = $json_resources->{'currency'};
                 $info{ $stocks, "volume" }   = $json_volume;
 
                 # The Yahoo JSON interface returns London prices in GBp (pence) instead of GBP (pounds)
@@ -138,8 +147,38 @@ sub yahoo_json {
                     $info{$stocks,"last"}=$info{$stocks,"last"}/100;
                     $info{ $stocks, "currency"} = "GBP";
                 }
-            
-                $my_date =  localtime($json_timestamp)->strftime('%d.%m.%Y %T');
+
+            # Add extra fields using names as per yahoo to make it easier
+            #  to switch from yahoo to yahooJSON
+            # Code added by goodvibes
+                {
+                  # turn off warnings in this block to fix bogus
+                  # 'Use of uninitialized value in multiplication' warning
+                  # in Strawberry perl 5.18.2 in Windows
+                  local $^W = 0;
+                  $info{ $stocks, "div_yield" } =
+                    $json_resources->{'trailingAnnualDividendYield'} * 100;
+                }
+                $info{ $stocks, "eps"} =
+                    $json_resources->{'epsTrailingTwelveMonths'};
+                $info{ $stocks, "pe"} = $json_resources->{'trailingPE'};
+                $info{ $stocks, "year_range"} =
+                    sprintf("%12s - %s",
+                        $json_resources->{"fiftyTwoWeekLow"},
+                        $json_resources->{'fiftyTwoWeekHigh'});
+                $info{ $stocks, "open"} =
+                    $json_resources->{'regularMarketOpen'};
+                $info{ $stocks, "high"} =
+                    $json_resources->{'regularMarketDayHigh'};
+                $info{ $stocks, "low"} =
+                    $json_resources->{'regularMarketDayLow'};
+                $info{ $stocks, "close"} =
+                    $json_resources->{'regularMarketPreviousClose'};
+
+                # MS Windows strftime() does not support %T so use %H:%M:%S
+                #  instead.
+                $my_date =
+                    localtime($json_timestamp)->strftime('%d.%m.%Y %H:%M:%S');
 
                 $quoter->store_date( \%info, $stocks,
                                      { eurodate => $my_date } );
@@ -187,7 +226,8 @@ This module provides the "yahoo_json" fetch method.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::YahooJSON :
-name, last, isodate, volume, method, exchange, currency.
+name, last, isodate, volume, currency, method, exchange, type,
+div_yield eps pe year_range open high low close.
 
 =head1 SEE ALSO
 
