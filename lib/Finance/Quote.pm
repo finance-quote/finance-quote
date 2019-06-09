@@ -171,18 +171,22 @@ sub new {
 
   # If we get an empty new(), or one starting with -defaults,
   # then load up the default methods.
-  if (!@reqmodules or $reqmodules[0] eq "-defaults") {
+
+  if ( !@reqmodules or $reqmodules[0] eq "-defaults" ) {
     shift(@reqmodules) if (@reqmodules);
+
     # Default modules
+
     @modules = qw/AEX AIAHK AlphaVantage ASEGR ASX BMONesbittBurns
-            BSERO Bourso Cdnfundlibrary Citywire CSE Currencies Deka
-            DWS FTPortfolios Fidelity FidelityFixed FinanceCanada Fool
-            FTfunds HU GoldMoney HEX IndiaMutual LeRevenu
-            ManInvestments Morningstar MorningstarAU MorningstarJP MStaruk
-            NZX Platinum SEB SIXfunds SIXshares StockHouseCanada TSP TSX
-            Tdefunds Tdwaterhouse Tiaacref TNetuk Troweprice Trustnet
-            Union USFedBonds VWD ZA Cominvest Finanzpartner YahooJSON
-            YahooYQL ZA_UnitTrusts/; }
+        BSERO Bourso Cdnfundlibrary Citywire CSE Currencies Deka
+        DWS FTPortfolios Fidelity FidelityFixed FinanceCanada Fool
+        FTfunds HU GoldMoney HEX IndiaMutual LeRevenu
+        ManInvestments Morningstar MorningstarAU MorningstarCH
+        MorningstarJP MStaruk NZX Platinum SEB SIXfunds SIXshares
+        StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref
+        TNetuk Troweprice Trustnet Union USFedBonds VWD ZA
+        Cominvest Finanzpartner YahooJSON YahooYQL ZA_UnitTrusts/;
+  }
 
   $this->_load_modules(@modules,@reqmodules);
 
