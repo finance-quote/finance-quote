@@ -36,7 +36,7 @@ sub methods {
     our @labels = qw/date isodate open high low close volume last/;
 
     sub labels {
-        return ( alphavantage => \@labels, );
+        return ( iextrading => \@labels, );
     }
 }
 
