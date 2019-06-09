@@ -30,11 +30,15 @@ use DateTime::Format::Strptime qw( strptime strftime );
 
 my $IEX_URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://api.iextrading.com/1.0/stock/{$symbol}/chart/1m');
 
-sub methods {
-    return ( iextrading => \&iextrading );
+sub methods { 
+  return ( iextrading => \&iextrading,
+           usa        => \&iextrading,
+           nasdaq     => \&iextrading,
+           nyse       => \&iextrading );
+}
 
+{
     our @labels = qw/date isodate open high low close volume last/;
-
     sub labels {
         return ( iextrading => \@labels, );
     }
