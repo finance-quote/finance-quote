@@ -40,29 +40,32 @@ following steps provide a recipe for setup.
 
   A. Clone the git repo
   
-    git clone https://github.com/finance-quote/finance-quote.git
+    $ git clone https://github.com/finance-quote/finance-quote.git
   
   B. (Optional) Install latest stable copy of perl in ~/perl5
   
-    curl -L https://install.perlbrew.pl | bash
-    echo "source ~/perl5/perlbrew/etc/bashrc" >> ~/.bash_profile     # or the equivalent for your shell
-    perlbrew --notest install perl-5.28.1                            # --notest is risky, but significant speeds installation
-    perlbrew switch perl-5.28.1
-    perlbrew install-cpanm
-    cpanm install Dist::Zilla
+    $ curl -L https://install.perlbrew.pl | bash
+    $ echo "source ~/perl5/perlbrew/etc/bashrc" >> ~/.bash_profile     # or the equivalent for your shell
+    $ perlbrew --notest install perl-5.28.1                            # --notest is risky, but significant speeds installation
+    $ perlbrew switch perl-5.28.1
+    $ perlbrew install-cpanm
+    $ cpanm install Dist::Zilla
     
     # inside the finance-quote directory
   
-    dzil authordeps --missing | cpanm --notest
-    dzil listdeps --missing | cpanm --notest
+    $ dzil authordeps --missing | cpanm --notest
+    $ dzil listdeps --missing | cpanm --notest
   
   C. Test out finance-quote
   
-    dzil test
+    $ dzil test
   
-    # To run all the skipped tests
-    cpanm Test::Pod Test::Pod::Coverage Test::Kwalitee Test::Perl::Critic
-    TEST_AUTHOR=1 ONLINE_TEST=1 dzil test
+    # To run all the skipped tests (using bash syntax to set environment variables TEST_AUTHOR and ONLINE_TEST)
+    $ cpanm Test::Pod Test::Pod::Coverage Test::Kwalitee Test::Perl::Critic
+    $ TEST_AUTHOR=1 ONLINE_TEST=1 dzil test
+
+    # To do an online test for one module 
+    $ ONLINE_TEST=1 dzil run prove -lv t/iextrading.t
 
 
 3. How to write a Finance::Quote module
