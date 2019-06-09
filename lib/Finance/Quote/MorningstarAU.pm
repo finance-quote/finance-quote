@@ -21,11 +21,11 @@ package Finance::Quote::MorningstarAU;
 require 5.005;
 
 use strict;
+use warnings;
 # use Data::Dumper;
 use HTML::TreeBuilder;
 use JSON::Parse;
 use HTTP::Request::Common;
-use Modern::Perl;
 use String::Util qw(trim);
 use Scalar::Util qw(looks_like_number);
 
