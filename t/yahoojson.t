@@ -10,7 +10,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 74;
+plan tests => 75;
 
 my $q = Finance::Quote->new();
 
