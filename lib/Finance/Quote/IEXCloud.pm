@@ -16,7 +16,7 @@
 #    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #    02111-1307, USA
 
-package Finance::Quote::IEXTrading;
+package Finance::Quote::IEXCloud;
 
 require 5.005;
 
@@ -28,23 +28,23 @@ use HTTP::Request::Common;
 use Text::Template;
 use DateTime::Format::Strptime qw( strptime strftime );
 
-my $IEX_URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://api.iextrading.com/1.0/stock/{$symbol}/chart/1m');
+my $IEX_URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://cloud.iexapis.com/v1/stock/{$symbol}/quote?token={$token}');
 
 sub methods { 
-  return ( iextrading => \&iextrading,
-           usa        => \&iextrading,
-           nasdaq     => \&iextrading,
-           nyse       => \&iextrading );
+  return ( iexcloud => \&iexcloud,
+           usa      => \&iexcloud,
+           nasdaq   => \&iexcloud,
+           nyse     => \&iexcloud );
 }
 
 {
     our @labels = qw/date isodate open high low close volume last/;
     sub labels {
-        return ( iextrading => \@labels, );
+        return ( iexcloud => \@labels, );
     }
 }
 
-sub iextrading {
+sub iexcloud {
     my $quoter = shift;
 
     my @stocks = @_;
@@ -66,21 +66,19 @@ sub iextrading {
             next;
         }
 
-        my $json_data;
-        eval {$json_data = JSON::decode_json $body};
+        my $quote;
+        eval {$quote = JSON::decode_json $body};
         if ($@) {
             $info{ $symbol, 'success' } = 0;
             $info{ $symbol, 'errormsg' } = $@;
             next;
         }
 
-        if (@$json_data == 0) {
+        if (not exists $quote->{'symbol'} or $quote->{'symbol'} ne $symbol) {
             $info{ $symbol, 'success' } = 0;
-            $info{ $symbol, 'errormsg' } = "No useable data returned";
+            $info{ $symbol, 'errormsg' } = "IEXCloud return and unexpected json result";
             next;
         }
-
-        my $quote = $json_data->[-1];
 
         $info{ $symbol, 'success' } = 1;
         $info{ $symbol, 'symbol' }  = $symbol;
@@ -90,7 +88,7 @@ sub iextrading {
         $info{ $symbol, 'low' }     = $quote->{'low'};
         $info{ $symbol, 'last' }    = $quote->{'close'};
         $info{ $symbol, 'volume' }  = $quote->{'volume'};
-        $info{ $symbol, 'method' }  = 'alphavantage';
+        $info{ $symbol, 'method' }  = 'iexcloud';
         
         my $isodate = $quote->{'date'};
         $quoter->store_date( \%info, $symbol, { isodate => $isodate } );

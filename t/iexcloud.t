@@ -8,7 +8,7 @@ if ( not $ENV{"ONLINE_TEST"} ) {
 }
 
 my $q        = Finance::Quote->new();
-my $year     = ( localtime() )[5] + 1900;
+my $year     = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
 # 10 NASDAQ stocks
@@ -18,7 +18,7 @@ my @symbols =  qw/MSFT AMZN AAPL GOOGL GOOG FB CSCO INTC CMCSA PEP BRK.A SEB NVR
 
 plan tests => 10*(1+$#symbols)+2;
 
-my %quotes = $q->iextrading( @symbols, "BOGUS" );
+my %quotes = $q->iexcloud( @symbols, "BOGUS" );
 ok(%quotes);
 
 foreach my $symbol (@symbols) {

@@ -76,7 +76,7 @@ following steps provide a recipe for setup.
 
     # To do an online test for one module 
 
-    $ ONLINE_TEST=1 dzil run prove -lv t/iextrading.t
+    $ ONLINE_TEST=1 dzil run prove -lv t/iexcloud.t
 
 
 3. How to write a Finance::Quote module
