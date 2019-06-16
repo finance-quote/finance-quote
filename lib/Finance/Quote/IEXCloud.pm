@@ -28,7 +28,8 @@ use HTTP::Request::Common;
 use Text::Template;
 use DateTime::Format::Strptime qw( strptime strftime );
 
-my $IEX_URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://cloud.iexapis.com/v1/stock/{$symbol}/quote?token={$token}');
+my $IEX_URL     = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://cloud.iexapis.com/v1/stock/{$symbol}/quote?token={$token}');
+my $IEX_API_KEY = $ENV{"IEXCLOUD_API_KEY"};
 
 sub methods { 
   return ( iexcloud => \&iexcloud,
@@ -53,7 +54,7 @@ sub iexcloud {
     my $ua = $quoter->user_agent();
 
     foreach my $symbol (@stocks) {
-        $url = $IEX_URL->fill_in(HASH => { symbol => $symbol});
+        $url = $IEX_URL->fill_in(HASH => { symbol => $symbol, token => $IEX_API_KEY});
 
         $reply = $ua->request( GET $url);
         $code  = $reply->code;
@@ -87,7 +88,7 @@ sub iexcloud {
         $info{ $symbol, 'high' }    = $quote->{'high'};
         $info{ $symbol, 'low' }     = $quote->{'low'};
         $info{ $symbol, 'last' }    = $quote->{'close'};
-        $info{ $symbol, 'volume' }  = $quote->{'volume'};
+        $info{ $symbol, 'volume' }  = $quote->{'latestVolume'};
         $info{ $symbol, 'method' }  = 'iexcloud';
         
         my $isodate = $quote->{'date'};
