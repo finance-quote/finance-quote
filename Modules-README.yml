@@ -1,0 +1,679 @@
+# Modules
+# vi: set filetype=yaml syntax=yaml noai ts=2 sw=2 ic:   
+# state: working | failing | obsolete | removed
+---
+- module: AEX.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: AIAHK.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: ASEGR.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: ASX.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: AlphaVantage.pm
+  state: working
+  added:
+  changed: 2019-06-16
+  removed:
+  urls:
+    - https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&datatype=json&apikey=$ALPHAVANTAGE_API_KEY
+  apikey: true
+  notes: |
+    Module to acquire data from https://www.alphavantage.co/.
+    Users must first request an API key and set the environment
+    variable ALPHAVANTAGE_API_KEY.
+  testfile: alphavantage.t
+  testcases:
+    - IBM
+    - CSCO
+    - SOLB.BR
+    - SAP.DE
+    - TD.TO
+    - LSE.L
+    - VFIAX
+    - T
+    - DIVO11.SA
+    - OGZD.IL
+    - TWTR
+    - AAPL
+    - ORCL
+    - FB
+    - CMCSA
+    - INTC
+    - NFLX
+    - TSLA
+    - NOK
+    - BAC
+    - GOOG
+    - F
+    - AXP
+    - ERIC-B.STO
+#
+- module: BMONesbittBurns.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: BSERO.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Bloomberg.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Bourso.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: CSE.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Cdnfundlibrary.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Citywire.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Cominvest.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Currencies.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: DWS.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Deka.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: FTPortfolios.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: FTfunds.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Fidelity.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: FidelityFixed.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: FinanceCanada.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Finanzpartner.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Fool.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: GoldMoney.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: HEX.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: HU.pm
+  state: failing
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+    - http://www.bamosz.hu/alapoldal?isin=
+    - http://www.bet.hu/topmenu/kereskedesi_adatok/product_search?isinquery=
+  apikey: false
+  notes: |
+    The URL http://www.bamosz.hu/alapoldal?isin= is for Mutual Funds.
+    The URL http://www.bet.hu/... is for Equities.
+    The equity URL is no longer working. Mutual Fund test cases need to
+    be updated, one of them no longer exists.
+    May need to try changing the equity URL to
+    https://www.bet.hu/oldalak/ceg_adatlap/$security/<symbol>
+  testfile: hu.t
+  testcases:
+    - OTP
+    - HU0000068952
+    - HU0000702709
+    - ZOL
+#
+- module: IEXCloud.pm
+  state: working
+  added: 2019-06-16
+  changed: 2019-06-16
+  removed:
+  urls:
+    - https://cloud.iexapis.com/v1/stock/{$symbol}/quote?token={$token}
+  apikey: true
+  notes: |
+    Module retrieves data from IEX Trading (https://iextrading.com/).
+    For API Key - https://iextrading.com/developer/.
+  testfile: iexcloud.t
+  testcases:
+    - MSFT
+    - AMZN
+    - AAPL
+    - GOOGL
+    - GOOG
+    - FB
+    - CSCO
+    - INTC
+    - CMCSA
+    - PEP
+    - BRK.A
+    - SEB
+    - NVR
+    - BKNG
+    - IBKR
+#
+- module: IndiaMutual.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: LeRevenu.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: MStaruk.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: ManInvestments.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Morningstar.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: MorningstarJP.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: NZX.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Platinum.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: SEB.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: SIXfunds.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: SIXshares.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: StockHouseCanada.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: TNetuk.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: TSP.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: TSX.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Tdefunds.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Tdwaterhouse.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Tiaacref.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Troweprice.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Trustnet.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: USFedBonds.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: Union.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: UserAgent.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: VWD.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: YahooJSON.pm
+  state: working
+  added:
+  changed: 2019-06-16
+  removed:
+  urls:
+    - https://query1.finance.yahoo.com/v7/finance/quote?symbols=
+  apikey: false
+  notes: |
+    Module to get data from Yahoo's API
+  testfile: yahoojson.t
+  testcases:
+    - SUZLON.BO
+    - ANDHRABANK.BO
+    - RECLTD.NS
+    - AMZN
+    - SOLB.BR
+    - ^DJI
+    - BEL20.BR
+    - INGDIRECTFNE.BC
+    - AENA.MC
+    - CFR.JO
+#
+- module: YahooYQL.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: ZA.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: ZA_UnitTrusts.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
