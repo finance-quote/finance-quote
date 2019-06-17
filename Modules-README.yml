@@ -338,7 +338,8 @@
   apikey: true
   notes: |
     Module retrieves data from IEX Trading (https://iextrading.com/).
-    For API Key - https://iextrading.com/developer/.
+    For API Key - https://iextrading.com/developer/ and set the 
+    environment variable IEXCLOUD_API_KEY.
   testfile: iexcloud.t
   testcases:
     - MSFT
