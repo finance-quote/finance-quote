@@ -502,15 +502,26 @@
   testcases:
 #
 - module: TSP.pm
-  state: TBD
-  added: TBD
-  changed: ~
-  removed: ~
-  urls:
+  state: working
+  added: 2005-03-02
+  changed: 2019-06-09
+  removed:
+  urls: 
+    - https://www.tsp.gov/InvestmentFunds/FundPerformance/index.html
   apikey: false
-  notes: ~
-  testfile: TBD
-  testcases:
+  notes: 
+  testfile: tsp.t
+  testcases: 
+    - C
+    - F
+    - G
+    - I
+    - S
+    - L2020
+    - L2030
+    - L2040
+    - L2050
+    - LINCOME
 #
 - module: TSX.pm
   state: TBD

@@ -7,50 +7,43 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 22;
-
-# Test TSP functions.
-
 my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 my $quoter = Finance::Quote->new();
 
-my %quotes = $quoter->tsp("c","s","TSPgfund","BOGUS","l2040fund");
+my @symbols =  qw/C F G I S L2020 L2030 L2040 L2050 LINCOME/;
+
+plan tests => 14*(1+$#symbols)+3;
+
+my %quotes = $quoter->tsp( @symbols, "BOGUS" );
 ok(%quotes);
 
-# Check that some values are defined.
-ok($quotes{"c","success"});
-ok($quotes{"c","nav"} > 0);
-ok($quotes{"l2040fund","date"});
-ok(substr($quotes{"l2040fund","isodate"},0,4) == $year ||
-   substr($quotes{"l2040fund","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"l2040fund","date"},6,4) == $year ||
-   substr($quotes{"l2040fund","date"},6,4) == $lastyear);
-ok($quotes{"s","currency"});
-ok($quotes{"s","name"});
-ok($quotes{"TSPgfund","success"});
-ok($quotes{"TSPgfund","nav"} > 0);
-ok($quotes{"TSPgfund","date"});
-ok(substr($quotes{"TSPgfund","isodate"},0,4) == $year ||
-   substr($quotes{"TSPgfund","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"TSPgfund","date"},6,4) == $year ||
-   substr($quotes{"TSPgfund","date"},6,4) == $lastyear);
+foreach my $symbol (@symbols) {
+    ok($quotes{$symbol, "success" }, "$symbol success");
+    ok(substr($quotes{$symbol, "isodate"}, 0, 4) == $year
+       || substr($quotes{$symbol, "isodate"}, 0, 4) == $lastyear);
+    ok(substr($quotes{$symbol, "date"}, 6, 4) == $year
+       || substr($quotes{$symbol, "date"}, 6, 4) == $lastyear);
+    ok($quotes{$symbol,"last"} > 0);
+    ok($quotes{$symbol,"currency"});
+    ok($quotes{$symbol,"name"});
+    ok(!defined($quotes{"c","exchange"}) );
+}
 
-# Check that some values are undefined.
-ok( !defined($quotes{"c","exchange"}) );
+ok( !$quotes{"BOGUS","success"});
 
-# Check that a bogus fund returns no-success.
-ok( ! $quotes{"BOGUS","success"});
-
-# Exercise the fetch function 
-%quotes = $quoter->fetch("tsp","g","f","i","tsplincomefund");
+%quotes = $quoter->fetch("tsp", @symbols);
 ok(%quotes);
-ok($quotes{"g","success"});
-ok($quotes{"f","nav"} > 0);
-ok($quotes{"i","date"});
-ok(substr($quotes{"i","isodate"},0,4) == $year ||
-   substr($quotes{"i","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"i","date"},6,4) == $year ||
-   substr($quotes{"i","date"},6,4) == $lastyear);
-ok($quotes{"tsplincomefund","nav"} > 0);
+
+foreach my $symbol (@symbols) {
+    ok($quotes{$symbol, "success" }, "$symbol success");
+    ok(substr($quotes{$symbol, "isodate"}, 0, 4) == $year
+       || substr($quotes{$symbol, "isodate"}, 0, 4) == $lastyear);
+    ok(substr($quotes{$symbol, "date"}, 6, 4) == $year
+       || substr($quotes{$symbol, "date"}, 6, 4) == $lastyear);
+    ok($quotes{$symbol,"last"} > 0);
+    ok($quotes{$symbol,"currency"});
+    ok($quotes{$symbol,"name"});
+    ok(!defined($quotes{"c","exchange"}) );
+}
 
