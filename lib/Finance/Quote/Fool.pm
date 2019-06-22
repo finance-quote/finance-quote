@@ -1,4 +1,7 @@
 #!/usr/bin/perl -w
+#    This module was rewritten in June 2019 based on the 
+#    Finance::Quote::IEXCloud.pm module and prior versions of Fool.pm
+#    that carried the following copyrights:
 #
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
@@ -21,105 +24,100 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #    02111-1307, USA
-#
-#
-# This code derived from Padzensky's work on package Finance::YahooQuote,
-# but extends its capabilites to encompas a greater number of data sources.
-#
-# This code was developed as part of GnuCash <http://www.gnucash.org/>
-
-require 5.005;
-
-use strict;
 
 package Finance::Quote::Fool;
 
-use HTTP::Request::Common;
-use LWP::UserAgent;
-use Exporter;
-
-use vars qw/$FOOL_URL  @FIELDS $MAX_REQUEST_SIZE @ISA/;
-
 # VERSION
 
-$FOOL_URL = 'http://quote.fool.com/quotes.csv?symbols=';
+use strict;
+use HTTP::Request::Common;
+use HTML::TableExtract;
+use HTML::TreeBuilder;
+use Text::Template;
+use Encode qw(decode);
 
-# This is the maximum number of stocks we'll batch into one operation.
-# If this gets too big (>50 or thereabouts) things will break because
-# some proxies and/or webservers cannot handle very large URLS.
+my $URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'http://caps.fool.com/Ticker/{$symbol}.aspx');
 
-$MAX_REQUEST_SIZE = 40;
-
-@FIELDS = qw/symbol price change open close high low yhigh ylow div yield vol avg_vol pe/;
-
-sub methods {return (fool   => \&fool)}
-
-# The follow methods are valid, but not enabled for this release until further
-# testing has been performed.
-#                     usa    => \&fool,
-#		     nasdaq => \&fool,
-#		     nyse   => \&fool )}
-#
-
-{
-	my @labels = (base_fool_labels(), "p_change", "currency", "method");
-
-	sub labels { return (fool => \@labels); }
+sub methods { 
+  return ( fool   => \&fool,
+           usa    => \&fool,
+           nasdaq => \&fool,
+           nyse   => \&fool);
 }
 
-sub base_fool_labels {
-  return (@FIELDS)
+my @labels = qw/date isodate open high low close volume last/;
+sub labels {
+  return ( iexcloud => \@labels, );
 }
-
-# Query the stocks from the Motley Fool website (www.fool.com).  The
-# data is returned as comma separated values, similar to Yahoo!Finance
 
 sub fool {
-	my $quoter = shift;
-	my @stocks = splice(@_, 0, $MAX_REQUEST_SIZE);
-	return unless @stocks;
-	my %info;
+    my $quoter = shift;
+    my @stocks = @_;
+    
+    my (%info, $symbol, $url, $reply, $code, $desc, $body);
+    my $ua = $quoter->user_agent();
+    
+    my $quantity = @stocks;
 
-	my $ua = $quoter->user_agent;
+    foreach my $symbol (@stocks) {
+        # Get the web page
+        $url   = $URL->fill_in(HASH => {symbol => $symbol});
+        $reply = $ua->request( GET $url);
+        $code  = $reply->code;
+        $desc  = HTTP::Status::status_message($code);
+        $body  = decode('UTF-8', $reply->content);
+  
+        if ($code != 200) {
+            $info{ $symbol, 'success' } = 0;
+            $info{ $symbol, 'errormsg' } = $desc;
+            next;
+        }
 
-	my $response = $ua->request(GET $FOOL_URL.join(",",@stocks));
-        return unless $response->is_success;
+        # Parse the web page
+        my $root      = HTML::TreeBuilder->new_from_content($body);
+        my $timestamp = $root->look_down(_tag => 'p', class => 'timestamp')->as_text;
+        
+        my $te = HTML::TableExtract->new();
+        $te->parse($body);
+        my $ts = $te->first_table_found();
+        my %data;
+        
+        foreach my $row ($ts->rows) {
+          my %slice = @$row;
+          %data = (%data, %slice); 
+        }
+  
+        # Assign the results
+        eval {
+          $info{$symbol, 'symbol'}             = $symbol;
+          $info{$symbol, 'method'}             = 'fool';
+          $info{$symbol, 'day_range'}          = $data{'Daily Range'} =~ s/[\$,]//g ? $data{'Daily Range'} : die('failed to parse daily range');
+          $info{$symbol, 'open'}               = $data{'Open'} =~ s/[\$,]//g ? $data{'Open'} : die('failed to parse open');
+          $info{$symbol, 'volume'}             = $data{'Volume'} =~ m/[0-9,]+/ ? $data{'Volume'} =~ s/,//gr : die('failed to parse volume');
+          $info{$symbol, 'close'}              = $data{'Prev. Close'} =~ s/[\$,]//g ? $data{'Prev. Close'} : die('failed to parse previous close');
+          $info{$symbol, 'year_range'}         = $data{'52-Wk Range'} =~ s/[\$,]//g ? $data{'52-Wk Range'} : die('failed to parse year range');
+          $info{$symbol, 'last'}               = $data{'Current Price'} =~ s/[\$,]//g ? $data{'Current Price'} : die('failed to parse last price');
+          $info{$symbol, 'currency'}           = 'USD';
+          $info{$symbol, 'currency_set_by_fq'} = 1;
+          $info{$symbol, 'success'}            = 1;
+          
+          # 03:38 PM EDT on 06/19/19
+          $quoter->store_date( \%info, $symbol, { usdate => $1 } ) if  $timestamp =~ m|([0-9]{2}/[0-9]{2}/[0-9]{2})|;
+        }
+        or do {
+          $info{$symbol, 'errormsg'} = $@;
+          $info{$symbol, 'success'}  = 0;
+        }
+    }
 
-	# Okay, the data is here
-        my $reply = $response->content;
-
-        my $i=0;
-	foreach (split('\x0D', $reply)) {
-	  if ( $i++ ) {    # the first line only contains info about
-	                   # the requested data, so we just skip it.
-	    my @q = $quoter->parse_csv($_);
-	    my $symbol = $q[0];
-#	    print "Symbol: $symbol\n";
-	    if ($#q != 13) {
-	      $info{$symbol, "success"} = 0;
-	      $info{$symbol, "errormsg"} = "Stock lookup failed";
-#	      print "ERROR\n";
-	    } else {
-	      for (my $j=1; $j < @FIELDS; $j++) {
-#		print "j = $j, $FIELDS[$j], $q[$j]\n";
-		$info{$symbol, $FIELDS[$j]} = $q[$j];
-	      }
-	      $info{$symbol, "currency"} = "USD";
-              $info{$symbol, "method"} = "fool";
-	         # change_p = change / prev_cl * 100%
-	      $info{$symbol, "p_change"} = $q[2]/$q[4]*100;
-	    }
-	  }
-	}
-	return %info if wantarray;
-	return \%info;
+    return wantarray() ? %info : \%info;
 }
 
 1;
 
 =head1 NAME
 
-Finance::Quote::Fool	- Obtain quotes from the Motley Fool web site.
+Finance::Quote::Fool - Obtain quotes from the Motley Fool web site.
 
 =head1 SYNOPSIS
 
@@ -132,24 +130,24 @@ Finance::Quote::Fool	- Obtain quotes from the Motley Fool web site.
 =head1 DESCRIPTION
 
 This module obtains information from the Motley Fool website
-(www.fool.com). The site provides date from NASDAQ, NYSE and AMEX.
+(http://caps.fool.com). The site provides date from NASDAQ, NYSE and AMEX.
 
-This module is loaded by default on a Finance::Quote object.  It's
-also possible to load it explicity by placing "Fool" in the argument
-list to Finance::Quote->new().
+This module is loaded by default on a Finance::Quote object.  It's also
+possible to load it explicity by placing "Fool" in the argument list to
+Finance::Quote->new().
 
-Information returned by this module is governed by the Motley Fool's
-terms and conditions.
+Information returned by this module is governed by the Motley Fool's terms and
+conditions.
 
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::Fool:
-symbol, price, change, open, close, high, low, yhigh, ylow,
-div, yield, vol, avg_vol, pe, change_p, currency, method.
+symbol, day_range, open, volume, close, year_range, last, currency,
+method.
 
 =head1 SEE ALSO
 
-Motley Fool, http://www.fool.com
+Motley Fool, http://caps.fool.com
 
 Finance::Quote.
 

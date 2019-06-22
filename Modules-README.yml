@@ -273,15 +273,30 @@
   testcases:
 #
 - module: Fool.pm
-  state: TBD
-  added: TBD
-  changed: ~
-  removed: ~
-  urls:
+  state: working
+  added: 2001-05-08
+  changed: 2019-06-21
+  removed:
+  urls: 
+    - http://caps.fool.com/Ticker/{$symbol}.aspx
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: fool.t
   testcases:
+    - MSFT
+    - AMZN
+    - AAPL
+    - GOOGL
+    - GOOG
+    - FB
+    - CSCO
+    - INTC
+    - CMCSA
+    - PEP
+    - BRK-A
+    - SEB
+    - NVR
+    - BKNG
 #
 - module: GoldMoney.pm
   state: TBD
