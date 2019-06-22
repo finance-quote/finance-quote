@@ -90,8 +90,11 @@ sub iexcloud {
         $info{ $symbol, 'last' }    = $quote->{'close'};
         $info{ $symbol, 'volume' }  = $quote->{'latestVolume'};
         $info{ $symbol, 'method' }  = 'iexcloud';
+       
+        my $iex_date = $quote->{'latestTime'};  # eg. June 20, 2019
+        my $time     = strptime('%b %d, %Y', $iex_date);
         
-        my $isodate = $quote->{'date'};
+        my $isodate  = strftime('%F', $time);
         $quoter->store_date( \%info, $symbol, { isodate => $isodate } );
         
         $info{ $symbol, 'currency' }           = 'USD';
