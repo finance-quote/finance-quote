@@ -323,23 +323,27 @@
 - module: HU.pm
   state: failing
   added: TBD
-  changed: ~
+  changed: 2019-06-22
   removed: ~
   urls:
     - http://www.bamosz.hu/alapoldal?isin=
     - http://www.bet.hu/topmenu/kereskedesi_adatok/product_search?isinquery=
+  methods:
+    - bamosz
+    - bse
+    - hu
   apikey: false
   notes: |
     The URL http://www.bamosz.hu/alapoldal?isin= is for Mutual Funds.
     The URL http://www.bet.hu/... is for Equities.
-    The equity URL is no longer working. Mutual Fund test cases need to
-    be updated, one of them no longer exists.
+    The equity URL is no longer working.
     May need to try changing the equity URL to
     https://www.bet.hu/oldalak/ceg_adatlap/$security/<symbol>
+    Changed failing Fund test case 2019-06-22.
   testfile: hu.t
   testcases:
     - OTP
-    - HU0000068952
+    - HU0000705280
     - HU0000702709
     - ZOL
 #
