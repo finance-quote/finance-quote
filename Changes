@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.48      2019-06-30 01:19:14+02:00 Europe/Brussels
         * Alphavantage: Add a waiting mechanism to comply to
           alphavantage use terms
         * Alphavantage: Added several stock exchange support and
