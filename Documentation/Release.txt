@@ -8,7 +8,7 @@ Procedure for a CPAN release
 ** OBSOLETE : push all commits up to github
 ** OBSOLETE : go to tmp
 ** OBSOLETE : clone from github server
-*** git clone git@github.com:pjf/finance-quote.git
+*** git clone git@github.com:finance-quote/finance-quote.git
 ** OBSOLETE : remove MANIFEST and inc directory
 ** OBSOLETE : perl Makefile.PL
 ** OBSOLETE : make manifest
@@ -23,4 +23,3 @@ Procedure for a CPAN release
 ** Update the website ! update htdocs/index.html file
 ** upload to sourceforge @ https://sourceforge.net/projects/finance-quote/files/finance-quote/
 sftp ecocode,finance-quote@web.sourceforge.net
-
