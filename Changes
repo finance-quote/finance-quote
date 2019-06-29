@@ -1,4 +1,26 @@
 {{$NEXT}}
+        * Alphavantage: Add a waiting mechanism to comply to
+          alphavantage use terms
+        * Alphavantage: Added several stock exchange support and
+          currency
+        * Updated modules: Union, Deka, Indiamutual, ASX, Yahoojson,
+          TSP, AEX, Fool
+        * New modules: IEXTrading, MorningstarAU, MorningstarCH,
+          IEXCloud
+        * Yahoo: removed modules referring to yahoo API, which yahoo
+          stopped
+        * BUGFIX: 'use of uninitialized value' returned by perl could
+          make gnucash fail when more than 15 quotes where requested
+        * BUGFIX: MS Windows does not support %T in strftime call
+        * Added new documentation files: Release.txt, Hackers-Guide,
+          Modules-README.yml
+        * We started moving known failing tests into TODO blocks
+        * This release is the result of hard work by Bruce Schuck,
+          Vincent Lucarelli, Pieter-Jan Vandormael, Manuel Friedli,
+          Jalon Avens, Chris Good, Mark J. Cox, Eelco Dolstra, Henrik
+          Ahlgren, Vinay Shastry, Mike Alexander, Erik Colson.
+        * Special thanks go to Bruce Schuck and Vincent Lucarelli
+          which joined the maintainers team!
 
 1.47      2017-11-12 17:19:42+01:00 Europe/Brussels
         * Use AlphaVantage for currency quotes instead of Yahoo (Mike Alexander)
