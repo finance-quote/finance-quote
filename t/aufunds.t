@@ -1,10 +1,11 @@
 #!/usr/bin/perl -w
 use strict;
+use warnings;
 use Scalar::Util qw(looks_like_number);
 use Finance::Quote;
-use Modern::Perl;
 use Test::More;
 use Time::Piece;
+use feature "say";
 
 if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
