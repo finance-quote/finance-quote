@@ -25,7 +25,6 @@ require 5.005;
 use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
-use Time::HiRes qw(usleep clock_gettime);
 
 # Alpha Vantage recommends that API call frequency does not extend far
 # beyond ~1 call per second so that they can continue to deliver
@@ -135,16 +134,16 @@ sub sleep_before_query {
     # wait till we can query again
     my $q = $maxQueries->{quantity}-1;
     if ( $#alphaqueries >= $q ) {
-        my $time_since_x_queries = clock_gettime()-$alphaqueries[$q];
+        my $time_since_x_queries = time()-$alphaqueries[$q];
         # print STDERR "LAST QUERY $time_since_x_queries\n";
         if ($time_since_x_queries < $maxQueries->{seconds}) {
-            my $sleeptime = ($maxQueries->{seconds} - $time_since_x_queries) * 1000000;
+            my $sleeptime = ($maxQueries->{seconds} - $time_since_x_queries) ;
             # print STDERR "SLEEP $sleeptime\n";
-            usleep( $sleeptime );
+            sleep( $sleeptime );
             # print STDERR "CONTINUE\n";
         }
     }
-    unshift @alphaqueries, clock_gettime();
+    unshift @alphaqueries, time();
     pop @alphaqueries while $#alphaqueries>$q; # remove unnecessary data
     # print STDERR join(",",@alphaqueries)."\n";
 }
@@ -156,7 +155,7 @@ sub alphavantage {
     my $quantity = @stocks;
     my ( %info, $reply, $url, $code, $desc, $body );
     my $ua = $quoter->user_agent();
-    my $launch_time = clock_gettime();
+    my $launch_time = time();
 
     foreach my $stock (@stocks) {
 
@@ -176,7 +175,7 @@ sub alphavantage {
 
         my $get_content = sub {
             sleep_before_query();
-            my $time=int(clock_gettime()-$launch_time);
+            my $time=int(time()-$launch_time);
             # print STDERR "Query at:".$time."\n";
             $reply = $ua->request( GET $url);
 

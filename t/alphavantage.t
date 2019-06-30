@@ -18,7 +18,7 @@ my $lastyear = $year - 1;
 
 my @symbols =  qw/ IBM CSCO SOLB.BR SAP.DE TD.TO LSE.L VFIAX T DIVO11.SA OGZD.IL TWTR AAPL ORCL FB CMCSA INTC NFLX TSLA NOK BAC GOOG F AXP ERIC-B.STO/;
 
-plan tests => 10*(1+$#symbols)+10;
+plan tests => 10*(1+$#symbols)+11;
 
 my %quotes = $q->alphavantage( @symbols, "BOGUS" );
 ok(%quotes);
