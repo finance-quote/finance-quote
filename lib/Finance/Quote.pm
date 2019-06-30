@@ -327,7 +327,7 @@ sub currency_lookup {
   my $param_errors = 0;
   for my $key ( keys %params ) {
     if ( ! exists $valid_params{$key} ) {
-      warn "Invalid parameter: ${key}";
+      warn "Invalid parameter: $key";
       $param_errors++;
     }
   }
