@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+1.49      2019-06-30 12:20:58+02:00 Europe/Brussels
+        * Alphavantage: Removed Time::HiRes dependency due to mswin32
+          not supporting clock_gettime calls.
+
 1.48      2019-06-30 01:19:14+02:00 Europe/Brussels
         * Alphavantage: Add a waiting mechanism to comply to
           alphavantage use terms
