@@ -986,7 +986,7 @@ sub fetch_live_currencies {
     else {
       $result{$code} = {'name'    => $currency,
                         'country' => [$country],
-                        'number'  => $code};
+                        'number'  => $number};
     }
   }
 
