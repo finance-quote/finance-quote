@@ -83,11 +83,11 @@ sub iexcloud {
 
         $info{ $symbol, 'success' } = 1;
         $info{ $symbol, 'symbol' }  = $symbol;
-        $info{ $symbol, 'open' }    = $quote->{'open'}; 
-        $info{ $symbol, 'close' }   = $quote->{'close'};
-        $info{ $symbol, 'high' }    = $quote->{'high'};
-        $info{ $symbol, 'low' }     = $quote->{'low'};
-        $info{ $symbol, 'last' }    = $quote->{'close'};
+        $info{ $symbol, 'open' }    = $quote->{'open'} if $quote->{'open'}; 
+        $info{ $symbol, 'close' }   = $quote->{'close'} if $quote->{'close'};
+        $info{ $symbol, 'high' }    = $quote->{'high'} if $quote->{'high'};
+        $info{ $symbol, 'low' }     = $quote->{'low'} if $quote->{'low'};
+        $info{ $symbol, 'last' }    = $quote->{'latestPrice'} if $quote->{'latestPrice'};
         $info{ $symbol, 'volume' }  = $quote->{'latestVolume'};
         $info{ $symbol, 'method' }  = 'iexcloud';
        
