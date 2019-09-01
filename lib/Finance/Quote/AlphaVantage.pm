@@ -37,7 +37,7 @@ my $maxQueries = { quantity =>5 , seconds => 60}; # no more than x
                                                   # https://www.alphavantage.co/support/#support
 
 my $ALPHAVANTAGE_URL =
-    'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&datatype=json';
+    'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&datatype=json';
 my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
 
 my %currencies_by_suffix = (
@@ -182,6 +182,7 @@ sub alphavantage {
             $code = $reply->code;
             $desc = HTTP::Status::status_message($code);
             $body = $reply->content;
+            # print STDERR "AlphaVantage returned: $body\n";
         };
 
         &$get_content();
@@ -216,57 +217,23 @@ sub alphavantage {
             next;
         }
 
-        if (!$json_data->{'Meta Data'}) {
+        my $quote = $json_data->{'Global Quote'};
+        if ( !$quote ) {
             $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } = ( $json_data->{'Information'} || "No useable data returned" ) ;
+            $info{ $stock, 'errormsg' } = "json_data doesn't contain Global Quote";
             next;
         }
-
-        my $last_refresh = $json_data->{'Meta Data'}->{'3. Last Refreshed'}; # when market is open this returns an isodate + time, otherwise only the isodate
-        $last_refresh = substr($last_refresh,0,10);  # remove time if returned
-        if ( !$last_refresh ) {
-            $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } = "json_data doesn't contain Last Refreshed";
-            next;
-        }
-        my $isodate = substr( $last_refresh, 0, 10 );
-        if ( !$json_data->{'Time Series (Daily)'} ) {
-            $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } = "json_data doesn't contain Time Series hash";
-            next;
-        }
-        if ( !$json_data->{'Time Series (Daily)'}->{$last_refresh} ) {
-            $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } = "json_data doesn't contain latest refresh data in Time Series hash";
-            next;
-        }
-
-        my %ts = %{ $json_data->{'Time Series (Daily)'}->{$last_refresh} };
-        if ( !%ts ) {
-            $info{ $stock, 'success' }  = 0;
-            $info{ $stock, 'errormsg' } = 'Could not extract Time Series data';
-            next;
-        }
-
-        # %ts holds data as
-        #  {
-        #     '1. open'     151.5400,
-        #     '2. high'     151.5900,
-        #     '3. low'      151.5300,
-        #     '4. close'    151.5900,
-        #     '5. volume'   57620
-        # }
 
         $info{ $stock, 'success' } = 1;
-        $info{ $stock, 'symbol' }  = $json_data->{'Meta Data'}->{'2. Symbol'};
-        $info{ $stock, 'open' }    = $ts{'1. open'};
-        $info{ $stock, 'close' }   = $ts{'4. close'};
-        $info{ $stock, 'last' }    = $ts{'4. close'};
-        $info{ $stock, 'high' }    = $ts{'2. high'};
-        $info{ $stock, 'low' }     = $ts{'3. low'};
-        $info{ $stock, 'volume' }  = $ts{'5. volume'};
+        $info{ $stock, 'symbol' }  = $quote->{'01. symbol'};
+        $info{ $stock, 'open' }    = $quote->{'02. open'};
+        $info{ $stock, 'close' }   = $quote->{'05. price'};
+        $info{ $stock, 'last' }    = $quote->{'05. price'};
+        $info{ $stock, 'high' }    = $quote->{'03. high'};
+        $info{ $stock, 'low' }     = $quote->{'04. low'};
+        $info{ $stock, 'volume' }  = $quote->{'06. volume'};
         $info{ $stock, 'method' }  = 'alphavantage';
-        $quoter->store_date( \%info, $stock, { isodate => $isodate } );
+        $quoter->store_date( \%info, $stock, { isodate => $quote->{'07. latest trading day'} } );
 
         # deduce currency
         if ( $stock =~ /(\..*)/ ) {
