@@ -77,7 +77,7 @@ sub fundlibrary   {
       my $json = JSON->new;
       my $data = decode_json($reply->decoded_content);
 
-      my $t = Time::Piece->strptime($$data{'PerformanceAsOfDateString'}, "%Y-%m-%dT%T");
+      my $t = Time::Piece->strptime($$data{'PriceAsOfDateString'}, "%Y-%m-%dT%T");
 
       $te->parse($$data{'SearchFundResultView'});
 
