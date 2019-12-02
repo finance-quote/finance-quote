@@ -141,15 +141,18 @@
   testcases:
 #
 - module: Cdnfundlibrary.pm
-  state: TBD
+  state: working
   added: TBD
-  changed: ~
+  changed: 2019-12-01
   removed: ~
   urls:
+    - https://www.fundlibrary.com/MutualFunds/GetFundSearchResults?cifscCategoryId=0&fundCompanyId=0&fundTypeId=0&isGradeA=true&isGradeB=true&isGradeC=true&isGradeD=true&isGradeE=true&sortBy=Default&page=0&searchText=
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: cdnfundlibrary.t
   testcases:
+    - NBC887
+    - TDB3533
 #
 - module: Citywire.pm
   state: TBD
