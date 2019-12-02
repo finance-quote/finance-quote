@@ -16,6 +16,10 @@
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #    02110-1301, USA
 
+# 2019-12-01: Added additional labels for net and p_change. Set
+#             close to previous close as returned in the JSON.
+#             Bruce Schuck (bschuck at asgard hyphen systems dot com)
+
 package Finance::Quote::AlphaVantage;
 
 require 5.005;
@@ -123,7 +127,7 @@ sub methods {
 }
 
 {
-    my @labels = qw/date isodate open high low close volume last/;
+    my @labels = qw/date isodate open high low close volume last net p_change/;
 
     sub labels {
         return ( alphavantage => \@labels, );
@@ -224,14 +228,33 @@ sub alphavantage {
             next;
         }
 
+        # %ts holds data as
+        #  {
+        #     "Global Quote": {
+        #         "01. symbol": "SOLB.BR",
+        #         "02. open": "104.2000",
+        #         "03. high": "104.9500",
+        #         "04. low": "103.4000",
+        #         "05. price": "104.0000",
+        #         "06. volume": "203059",
+        #         "07. latest trading day": "2019-11-29",
+        #         "08. previous close": "105.1500",
+        #         "09. change": "-1.1500",
+        #         "10. change percent": "-1.0937%"
+        #     }
+        # }
+
         $info{ $stock, 'success' } = 1;
-        $info{ $stock, 'symbol' }  = $quote->{'01. symbol'};
-        $info{ $stock, 'open' }    = $quote->{'02. open'};
-        $info{ $stock, 'close' }   = $quote->{'05. price'};
-        $info{ $stock, 'last' }    = $quote->{'05. price'};
-        $info{ $stock, 'high' }    = $quote->{'03. high'};
-        $info{ $stock, 'low' }     = $quote->{'04. low'};
-        $info{ $stock, 'volume' }  = $quote->{'06. volume'};
+        $info{ $stock, 'success' }  = 1;
+        $info{ $stock, 'symbol' }   = $quote->{'01. symbol'};
+        $info{ $stock, 'open' }     = $quote->{'02. open'};
+        $info{ $stock, 'high' }     = $quote->{'03. high'};
+        $info{ $stock, 'low' }      = $quote->{'04. low'};
+        $info{ $stock, 'last' }     = $quote->{'05. price'};
+        $info{ $stock, 'volume' }   = $quote->{'06. volume'};
+        $info{ $stock, 'close' }    = $quote->{'08. previous close'};
+        $info{ $stock, 'net' }      = $quote->{'09. change'};
+        $info{ $stock, 'p_change' } = $quote->{'10. change percent'};
         $info{ $stock, 'method' }  = 'alphavantage';
         $quoter->store_date( \%info, $stock, { isodate => $quote->{'07. latest trading day'} } );
 
