@@ -77,6 +77,14 @@ sub fundlibrary   {
       my $json = JSON->new;
       my $data = decode_json($reply->decoded_content);
 
+#     If the fund is not found, "PriceAsOfDateString" is "0001-01-01T00:00"
+      if ( $$data{'PriceAsOfDateString'} eq "0001-01-01T00:00" )
+      {
+          $fundquote {$mutual,"success"} = 0;
+          $fundquote {$mutual,"errormsg"} = "Fund name $mutual not found";
+          next;
+      }
+
       my $t = Time::Piece->strptime($$data{'PriceAsOfDateString'}, "%Y-%m-%dT%T");
 
       $te->parse($$data{'SearchFundResultView'});
