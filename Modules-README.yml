@@ -49,10 +49,10 @@
 - module: AlphaVantage.pm
   state: working
   added:
-  changed: 2019-06-16
+  changed: 2019-12-01
   removed:
   urls:
-    - https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&datatype=json&apikey=$ALPHAVANTAGE_API_KEY
+    - https://www.alphavantage.co/query?function=GLOBAL_QUOTE&apikey=$ALPHAVANTAGE_API_KEY&symbol=
   apikey: true
   notes: |
     Module to acquire data from https://www.alphavantage.co/.
