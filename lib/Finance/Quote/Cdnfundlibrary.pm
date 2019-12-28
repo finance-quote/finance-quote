@@ -25,6 +25,8 @@ use JSON;
 use warnings;
 use Time::Piece;
 
+#VERSION
+
 # URLs of where to obtain information.
 
 $FUNDLIB_URL =
