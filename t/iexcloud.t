@@ -28,12 +28,18 @@ ok(%quotes);
 foreach my $symbol (@symbols) {
     ok( $quotes{ $symbol, "success" }, "$symbol success" );
     ok( $quotes{ $symbol, "symbol" } eq $symbol , "$symbol defined" );
-    ok( $quotes{ $symbol, "open" } > 0, "$symbol returned open" );
-    ok( $quotes{ $symbol, "close" } > 0, "$symbol returned close" );
+
+    # Require last
     ok( $quotes{ $symbol, "last" } > 0, "$symbol returned last" );
-    ok( $quotes{ $symbol, "high" } > 0, "$symbol returned high" );
-    ok( $quotes{ $symbol, "low" } > 0, "$symbol returned low" );
-    ok( $quotes{ $symbol, "volume" } >= 0, "$symbol returned volume" );
+
+    # Optional
+    ok( $quotes{ $symbol, "open" } > 0, "$symbol returned open" ) if exists $quotes{ $symbol, "open" };
+    ok( $quotes{ $symbol, "close" } > 0, "$symbol returned close" ) if exists $quotes{ $symbol, "close" } ;
+    ok( $quotes{ $symbol, "high" } > 0, "$symbol returned high" ) if exists $quotes{ $symbol, "high" } ;
+    ok( $quotes{ $symbol, "low" } > 0, "$symbol returned low" ) if exists $quotes{ $symbol, "low" };
+    ok( $quotes{ $symbol, "volume" } >= 0, "$symbol returned volume" ) if exists $quotes{ $symbol, "volume" };
+
+    
     ok( substr( $quotes{ $symbol, "isodate" }, 0, 4 ) == $year
         || substr( $quotes{ $symbol, "isodate" }, 0, 4 ) == $lastyear );
     ok( substr( $quotes{ $symbol, "date" }, 6, 4 ) == $year

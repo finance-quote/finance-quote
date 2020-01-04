@@ -88,12 +88,11 @@ sub iexcloud {
         $info{ $symbol, 'high' }    = $quote->{'high'} if $quote->{'high'};
         $info{ $symbol, 'low' }     = $quote->{'low'} if $quote->{'low'};
         $info{ $symbol, 'last' }    = $quote->{'latestPrice'} if $quote->{'latestPrice'};
-        $info{ $symbol, 'volume' }  = $quote->{'latestVolume'};
+        $info{ $symbol, 'volume' }  = $quote->{'latestVolume'} if $quote->{'latestVolume'};
         $info{ $symbol, 'method' }  = 'iexcloud';
        
-        my $iex_date = $quote->{'latestTime'};  # eg. June 20, 2019
-        my $time     = strptime('%b %d, %Y', $iex_date);
-        
+        my $iex_date = $quote->{'latestUpdate'};  # milliseconds since midnight Jan 1, 1970
+        my $time     = strptime('%s', int($iex_date/1000.0));
         my $isodate  = strftime('%F', $time);
         $quoter->store_date( \%info, $symbol, { isodate => $isodate } );
         
