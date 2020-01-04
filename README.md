@@ -219,7 +219,7 @@ code (ie "AUD") or both. You can pass either a scalar or regular expression
 as a search value - scalar values are matched by substring while regular
 expressions are matched as-is (no changes are made to the expression).
 
-See [Finance::Quote::Currencies::fetch\_live\_currencies](https://metacpan.org/pod/Finance::Quote::Currencies::fetch_live_currencies) (and the
+See [Finance::Quote::Currencies::fetch\_live\_currencies](https://metacpan.org/pod/Finance%3A%3AQuote%3A%3ACurrencies%3A%3Afetch_live_currencies) (and the
 `t/currencies.t` test file) for a way to make sure that the stored
 currency list is up to date.
 

@@ -40,8 +40,19 @@ use JSON qw( decode_json );
 # use Data::Dumper;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
-            $TIMEOUT %MODULES %METHODS $AUTOLOAD
+            $TIMEOUT @MODULES %MODULES %METHODS $AUTOLOAD
             $ALPHAVANTAGE_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
+
+@MODULES = qw/AEX AIAHK AlphaVantage ASEGR ASX BMONesbittBurns
+              BSERO Bourso Cdnfundlibrary Citywire CSE Currencies Deka
+              DWS FTPortfolios Fidelity FidelityFixed FinanceCanada Fool
+              FTfunds HU GoldMoney HEX IEXCloud IndiaMutual LeRevenu
+              ManInvestments Morningstar MorningstarAU MorningstarCH
+              MorningstarJP MStaruk NZX Platinum SEB SIXfunds SIXshares
+              StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref
+              TNetuk Troweprice Trustnet Union USFedBonds VWD ZA
+              Cominvest Finanzpartner YahooJSON YahooYQL ZA_UnitTrusts/;
+ 
 
 # Call on the Yahoo API:
 #  - "f=l1" should return a single value - the "Last Trade (Price Only)"
@@ -253,16 +264,10 @@ sub _smart_compare {
 #
 ################################################################################
 
-sub get_default_timeout {
-
-}
-
-sub get_default_required_labels {
-
-}
-
 sub get_sources {
-
+  # Create a dummy object to ensure METHODS is populated
+  my $t = Finance::Quote->new();
+  return(wantarray ? keys %METHODS : [keys %METHODS]);
 }
 
 sub get_default_currency_fields {
@@ -302,15 +307,7 @@ sub new {
 
     # Default modules
 
-    @modules = qw/AEX AIAHK AlphaVantage ASEGR ASX BMONesbittBurns
-        BSERO Bourso Cdnfundlibrary Citywire CSE Currencies Deka
-        DWS FTPortfolios Fidelity FidelityFixed FinanceCanada Fool
-        FTfunds HU GoldMoney HEX IEXCloud IndiaMutual LeRevenu
-        ManInvestments Morningstar MorningstarAU MorningstarCH
-        MorningstarJP MStaruk NZX Platinum SEB SIXfunds SIXshares
-        StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref
-        TNetuk Troweprice Trustnet Union USFedBonds VWD ZA
-        Cominvest Finanzpartner YahooJSON YahooYQL ZA_UnitTrusts/;
+    @modules = @MODULES;
   }
 
   $this->_load_modules(@modules,@reqmodules);
@@ -823,7 +820,7 @@ sub parse_csv_semicolon
 #        $sourceref = $quoter->sources();
 
 sub sources {
-  return(wantarray ? keys %METHODS : [keys %METHODS]);
+  return get_sources();
 }
 
 # default_currency_fields (public method)
