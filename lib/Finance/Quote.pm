@@ -209,19 +209,6 @@ sub new {
   }
 }
 
-# =======================================================================
-# sources (public object method)
-#
-# sources returns a list of sources which can be passed to fetch to
-# obtain information.
-#
-# Usage: @sources   = $quoter->sources();
-#        $sourceref = $quoter->sources();
-
-sub sources {
-  return(wantarray ? keys %METHODS : [keys %METHODS]);
-}
-
 
 # =======================================================================
 # currency (public object method)
@@ -382,42 +369,6 @@ sub _smart_compare {
   }
 }
 
-# =======================================================================
-# set_currency (public object method)
-#
-# set_currency allows information to be requested in the specified
-# currency.  If called with no arguments then information is returned
-# in the default currency.
-#
-# Requesting stocks in a particular currency increases the time taken,
-# and the likelyhood of failure, as additional operations are required
-# to fetch the currency conversion information.
-#
-# This method should only be called from the quote object unless you
-# know what you are doing.
-
-sub set_currency {
-  my $this = shift if (ref $_[0]);
-  $this ||= _dummy();
-
-  unless (defined($_[0])) {
-    delete $this->{"currency"};
-  } else {
-    $this->{"currency"} = $_[0];
-  }
-}
-
-# default_currency_fields (public method)
-#
-# This is a list of fields that will be automatically converted during
-# currency conversion.  If a module provides a currency_fields()
-# function then that list will be used instead.
-
-sub default_currency_fields {
-  return qw/last high low net bid ask close open day_range year_range
-            eps div cap nav price/;
-}
-
 # _convert (private object method)
 #
 # This function converts between one currency and another.  It expects
@@ -504,54 +455,6 @@ sub scale_field {
 }
 
 
-# =======================================================================
-# Timeout code.  If called on a particular object, then it sets
-# the timout for that object only.  If called as a class method
-# (or as Finance::Quote::timeout) then it sets the default timeout
-# for all new objects that will be created.
-
-sub timeout {
-  if (@_ == 1 or !ref($_[0])) { # Direct or class call.
-    return $TIMEOUT = $_[0];
-  }
-
-  # Otherwise we were called through an object.  Yay.
-  # Set the timeout in this object only.
-  my $this = shift;
-  return $this->{TIMEOUT} = shift;
-}
-
-# =======================================================================
-# failover (public object method)
-#
-# This sets/gets whether or not it's acceptable to use failover techniques.
-
-sub failover {
-  my $this = shift;
-  my $value = shift;
-        return $this->{FAILOVER} = $value if (defined($value));
-  return $this->{FAILOVER};
-}
-
-# =======================================================================
-# require_labels (public object method)
-#
-# Require_labels indicates which labels are required for lookups.  Only methods
-# that have registered all the labels specified in the list passed to
-# require_labels() will be called.
-#
-# require_labels takes a list of required labels.  When called with no
-# arguments, the require list is cleared.
-#
-# This method always succeeds.
-
-sub require_labels {
-  my $this = shift;
-  my @labels = @_;
-  $this->{REQUIRED} = \@labels;
-  return;
-}
-
 # _require_test (private object method)
 #
 # This function takes an array.  It returns true if all required
@@ -617,37 +520,6 @@ sub fetch {
   }
 
   return wantarray() ? %returnhash : \%returnhash;
-}
-
-# =======================================================================
-# user_agent (public object method)
-#
-# Returns a LWP::UserAgent which conforms to the relevant timeouts,
-# proxies, and other settings on the particular Finance::Quote object.
-#
-# This function is mainly intended to be used by the modules that we load,
-# but it can be used by the application to directly play with the
-# user-agent settings.
-
-sub user_agent {
-  my $this = shift;
-
-  return $this->{UserAgent} if $this->{UserAgent};
-
-  my $ua;
-
-  if ($USE_EXPERIMENTAL_UA) {
-    $ua = Finance::Quote::UserAgent->new;
-  } else {
-    $ua = LWP::UserAgent->new;
-  }
-
-  $ua->timeout($this->{TIMEOUT}) if defined($this->{TIMEOUT});
-  $ua->env_proxy;
-
-  $this->{UserAgent} = $ua;
-
-  return $ua;
 }
 
 # =======================================================================
@@ -856,6 +728,155 @@ sub decimal_shiftup {
 
 # Dummy destroy function to avoid AUTOLOAD catching it.
 sub DESTROY { return; }
+
+###############################################################################
+#
+# Legacy Class Methods
+#
+###############################################################################
+
+# =======================================================================
+# sources (public object method)
+#
+# sources returns a list of sources which can be passed to fetch to
+# obtain information.
+#
+# Usage: @sources   = $quoter->sources();
+#        $sourceref = $quoter->sources();
+
+sub sources {
+  return(wantarray ? keys %METHODS : [keys %METHODS]);
+}
+
+# default_currency_fields (public method)
+#
+# This is a list of fields that will be automatically converted during
+# currency conversion.  If a module provides a currency_fields()
+# function then that list will be used instead.
+
+sub default_currency_fields {
+  return qw/last high low net bid ask close open day_range year_range
+            eps div cap nav price/;
+}
+
+
+
+###############################################################################
+#
+# Legacy Class or Object Methods
+#
+###############################################################################
+
+# =======================================================================
+# set_currency (public object method)
+#
+# set_currency allows information to be requested in the specified
+# currency.  If called with no arguments then information is returned
+# in the default currency.
+#
+# Requesting stocks in a particular currency increases the time taken,
+# and the likelyhood of failure, as additional operations are required
+# to fetch the currency conversion information.
+#
+# This method should only be called from the quote object unless you
+# know what you are doing.
+
+sub set_currency {
+  my $this = shift if (ref $_[0]);
+  $this ||= _dummy();
+
+  unless (defined($_[0])) {
+    delete $this->{"currency"};
+  } else {
+    $this->{"currency"} = $_[0];
+  }
+}
+
+# =======================================================================
+# Timeout code.  If called on a particular object, then it sets
+# the timout for that object only.  If called as a class method
+# (or as Finance::Quote::timeout) then it sets the default timeout
+# for all new objects that will be created.
+
+sub timeout {
+  if (@_ == 1 or !ref($_[0])) { # Direct or class call.
+    return $TIMEOUT = $_[0];
+  }
+
+  # Otherwise we were called through an object.  Yay.
+  # Set the timeout in this object only.
+  my $this = shift;
+  return $this->{TIMEOUT} = shift;
+}
+
+
+###############################################################################
+#
+# Legacy Object Methods
+#
+###############################################################################
+
+# =======================================================================
+# failover (public object method)
+#
+# This sets/gets whether or not it's acceptable to use failover techniques.
+
+sub failover {
+  my $this = shift;
+  my $value = shift;
+        return $this->{FAILOVER} = $value if (defined($value));
+  return $this->{FAILOVER};
+}
+
+# =======================================================================
+# require_labels (public object method)
+#
+# Require_labels indicates which labels are required for lookups.  Only methods
+# that have registered all the labels specified in the list passed to
+# require_labels() will be called.
+#
+# require_labels takes a list of required labels.  When called with no
+# arguments, the require list is cleared.
+#
+# This method always succeeds.
+
+sub require_labels {
+  my $this = shift;
+  my @labels = @_;
+  $this->{REQUIRED} = \@labels;
+  return;
+}
+
+# =======================================================================
+# user_agent (public object method)
+#
+# Returns a LWP::UserAgent which conforms to the relevant timeouts,
+# proxies, and other settings on the particular Finance::Quote object.
+#
+# This function is mainly intended to be used by the modules that we load,
+# but it can be used by the application to directly play with the
+# user-agent settings.
+
+sub user_agent {
+  my $this = shift;
+
+  return $this->{UserAgent} if $this->{UserAgent};
+
+  my $ua;
+
+  if ($USE_EXPERIMENTAL_UA) {
+    $ua = Finance::Quote::UserAgent->new;
+  } else {
+    $ua = LWP::UserAgent->new;
+  }
+
+  $ua->timeout($this->{TIMEOUT}) if defined($this->{TIMEOUT});
+  $ua->env_proxy;
+
+  $this->{UserAgent} = $ua;
+
+  return $ua;
+}
 
 1;
 
