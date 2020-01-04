@@ -62,6 +62,12 @@ $ALPHAVANTAGE_CURRENCY_URL = "https://www.alphavantage.co/query?function=CURRENC
 
 $USE_EXPERIMENTAL_UA = 0;
 
+################################################################################
+#
+# Private Class Methods
+#
+################################################################################
+
 # Autoload method for obsolete methods.  This also allows people to
 # call methods that objects export without having to go through fetch.
 
@@ -90,6 +96,86 @@ sub AUTOLOAD {
   }
 
   carp "$AUTOLOAD does not refer to a known method.";
+}
+
+# Dummy destroy function to avoid AUTOLOAD catching it.
+sub DESTROY { return; }
+
+# _convert (private object method)
+#
+# This function converts between one currency and another.  It expects
+# to receive a hashref to the information, a reference to a list
+# of the stocks to be converted, and a reference to a  list of fields
+# that conversion should apply to.
+
+{
+  my %conversion;   # Conversion lookup table.
+
+  sub _convert {
+    my $this = shift;
+    my $info = shift;
+    my $stocks = shift;
+    my $convert_fields = shift;
+    my $new_currency = $this->{"currency"};
+
+    # Skip all this unless they actually want conversion.
+    return unless $new_currency;
+
+    foreach my $stock (@$stocks) {
+      my $currency;
+
+      # Skip stocks that don't have a currency.
+      next unless ($currency = $info->{$stock,"currency"});
+
+      # Skip if it's already in the same currency.
+      next if ($currency eq $new_currency);
+
+      # Lookup the currency conversion if we haven't
+      # already.
+      unless (exists $conversion{$currency,$new_currency}) {
+        $conversion{$currency,$new_currency} =
+          $this->currency($currency,$new_currency);
+      }
+
+      # Make sure we have a reasonable currency conversion.
+      # If we don't, mark the stock as bad.
+      unless ($conversion{$currency,$new_currency}) {
+        $info->{$stock,"success"} = 0;
+        $info->{$stock,"errormsg"} =
+          "Currency conversion failed.";
+        next;
+      }
+
+      # Okay, we have clean data.  Convert it.  Ideally
+      # we'd like to just *= entire fields, but
+      # unfortunately some things (like ranges,
+      # capitalisation, etc) don't take well to that.
+      # Hence we pull out any numbers we see, convert
+      # them, and stick them back in.  That's pretty
+      # yucky, but it works.
+
+      foreach my $field (@$convert_fields) {
+        next unless (defined $info->{$stock,$field});
+
+        $info->{$stock,$field} = $this->scale_field($info->{$stock,$field},$conversion{$currency,$new_currency});
+      }
+
+      # Set the new currency.
+      $info->{$stock,"currency"} = $new_currency;
+    }
+  }
+}
+
+# =======================================================================
+# _dummy (private function)
+#
+# _dummy returns a Finance::Quote object.  I'd really rather not have
+# this, but to maintain backwards compatibility we hold on to it.
+{
+  my $dummy_obj;
+  sub _dummy {
+    return $dummy_obj ||= Finance::Quote->new;
+  }
 }
 
 # _load_module (private class method)
@@ -144,6 +230,25 @@ sub _load_modules {
   }
 }
 
+# _smart_compare (private method function)
+#
+# This function compares values where the method depends on the
+# type of the second parameter.
+#  regex  : compare as regex
+#  scalar : test for substring match
+sub _smart_compare {
+  my ($val1, $val2) = @_;
+
+  if ( ref $val2 eq 'Regexp' ) {
+    return $val1 =~ $val2;
+  }
+  else {
+    return index($val1, $val2) > -1
+  }
+}
+
+
+
 # =======================================================================
 # new (public class method)
 #
@@ -195,18 +300,6 @@ sub new {
   $this->{REQUIRED} = [];
 
   return $this;
-}
-
-# =======================================================================
-# _dummy (private function)
-#
-# _dummy returns a Finance::Quote object.  I'd really rather not have
-# this, but to maintain backwards compatibility we hold on to it.
-{
-  my $dummy_obj;
-  sub _dummy {
-    return $dummy_obj ||= Finance::Quote->new;
-  }
 }
 
 
@@ -352,87 +445,6 @@ sub currency_lookup {
   return $returned_currencies;
 }
 
-# _smart_compare (private method function)
-#
-# This function compares values where the method depends on the
-# type of the second parameter.
-#  regex  : compare as regex
-#  scalar : test for substring match
-sub _smart_compare {
-  my ($val1, $val2) = @_;
-
-  if ( ref $val2 eq 'Regexp' ) {
-    return $val1 =~ $val2;
-  }
-  else {
-    return index($val1, $val2) > -1
-  }
-}
-
-# _convert (private object method)
-#
-# This function converts between one currency and another.  It expects
-# to receive a hashref to the information, a reference to a list
-# of the stocks to be converted, and a reference to a  list of fields
-# that conversion should apply to.
-
-{
-  my %conversion;   # Conversion lookup table.
-
-  sub _convert {
-    my $this = shift;
-    my $info = shift;
-    my $stocks = shift;
-    my $convert_fields = shift;
-    my $new_currency = $this->{"currency"};
-
-    # Skip all this unless they actually want conversion.
-    return unless $new_currency;
-
-    foreach my $stock (@$stocks) {
-      my $currency;
-
-      # Skip stocks that don't have a currency.
-      next unless ($currency = $info->{$stock,"currency"});
-
-      # Skip if it's already in the same currency.
-      next if ($currency eq $new_currency);
-
-      # Lookup the currency conversion if we haven't
-      # already.
-      unless (exists $conversion{$currency,$new_currency}) {
-        $conversion{$currency,$new_currency} =
-          $this->currency($currency,$new_currency);
-      }
-
-      # Make sure we have a reasonable currency conversion.
-      # If we don't, mark the stock as bad.
-      unless ($conversion{$currency,$new_currency}) {
-        $info->{$stock,"success"} = 0;
-        $info->{$stock,"errormsg"} =
-          "Currency conversion failed.";
-        next;
-      }
-
-      # Okay, we have clean data.  Convert it.  Ideally
-      # we'd like to just *= entire fields, but
-      # unfortunately some things (like ranges,
-      # capitalisation, etc) don't take well to that.
-      # Hence we pull out any numbers we see, convert
-      # them, and stick them back in.  That's pretty
-      # yucky, but it works.
-
-      foreach my $field (@$convert_fields) {
-        next unless (defined $info->{$stock,$field});
-
-        $info->{$stock,$field} = $this->scale_field($info->{$stock,$field},$conversion{$currency,$new_currency});
-      }
-
-      # Set the new currency.
-      $info->{$stock,"currency"} = $new_currency;
-    }
-  }
-}
 
 # =======================================================================
 # Helper function that can scale a field.  This is useful because it
@@ -726,8 +738,6 @@ sub decimal_shiftup {
   }
 }
 
-# Dummy destroy function to avoid AUTOLOAD catching it.
-sub DESTROY { return; }
 
 ###############################################################################
 #
