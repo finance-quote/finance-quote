@@ -342,8 +342,282 @@ sub scale_field {
   return join("",@chunks);
 }
 
+################################################################################
+#
+# Private Object Methods
+#
+################################################################################
 
+# _require_test (private object method)
+#
+# This function takes an array.  It returns true if all required
+# labels appear in the arrayref.  It returns false otherwise.
+#
+# This function could probably be made more efficient.
 
+sub _require_test {
+  my $this = shift;
+  my %available;
+  @available{@_} = ();  # Ooooh, hash-slice.  :)
+  my @required = @{$this->{REQUIRED}};
+  return 1 unless @required;
+  for (my $i = 0; $i < @required; $i++) {
+    return 0 unless exists $available{$required[$i]};
+  }
+  return 1;
+}
+
+################################################################################
+#
+# Public Object Methods
+#
+################################################################################
+
+# If $str ends with a B like "20B" or "1.6B" then expand it as billions like
+# "20000000000" or "1600000000".
+#
+# This is done with string manipulations so floating-point rounding doesn't
+# produce spurious digits for values like "1.6" which aren't exactly
+# representable in binary.
+#
+# Is "B" for billions the only abbreviation from Yahoo?
+# Could extend and rename this if there's also millions or thousands.
+#
+# For reference, if the value was just for use within perl then simply
+# substituting to exponential "1.5e9" might work.  But expanding to full
+# digits seems a better idea as the value is likely to be printed directly
+# as a string.
+sub B_to_billions {
+
+  my ($self,$str) = @_;
+  ### B_to_billions(): $str
+  if ($str =~ s/B$//i) {
+    $str = $self->decimal_shiftup ($str, 9);
+  }
+  return $str;
+}
+
+# $str is a number like "123" or "123.45"
+# return it with the decimal point moved $shift places to the right
+# must have $shift>=1
+# eg. decimal_shiftup("123",3)    -> "123000"
+#     decimal_shiftup("123.45",1) -> "1234.5"
+#     decimal_shiftup("0.25",1)   -> "2.5"
+#
+sub decimal_shiftup {
+  my ($self, $str, $shift) = @_;
+
+  # delete decimal point and set $after to count of chars after decimal.
+  # Leading "0" as in "0.25" is deleted too giving "25" so as not to end up
+  # with something that might look like leading 0 for octal.
+  my $after = ($str =~ s/(?:^0)?\.(.*)/$1/ ? length($1) : 0);
+
+  $shift -= $after;
+  # now $str is an integer and $shift is relative to the end of $str
+
+  if ($shift >= 0) {
+    # moving right, eg. "1234" becomes "12334000"
+    return $str . ('0' x $shift);  # extra zeros appended
+  } else {
+    # negative means left, eg. "12345" becomes "12.345"
+    # no need to prepend zeros since demanding initial $shift>=1
+    substr ($str, $shift,0, '.');  # new '.' at shifted spot from end
+    return $str;
+  }
+}
+
+# =======================================================================
+# fetch (public object method)
+#
+# Fetch is a wonderful generic fetcher.  It takes a method and stuff to
+# fetch.  It's a nicer interface for when you have a list of stocks with
+# different sources which you wish to deal with.
+sub fetch {
+  my $this = shift if ref ($_[0]);
+
+  $this ||= _dummy();
+
+  my $method = lc(shift);
+  my @stocks = @_;
+
+  unless (exists $METHODS{$method}) {
+    carp "Undefined fetch-method $method passed to ".
+         "Finance::Quote::fetch";
+    return;
+  }
+
+  # Failover code.  This steps through all availabe methods while
+  # we still have failed stocks to look-up.  This loop only
+  # runs a single time unless FAILOVER is defined.
+
+  my %returnhash = ();
+
+  foreach my $methodinfo (@{$METHODS{$method}}) {
+    my $funcref = $methodinfo->{"function"};
+    next unless $this->_require_test(@{$methodinfo->{"labels"}});
+    my @failed_stocks = ();
+    %returnhash = (%returnhash,&$funcref($this,@stocks));
+
+    foreach my $stock (@stocks) {
+      push(@failed_stocks,$stock)
+        unless ($returnhash{$stock,"success"});
+    }
+
+    $this->_convert(\%returnhash,\@stocks,
+                    $methodinfo->{"currency_fields"});
+
+    last unless $this->{FAILOVER};
+    last unless @failed_stocks;
+    @stocks = @failed_stocks;
+  }
+
+  return wantarray() ? %returnhash : \%returnhash;
+}
+
+sub get_failover {
+
+}
+
+sub get_fetch_currency {
+
+}
+
+sub get_required_labels {
+
+}
+
+sub get_timeout {
+
+}
+
+sub get_user_agent {
+
+}
+
+sub isoTime {
+  my ($self,$timeString) = @_ ;
+  $timeString =~ tr/ //d ;
+  $timeString = uc $timeString ;
+  my $retTime = "00:00"; # return zero time if unparsable input
+  if ($timeString=~m/^(\d+)[\.:UH](\d+)(AM|PM)?/) {
+    my ($hours,$mins)= ($1-0,$2-0) ;
+    $hours-=12 if ($hours==12);
+    $hours+=12 if ($3 && ($3 eq "PM")) ;
+    if ($hours>=0 && $hours<=23 && $mins>=0 && $mins<=59 ) {
+      $retTime = sprintf ("%02d:%02d", $hours, $mins) ;
+    }
+  }
+  return $retTime;
+}
+
+sub set_failover {
+
+}
+
+sub set_fetch_currency {
+
+}
+
+sub set_required_labels {
+
+}
+
+sub set_timeout {
+
+}
+
+# =======================================================================
+# store_date (public object method)
+#
+# Given the various pieces of a date, this functions figure out how to
+# store them in both the pre-existing US date format (mm/dd/yyyy), and
+# also in the ISO date format (yyyy-mm-dd).  This function expects to
+# be called with the arguments:
+#
+# (inforef, symbol_name, data_hash)
+#
+# The components of date hash can be any of:
+#
+# usdate   - A date in mm/dd/yy or mm/dd/yyyy
+# eurodate - A date in dd/mm/yy or dd/mm/yyyy
+# isodate  - A date in yy-mm-dd or yyyy-mm-dd
+# year   - The year in yyyy
+# month  - The month in mm or mmm format (i.e. 07 or Jul)
+# day  - The day
+# today  - A flag to indicate todays date should be used.
+#
+# The separator for the *date forms is ignored.  It can be any
+# non-alphanumeric character.  Any combination of year, month, and day
+# values can be provided.  Missing fields are filled in based upon
+# today's date.
+#
+sub store_date
+{
+    my $this = shift;
+    my $inforef = shift;
+    my $symbol = shift;
+    my $piecesref = shift;
+
+    my ($year, $month, $day, $this_month, $year_specified);
+    my %mnames = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
+      jul => 7, aug => 8, sep => 9, oct =>10, nov =>11, dec =>12);
+
+#    printf "In store_date\n";
+#    print "inforef $inforef\n";
+#    print "piecesref $piecesref\n";
+#    foreach my $key (keys %$piecesref) {
+#      printf ("  %s: %s\n", $key, $piecesref->{$key});
+#    }
+
+    # Default to today's date.
+    ($month, $day, $year) = (localtime())[4,3,5];
+    $month++;
+    $year += 1900;
+    $this_month = $month;
+    $year_specified = 0;
+
+    # Process the inputs
+    if ((defined $piecesref->{isodate}) && ($piecesref->{isodate})) {
+      ($year, $month, $day) = ($piecesref->{isodate} =~ m/(\d+)\W+(\w+)\W+(\d+)/);
+      $year += 2000 if $year < 100;
+      $year_specified = 1;
+#      printf "ISO Date %s: Year %d, Month %s, Day %d\n", $piecesref->{isodate}, $year, $month, $day;
+    }
+
+    if ((defined $piecesref->{usdate}) && ($piecesref->{usdate})) {
+      ($month, $day, $year) = ($piecesref->{usdate} =~ /(\w+)\W+(\d+)\W+(\d+)/);
+      $year += 2000 if $year < 100;
+      $year_specified = 1;
+#      printf "US Date %s: Month %s, Day %d, Year %d\n", $piecesref->{usdate}, $month, $day, $year;
+    }
+
+    if ((defined $piecesref->{eurodate}) && ($piecesref->{eurodate})) {
+        ($day, $month, $year) = ($piecesref->{eurodate} =~ /(\d+)\W+(\w+)\W+(\d+)/);
+      $year += 2000 if $year < 100;
+      $year_specified = 1;
+#      printf "Euro Date %s: Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year;
+    }
+
+    if (defined ($piecesref->{year})) {
+      $year = $piecesref->{year};
+      $year += 2000 if $year < 100;
+      $year_specified = 1;
+    }
+    $month = $piecesref->{month} if defined ($piecesref->{month});
+    $month = $mnames{lc(substr($month,0,3))} if ($month =~ /\D/);
+    $day  = $piecesref->{day} if defined ($piecesref->{day});
+
+    $year-- if (($year_specified == 0) && ($this_month < $month));
+
+    $inforef->{$symbol, "date"} =  sprintf "%02d/%02d/%04d", $month, $day, $year;
+    $inforef->{$symbol, "isodate"} = sprintf "%04d-%02d-%02d", $year, $month, $day;
+}
+
+################################################################################
+#
+# Public Class or Object Methods
+#
+################################################################################
 
 # =======================================================================
 # currency (public object method)
@@ -487,75 +761,6 @@ sub currency_lookup {
   return $returned_currencies;
 }
 
-
-
-# _require_test (private object method)
-#
-# This function takes an array.  It returns true if all required
-# labels appear in the arrayref.  It returns false otherwise.
-#
-# This function could probably be made more efficient.
-
-sub _require_test {
-  my $this = shift;
-  my %available;
-  @available{@_} = ();  # Ooooh, hash-slice.  :)
-  my @required = @{$this->{REQUIRED}};
-  return 1 unless @required;
-  for (my $i = 0; $i < @required; $i++) {
-    return 0 unless exists $available{$required[$i]};
-  }
-  return 1;
-}
-
-# =======================================================================
-# fetch (public object method)
-#
-# Fetch is a wonderful generic fetcher.  It takes a method and stuff to
-# fetch.  It's a nicer interface for when you have a list of stocks with
-# different sources which you wish to deal with.
-sub fetch {
-  my $this = shift if ref ($_[0]);
-
-  $this ||= _dummy();
-
-  my $method = lc(shift);
-  my @stocks = @_;
-
-  unless (exists $METHODS{$method}) {
-    carp "Undefined fetch-method $method passed to ".
-         "Finance::Quote::fetch";
-    return;
-  }
-
-  # Failover code.  This steps through all availabe methods while
-  # we still have failed stocks to look-up.  This loop only
-  # runs a single time unless FAILOVER is defined.
-
-  my %returnhash = ();
-
-  foreach my $methodinfo (@{$METHODS{$method}}) {
-    my $funcref = $methodinfo->{"function"};
-    next unless $this->_require_test(@{$methodinfo->{"labels"}});
-    my @failed_stocks = ();
-    %returnhash = (%returnhash,&$funcref($this,@stocks));
-
-    foreach my $stock (@stocks) {
-      push(@failed_stocks,$stock)
-        unless ($returnhash{$stock,"success"});
-    }
-
-    $this->_convert(\%returnhash,\@stocks,
-                    $methodinfo->{"currency_fields"});
-
-    last unless $this->{FAILOVER};
-    last unless @failed_stocks;
-    @stocks = @failed_stocks;
-  }
-
-  return wantarray() ? %returnhash : \%returnhash;
-}
-
 # =======================================================================
 # parse_csv (public object method)
 #
@@ -602,165 +807,6 @@ sub parse_csv_semicolon
        return @new;      # list of values that were comma-separated
 }
 
-# =======================================================================
-# store_date (public object method)
-#
-
-# Given the various pieces of a date, this functions figure out how to
-# store them in both the pre-existing US date format (mm/dd/yyyy), and
-# also in the ISO date format (yyyy-mm-dd).  This function expects to
-# be called with the arguments:
-#
-# (inforef, symbol_name, data_hash)
-#
-# The components of date hash can be any of:
-#
-# usdate   - A date in mm/dd/yy or mm/dd/yyyy
-# eurodate - A date in dd/mm/yy or dd/mm/yyyy
-# isodate  - A date in yy-mm-dd or yyyy-mm-dd
-# year   - The year in yyyy
-# month  - The month in mm or mmm format (i.e. 07 or Jul)
-# day  - The day
-# today  - A flag to indicate todays date should be used.
-#
-# The separator for the *date forms is ignored.  It can be any
-# non-alphanumeric character.  Any combination of year, month, and day
-# values can be provided.  Missing fields are filled in based upon
-# today's date.
-#
-sub store_date
-{
-    my $this = shift;
-    my $inforef = shift;
-    my $symbol = shift;
-    my $piecesref = shift;
-
-    my ($year, $month, $day, $this_month, $year_specified);
-    my %mnames = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
-      jul => 7, aug => 8, sep => 9, oct =>10, nov =>11, dec =>12);
-
-#    printf "In store_date\n";
-#    print "inforef $inforef\n";
-#    print "piecesref $piecesref\n";
-#    foreach my $key (keys %$piecesref) {
-#      printf ("  %s: %s\n", $key, $piecesref->{$key});
-#    }
-
-    # Default to today's date.
-    ($month, $day, $year) = (localtime())[4,3,5];
-    $month++;
-    $year += 1900;
-    $this_month = $month;
-    $year_specified = 0;
-
-    # Process the inputs
-    if ((defined $piecesref->{isodate}) && ($piecesref->{isodate})) {
-      ($year, $month, $day) = ($piecesref->{isodate} =~ m/(\d+)\W+(\w+)\W+(\d+)/);
-      $year += 2000 if $year < 100;
-      $year_specified = 1;
-#      printf "ISO Date %s: Year %d, Month %s, Day %d\n", $piecesref->{isodate}, $year, $month, $day;
-    }
-
-    if ((defined $piecesref->{usdate}) && ($piecesref->{usdate})) {
-      ($month, $day, $year) = ($piecesref->{usdate} =~ /(\w+)\W+(\d+)\W+(\d+)/);
-      $year += 2000 if $year < 100;
-      $year_specified = 1;
-#      printf "US Date %s: Month %s, Day %d, Year %d\n", $piecesref->{usdate}, $month, $day, $year;
-    }
-
-    if ((defined $piecesref->{eurodate}) && ($piecesref->{eurodate})) {
-        ($day, $month, $year) = ($piecesref->{eurodate} =~ /(\d+)\W+(\w+)\W+(\d+)/);
-      $year += 2000 if $year < 100;
-      $year_specified = 1;
-#      printf "Euro Date %s: Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year;
-    }
-
-    if (defined ($piecesref->{year})) {
-      $year = $piecesref->{year};
-      $year += 2000 if $year < 100;
-      $year_specified = 1;
-    }
-    $month = $piecesref->{month} if defined ($piecesref->{month});
-    $month = $mnames{lc(substr($month,0,3))} if ($month =~ /\D/);
-    $day  = $piecesref->{day} if defined ($piecesref->{day});
-
-    $year-- if (($year_specified == 0) && ($this_month < $month));
-
-    $inforef->{$symbol, "date"} =  sprintf "%02d/%02d/%04d", $month, $day, $year;
-    $inforef->{$symbol, "isodate"} = sprintf "%04d-%02d-%02d", $year, $month, $day;
-}
-
-sub isoTime {
-  my ($self,$timeString) = @_ ;
-  $timeString =~ tr/ //d ;
-  $timeString = uc $timeString ;
-  my $retTime = "00:00"; # return zero time if unparsable input
-  if ($timeString=~m/^(\d+)[\.:UH](\d+)(AM|PM)?/) {
-    my ($hours,$mins)= ($1-0,$2-0) ;
-    $hours-=12 if ($hours==12);
-    $hours+=12 if ($3 && ($3 eq "PM")) ;
-    if ($hours>=0 && $hours<=23 && $mins>=0 && $mins<=59 ) {
-      $retTime = sprintf ("%02d:%02d", $hours, $mins) ;
-    }
-  }
-  return $retTime;
-}
-
-
-# If $str ends with a B like "20B" or "1.6B" then expand it as billions like
-# "20000000000" or "1600000000".
-#
-# This is done with string manipulations so floating-point rounding doesn't
-# produce spurious digits for values like "1.6" which aren't exactly
-# representable in binary.
-#
-# Is "B" for billions the only abbreviation from Yahoo?
-# Could extend and rename this if there's also millions or thousands.
-#
-# For reference, if the value was just for use within perl then simply
-# substituting to exponential "1.5e9" might work.  But expanding to full
-# digits seems a better idea as the value is likely to be printed directly
-# as a string.
-sub B_to_billions {
-
-  my ($self,$str) = @_;
-  ### B_to_billions(): $str
-  if ($str =~ s/B$//i) {
-    $str = $self->decimal_shiftup ($str, 9);
-  }
-  return $str;
-}
-
-# $str is a number like "123" or "123.45"
-# return it with the decimal point moved $shift places to the right
-# must have $shift>=1
-# eg. decimal_shiftup("123",3)    -> "123000"
-#     decimal_shiftup("123.45",1) -> "1234.5"
-#     decimal_shiftup("0.25",1)   -> "2.5"
-#
-sub decimal_shiftup {
-  my ($self, $str, $shift) = @_;
-
-  # delete decimal point and set $after to count of chars after decimal.
-  # Leading "0" as in "0.25" is deleted too giving "25" so as not to end up
-  # with something that might look like leading 0 for octal.
-  my $after = ($str =~ s/(?:^0)?\.(.*)/$1/ ? length($1) : 0);
-
-  $shift -= $after;
-  # now $str is an integer and $shift is relative to the end of $str
-
-  if ($shift >= 0) {
-    # moving right, eg. "1234" becomes "12334000"
-    return $str . ('0' x $shift);  # extra zeros appended
-  } else {
-    # negative means left, eg. "12345" becomes "12.345"
-    # no need to prepend zeros since demanding initial $shift>=1
-    substr ($str, $shift,0, '.');  # new '.' at shifted spot from end
-    return $str;
-  }
-}
-
-
 ###############################################################################
 #
 # Legacy Class Methods
@@ -790,8 +836,6 @@ sub default_currency_fields {
   return qw/last high low net bid ask close open day_range year_range
             eps div cap nav price/;
 }
-
-
 
 ###############################################################################
 #
@@ -840,7 +884,6 @@ sub timeout {
   my $this = shift;
   return $this->{TIMEOUT} = shift;
 }
-
 
 ###############################################################################
 #
