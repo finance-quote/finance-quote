@@ -247,7 +247,27 @@ sub _smart_compare {
   }
 }
 
+################################################################################
+#
+# Public Class Methods
+#
+################################################################################
 
+sub get_default_timeout {
+
+}
+
+sub get_default_required_labels {
+
+}
+
+sub get_sources {
+
+}
+
+sub get_default_currency_fields {
+
+}
 
 # =======================================================================
 # new (public class method)
@@ -301,6 +321,28 @@ sub new {
 
   return $this;
 }
+
+# =======================================================================
+# Helper function that can scale a field.  This is useful because it
+# handles things like ranges "105.4 - 108.3", and not just straight fields.
+#
+# The function takes a string or number to scale, and the factor to scale
+# it by.  For example, scale_field("1023","0.01") would return "10.23".
+
+sub scale_field {
+  shift if ref $_[0]; # Shift off the object, if there is one.
+
+  my ($field, $scale) = @_;
+  my @chunks = split(/([^0-9.])/,$field);
+
+  for (my $i=0; $i < @chunks; $i++) {
+    next unless $chunks[$i] =~ /\d/;
+    $chunks[$i] *= $scale;
+  }
+  return join("",@chunks);
+}
+
+
 
 
 # =======================================================================
@@ -445,26 +487,6 @@ sub currency_lookup {
   return $returned_currencies;
 }
 
-
-# =======================================================================
-# Helper function that can scale a field.  This is useful because it
-# handles things like ranges "105.4 - 108.3", and not just straight fields.
-#
-# The function takes a string or number to scale, and the factor to scale
-# it by.  For example, scale_field("1023","0.01") would return "10.23".
-
-sub scale_field {
-  shift if ref $_[0]; # Shift off the object, if there is one.
-
-  my ($field, $scale) = @_;
-  my @chunks = split(/([^0-9.])/,$field);
-
-  for (my $i=0; $i < @chunks; $i++) {
-    next unless $chunks[$i] =~ /\d/;
-    $chunks[$i] *= $scale;
-  }
-  return join("",@chunks);
-}
 
 
 # _require_test (private object method)
