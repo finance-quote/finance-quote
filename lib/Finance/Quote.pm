@@ -271,7 +271,8 @@ sub get_sources {
 }
 
 sub get_default_currency_fields {
-
+  return qw/last high low net bid ask close open day_range year_range
+            eps div cap nav price/;
 }
 
 # =======================================================================
@@ -830,8 +831,7 @@ sub sources {
 # function then that list will be used instead.
 
 sub default_currency_fields {
-  return qw/last high low net bid ask close open day_range year_range
-            eps div cap nav price/;
+  return get_default_currency_fields();
 }
 
 ###############################################################################
