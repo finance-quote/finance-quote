@@ -264,58 +264,99 @@ sub _smart_compare {
 #
 ################################################################################
 
+sub get_default_currency_fields {
+  return qw/last high low net bid ask close open day_range year_range
+            eps div cap nav price/;
+}
+
+sub get_default_timeout {
+  return $TIMEOUT; 
+}
+
 sub get_sources {
   # Create a dummy object to ensure METHODS is populated
   my $t = Finance::Quote->new();
   return(wantarray ? keys %METHODS : [keys %METHODS]);
 }
 
-sub get_default_currency_fields {
-  return qw/last high low net bid ask close open day_range year_range
-            eps div cap nav price/;
-}
-
 # =======================================================================
 # new (public class method)
 #
-# Returns a new Finance::Quote object.  If methods are asked for, then
-# it will load the relevant modules.  With no arguments, this function
-# loads a default set of methods.
+# Returns a new Finance::Quote object.  
+#
+# Arguments :: 
+#    - zero or more module names from the Finance::Quote::get_sources list
+#    - zero or more named parameters, passes as name => value
+#
+# Named Parameters ::
+#    - timeout           # timeout in seconds for web requests
+#    - failover          # boolean value indicating if failover is acceptable
+#    - fetch_currency    # currency code for fetch results
+#    - required_labels   # array of required labels in fetch results
+#    - <module-name>     # hash specific to various Finance::Quote modules
+#
+# new()                              # default constructor
+# new('a', 'b')                      # load only modules a and b
+# new(timeout => 30)                 # load all default modules, set timeout
+# new('a', fetch_currency => 'X')    # load only module a, use currency X for results
+# new('z' => {API_KEY => 'K')        # load all modules, pass hash to module z constructor
+# new('z', 'z' => {API_KEY => 'K')   # load only module z and pass hash to its constructor
+#
+# Enivornment Variables ::
+#    - FQ_LOAD_QUOTELET  # if no modules named in argument list, use ones in this variable
+#
+# Return Value ::
+#    - Finanace::Quote object
 
 sub new {
+  # Create and bless object
   my $self = shift;
   my $class = ref($self) || $self;
 
   my $this = {};
   bless $this, $class;
 
-  my @modules = ();
-  my @reqmodules = ();  # Requested modules.
-
-  # If there's no argument list, but we have the appropriate
-  # environment variable set, we'll use that instead.
-  if ($ENV{FQ_LOAD_QUOTELET} and !@_) {
-    @reqmodules = split(' ',$ENV{FQ_LOAD_QUOTELET});
-  } else {
-    @reqmodules = @_;
-  }
-
-  # If we get an empty new(), or one starting with -defaults,
-  # then load up the default methods.
-
-  if ( !@reqmodules or $reqmodules[0] eq "-defaults" ) {
-    shift(@reqmodules) if (@reqmodules);
-
-    # Default modules
-
-    @modules = @MODULES;
-  }
-
-  $this->_load_modules(@modules,@reqmodules);
-
-  $this->{TIMEOUT} = $TIMEOUT if defined($TIMEOUT);
+  # Default values
   $this->{FAILOVER} = 1;
   $this->{REQUIRED} = [];
+  $this->{TIMEOUT} = $TIMEOUT if defined($TIMEOUT);
+
+  # Sort out arguments
+  my %named_parameter = (timeout         => ['', 'TIMEOUT'], 
+                         failover        => ['', 'FAILOVER'], 
+                         fetch_currency  => ['', 'currency'],
+                         required_labels => ['ARRAY', 'REQUIRED']);
+
+  $this->{module_specific_data} = {};
+  my @load_modules = ();
+
+  for (my $i = 0; $i < @_; $i++) {
+    if (exists $named_parameter{$_[$i]}) {
+      die "missing value for named parameter $_[$i]" if $i + 1 == @_;
+      die "unexpect type for value of named parameter $_[$i]" if ref $_[$i+1] ne $named_parameter{$_[$i]}[0];
+
+      $this->{$named_parameter{$_[$i]}[1]} = $_[$i+1];
+    }
+    elsif ($i + 1 < @_ and ref $_[$i+1] eq 'HASH') {
+      $this->{module_specific_data}->{$_[$i]} = $_[$i+1];
+    }
+    elsif ($_[$i] eq '-defaults') {
+      push (@load_modules, @MODULES);
+    }
+    else {
+      push (@load_modules, $_[$i]);
+    }
+  }
+  
+  # Honor FQ_LOAD_QUOTELET if @load_modules is empty
+  if ($ENV{FQ_LOAD_QUOTELET} and !@load_modules) {
+    @load_modules = split(' ',$ENV{FQ_LOAD_QUOTELET});
+  }
+  elsif (@load_modules == 0) {
+    push(@load_modules, @MODULES);
+  }
+
+  $this->_load_modules(@load_modules);
 
   return $this;
 }
@@ -338,6 +379,10 @@ sub scale_field {
     $chunks[$i] *= $scale;
   }
   return join("",@chunks);
+}
+
+sub set_default_timeout {
+  $TIMEOUT  = shift;
 }
 
 ################################################################################
@@ -485,7 +530,8 @@ sub get_required_labels {
 }
 
 sub get_timeout {
-
+  my $self = shift;
+  return $self->{TIMEOUT};
 }
 
 sub get_user_agent {
@@ -872,14 +918,17 @@ sub set_currency {
 # for all new objects that will be created.
 
 sub timeout {
-  if (@_ == 1 or !ref($_[0])) { # Direct or class call.
-    return $TIMEOUT = $_[0];
+  if (@_ == 1 or !ref($_[0])) { 
+    # Direct or class call
+    Finance::Quote::set_default_timeout(shift);
+    return Finance::Quote::get_default_timeout();
   }
 
   # Otherwise we were called through an object.  Yay.
   # Set the timeout in this object only.
   my $this = shift;
-  return $this->{TIMEOUT} = shift;
+  $this->set_timeout(shift);
+  return $this->get_timeout();
 }
 
 ###############################################################################
