@@ -947,8 +947,9 @@ sub timeout {
 sub failover {
   my $this = shift;
   my $value = shift;
-        return $this->{FAILOVER} = $value if (defined($value));
-  return $this->{FAILOVER};
+
+  $this->set_failover($value) if defined $value;
+  return $this->get_failover();
 }
 
 # =======================================================================
