@@ -431,8 +431,8 @@ sub _require_test {
 # digits seems a better idea as the value is likely to be printed directly
 # as a string.
 sub B_to_billions {
-
   my ($self,$str) = @_;
+
   ### B_to_billions(): $str
   if ($str =~ s/B$//i) {
     $str = $self->decimal_shiftup ($str, 9);
