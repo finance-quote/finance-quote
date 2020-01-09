@@ -336,6 +336,7 @@ sub new {
       die "unexpect type for value of named parameter $_[$i]" if ref $_[$i+1] ne $named_parameter{$_[$i]}[0];
 
       $this->{$named_parameter{$_[$i]}[1]} = $_[$i+1];
+      $i += 1;
     }
     elsif ($i + 1 < @_ and ref $_[$i+1] eq 'HASH') {
       $this->{module_specific_data}->{$_[$i]} = $_[$i+1];
@@ -492,7 +493,6 @@ sub fetch {
   # Failover code.  This steps through all availabe methods while
   # we still have failed stocks to look-up.  This loop only
   # runs a single time unless FAILOVER is defined.
-
   my %returnhash = ();
 
   foreach my $methodinfo (@{$METHODS{$method}}) {
@@ -518,7 +518,8 @@ sub fetch {
 }
 
 sub get_failover {
-
+  my $self = shift;
+  return $self->{FAILOVER};
 }
 
 sub get_fetch_currency {
@@ -555,7 +556,8 @@ sub isoTime {
 }
 
 sub set_failover {
-
+  my $self = shift;
+  $self->{FAILOVER} = shift;
 }
 
 sub set_fetch_currency {
