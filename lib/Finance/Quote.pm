@@ -523,7 +523,8 @@ sub get_failover {
 }
 
 sub get_fetch_currency {
-
+  my $self = shift;
+  return $self->{currency};
 }
 
 sub get_required_labels {
@@ -556,12 +557,13 @@ sub isoTime {
 }
 
 sub set_failover {
-  my $self = shift;
+  my $self          = shift;
   $self->{FAILOVER} = shift;
 }
 
 sub set_fetch_currency {
-
+  my $self          = shift;
+  $self->{currency} = shift;
 }
 
 sub set_required_labels {
@@ -903,14 +905,17 @@ sub default_currency_fields {
 # know what you are doing.
 
 sub set_currency {
-  my $this = shift if (ref $_[0]);
-  $this ||= _dummy();
-
-  unless (defined($_[0])) {
-    delete $this->{"currency"};
-  } else {
-    $this->{"currency"} = $_[0];
+  if (@_ == 1 or !ref($_[0])) { 
+    # Direct or class call - there is no class default currency
+    return undef;
   }
+
+  my $this = shift;
+  if (defined($_[0])) {
+    $this->set_fetch_currency($_[0]);
+  }
+
+  return $this->get_fetch_currency();
 }
 
 # =======================================================================

@@ -2,7 +2,7 @@
 use strict;
 use Test::More;
 
-plan tests => 11;
+plan tests => 14;
 
 use Finance::Quote;
 ok(1, "Finance::Quote loaded");
@@ -29,5 +29,13 @@ ok( !$q->get_failover(), "check set/get failover");
 
 $q = Finance::Quote->new(failover => 0);
 ok( !$q->get_failover(), "check failover for named argument constructor");
+
+$q = Finance::Quote->new();
+ok( !defined $q->get_fetch_currency(), "default currency is not defined");
+$q->set_fetch_currency('asd');
+ok( 'asd' eq $q->get_fetch_currency(), "check set/get currency");
+
+$q = Finance::Quote->new(fetch_currency => 'usd');
+ok( 'usd' eq $q->get_fetch_currency(), "check named parameter fetch_currency");
 
 
