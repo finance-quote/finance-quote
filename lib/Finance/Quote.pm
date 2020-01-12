@@ -538,7 +538,24 @@ sub get_timeout {
 }
 
 sub get_user_agent {
+  my $this = shift;
 
+  return $this->{UserAgent} if $this->{UserAgent};
+
+  my $ua;
+
+  if ($USE_EXPERIMENTAL_UA) {
+    $ua = Finance::Quote::UserAgent->new;
+  } else {
+    $ua = LWP::UserAgent->new;
+  }
+
+  $ua->timeout($this->{TIMEOUT}) if defined($this->{TIMEOUT});
+  $ua->env_proxy;
+
+  $this->{UserAgent} = $ua;
+
+  return $ua;
 }
 
 sub isoTime {
@@ -991,23 +1008,7 @@ sub require_labels {
 
 sub user_agent {
   my $this = shift;
-
-  return $this->{UserAgent} if $this->{UserAgent};
-
-  my $ua;
-
-  if ($USE_EXPERIMENTAL_UA) {
-    $ua = Finance::Quote::UserAgent->new;
-  } else {
-    $ua = LWP::UserAgent->new;
-  }
-
-  $ua->timeout($this->{TIMEOUT}) if defined($this->{TIMEOUT});
-  $ua->env_proxy;
-
-  $this->{UserAgent} = $ua;
-
-  return $ua;
+  return $this->get_user_agent();
 }
 
 1;

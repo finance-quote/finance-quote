@@ -2,7 +2,7 @@
 use strict;
 use Test::More;
 
-plan tests => 22;
+plan tests => 23;
 
 use Finance::Quote;
 ok(1, "Finance::Quote loaded");
@@ -57,3 +57,7 @@ $q->set_timeout(123);
 ok( 123 == $q->get_timeout(), "check set/get timeout");
 $q = Finance::Quote->new(timeout => 456);
 ok( 456 == $q->get_timeout(), "check timeout as named parameter");
+
+print ref $q->get_user_agent(), "\n";
+
+ok( 'LWP::UserAgent' eq ref $q->get_user_agent(), "check get_user_agent");
