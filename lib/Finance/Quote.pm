@@ -340,6 +340,7 @@ sub new {
     }
     elsif ($i + 1 < @_ and ref $_[$i+1] eq 'HASH') {
       $this->{module_specific_data}->{$_[$i]} = $_[$i+1];
+      $i += 1;
     }
     elsif ($_[$i] eq '-defaults') {
       push (@load_modules, @MODULES);
