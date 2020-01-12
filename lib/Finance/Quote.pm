@@ -528,7 +528,8 @@ sub get_fetch_currency {
 }
 
 sub get_required_labels {
-
+  my $self = shift;
+  return $self->{REQUIRED};
 }
 
 sub get_timeout {
@@ -567,7 +568,8 @@ sub set_fetch_currency {
 }
 
 sub set_required_labels {
-
+  my $self          = shift;
+  $self->{REQUIRED} = shift;
 }
 
 sub set_timeout {
@@ -972,7 +974,7 @@ sub failover {
 sub require_labels {
   my $this = shift;
   my @labels = @_;
-  $this->{REQUIRED} = \@labels;
+  $this->set_required_labels(\@labels);
   return;
 }
 
