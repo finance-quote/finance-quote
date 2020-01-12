@@ -573,7 +573,8 @@ sub set_required_labels {
 }
 
 sub set_timeout {
-
+  my $self         = shift;
+  $self->{TIMEOUT} = shift;
 }
 
 # =======================================================================
@@ -696,7 +697,7 @@ sub currency {
 
   return $amount if ($from eq $to); # Trivial case.
 
-  my $ua = $this->user_agent;
+  my $ua = $this->get_user_agent;
 
   my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
   return undef unless ( defined $ALPHAVANTAGE_API_KEY );

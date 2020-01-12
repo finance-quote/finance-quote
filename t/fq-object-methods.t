@@ -2,7 +2,7 @@
 use strict;
 use Test::More;
 
-plan tests => 19;
+plan tests => 22;
 
 use Finance::Quote;
 ok(1, "Finance::Quote loaded");
@@ -38,7 +38,6 @@ ok( 'aud' eq $q->get_fetch_currency(), "check set/get currency");
 $q = Finance::Quote->new(fetch_currency => 'usd');
 ok( 'usd' eq $q->get_fetch_currency(), "check named parameter fetch_currency");
 
-
 $q = Finance::Quote->new();
 ok( 0 == @{$q->get_required_labels()}, "check default required labels");
 my $labels = ['close', 'isodate', 'last'];
@@ -52,4 +51,9 @@ ok( 'does-not-exist' eq join(",", @{$q->get_required_labels()}), "check set/get 
 $result = $q->fetch("usa", "IBM");
 ok( (ref $result eq "HASH" and !%{$result}), "check required_labels is enforeced");
 
-
+$q = Finance::Quote->new();
+ok( !defined $q->get_timeout(), "check default timeout");
+$q->set_timeout(123);
+ok( 123 == $q->get_timeout(), "check set/get timeout");
+$q = Finance::Quote->new(timeout => 456);
+ok( 456 == $q->get_timeout(), "check timeout as named parameter");
