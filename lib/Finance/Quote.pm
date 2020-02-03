@@ -182,9 +182,9 @@ sub new {
         DWS FTPortfolios Fidelity FidelityFixed FinanceCanada Fool
         FTfunds HU GoldMoney HEX IEXCloud IndiaMutual LeRevenu
         ManInvestments Morningstar MorningstarAU MorningstarCH
-        MorningstarJP MStaruk NZX Platinum SEB SIXfunds SIXshares
-        StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref
-        TNetuk Troweprice Trustnet Union USFedBonds VWD ZA
+        MorningstarJP MStaruk NZX Platinum Oslobors SEB SIXfunds
+        SIXshares StockHouseCanada TSP TSX Tdefunds Tdwaterhouse
+        Tiaacref TNetuk Troweprice Trustnet Union USFedBonds VWD ZA
         Cominvest Finanzpartner YahooJSON YahooYQL ZA_UnitTrusts/;
   }
 
