@@ -232,15 +232,20 @@
   testcases:
 #
 - module: Fidelity.pm
-  state: TBD
+  state: working
   added: TBD
-  changed: ~
+  changed: 2020-03-21
   removed: ~
   urls:
+    - https://fundresearch.fidelity.com/mutual-funds/fidelity-funds-daily-pricing-yields/download
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: fidelity.t
   testcases:
+    - FGRIX
+    - FNMIX
+    - FASGX
+    - FEQTX
 #
 - module: FidelityFixed.pm
   state: TBD

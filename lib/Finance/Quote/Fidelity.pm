@@ -37,7 +37,7 @@ use vars qw/$FIDELITY_URL /;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 
-our $VERSION = '1.50'; # VERSION
+# VERSION
 
 $FIDELITY_URL = ("https://fundresearch.fidelity.com/mutual-funds/fidelity-funds-daily-pricing-yields/download");
 
