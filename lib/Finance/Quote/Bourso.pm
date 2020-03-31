@@ -113,9 +113,7 @@ sub bourso {
     $url = $Bourso_URL;
 
     foreach my $stocks (@stocks) {
-        my $queryUrl =
-              $url
-            . join( '', $stocks );
+        my $queryUrl = $url . $stocks;
         $reply = $ua->request( GET $queryUrl);
 
         # print "URL=".$queryUrl."\n";
@@ -179,6 +177,7 @@ sub bourso {
 				my $month = substr($elements[1],5,2);
 				my $day = substr($elements[1],8,2);
 				$info{ $stocks, 'date' } = $month."/".$day."/".$year;
+				$info{ $stocks, 'isodate' } = $year."-".$month."-".$day;
 			    }
 			} else {
 			    my $ierr = $icsv->error_diag;
@@ -256,6 +255,7 @@ sub bourso {
 		    my $day = substr($lastdate,-10,2);
 		    # print $month."/".$day."/".$year."\n";
 		    $info{ $stocks, "date" } = $month."/".$day."/".$year;
+		    $info{ $stocks, 'isodate' } = $year."-".$month."-".$day;
 		}
 	    }
 

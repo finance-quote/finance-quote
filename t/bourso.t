@@ -7,33 +7,35 @@ if ( not $ENV{ONLINE_TEST} ) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 73;
+plan tests => 71;
 
 # Test Bourso functions.
 
 my $q = Finance::Quote->new();
 
-# my stocks = stock, fund, warrant, bond, indice
-my @stocks = ( "FR0000441677",    # Fund
-               "AF",              # Stock, EUR, Nyse Euronext
-               "MSFT",            # Stock, USD, NASDAQ
-               "SOLB",            # Stock, EUR, BRUXELLES
-               "CNP",             # Stock, EUR, Nyse Euronext
-               "FR0010371401",    # Bond
-               "FR0012773687",    # Warrant
-               "FR0003500008",    # Index
-               "LU0207947044",    # Bond
+# my stocks = stock, fund, warrant, bond, indice, tracker
+my %stocks = ( "MP-802941" => "FR0000441677",       # Fund, EUR, Covéa Actions Asie C
+               "1rPAF" => "FR0000031122",           # Stock, EUR, Euronext Paris, AIR FRANCE - KLM
+               "MSFT" => "US5949181045",            # Stock, USD, NASDAQ, MICROSOFT
+               "FF11-SOLB" => "BE0003470755",       # Stock, EUR, Euronext Bruxelles, SOLVAY
+               "1rPSOLB" => "BE0003470755",         # Stock, EUR, Euronext Paris, SOLVAY
+               "1rPCNP" => "FR0000120222",          # Stock, EUR, Euronext Paris, CNP ASSURANCES
+               "1rPFR0010371401" => "FR0010371401", # Bond, EUR, Euronext Paris, FRENCH REPUBLIC 4% 25/10/38 EUR
+               "1rAHX70B" => "NL0011806336",        # Warrant, EUR, Euronext Paris, SAMSUNG ELEC/BNP WT
+               "1rPCAC" => "FR0003500008",          # Index, Pts, Paris, CAC40
+               "1rTBX4" => "FR0010411884",          # Tracker, EUR, LYXOR ETF BX4
 );
 
 # Bourso tests need to cover all the possible cases:
 #
 #    Name		What		Test Case
 #
-#    cours-action	Stock		AF
-#    cours-obligation	Bond		FR0010371401
-#    opcvm/opcvm	Fund		FR0000441677
-#    cours-warrant	Warrant		FR0012773687
-#    cours-indice	Index		FR0003500008
+#    action	        Stock		1rPAF, MSFT, FF11-SOLB, 1rPSOLB, 1rPCNP
+#    obligation	        Bond		1rPFR0010371401
+#    opcvm	        Fund		MP-802941
+#    warrant	        Warrant		1rAHX70B
+#    indice	        Index		1rPCAC
+#    tracker            Tracker         1rTBX4
 
 my $year     = ( localtime() )[5] + 1900;
 my $lastyear = $year - 1;
@@ -44,7 +46,7 @@ my %quotes;
 #ok(%quotes);
 
 # Check that the name, last, currency and date are defined for all of the stocks.
-foreach my $stock (@stocks) {
+foreach my $stock (keys %stocks) {
     eval {
         %quotes = $q->fetch( "bourso", $stock );
         ok( %quotes, "$stock \%quotes defined" );
@@ -52,20 +54,17 @@ foreach my $stock (@stocks) {
         my $last = $quotes{ $stock, "last" };
         ok( $last > 0, "$stock last ($last) > 0" );
         ok( length( $quotes{ $stock, "name" } ),   "$stock name is defined" );
-        ok( $quotes{ $stock, "symbol" } =~ /[A-Z]{2}\d{10}/, "$stock symbol is defined as ".$quotes{ $stock, "symbol" } );
         ok( $quotes{ $stock, "success" }, "$stock returned success" );
-        ok(    # indexes are quoted in percents
-            ( $stock eq "FR0003500008" )
+        ok(    # bonds are quoted in percents and index in points
+            ( $stock eq "1rPFR0010371401" ) || ( $stock eq "1rPCAC" ) 
                 || (    ( $stock eq "MSFT" )
                      && ( $quotes{ $stock, "currency" } eq "USD" ) )
                 || ( $quotes{ $stock, "currency" } eq "EUR" ),
-            "Index is quoted in percents"
+            "Currency as expected"
         );
 
     SKIP:
         {
-            skip "date is not defined for warrants", 2
-                if ( $stock eq "FR0012773687" );
             ok( substr( $quotes{ $stock, "isodate" }, 0, 4 ) == $year
                     || substr( $quotes{ $stock, "isodate" }, 0, 4 )
                     == $lastyear,

@@ -119,15 +119,25 @@
   testcases:
 #
 - module: Bourso.pm
-  state: TBD
-  added: TBD
-  changed: ~
-  removed: ~
-  urls:
+  state: working
+  added:
+  changed: 2020-03~31
+  removed:
+  urls: https://www.boursorama.com/cours/$stock
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: bourso.t
   testcases:
+    - MP-802941
+    - 1rPAF
+    - MSFT
+    - FF11-SOLB
+    - 1rPSOLB
+    - 1rPCNP
+    - 1rPFR0010371401
+    - 1rAHX70B
+    - 1rPCAC
+    - 1rTBX4
 #
 - module: CSE.pm
   state: TBD
