@@ -21,8 +21,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-#    02111-1307, USA
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+#    02110-1301, USA
 #
 #
 # This code is derived from version 0.9 of the AEX.pm module.
@@ -43,110 +43,93 @@ use HTML::TableExtract;
 
 # URLs of where to obtain information
 
-$TSP_URL = 'https://www.tsp.gov/investmentfunds/shareprice/sharePriceHistory.shtml';
+$TSP_URL = 'https://www.tsp.gov/InvestmentFunds/FundPerformance/index.html';
 $TSP_MAIN_URL=("http://www.tsp.gov");
 
 # ENHANCE-ME: The decade target funds like 2020 appear and disappear.
 # Better not to hard code them.
 #
 %TSP_FUND_COLUMNS = (
-    TSPL2050FUND => "L 2050",
-    TSPL2040FUND => "L 2040",
-    TSPL2030FUND => "L 2030",
-    TSPL2020FUND => "L 2020",
-    TSPLINCOMEFUND => "L INCOME",
-    TSPGFUND => "G FUND",
-    TSPFFUND => "F FUND",
-    TSPCFUND => "C FUND",
-    TSPSFUND => "S FUND",
-    TSPIFUND => "I FUND" );
+    L2050   => "L 2050",
+    L2040   => "L 2040",
+    L2030   => "L 2030",
+    L2020   => "L 2020",
+    LINCOME => "L INCOME",
+    G       => "G FUND",
+    F       => "F FUND",
+    C       => "C FUND",
+    S       => "S FUND",
+    I       => "I FUND" );
 
 %TSP_FUND_NAMES = (
-    TSPL2050 => 'Lifecycle 2050 Fund',
-    TSPL2040 => 'Lifecycle 2040 Fund',
-    TSPL2030 => 'Lifecycle 2030 Fund',
-    TSPL2020 => 'Lifecycle 2020 Fund',
-    TSPLINCOME => 'Lifecycle Income Fund',
-    TSPGFUND => 'Government Securities Investment Fund',
-    TSPFFUND => 'Fixed Income Index Investment Fund',
-    TSPCFUND => 'Common Stock Index Investment Fund',
-    TSPSFUND => 'Small Capitalization Stock Index Investment Fund',
-    TSPIFUND => 'International Stock Index Investment Fund' );
+    L2050    => 'Lifecycle 2050 Fund',
+    L2040    => 'Lifecycle 2040 Fund',
+    L2030    => 'Lifecycle 2030 Fund',
+    L2020    => 'Lifecycle 2020 Fund',
+    LINCOME  => 'Lifecycle Income Fund',
+    G        => 'Government Securities Investment Fund',
+    F        => 'Fixed Income Index Investment Fund',
+    C        => 'Common Stock Index Investment Fund',
+    S        => 'Small Capitalization Stock Index Investment Fund',
+    I        => 'International Stock Index Investment Fund' );
 
 sub methods { return (tsp => \&tsp) }
 
 {
-	my @labels = qw/name nav date isodate currency method last close/;
-
-	sub labels { return (tsp => \@labels); }
+  my @labels = qw/name date isodate currency close/;
+  sub labels { return (tsp => \@labels); }
 }
 
 # ==============================================================================
 sub tsp {
-	my $quoter = shift;
-	my @symbols = @_;
+  my $quoter = shift;
+  my @symbols = @_;
 
-	# Make sure symbols are requested
-	##CAN exit more gracefully - add later##
+  return unless @symbols;
 
-	return unless @symbols;
+  my(%info, %fundrows);
+  my($ua, $reply, $row, $te, $ts, $second_row);
 
-	# Local Variables
-	my(%info, %fundrows);
-	my($ua, $reply, $row, $te, $ts, $second_row);
+  $ua = $quoter->user_agent;
+  $reply = $ua->request(GET $TSP_URL);
+  return unless ($reply->is_success);
+  $te = HTML::TableExtract->new( headers =>
+      ["Date", values %TSP_FUND_COLUMNS] );
 
-	$ua = $quoter->user_agent;
-	$reply = $ua->request(GET $TSP_URL);
-	return unless ($reply->is_success);
-	$te = HTML::TableExtract->new( headers =>
-		["Date", values %TSP_FUND_COLUMNS] );
+  $te->parse($reply->content);
 
-	$te->parse($reply->content);
+  # First row is newest data, older data follows, maybe there
+  # should be some way to get it (in addition to the second_row "close")
+  $ts = $te->first_table_found
+    || die 'TSP data table not recognised';
+  $row = $ts->row(0);
+  $second_row = $ts->row(1);
 
-	# First row is newest data, older data follows, maybe there
-	# should be some way to get it (in addition to the second_row "close")
-        $ts = $te->first_table_found
-          || die 'TSP data table not recognised';
-        $row = $ts->row(0);
-	$second_row = $ts->row(1);
+  # Make a hash that maps the order the columns are in
+  for(my $i=1; my $key = each %TSP_FUND_COLUMNS ; $i++) {
+    $fundrows{$key} = $i;
+  }
+  
+  foreach (@symbols) {
+    my $symbol = uc $_;
 
-	# Make a hash that maps the order the columns are in
-	for(my $i=1; my $key = each %TSP_FUND_COLUMNS ; $i++) {
-	    $fundrows{$key} = $i;
-	}
-
-	foreach (@symbols) {
-	    # Ignore case when looking up the data.  Preserve case
-	    # when storing the symbol name in the info array.
-	    my $tmp = uc $_;
-	    $tmp = uc sprintf("TSP%sfund", substr($tmp,0,1))
-	      if (index("GFCSI", substr($tmp,0,1)) >= 0);
-		if (index("LINCOME", substr($tmp,0,7)) >= 0)
-		{
-			$tmp = uc sprintf("TSP%sfund", substr($tmp,0,7));
-		} elsif (index("L", substr($tmp,0,1)) >= 0) {
-			$tmp = uc sprintf("TSP%sfund", substr($tmp,0,5));
-		}
-
-	    if(exists $fundrows{$tmp}) {
-		$info{$_, 'success'} = 1;
-
-		$info{$_, 'method'} = 'tsp';
-		$info{$_, 'currency'} = 'USD';
-		$info{$_, 'source'} = $TSP_MAIN_URL;
-		$info{$_, 'symbol'} = $_;
-		$info{$_, 'name'} = $TSP_FUND_NAMES{$tmp};
-		($info{$_, 'nav'} = $$row[$fundrows{$tmp}]) =~ s/[^0-9]*([0-9.,]+).*/$1/s;
-		$info{$_, 'last'} = $info{$_, 'nav'};
-		($info{$_, 'close'} = $second_row->[$fundrows{$tmp}]) =~ s/[^0-9]*([0-9.,]+).*/$1/s;
-		$quoter->store_date(\%info, $_, {usdate => $$row[0]});
-	    } else {
-		$info{$_, 'success'} = 0;
-		$info{$_, 'errormsg'} = "Fund name unknown";
-	    }
-	}
-	return %info if wantarray;
-	return \%info;
+    if(exists $fundrows{$symbol}) {
+      $info{$_, 'success'} = 1;
+      $info{$_, 'name'} = $TSP_FUND_NAMES{$symbol};
+      $quoter->store_date(\%info, $_, {usdate => $$row[0]});
+      ($info{$_, 'last'} = $second_row->[$fundrows{$symbol}]) =~ s/[^0-9]*([0-9.,]+).*/$1/s;
+      $info{$_, 'currency'} = 'USD';
+      $info{$_, 'method'} = 'tsp';
+      $info{$_, 'source'} = $TSP_MAIN_URL;
+      $info{$_, 'symbol'} = $_;
+    } 
+    else {
+      $info{$_, 'success'} = 0;
+      $info{$_, 'errormsg'} = "Fund name unknown";
+    }
+  }
+  return %info if wantarray;
+  return \%info;
 }
 1;
 
@@ -189,17 +172,13 @@ The quote symbols are
 
 The following labels may be returned by Finance::Quote::TSP :
 
-    name        eg. "Common Stock Index Investment Fund"
+    name        eg. "Lifecycle 2050 Fund"
     date        latest date, eg. "21/02/10"
     isodate     latest date, eg. "2010-02-21"
-    last        latest price, eg. "16.1053"
-    close       previous day's price
-    nav         same as "last"
+    last        latest available price, eg. "16.1053"
     currency    "USD"
     method      "tsp"
-
-C<nav> is the same as C<last> since the funds are quoted at their net asset
-value.
+    source      TSP URL
 
 =head1 SEE ALSO
 

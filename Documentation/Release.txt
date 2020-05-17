@@ -1,0 +1,16 @@
+Procedure for a CPAN release
+----------------------------
+
+* FINALIZE DEVELOPMENT
+** finalize dev branch merges
+** check for debug code in modules
+** Modify Changelog
+** Add missing authors to dist.ini (use git shortlog -s -n -e and select everyone with at least 2 commits)
+** push all commits up to github
+** dzil build - build a new release
+** dzil test - test it out
+* RELEASE
+** dzil release - upload to cpan, tweet and mail :)
+** Update the website ! update htdocs/index.html file
+** upload to sourceforge @ https://sourceforge.net/projects/finance-quote/files/finance-quote/
+sftp ecocode,finance-quote@web.sourceforge.net

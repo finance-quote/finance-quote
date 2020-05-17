@@ -22,8 +22,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-#    02111-1307, USA
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+#    02110-1301, USA
 #
 #
 # This code derived from Padzensky's work on package Finance::YahooQuote,
@@ -86,11 +86,12 @@ sub aex {
   if ($reply->is_success) {
 
     # Write retreived data to temp file for debugging
-    use POSIX;
-    my $filename = tmpnam();
+    use File::Temp;
+    my ($tmp_fh, $filename) = File::Temp::tempfile();
     open my $fw, ">", $filename or die "$filename: $!";
     print $fw $reply->content;
     close $fw;
+    close $tmp_fh;
 
     # Open reply to read lins
     open FP, "<", \$reply->content or die "Unable to read data: $!";

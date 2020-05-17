@@ -10,13 +10,13 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 67;
+plan tests => 75;
 
 my $q = Finance::Quote->new();
 
 #List of stocks to fetch. Feel free to change this during testing
 my @stocks =
-    ( "SUZLON.BO", "ANDHRABANK.BO", "RECLTD.NS", "AMZN", "SOLB.BR", "^DJI", "BEL20.BR", "INGDIRECTFNE.BC", "AENA.MC" );
+    ( "SUZLON.BO", "ANDHRABANK.BO", "RECLTD.NS", "AMZN", "SOLB.BR", "^DJI", "BEL20.BR", "INGDIRECTFNE.BC", "AENA.MC", "CFR.JO" );
 
 my %quotes = $q->fetch( "yahoo_json", @stocks );
 ok( %quotes, "Data returned" );
@@ -57,6 +57,9 @@ foreach my $stock (@stocks) {
         ok( $quotes { $stock, "currency" } eq 'INR', 'Bombay stocks have currency INR' ) if $stock =~ /\.BO$/ ;
         ok( $quotes { $stock, "currency" } eq 'EUR', 'Barcelona stocks have currency EUR' ) if $stock =~ /\.BC$/ ;
         ok( $quotes { $stock, "currency" } eq 'EUR', 'Madrid stocks have currency EUR' ) if $stock =~ /\.MC$/ ;
+
+        # currency for .JO (Johannesburg Stock Exchange) stocks
+        ok( $quotes { $stock, "currency" } eq 'ZAR', 'Johannesburg stocks have currency ZAR' ) if $stock =~ /\.JO$/ ;
 
         # print "Date: $date ";
     }

@@ -13,8 +13,12 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-#    02111-1307, USA
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+#    02110-1301, USA
+
+# 2019-12-01: Added additional labels for net and p_change. Set
+#             close to previous close as returned in the JSON.
+#             Bruce Schuck (bschuck at asgard hyphen systems dot com)
 
 package Finance::Quote::AlphaVantage;
 
@@ -25,17 +29,19 @@ require 5.005;
 use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
-use Time::HiRes qw(usleep clock_gettime);
 
 # Alpha Vantage recommends that API call frequency does not extend far
 # beyond ~1 call per second so that they can continue to deliver
 # optimal server-side performance:
 #   https://www.alphavantage.co/support/#api-key
 our @alphaqueries=();
-my $maxQueries = { quantity =>20 , seconds => 65}; # no more than x queries per y seconds
+my $maxQueries = { quantity =>5 , seconds => 60}; # no more than x
+                                                  # queries per y
+                                                  # seconds, based on
+                                                  # https://www.alphavantage.co/support/#support
 
 my $ALPHAVANTAGE_URL =
-    'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&datatype=json';
+    'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&datatype=json';
 my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
 
 my %currencies_by_suffix = (
@@ -96,6 +102,7 @@ my %currencies_by_suffix = (
     '.MA'  => "EUR",    # 		Madrid
     '.VA'  => "EUR",    # 		Valence
     '.ST'  => "SEK",    # Sweden		Stockholm
+    '.STO' => "SEK",    # Sweden		Stockholm
     '.HE'  => "EUR",    # Finland		Helsinki
     '.S'   => "CHF",    # Switzerland	Zurich
     '.TW'  => "TWD",    # Taiwan		Taiwan Stock Exchange
@@ -117,8 +124,10 @@ sub methods {
              nasdaq       => \&alphavantage,
              vanguard     => \&alphavantage,
     );
+}
 
-    our @labels = qw/date isodate open high low close volume last/;
+{
+    my @labels = qw/date isodate open high low close volume last net p_change/;
 
     sub labels {
         return ( alphavantage => \@labels, );
@@ -127,18 +136,18 @@ sub methods {
 
 sub sleep_before_query {
     # wait till we can query again
-    my $q = $maxQueries->{quantity};
+    my $q = $maxQueries->{quantity}-1;
     if ( $#alphaqueries >= $q ) {
-        my $time_since_x_queries = clock_gettime()-$alphaqueries[$q];
+        my $time_since_x_queries = time()-$alphaqueries[$q];
         # print STDERR "LAST QUERY $time_since_x_queries\n";
         if ($time_since_x_queries < $maxQueries->{seconds}) {
-            my $sleeptime = ($maxQueries->{seconds} - $time_since_x_queries) * 1000000;
+            my $sleeptime = ($maxQueries->{seconds} - $time_since_x_queries) ;
             # print STDERR "SLEEP $sleeptime\n";
-            usleep( $sleeptime );
+            sleep( $sleeptime );
             # print STDERR "CONTINUE\n";
         }
     }
-    unshift @alphaqueries, clock_gettime();
+    unshift @alphaqueries, time();
     pop @alphaqueries while $#alphaqueries>$q; # remove unnecessary data
     # print STDERR join(",",@alphaqueries)."\n";
 }
@@ -150,6 +159,7 @@ sub alphavantage {
     my $quantity = @stocks;
     my ( %info, $reply, $url, $code, $desc, $body );
     my $ua = $quoter->user_agent();
+    my $launch_time = time();
 
     foreach my $stock (@stocks) {
 
@@ -169,11 +179,14 @@ sub alphavantage {
 
         my $get_content = sub {
             sleep_before_query();
+            my $time=int(time()-$launch_time);
+            # print STDERR "Query at:".$time."\n";
             $reply = $ua->request( GET $url);
 
             $code = $reply->code;
             $desc = HTTP::Status::status_message($code);
             $body = $reply->content;
+            # print STDERR "AlphaVantage returned: $body\n";
         };
 
         &$get_content();
@@ -192,8 +205,8 @@ sub alphavantage {
         }
 
         my $try_cnt = 0;
-        while (($try_cnt < 5) && ($json_data->{'Information'})) {
-            # print STDERR "INFORMATION:".$json_data->{'Information'}."\n";
+        while (($try_cnt < 5) && ($json_data->{'Note'})) {
+            # print STDERR "NOTE:".$json_data->{'Note'}."\n";
             # print STDERR "ADDITIONAL SLEEPING HERE !";
             sleep (20);
             &$get_content();
@@ -208,57 +221,42 @@ sub alphavantage {
             next;
         }
 
-        if (!$json_data->{'Meta Data'}) {
+        my $quote = $json_data->{'Global Quote'};
+        if ( !$quote ) {
             $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } = ( $json_data->{'Information'} || "No useable data returned" ) ;
-            next;
-        }
-
-        my $last_refresh = $json_data->{'Meta Data'}->{'3. Last Refreshed'}; # when market is open this returns an isodate + time, otherwise only the isodate
-        $last_refresh = substr($last_refresh,0,10);  # remove time if returned
-        if ( !$last_refresh ) {
-            $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } = "json_data doesn't contain Last Refreshed";
-            next;
-        }
-        my $isodate = substr( $last_refresh, 0, 10 );
-        if ( !$json_data->{'Time Series (Daily)'} ) {
-            $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } = "json_data doesn't contain Time Series hash";
-            next;
-        }
-        if ( !$json_data->{'Time Series (Daily)'}->{$last_refresh} ) {
-            $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } = "json_data doesn't contain latest refresh data in Time Series hash";
-            next;
-        }
-
-        my %ts = %{ $json_data->{'Time Series (Daily)'}->{$last_refresh} };
-        if ( !%ts ) {
-            $info{ $stock, 'success' }  = 0;
-            $info{ $stock, 'errormsg' } = 'Could not extract Time Series data';
+            $info{ $stock, 'errormsg' } = "json_data doesn't contain Global Quote";
             next;
         }
 
         # %ts holds data as
         #  {
-        #     '1. open'     151.5400,
-        #     '2. high'     151.5900,
-        #     '3. low'      151.5300,
-        #     '4. close'    151.5900,
-        #     '5. volume'   57620
+        #     "Global Quote": {
+        #         "01. symbol": "SOLB.BR",
+        #         "02. open": "104.2000",
+        #         "03. high": "104.9500",
+        #         "04. low": "103.4000",
+        #         "05. price": "104.0000",
+        #         "06. volume": "203059",
+        #         "07. latest trading day": "2019-11-29",
+        #         "08. previous close": "105.1500",
+        #         "09. change": "-1.1500",
+        #         "10. change percent": "-1.0937%"
+        #     }
         # }
 
         $info{ $stock, 'success' } = 1;
-        $info{ $stock, 'symbol' }  = $json_data->{'Meta Data'}->{'2. Symbol'};
-        $info{ $stock, 'open' }    = $ts{'1. open'};
-        $info{ $stock, 'close' }   = $ts{'4. close'};
-        $info{ $stock, 'last' }    = $ts{'4. close'};
-        $info{ $stock, 'high' }    = $ts{'2. high'};
-        $info{ $stock, 'low' }     = $ts{'3. low'};
-        $info{ $stock, 'volume' }  = $ts{'5. volume'};
+        $info{ $stock, 'success' }  = 1;
+        $info{ $stock, 'symbol' }   = $quote->{'01. symbol'};
+        $info{ $stock, 'open' }     = $quote->{'02. open'};
+        $info{ $stock, 'high' }     = $quote->{'03. high'};
+        $info{ $stock, 'low' }      = $quote->{'04. low'};
+        $info{ $stock, 'last' }     = $quote->{'05. price'};
+        $info{ $stock, 'volume' }   = $quote->{'06. volume'};
+        $info{ $stock, 'close' }    = $quote->{'08. previous close'};
+        $info{ $stock, 'net' }      = $quote->{'09. change'};
+        $info{ $stock, 'p_change' } = $quote->{'10. change percent'};
         $info{ $stock, 'method' }  = 'alphavantage';
-        $quoter->store_date( \%info, $stock, { isodate => $isodate } );
+        $quoter->store_date( \%info, $stock, { isodate => $quote->{'07. latest trading day'} } );
 
         # deduce currency
         if ( $stock =~ /(\..*)/ ) {

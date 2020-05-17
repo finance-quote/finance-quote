@@ -18,8 +18,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-#    02111-1307, USA
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+#    02110-1301, USA
 #
 #
 # This code derived from Padzensky's work on package Finance::YahooQuote,
@@ -171,18 +171,22 @@ sub new {
 
   # If we get an empty new(), or one starting with -defaults,
   # then load up the default methods.
-  if (!@reqmodules or $reqmodules[0] eq "-defaults") {
+
+  if ( !@reqmodules or $reqmodules[0] eq "-defaults" ) {
     shift(@reqmodules) if (@reqmodules);
+
     # Default modules
+
     @modules = qw/AEX AIAHK AlphaVantage ASEGR ASX BMONesbittBurns
-            BSERO Bourso Cdnfundlibrary Citywire CSE Currencies Deka
-            DWS FTPortfolios Fidelity FidelityFixed FinanceCanada Fool
-            FTfunds HU GoldMoney HEX IndiaMutual LeRevenu
-            ManInvestments Morningstar MorningstarJP MStaruk NZX
-            Platinum SEB SIXfunds SIXshares StockHouseCanada TSP TSX
-            Tdefunds Tdwaterhouse Tiaacref TNetuk Troweprice Trustnet
-            Union USFedBonds VWD ZA Cominvest Finanzpartner YahooJSON
-            YahooYQL ZA_UnitTrusts/; }
+        BSERO Bourso Cdnfundlibrary Citywire CSE Currencies Deka
+        DWS FTPortfolios Fidelity FidelityFixed FinanceCanada Fool
+        FTfunds HU GoldMoney HEX IEXCloud IndiaMutual LeRevenu
+        ManInvestments Morningstar MorningstarAU MorningstarCH
+        MorningstarJP MStaruk NZX Platinum Oslobors SEB SIXfunds
+        SIXshares StockHouseCanada TSP TSX Tdefunds Tdwaterhouse
+        Tiaacref TNetuk Troweprice Trustnet Union USFedBonds VWD ZA
+        Cominvest Finanzpartner YahooJSON YahooYQL ZA_UnitTrusts/;
+  }
 
   $this->_load_modules(@modules,@reqmodules);
 
@@ -270,9 +274,9 @@ sub currency {
     if ( !$json_data || $json_data->{'Error Message'} ) {
       return undef;
     }
-#     print "Failed: " . $json_data->{'Information'} . "\n" if (($try_cnt < 5) && ($json_data->{'Information'}));
-    sleep (20) if (($try_cnt < 5) && ($json_data->{'Information'}));
-  } while (($try_cnt < 5) && ($json_data->{'Information'}));
+#     print "Failed: " . $json_data->{'Note'} . "\n" if (($try_cnt < 5) && ($json_data->{'Note'}));
+    sleep (20) if (($try_cnt < 5) && ($json_data->{'Note'}));
+  } while (($try_cnt < 5) && ($json_data->{'Note'}));
 
   my $exchange_rate = $json_data->{'Realtime Currency Exchange Rate'}->{'5. Exchange Rate'};
 
@@ -323,7 +327,7 @@ sub currency_lookup {
   my $param_errors = 0;
   for my $key ( keys %params ) {
     if ( ! exists $valid_params{$key} ) {
-      warn "Invalid parameter: ${key}";
+      warn "Invalid parameter: $key";
       $param_errors++;
     }
   }
@@ -743,26 +747,26 @@ sub store_date
     $this_month = $month;
     $year_specified = 0;
 
-    # Proces the inputs
-    if (defined $piecesref->{isodate}) {
+    # Process the inputs
+    if ((defined $piecesref->{isodate}) && ($piecesref->{isodate})) {
       ($year, $month, $day) = ($piecesref->{isodate} =~ m/(\d+)\W+(\w+)\W+(\d+)/);
       $year += 2000 if $year < 100;
       $year_specified = 1;
-#      printf ("ISO Date %s: Year %d, Month %s, Day %d\n", $piecesref->{isodate}, $year, $month, $day);
+#      printf "ISO Date %s: Year %d, Month %s, Day %d\n", $piecesref->{isodate}, $year, $month, $day;
     }
 
-    if (defined $piecesref->{usdate}) {
+    if ((defined $piecesref->{usdate}) && ($piecesref->{usdate})) {
       ($month, $day, $year) = ($piecesref->{usdate} =~ /(\w+)\W+(\d+)\W+(\d+)/);
       $year += 2000 if $year < 100;
       $year_specified = 1;
-#      printf ("US Date %s: Month %s, Day %d, Year %d\n", $piecesref->{usdate}, $month, $day, $year);
+#      printf "US Date %s: Month %s, Day %d, Year %d\n", $piecesref->{usdate}, $month, $day, $year;
     }
 
-    if (defined $piecesref->{eurodate}) {
-      ($day, $month, $year) = ($piecesref->{eurodate} =~ /(\d+)\W+(\w+)\W+(\d+)/);
+    if ((defined $piecesref->{eurodate}) && ($piecesref->{eurodate})) {
+        ($day, $month, $year) = ($piecesref->{eurodate} =~ /(\d+)\W+(\w+)\W+(\d+)/);
       $year += 2000 if $year < 100;
       $year_specified = 1;
-#      printf ("Euro Date %s: Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year);
+#      printf "Euro Date %s: Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year;
     }
 
     if (defined ($piecesref->{year})) {
