@@ -1,5 +1,5 @@
 Finance::Quote Hackers Guide
-Paul Fenwick <pjf@cpan.org>, May 2000
+Original Author: Paul Fenwick <pjf@cpan.org>, May 2000
 
 $Version$
 
@@ -7,16 +7,18 @@ $Version$
 ====================
 
 	1. Introduction
-	2. How to write a Finance::Quote module.
-		2.1. The package name.
-		2.2. The methods() subroutine.
-		2.3. The functions specified by methods().
-		2.4. Currency.
-		2.5. Thngs to avoid.
-		2.6. Using your new module.
-	3. How to contribute your module to the world.
-	4. How to find out more?
-	5. How to join the mailing lists?
+        2. Setup a Development Environment
+	3. How to write a Finance::Quote module
+		3.1. The package name.
+		3.2. The methods() subroutine.
+		3.3. The functions specified by methods().
+		3.4. Currency.
+		3.5. Thngs to avoid.
+		3.6. Using your new module.
+	4. How to contribute your module to the world
+	5. How to find out more
+	6. How to join the mailing lists
+
 
 1. Introduction
 ===============
@@ -28,7 +30,56 @@ to the Finance::Quote library.
 
 This guide assumes that you are familiar with perl.
 
-2. How to write a Finance::Quote module
+
+2. Setup a Development Environment
+==================================
+
+To develop and test modules, you need a clone of the Finance-Quote git repo, a
+recent version of perl, and the Dist::Zilla module and its dependencies.  The 
+following steps provide a recipe for setup.
+
+  A. Clone the git repo
+  
+    $ git clone https://github.com/finance-quote/finance-quote.git
+  
+  B. (Optional) Install latest stable copy of perl in ~/perl5
+  
+    $ curl -L https://install.perlbrew.pl | bash
+    $ echo "source ~/perl5/perlbrew/etc/bashrc" >> ~/.bash_profile     # or the equivalent for your shell
+    $ perlbrew --notest install perl-5.28.1                            # --notest is risky, but significant speeds installation
+    $ perlbrew switch perl-5.28.1
+    $ perlbrew install-cpanm
+    $ cpanm install Dist::Zilla
+    
+    # inside the finance-quote directory
+  
+    $ dzil authordeps --missing | cpanm --notest
+    $ dzil listdeps --missing | cpanm --notest
+  
+  C. Test out finance-quote
+  
+    # Light-weight test mode that skips all online tests
+
+    $ dzil test
+  
+
+    # To run all the skipped tests, you need three environment variables:
+    #  TEST_AUTHOR          - when set, tests are run to check for required modules
+    #  ONLINE_TEST          - when set, online tests are executed
+    #  ALPHAVANTAGE_API_KEY - free API key available from https://www.alphavantage.co
+    #
+    # Using bash syntax to set environment variables
+
+    $ cpanm Test::Pod Test::Pod::Coverage Test::Kwalitee Test::Perl::Critic
+    $ TEST_AUTHOR=1 ONLINE_TEST=1 ALPHAVANTAGE_API_KEY=<YOUR API KEY> dzil test
+
+
+    # To do an online test for one module 
+
+    $ ONLINE_TEST=1 dzil run prove -lv t/iexcloud.t
+
+
+3. How to write a Finance::Quote module
 =======================================
 
 Finding a source of information, and writing code to parse and interpret
@@ -36,16 +87,16 @@ that information is a difficult task.  As such, we've aimed to make
 writing a Finance::Quote module as easy as possible.  There are only
 a few simple rules you need to follow:
 
-2.1. The package name.
-----------------------
+3.1. The package name
+---------------------
 Finance::Quote expects that its loadable modules will be in the
 Finance::Quote namespace somewhere.  Hence, if you were writing
 a module called "DodgyBank" that returned information on DodgyBank's
 managed funds, a reasonable name for that module would be
 Finance::Quote::DodgyBank.
 
-2.2. The methods() subroutine.
-------------------------------
+3.2. The methods() subroutine
+-----------------------------
 Your module must have a subroutine named methods().  This function will
 be called by the Finance::Quote harness when it loads your module, and
 is used to determine which methods your module provides.  The methods()
@@ -98,8 +149,8 @@ where the information is coming from.  In the second, failover methods mean
 that many different functions could be used to fetch the stock information,
 not just the one you have defined.
 
-2.3 The functions specified by methods().
------------------------------------------
+3.3 The functions specified by methods()
+----------------------------------------
 The functions referred to by methods() will be passed a Finance::Quote
 object when called, and a list of zero or more symbol names.  The
 Finance::Quote object provides the following ready-to-use methods:
@@ -167,7 +218,7 @@ It is also very very strongly recommended that you place your module's
 name in the {$stock,"source"} field.  This allows others to check where
 information was obtained, and to use it appropriately.
 
-2.4. Currency
+3.4. Currency
 -------------
 Finance::Quote has support for multiple currencies and for currency
 conversion.  As long as you provide a little bit of information about
@@ -214,7 +265,7 @@ to use the defaults, but also add some of your own:
 In the example above, the default fields would be available for currency
 conversion, but the "commission" field would also be converted.
 
-2.5. Dates
+3.5. Dates
 ----------
 
 Do not parse dates directly in your module.  Instead you should use
@@ -233,7 +284,7 @@ function this way:
 See the documentation in Quote.pm for more information.
 
 
-2.6. Things to avoid
+3.6. Things to avoid
 --------------------
 Some sources of information will provide more stock information than
 requested.  Some code may rely upon your code only returning information
@@ -241,7 +292,7 @@ about the stocks that the caller requested.  As such, you should
 never return information about stocks that were not requested, even
 if you fetch and/or process that information.
 
-2.7. Using your new module
+3.7. Using your new module
 --------------------------
 Using your new module is easy.  Normally when using Finance::Quote you'd
 do something like the following:
@@ -270,29 +321,36 @@ little advantages over the fetch() method:
 This mainly exists to maintain compatibility with previous versions of
 Finance::Quote.
 
-3. How to contribute your module to the world.
-==============================================
-If you'd like others to use your module, then send a post to
 
-	<finance-quote-devel@sourceforge.net> 
+4. How to contribute your module to the world
+=============================================
 
-to get in touch with the other finance-quote developers and maintainers.
-You can also submit your module using the patch manager at:
+Contributions to Finance-Quote are best presented as pull requests on GitHub.com.  
 
-	http://sourceforge.net/project/?group_id=4232
+  A. Create a GitHub account and sign-in
+  B. Go to https://github.com/finance-quote/finance-quote
+  C. Click "Fork" in the upper-right corner
+  D. Commit your new module and other code changes to the fork
+  E. Click "New Pull Request" on https://github.com/finance-quote/finance-quote
+  F. Click "Compare Across Forks"
+  G. Select the appropriate commits and create the merge request
 
-4. How to find out more?
-========================
-The Finance::Quote webpage is located at:
 
-	http://finance-quote.sourceforge.net/
+Contact developers at finance-quote-devel@sourceforge.net to discuss
+new modules, ask questions, or get help opening a merge request.
 
-You are welcome to make use of the tools at:
 
-	http://sourceforge.net/project/?group_id=4232
+5. How to find out more
+=======================
+The Finance::Quote GitHub page is located at
 
-5. How to join the mailing lists?
-=================================
+  https://github.com/finance-quote/finance-quote
+
+and contains information about the project and links to older SourceForge
+documentation.
+
+6. How to join the mailing lists
+================================
 
 There are two mailing lists for Finance::Quote.  These can both be accessed
 from:

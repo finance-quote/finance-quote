@@ -1,13 +1,16 @@
 #!/usr/bin/perl -w
 
-#  MStaruk.pm
+#  MorningstarCH.pm
 #
-#  Obtains quotes for UK Unit Trusts from http://morningstar.co.uk/ - please
+#  Obtains quotes for CH Unit Trusts from http://morningstar.ch/ - please
 #  refer to the end of this file for further information.
 #
-#  author: Martin Sadler (martinsadler@users.sourceforge.net)
+#  author: Manuel Friedli (manuel@fritteli.ch)
 #
-#  version: 0.1 Initial version - 01 April 2013
+#  version: 0.1 Initial version - 02 March 2019
+#
+#  This file is heavily based on MStaruk.pm by Martin Sadler
+#  (martinsadler@users.sourceforge.net), version 0.1, 01 April 2013
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,14 +29,14 @@
 #
 
 
-package Finance::Quote::MStaruk;
+package Finance::Quote::MorningstarCH;
 require 5.005;
 
 use strict;
 use warnings;
 
 # URLs
-use vars qw($VERSION $MSTARUK_NEXT_URL $MSTARUK_LOOK_UP $MSTARUK_MAIN_URL);
+use vars qw($VERSION $MSTARCH_NEXT_URL $MSTARCH_LOOK_UP $MSTARCH_MAIN_URL);
 
 use LWP::Simple;
 use LWP::UserAgent;
@@ -42,26 +45,24 @@ use HTTP::Cookies;
 
 # VERSION
 
-$MSTARUK_MAIN_URL   =   "http://www.morningstar.co.uk";
-$MSTARUK_LOOK_UP    =   "http://www.morningstar.co.uk/uk/funds/SecuritySearchResults.aspx?search=";
-$MSTARUK_NEXT_URL	=	"http://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=";
+$MSTARCH_MAIN_URL   =	"http://www.morningstar.ch";
+$MSTARCH_LOOK_UP    =	"http://www.morningstar.ch/ch/funds/SecuritySearchResults.aspx?search=";
+$MSTARCH_NEXT_URL   =	"http://www.morningstar.ch/ch/funds/snapshot/snapshot.aspx?id=";
 
 # FIXME -
 
-sub methods { return (mstaruk => \&mstaruk_fund,
-		      			ukfunds => \&mstaruk_fund); }
+sub methods { return (morningstarch => \&morningstarch_fund); }
 
 {
     my @labels = qw/name currency last date time price nav source iso_date method net p_change success errormsg/;
 
-    sub labels { return (mstaruk => \@labels,
-			 				ukfunds => \@labels); }
+    sub labels { return (morningstarch => \@labels); }
 }
 
 #
 # =======================================================================
 
-sub mstaruk_fund  {
+sub morningstarch_fund  {
     my $quoter = shift;
     my @symbols = @_;
 
@@ -96,7 +97,7 @@ sub mstaruk_fund  {
 
 # perform the look-up - if not found, return with error
 
-        my $webdoc  = get($MSTARUK_LOOK_UP.$code);
+        my $webdoc  = get($MSTARCH_LOOK_UP.$code);
         if (!$webdoc)
         {
 	        # serious error, report it and give up
@@ -106,7 +107,7 @@ sub mstaruk_fund  {
 		    next;
 	    }
 	    $fundquote {$code, "symbol"} = $code;
-	    $fundquote {$code, "source"} = $MSTARUK_MAIN_URL;
+	    $fundquote {$code, "source"} = $MSTARCH_MAIN_URL;
 
 # Find name by regexp
 
@@ -143,7 +144,7 @@ sub mstaruk_fund  {
 
 # Now need to look-up next page using $next_url
 
-        $webdoc  = get($MSTARUK_MAIN_URL.$nexturl);
+        $webdoc  = get($MSTARCH_MAIN_URL.$nexturl);
         if (!$webdoc)
         {
 	        # serious error, report it and give up
@@ -157,7 +158,7 @@ sub mstaruk_fund  {
 
 		my ($currency, $date, $price, $pchange);
 		if ($webdoc =~
-		m[<td class="line heading">NAV<span class="heading"><br />([0-9]{2}/[0-9]{2}/[0-9]{4})</span>.*([A-Z]{3}).([0-9\.]+).*>([0-9\.\-]+)] )
+		m[<td class="line heading">NAV<span class="heading"><br />([0-9]{2}\.[0-9]{2}\.[0-9]{4})</span>.*([A-Z]{3}).([0-9\,\.]+).*>([0-9\,\.\-]+)%?] )
         {
 
             $date = $1;
@@ -175,6 +176,7 @@ sub mstaruk_fund  {
             $pchange = -0.00;
 			# ... and continue
 		}
+		$pchange =~ s/,/./;
 		$fundquote {$code, "p_change"} = $pchange;	# set %-change
 
 		if (!defined($date)) {
@@ -197,6 +199,7 @@ sub mstaruk_fund  {
 			$fundquote {$code,"errormsg"} = "Error - failed to find a price";
 			next;
 		}
+		$price =~ s/,/./;
 
 		if (!defined($currency)) {
 	    	# serious error, report it and give up
@@ -210,15 +213,6 @@ sub mstaruk_fund  {
 # Calculate net change - it's not included in the morningstar factsheets
 
 		my $net = ($price * $pchange) / 100 ;
-
-# deal with GBX pricing of UK unit trusts
-
-		if ($currency eq "GBX")
-		{
-			$currency = "GBP" ;
-			$price = $price / 100 ;
-            $net   = $net   / 100 ;
-		}
 
 		# now set prices and currency
 
@@ -235,7 +229,7 @@ sub mstaruk_fund  {
 
 		$fundquote {$code, "time"} = $time; # set time
 
-		$fundquote {$code, "method"} = "mstaruk";   # set method
+		$fundquote {$code, "method"} = "morningstarch";   # set method
 
 	}
 
@@ -246,45 +240,36 @@ sub mstaruk_fund  {
 
 =head1 NAME
 
-Finance::Quote::mstaruk - Obtain UK Unit Trust quotes from morningstar.co.uk.
+Finance::Quote::morningstarch - Obtain CH Unit Trust quotes from morningstar.ch.
 
 =head1 SYNOPSIS
 
     $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("mstaruk","<isin> ...");  # Only query morningstar.co.uk using ISINs
-    %info = Finance::Quote->fetch("ukfunds","<isin> ...");  # Failover to other sources
+    %info = Finance::Quote->fetch("morningstarch","<isin> ...");  # Only query morningstar.ch using ISINs
 
 =head1 DESCRIPTION
 
 This module fetches information from the MorningStar Funds service,
-http://morningstar.com/uk/. There are many UK Unit Trusts and OEICs quoted,
-as well as many Offshore Funds and Exhange Traded Funds (ETFs). It converts
-any funds quoted in GBX (pence) to GBP, dividing the price by 100 in the
-process.
+http://morningstar.com/ch/.
 
 Funds are identified by their ISIN code.
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "mstaruk" in the argument
+also possible to load it explicity by placing "morningstarch" in the argument
 list to Finance::Quote->new().
 
-Information obtained by this module may be covered by funds.ft.com
-terms and conditions See http://morningstar.co.ukfor details.
+Information obtained by this module may be covered by Morningstar
+terms and conditions See http://morningstar.ch/ for details.
 
 =head2 Stocks And Indices
 
-This module provides both the "mstaruk" and "ukfunds" fetch methods for
-fetching UK and Offshore Unit Trusts and OEICs prices and other information
-from funds.ft.com. Please use the "ukfunds" fetch method if you wish to have
-failover with future sources for UK and Offshore Unit Trusts and OEICs - the
-author has plans to develop Finance::Quote modules for other source providing
-unit trust prices. Using the "mstaruk" method will guarantee
-that your information only comes from the morningstar.co.uk website.
+This module provides the "morningstarch" fetch method for fetching CH Unit
+Trusts and OEICs prices and other information from morningstar.ch.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::mstaruk :
+The following labels may be returned by Finance::Quote::morningstarch :
 
     name, currency, last, date, time, price, nav, source, method,
     iso_date, net, p_change, success, errormsg.
@@ -292,16 +277,17 @@ The following labels may be returned by Finance::Quote::mstaruk :
 
 =head1 SEE ALSO
 
-Morning Star websites, http://morningstar.co.uk
+Morning Star websites, http://morningstar.ch
 
 
 =head1 AUTHOR
 
-Martin Sadler, E<lt>martinsadler@users.sourceforge.netE<gt>
+Manuel Friedli, E<lt>manuel@fritteli.chE<gt>
+Based heavily on the work of Martin Sadler E<lt>martinsadler@users.sourceforge.netE<gt>, many thanks!
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2010 by Martin Sadler
+Copyright (C) 2019 by Manuel Friedli
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,
