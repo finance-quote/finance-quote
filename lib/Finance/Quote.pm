@@ -185,7 +185,8 @@ sub new {
         MorningstarJP MStaruk NZX Platinum Oslobors SEB SIXfunds
         SIXshares StockHouseCanada TSP TSX Tdefunds Tdwaterhouse
         Tiaacref TNetuk Troweprice Trustnet Union USFedBonds VWD ZA
-        Cominvest Finanzpartner YahooJSON YahooYQL ZA_UnitTrusts/;
+        Cominvest Finanzpartner YahooJSON YahooYQL ZA_UnitTrusts
+        NSEIndia BSEIndia/;
   }
 
   $this->_load_modules(@modules,@reqmodules);
