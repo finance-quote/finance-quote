@@ -36,15 +36,15 @@ sub nseindia {
     my $quoter = shift;
     my @symbols = @_;
     return unless @symbols;
-    
+
     my (%info, $errormsg, $fh, $ua, $url, $reply);
-    
+
     $ua = $quoter->user_agent;
     # Disable redirects - server redirects instead of 404.
     $ua->requests_redirectable([]);
 
     my %mnames = ('01' => 'JAN', '02' => 'FEB', '03' => 'MAR', '04' => 'APR', '05' => 'MAY', '06' => 'JUN',
-          '07' => 'JUL', '08' => 'AUG', '09' => 'SEP', '10' => 'OCT', '11' => 'NOV', '12' => 'DEC');  
+          '07' => 'JUL', '08' => 'AUG', '09' => 'SEP', '10' => 'OCT', '11' => 'NOV', '12' => 'DEC');
     # Try to fetch last 10 days
     for (my ($days, $now) = (0, time()); $days < 10; $days++) {
         # Ex: https://archives.nseindia.com/content/historical/EQUITIES/2020/APR/cm23APR2020bhav.csv.zip

@@ -35,9 +35,9 @@ sub bseindia {
     my $quoter = shift;
     my @symbols = @_;
     return unless @symbols;
-    
+
     my (%info, $errormsg, $fh, $ua, $url, $reply);
-    
+
     $ua = $quoter->user_agent;
     # Set the ua to be blank. Server blocks default useragent.
     $ua->agent('');
