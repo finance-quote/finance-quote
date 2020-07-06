@@ -50,10 +50,15 @@ $TSP_MAIN_URL=("http://www.tsp.gov");
 # Better not to hard code them.
 #
 %TSP_FUND_COLUMNS = (
+    L2065   => "L 2065",
+    L2060   => "L 2060",
+    L2055   => "L 2055",
     L2050   => "L 2050",
+    L2045   => "L 2045",
     L2040   => "L 2040",
+    L2035   => "L 2035",
     L2030   => "L 2030",
-    L2020   => "L 2020",
+    L2025   => "L 2025",
     LINCOME => "L INCOME",
     G       => "G FUND",
     F       => "F FUND",
@@ -62,10 +67,15 @@ $TSP_MAIN_URL=("http://www.tsp.gov");
     I       => "I FUND" );
 
 %TSP_FUND_NAMES = (
+    L2065    => 'Lifecycle 2065 Fund',
+    L2060    => 'Lifecycle 2060 Fund',
+    L2055    => 'Lifecycle 2055 Fund',
     L2050    => 'Lifecycle 2050 Fund',
+    L2045    => 'Lifecycle 2045 Fund',
     L2040    => 'Lifecycle 2040 Fund',
+    L2035    => 'Lifecycle 2035 Fund',
     L2030    => 'Lifecycle 2030 Fund',
-    L2020    => 'Lifecycle 2020 Fund',
+    L2025    => 'Lifecycle 2025 Fund',
     LINCOME  => 'Lifecycle Income Fund',
     G        => 'Government Securities Investment Fund',
     F        => 'Fixed Income Index Investment Fund',
@@ -162,8 +172,15 @@ The quote symbols are
     G          government securities fund
     I          international stock fund
     S          small cap stock fund
-    L2020      lifecycle fund year 2020
+    L2025      lifecycle fund year 2025
     L2030      lifecycle fund year 2030
+    L2035      lifecycle fund year 2035
+    L2040      lifecycle fund year 2040
+    L2045      lifecycle fund year 2045
+    L2050      lifecycle fund year 2050
+    L2055      lifecycle fund year 2055
+    L2060      lifecycle fund year 2060
+    L2065      lifecycle fund year 2065
     L2040      lifecycle fund year 2040
     L2050      lifecycle fund year 2050
     LINCOME    lifecycle income fund
