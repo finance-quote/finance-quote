@@ -181,8 +181,6 @@ The quote symbols are
     L2055      lifecycle fund year 2055
     L2060      lifecycle fund year 2060
     L2065      lifecycle fund year 2065
-    L2040      lifecycle fund year 2040
-    L2050      lifecycle fund year 2050
     LINCOME    lifecycle income fund
 
 =head1 LABELS RETURNED
