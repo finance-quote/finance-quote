@@ -296,7 +296,9 @@ if ( $exchange_rate < 0.001 ) {
         local $^W = 0;
         return undef unless ( $exchange_rate + 0 );
     }
-    $exchange_rate = int( 100000000 / $inverse_rate + .5 ) / 100000000;
+    if ($inverse_rate != 0.0) {
+        $exchange_rate = int( 100000000 / $inverse_rate + .5 ) / 100000000;
+    }
 }
 
   return ($exchange_rate * $amount);
