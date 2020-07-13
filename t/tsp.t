@@ -11,7 +11,7 @@ my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 my $quoter = Finance::Quote->new();
 
-my @symbols =  qw/C F G I S L2020 L2030 L2040 L2050 LINCOME/;
+my @symbols =  qw/C F G I S L2025 L2030 L2035 L2040 L2045 L2050 L2055 L2060 L2065 LINCOME/;
 
 plan tests => 14*(1+$#symbols)+3;
 
