@@ -81,30 +81,14 @@ the empty list may be returned, or undef in a scalar context.
 
 # INSTALLATION
 
-Please note that the Github repository is not meant for general users
-of Finance::Quote for installation.
+To install this module, run the following commands:
 
-If you downloaded the Finance-Quote-N.NN.tar.gz tarball from CPAN
-(N.NN is the version number, ex: Finance-Quote-1.47.tar.gz),
-run the following commands:
-    
-    tar xzf Finance-Quote-1.47.tar.gz
-    cd Finance-Quote-1.47.tar.gz
     perl Makefile.PL
-    make         
-    make test    
-    make install 
-    
-If you have the CPAN module installed:
-Using cpanm (Requires App::cpanminus) 
-                 
-    cpanm Finance::Quote
+    make
+    make test
+    make install
 
-or 
-Using CPAN shell
-
-    perl -MCPAN -e shell
-    install Finance::Quote
+For more detailed instructions, please see the INSTALL file.
 
 # SUPPORT AND DOCUMENTATION
 
@@ -235,7 +219,7 @@ code (ie "AUD") or both. You can pass either a scalar or regular expression
 as a search value - scalar values are matched by substring while regular
 expressions are matched as-is (no changes are made to the expression).
 
-See [Finance::Quote::Currencies::fetch\_live\_currencies](https://metacpan.org/pod/Finance::Quote::Currencies::fetch_live_currencies) (and the
+See [Finance::Quote::Currencies::fetch\_live\_currencies](https://metacpan.org/pod/Finance%3A%3AQuote%3A%3ACurrencies%3A%3Afetch_live_currencies) (and the
 `t/currencies.t` test file) for a way to make sure that the stored
 currency list is up to date.
 
