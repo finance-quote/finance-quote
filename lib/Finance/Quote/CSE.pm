@@ -156,7 +156,7 @@ This module retrieves information from the Colombo Stock Exchange (CSE)
 in Sri Lanka http://www.cse.lk.
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "cse" in the argument
+also possible to load it explicitly by placing "cse" in the argument
 list to Finance::Quote->new().
 
 =head1 LABELS RETURNED

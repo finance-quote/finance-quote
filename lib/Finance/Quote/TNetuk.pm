@@ -373,7 +373,7 @@ process.
 Funds are identified by their ISIN code.
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "tnetuk" in the argument
+also possible to load it explicitly by placing "tnetuk" in the argument
 list to Finance::Quote->new().
 
 Information obtained by this module may be covered by tnetuk.com

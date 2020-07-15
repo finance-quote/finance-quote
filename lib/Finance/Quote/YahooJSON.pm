@@ -228,7 +228,7 @@ Finance::Quote::YahooJSON - Obtain quotes from Yahoo Finance through JSON call
 This module fetches information from Yahoo as JSON
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "YahooJSON" in the argument
+also possible to load it explicitly by placing "YahooJSON" in the argument
 list to Finance::Quote->new().
 
 This module provides the "yahoo_json" fetch method.

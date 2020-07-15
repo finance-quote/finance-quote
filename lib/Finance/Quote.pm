@@ -1193,7 +1193,7 @@ conversion rates.
  Copyright 1998, Dj Padzensky
  Copyright 1998, 1999 Linas Vepstas
  Copyright 2000, Yannick LE NY (update for Yahoo Europe and YahooQuote)
- Copyright 2000-2001, Paul Fenwick (updates for ASX, maintainence and release)
+ Copyright 2000-2001, Paul Fenwick (updates for ASX, maintenance and release)
  Copyright 2000-2001, Brent Neal (update for TIAA-CREF)
  Copyright 2000 Volker Stuerzl (DWS and VWD support)
  Copyright 2000 Keith Refson (Trustnet support)
