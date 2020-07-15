@@ -227,7 +227,7 @@ https://morningstar.com.au/ to provide quotes on Australian managed funds in AUD
 Funds are identified by their APIR code.
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "morningstarau" in the argument
+also possible to load it explicitly by placing "morningstarau" in the argument
 list to Finance::Quote->new().
 
 =head2 Managed Funds
