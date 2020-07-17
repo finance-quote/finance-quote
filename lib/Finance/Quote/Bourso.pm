@@ -322,7 +322,7 @@ sub bourso {
 
 =head1 NAME
 
-Finance::Quote::Bourso Obtain quotes from Boursorama.
+Finance::Quote::Bourso - Obtain quotes from Boursorama.
 
 =head1 SYNOPSIS
 
