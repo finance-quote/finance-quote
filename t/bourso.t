@@ -21,7 +21,7 @@ my %stocks = ( "MP-802941" => "FR0000441677",       # Fund, EUR, Covéa Actions 
                "1rPSOLB" => "BE0003470755",         # Stock, EUR, Euronext Paris, SOLVAY
                "1rPCNP" => "FR0000120222",          # Stock, EUR, Euronext Paris, CNP ASSURANCES
                "1rPFR0010371401" => "FR0010371401", # Bond, EUR, Euronext Paris, FRENCH REPUBLIC 4% 25/10/38 EUR
-               "1rAHX70B" => "NL0011806336",        # Warrant, EUR, Euronext Paris, SAMSUNG ELEC/BNP WT
+               "2rPDE000CX0QLH6" => "DE000CX0QLH6", # Warrant, EUR, Euronext Paris, GOLD/CITI WT OPEN
                "1rPCAC" => "FR0003500008",          # Index, Pts, Paris, CAC40
                "1rTBX4" => "FR0010411884",          # Tracker, EUR, LYXOR ETF BX4
 );

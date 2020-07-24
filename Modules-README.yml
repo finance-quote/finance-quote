@@ -121,7 +121,7 @@
 - module: Bourso.pm
   state: working
   added:
-  changed: 2020-03~31
+  changed: 2020-07~24
   removed:
   urls: https://www.boursorama.com/cours/$stock
   apikey: false
@@ -135,7 +135,7 @@
     - 1rPSOLB
     - 1rPCNP
     - 1rPFR0010371401
-    - 1rAHX70B
+    - 2rPDE000CX0QLH6
     - 1rPCAC
     - 1rTBX4
 #
