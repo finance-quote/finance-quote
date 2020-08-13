@@ -10,6 +10,7 @@
 #    Copyright (C) 2006, Dominique Corbex <domcox@sourceforge.net>
 #    Copyright (C) 2008, Bernard Fuentes <bernard.fuentes@gmail.com>
 #    Copyright (C) 2009, Erik Colson <eco@ecocode.net>
+#    Copyright (C) 2018, Jean-Marie Pacquet <jmpacquet@sourceforge.net>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,6 +33,10 @@
 #
 #
 # Changelog
+#
+# 2018-04-08  Jean-Marie Pacquet
+#
+#     * (1.49) Major site change (html 5)
 #
 # 2014-01-12  Arnaud Gardelein
 #
@@ -68,31 +73,29 @@ use strict;
 
 package Finance::Quote::Bourso;
 
-use vars qw( $Bourso_URL);
+use vars qw( $Bourso_URL );
 
-use LWP::UserAgent;
 use HTTP::Request::Common;
-use HTML::TreeBuilder
-    ;    # Boursorama doesn't put data in table elements anymore but uses <div>
+use HTML::TreeBuilder;
+use Encode qw(decode);
+use JSON qw( decode_json );
+use utf8;
 
 # VERSION
 
-my $Bourso_URL = 'http://www.boursorama.com/recherche/index.phtml';
+my $Bourso_URL = 'https://www.boursorama.com/cours/';
 
 sub methods {
-    return ( france => \&bourso,
-             bourso => \&bourso,
-             europe => \&bourso
+    return ( bourso => \&bourso
     );
 }
+
 {
     my @labels =
         qw/name last date isodate p_change open high low close volume currency method exchange/;
 
     sub labels {
-        return ( france => \@labels,
-                 bourso => \@labels,
-                 europe => \@labels
+        return ( bourso => \@labels
         );
     }
 }
@@ -106,218 +109,77 @@ sub bourso_to_number {
 sub bourso {
     my $quoter = shift;
     my @stocks = @_;
-    my ( %info, $reply, $url, $te, $ts, $row, $style );
     my $ua = $quoter->user_agent();
+    my %info;
 
-    $url = $Bourso_URL;
+    foreach my $stock (@stocks) {
+        eval {
+          my $query = $Bourso_URL . $stock;
+          my $reply = $ua->request(GET $query);
+          my $body  = decode('UTF-8', $reply->content);
+          my $root  = HTML::TreeBuilder->new_from_content($body);
 
-    foreach my $stocks (@stocks) {
-        my $queryUrl =
-              $url
-            . join( '', "?q=", $stocks )
-            . "&search[type]=rapide&search[categorie]=STK&search[bourse]=country:33";
-        $reply = $ua->request( GET $queryUrl);
+          my $div   = $root->look_down(_tag => 'div',
+                                       class => qr/^c-faceplate/);
 
-        # print "URL=".$queryUrl."\n";
+          my $name  = $div->look_down(_tag => 'a', class => qr/^c-faceplate__company-link/)->as_text();
+          $name =~ s/^\s+|\s+$//g;
+          utf8::encode($name);
 
-        if ( $reply->is_success ) {
+          my $currency = $div->look_down(_tag => 'span', class => qr/^c-faceplate__price-currency/)->as_text();
+          $currency =~ s/^\s+|\s+$//g;
 
-            # print $reply->content;
-            $info{ $stocks, "success" } = 1;
+          my ($date, $last, $symbol, $low, $high, $close, $exchange, $volume, $net);
 
-            my $tree = HTML::TreeBuilder->new_from_content( $reply->content );
+          if ($div->attr('data-ist-init')) {
+              my $json  = JSON::decode_json($div->attr('data-ist-init'));
+              $date     = $json->{'tradeDate'};
+              $last     = $json->{'last'};
+              $symbol   = $json->{'symbol'};
+              $low      = $json->{'low'};
+              $high     = $json->{'high'};
+              $close    = $json->{'previousClose'};
+              $exchange = $json->{'exchangeCode'};
+              $volume   = $json->{'totalVolume'};
+              $net      = $json->{'variation'};
+          }
+          else {
+              # date captures more than the date, but the regular expression below extracts just the date
+              $date    = $div->look_down(_tag => 'div', class => qr/^c-faceplate__real-time/)->as_text();
+              $last    = $div->look_down(_tag => 'span', class => qr/^c-instrument c-instrument--last/)->as_text();
+              $symbol  = $stock;
+          }
 
-            # retrieve SYMBOL
-            my @symbolline = $tree->look_down( 'class', 'seoinline fv-isin ellipsis' );
+          $info{$stock, 'symbol'}   = $symbol;
+          $info{$stock, 'name'}     = $name;
+          $info{$stock, 'currency'} = $currency;
+          $info{$stock, 'last'}     = $last;
+          $info{$stock, 'high'}     = $high if $high;
+          $info{$stock, 'low'}      = $low if $low;
+          $info{$stock, 'close'}    = $close if $close;
+          $info{$stock, 'exchange'} = $exchange if $exchange;
+          $info{$stock, 'volume'}   = $volume if $volume;
+          $info{$stock, 'net'}      = $net if $net;
 
-            unless (@symbolline) {
-                $info{ $stocks, "success" }  = 0;
-                $info{ $stocks, "errormsg" } = "Stock name $stocks not found";
-                next;
-            }
+          # 2020-07-17 17:03:45
+          $quoter->store_date(\%info, $symbol, {isodate => $1}) if $date =~ m|([0-9]{4}-[0-9]{2}-[0-9]{2})|;
 
-            my $symbol = ( $symbolline[0]->content_list )[0];
-            ($symbol) = ( $symbol =~ m/(\w+)/ );
-            $info{ $stocks, "symbol" } = $symbol;
+          # dd/mm/yyyy
+          $quoter->store_date(\%info, $symbol, {eurodate => $1}) if $date =~ m|([0-9]{2}/[0-9]{2}/[0-9]{4})|;
 
-            # retrieve NAME
-            my @nameline = $tree->look_down( 'class', 'fv-name' );
-
-            unless (@nameline) {
-                $info{ $stocks, "success" } = 0;
-                $info{ $stocks, "errormsg" } =
-                    "Stock name $stocks not retrievable";
-                next;
-            }
-
-            my $name = $nameline[0]->as_text;
-            $info{ $stocks, "name" } = $name;
-
-            # set method
-            $info{ $stocks, "method" } = "bourso";
-
-            #holds table data
-            my %tempinfo;
-
-            # retrieve other data
-            my $infoclass = ( $tree->look_down( 'class', 'fv-extras' ) )[0];
-            unless ($infoclass) {
-                my $opcvm =
-                    ( $tree->look_down( 'class', 'opcvm-partners block' ) )[0];
-                unless ($opcvm) {
-                    $info{ $stocks, "success" } = 0;
-                    $info{ $stocks, "errormsg" } =
-                        "$stocks retrieval not supported.";
-                    next;
-                }
-
-                # the stock is a delayed OPCVM
-
-                my $infoelem =
-                    ( $tree->look_down( 'id', 'quote-infos-page' ) )[0];
-                $infoelem =
-                    ( $infoelem->look_down( 'class', 'q-details span-1-2' ) )
-                    [0];
-
-                my @rows = $infoelem->look_down( '_tag', 'tr' );
-                foreach my $i ( 0 .. $#rows ) {
-                    my $row = $rows[$i];
-                    unless ( $row->attr('class') ) {
-                        next;
-                    }
-
-                    my @cells     = $row->look_down( '_tag', 'td' );
-                    my $keytext   = ( $cells[0] )->as_text;
-                    my $valuetext = ( $cells[2] )->as_text;
-
-                    $tempinfo{$keytext} = $valuetext;
-                }
-            }
-            else {
-                # regular stock
-
-                my $infoelem;
-                my $quote_infos_page =
-                    ( $tree->look_down( 'id', 'quote-infos-page' ) )[0];
-                $infoelem = ( $quote_infos_page->look_down(
-                                                   'class', 'q-details span-1-2'
-                              )
-                )[0];
-                $infoelem = ( $quote_infos_page->look_down( 'class', 'bd' ) )[0]
-                    if ( !defined $infoelem );    # needed for warrants
-
-                my @rows = $infoelem->look_down( '_tag', 'tr' );
-                foreach my $i ( 0 .. $#rows ) {
-                    my $row   = $rows[$i];
-                    my @cells = $row->look_down( '_tag', 'td' );
-                    my $j     = 0;
-                    if ( $cells[0]->attr('rowspan') ) {
-                        $j = 1;
-                    }
-                    if ( $cells[0]->attr('colspan') ) {
-                        next;
-                    }
-
-                    my $keytext   = ( $cells[$j] )->as_text;
-                    my $valuetext = ( $cells[ $j + 1 ] )->as_text;
-
-                    $tempinfo{$keytext} = $valuetext;
-                }
-            }
-
-            foreach my $key ( keys %tempinfo ) {
-
-                # print "$key -> $tempinfo{$key}\n";
-
-            ASSIGN: for ($key) {
-
-                    # OPCVM
-                    /Valeur liquidative/ && do {
-                        my ( $last, $currency ) =
-                            ( $tempinfo{$key}
-                            =~ m/(\d+(?:\s\d+)*(?:\.\d+)?)(?:\(c\))?(?:\s+(\w+))?/
-                            );
-                        $last = bourso_to_number($last);
-                        $info{ $stocks, "last" }     = $last;
-                        $info{ $stocks, "currency" } = $currency;
-                    };
-                    /Date/ && do {
-                        $info{ $stocks, "date" } = $tempinfo{$key};
-                        $quoter->store_date( \%info, $stocks,
-                                     { eurodate => $info{ $stocks, "date" } } );
-                    };
-                    /Variation Veille/ && do {
-                        $info{ $stocks, "p_change" } = $tempinfo{$key};
-                    };
-
-                    # REGULAR STOCK
-                    /Cours/ && do {
-                        my ( $last, $currency ) =
-                            ( $tempinfo{$key}
-                            =~ m/(\d+(?:\s\d+)*(?:\.\d+)?)(?:\(c\))?(?:\s+(\w+))?/
-                            );
-                        $last = bourso_to_number($last);
-                        $info{ $stocks, "last" } = $last;
-                        $info{ $stocks, "currency" } =
-                            $currency || "EUR";    # defaults to EUR
-                        my $exchange = $key;
-                        $exchange =~ s/.*Cours\s*(\w.*\w)\s*/$1/
-                            ;    # the exchange is in the $key here
-                        $info{ $stocks, "exchange" } = $exchange;
-                    };
-                    /Variation/ && do {
-                        $info{ $stocks, "p_change" } = $tempinfo{$key};
-                    };
-                    /Dernier .change/ && do {
-                        my ( $day, $month, $year ) =
-                            ( $tempinfo{$key} =~ m|(\d\d)/(\d\d)/(\d\d)| );
-                        $year += 2000;
-                        $info{ $stocks, "date" } = sprintf "%02d/%02d/%04d",
-                            $day, $month, $year;
-                        $quoter->store_date( \%info, $stocks,
-                                     { eurodate => $info{ $stocks, "date" } } );
-                    };
-                    /Volume/ && do {
-                        $info{ $stocks, "volume" } =
-                            bourso_to_number( $tempinfo{$key} );
-                    };
-                    /Ouverture/ && do {
-                        $info{ $stocks, "open" } =
-                            bourso_to_number( $tempinfo{$key} );
-                    };
-                    /Haut/ && do {
-                        $info{ $stocks, "high" } =
-                            bourso_to_number( $tempinfo{$key} );
-                    };
-                    /Bas/ && do {
-                        $info{ $stocks, "low" } =
-                            bourso_to_number( $tempinfo{$key} );
-                    };
-                    /Cl.ture veille/ && do {
-                        $info{ $stocks, "previous" } =
-                            bourso_to_number( $tempinfo{$key} );
-                    };
-                    /Valorisation/ && do {
-                        $info{ $stocks, "cap" } = $tempinfo{$key};
-                        $info{ $stocks, "cap" } =~ s/[A-Z\s]//g
-                            ; # remove spaces and 'M' (millions) and currency (when not EUR)
-                        $info{ $stocks, "cap" }
-                            =~ tr/,/./;    # point instead of comma
-                        $info{ $stocks, "cap" }
-                            *= 1000000;    # valorisation is in millions
-                    };
-                }
-            }
-            $tree->delete;
-        }
-        else {
-            $info{ $stocks, "success" }  = 0;
-            $info{ $stocks, "errormsg" } = "Error retreiving $stocks ";
+          $info{$stock, 'method' } = 'bourso'; 
+          $info{$stock, 'success'} = 1;
+        };
+        if ($@) {
+          $info{$stock, 'success'}  = 0;
+          $info{$stock, 'errormsg'} = 'Failed to retrieve quote';
         }
     }
+
     return wantarray() ? %info : \%info;
     return \%info;
 }
+
 1;
 
 =head1 NAME
@@ -331,33 +193,27 @@ Finance::Quote::Bourso - Obtain quotes from Boursorama.
     $q = Finance::Quote->new;
 
     %info = Finance::Quote->fetch("bourso","ml");  # Only query Bourso
-    %info = Finance::Quote->fetch("france","af"); # Failover to other sources OK.
 
 =head1 DESCRIPTION
 
 This module fetches information from the "Paris Stock Exchange",
-http://www.boursorama.com. All stocks are available.
+https://www.boursorama.com. All stocks are available.
 
 This module is loaded by default on a Finance::Quote object. It's
 also possible to load it explicitly by placing "bourso" in the argument
 list to Finance::Quote->new().
 
-This module provides both the "bourso" and "france" fetch methods.
-Please use the "france" fetch method if you wish to have failover
-with future sources for French stocks. Using the "bourso" method
-will guarantee that your information only comes from the Paris Stock Exchange.
-
 Information obtained by this module may be covered by www.boursorama.com
-terms and conditions See http://www.boursorama.com/ for details.
+terms and conditions See https://www.boursorama.com/ for details.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::Bourso :
-name, last, date, p_change, open, high, low, close, nav,
-volume, currency, method, exchange, symbol.
+The following labels will be returned by Finance::Quote::Bourso : name, last,
+symbol, date, isodate, method, currency.  For some symbols, additional
+information is available: exchange, high, low, close, net, volume.
 
 =head1 SEE ALSO
 
-Boursorama (french web site), http://www.boursorama.com
+Boursorama (french web site), https://www.boursorama.com
 
 =cut

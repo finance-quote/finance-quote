@@ -2,87 +2,72 @@
 use strict;
 use Test::More;
 use Finance::Quote;
+use Scalar::Util qw(looks_like_number);
 
 if ( not $ENV{ONLINE_TEST} ) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 73;
-
-# Test Bourso functions.
+plan tests => 133;
 
 my $q = Finance::Quote->new();
-
-# my stocks = stock, fund, warrant, bond, indice
-my @stocks = ( "FR0000441677",    # Fund
-               "AF",              # Stock, EUR, Nyse Euronext
-               "MSFT",            # Stock, USD, NASDAQ
-               "SOLB",            # Stock, EUR, BRUXELLES
-               "CNP",             # Stock, EUR, Nyse Euronext
-               "FR0010371401",    # Bond
-               "FR0012773687",    # Warrant
-               "FR0003500008",    # Index
-               "LU0207947044",    # Bond
-);
 
 # Bourso tests need to cover all the possible cases:
 #
 #    Name		What		Test Case
 #
-#    cours-action	Stock		AF
-#    cours-obligation	Bond		FR0010371401
-#    opcvm/opcvm	Fund		FR0000441677
-#    cours-warrant	Warrant		FR0012773687
-#    cours-indice	Index		FR0003500008
+#    action	        Stock		1rPAF, MSFT, FF11-SOLB, 1rPSOLB, 1rPCNP
+#    obligation	        Bond		1rPFR0010371401
+#    opcvm	        Fund		MP-802941
+#    warrant	        Warrant		1rAHX70B - expired & removed from tests
+#    indice	        Index		1rPCAC
+#    tracker            Tracker         1rTBX4
 
-my $year     = ( localtime() )[5] + 1900;
-my $lastyear = $year - 1;
+my %stocks = ( "MP-802941" => "EUR",       # Fund, EUR, Covéa Actions Asie C
+               "1rPAF" => "EUR",           # Stock, EUR, Euronext Paris, AIR FRANCE - KLM
+               "MSFT" => "USD",            # Stock, USD, NASDAQ, MICROSOFT
+               "FF11-SOLB" => "EUR",       # Stock, EUR, Euronext Bruxelles, SOLVAY
+               "1rPSOLB" => "EUR",         # Stock, EUR, Euronext Paris, SOLVAY
+               "1rPCNP" => "EUR",          # Stock, EUR, Euronext Paris, CNP ASSURANCES
+               "2rPDE000CX0QLH6" => "EUR", # Warrant
+               "1rPFR0010371401" => "%",   # Bond, EUR, Euronext Paris, FRENCH REPUBLIC 4% 25/10/38 EUR
+               "1rPCAC" => "Pts",          # Index, Pts, Paris, CAC40
+               "1rTBX4" => "EUR",          # Tracker, EUR, LYXOR ETF BX4
+);
 
-my %quotes;
+my $year = ( localtime() )[5] + 1900;
 
-#my %quotes = $q->fetch("bourso", @stocks);
-#ok(%quotes);
-
-# Check that the name, last, currency and date are defined for all of the stocks.
-foreach my $stock (@stocks) {
+foreach my $stock (keys %stocks) {
     eval {
-        %quotes = $q->fetch( "bourso", $stock );
-        ok( %quotes, "$stock \%quotes defined" );
-
-        my $last = $quotes{ $stock, "last" };
-        ok( $last > 0, "$stock last ($last) > 0" );
-        ok( length( $quotes{ $stock, "name" } ),   "$stock name is defined" );
-        ok( $quotes{ $stock, "symbol" } =~ /[A-Z]{2}\d{10}/, "$stock symbol is defined as ".$quotes{ $stock, "symbol" } );
-        ok( $quotes{ $stock, "success" }, "$stock returned success" );
-        ok(    # indexes are quoted in percents
-            ( $stock eq "FR0003500008" )
-                || (    ( $stock eq "MSFT" )
-                     && ( $quotes{ $stock, "currency" } eq "USD" ) )
-                || ( $quotes{ $stock, "currency" } eq "EUR" ),
-            "Index is quoted in percents"
-        );
-
-    SKIP:
-        {
-            skip "date is not defined for warrants", 2
-                if ( $stock eq "FR0012773687" );
-            ok( substr( $quotes{ $stock, "isodate" }, 0, 4 ) == $year
-                    || substr( $quotes{ $stock, "isodate" }, 0, 4 )
-                    == $lastyear,
-                "$stock isodate defined"
-            );
-            ok( substr( $quotes{ $stock, "date" }, 6, 4 ) == $year
-                    || substr( $quotes{ $stock, "date" }, 6, 4 ) == $lastyear,
-                "$stock date defined"
-            );
+        my %quotes = $q->fetch( "bourso", $stock );
+        ok(%quotes, "$stock \%quotes defined" );
+        ok(length $quotes{$stock, "name"} > 0, "$stock name length > 0");
+        ok($quotes{$stock, "last"} > 0, "$stock last > 0");
+        ok(length $quotes{$stock, "symbol"} > 0, "$stock symbol length > 0");
+        ok(length $quotes{$stock, "date"} > 0, "$stock date length > 0");
+      
+        my $quote_year = substr($quotes{$stock, "isodate"}, 0, 4 );
+        ok ($quote_year == $year || $quote_year - 1 == $year, "$stock isodate year check");
+        
+        ok($quotes{$stock, "method"} eq "bourso", "$stock method is bourso");
+        ok($quotes{$stock, "currency"} eq $stocks{$stock}, "$stock currency as expected");
+        
+        if (exists $quotes{$stock, "high"}) {
+            ok(length $quotes{$stock, "exchange"}, "$stock exchange length > 0");
+            ok($quotes{$stock, "high"} > 0, "$stock high > 0");
+            ok($quotes{$stock, "low"} > 0, "$stock low > 0");
+            ok($quotes{$stock, "close"} > 0, "$stock close > 0");
+            ok(looks_like_number($quotes{$stock, "net"}), "$stock net looks like a number");
+            ok(!exists $quotes{$stock, "volume"} or looks_like_number($quotes{$stock, "volume"}), "$stock volume looks like a number");
         }
+        ok( $quotes{ $stock, "success" }, "$stock returned success" );
     };
     if ($@) {
         print STDERR "Error fetching stock ", $stock, "\n", $@;
-        ok( !1 );
+        ok(!1);
     }
 }
 
 # Check that a bogus stock returns no-success.
-%quotes = $q->fetch( "bourso", "BOGUS" );
-ok( !$quotes{ "BOGUS", "success" }, "BOGUS failed correctly" );
+my %quotes = $q->fetch("bourso", "BOGUS");
+ok(!$quotes{ "BOGUS", "success" }, "BOGUS failed correctly");
