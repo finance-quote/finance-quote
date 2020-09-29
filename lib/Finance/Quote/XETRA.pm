@@ -98,7 +98,7 @@ sub xetra {
 
 =head1 NAME
 
-Finance::Quote::XETRA - Obtain quotes from XETRA (Frankfurt Stock Exchange)
+Finance::Quote::XETRA - Obtain quotes from XETRA.
 
 =head1 SYNOPSIS
 
@@ -110,7 +110,7 @@ Finance::Quote::XETRA - Obtain quotes from XETRA (Frankfurt Stock Exchange)
 
 =head1 DESCRIPTION
 
-This module fetches information from the Frankfurt Stock Exchange.
+This module fetches information from the XETRA exchange, also including ETFs.
 
 This module is loaded by default on a Finance::Quote object. It's
 also possible to load it explicitly by placing "XETRA" in the argument
