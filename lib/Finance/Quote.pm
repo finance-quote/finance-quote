@@ -180,7 +180,7 @@ sub new {
     @modules = qw/AEX AIAHK AlphaVantage ASEGR ASX BMONesbittBurns
         BSERO Bourso Cdnfundlibrary Citywire CSE Currencies Deka
         DWS FTPortfolios Fidelity FidelityFixed FinanceCanada Fool
-        FTfunds HU GoldMoney HEX IEXCloud IndiaMutual LeRevenu
+        FTfunds Fundata HU GoldMoney HEX IEXCloud IndiaMutual LeRevenu
         ManInvestments Morningstar MorningstarAU MorningstarCH
         MorningstarJP MStaruk NZX Platinum Oslobors SEB SIXfunds
         SIXshares StockHouseCanada TSP TSX Tdefunds Tdwaterhouse
