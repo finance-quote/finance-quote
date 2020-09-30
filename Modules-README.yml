@@ -2,17 +2,6 @@
 # vi: set filetype=yaml syntax=yaml noai ts=2 sw=2 ic:
 # state: working | failing | obsolete | removed
 ---
-- module: XETRA.pm
-  state: TBD
-  added: TBD
-  changed: ~
-  removed: ~
-  urls:
-  apikey: false
-  notes: ~
-  testfile: TBD
-  testcases:
-#
 - module: AEX.pm
   state: TBD
   added: TBD
@@ -698,6 +687,17 @@
   testcases:
 #
 - module: VWD.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: XETRA.pm
   state: TBD
   added: TBD
   changed: ~
