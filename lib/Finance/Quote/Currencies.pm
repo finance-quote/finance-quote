@@ -24,7 +24,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 use Encode qw(decode);
-use Data::Dumper::Perltidy;
+#use Data::Dumper::Perltidy;
 
 @EXPORT_OK = qw( known_currencies fetch_live_currencies );
 # VERSION
@@ -993,11 +993,12 @@ sub fetch_live_currencies {
   return \%result;
 }
 
-unless (caller) {
-  my $hash = fetch_live_currencies();
-  $Data::Dumper::Sortkeys = 1;
-  print Dumper $hash;
-}
+# use of D::D goes against the package testing policy
+#unless (caller) {
+  #my $hash = fetch_live_currencies();
+  #$Data::Dumper::Sortkeys = 1;
+  #print Dumper $hash;
+#}
 
 1;
 
