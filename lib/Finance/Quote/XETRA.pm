@@ -66,7 +66,7 @@ sub xetra {
         else {
             $info{ $stocks, "success" } = 0;
             $info{ $stocks, "errormsg" } = "Invalid format: use only one '.' to separate ISIN from MIC";
-            continue;
+            next;
         }
 
         my $url = $PRICE_URL . "?mic=" . $mic . "&isin=" . $isin;
