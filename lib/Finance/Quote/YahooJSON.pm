@@ -91,7 +91,7 @@ sub yahoo_json {
             if ( $json_data_count < 1 ) {
                 $info{ $stocks, "success" } = 0;
                 $info{ $stocks, "errormsg" } =
-                    "Error retrieving quote for $stocks - no listing for this name found. Please check scrip name and the two letter extension (if any)";
+                    "Error retrieving quote for $stocks - no listing for this name found. Please check symbol and the two letter extension (if any)";
 
             }
             else {
