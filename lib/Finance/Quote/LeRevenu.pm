@@ -411,7 +411,7 @@ sub lerevenu {
 
 =head1 NAME
 
-Finance::Quote::LeRevenu Obtain quotes from http://bourse.lerevenu.com.
+Finance::Quote::LeRevenu - Obtain quotes from http://bourse.lerevenu.com.
 
 =head1 SYNOPSIS
 
@@ -428,7 +428,7 @@ This module fetches information from the "Paris Stock Exchange",
 http://bourse.lerevenu.com. All stocks are available.
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "LeRevenu" in the argument
+also possible to load it explicitly by placing "LeRevenu" in the argument
 list to Finance::Quote->new().
 
 This module provides both the "lerevenu" and "france" fetch methods.

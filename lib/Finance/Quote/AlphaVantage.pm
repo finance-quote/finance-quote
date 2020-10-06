@@ -71,9 +71,11 @@ my %currencies_by_suffix = (
     '.BM'  => "EUR",    # 		Bremen
     '.D'   => "EUR",    # 		Dusseldorf
     '.F'   => "EUR",    # 		Frankfurt
+    '.FRK' => "EUR",    # 		Frankfurt
     '.H'   => "EUR",    # 		Hamburg
     '.HA'  => "EUR",    # 		Hanover
     '.MU'  => "EUR",    # 		Munich
+    '.DEX' => "EUR",    # 		Xetra
     '.ME'  => "RUB",    # Russia	Moscow
     '.SG'  => "EUR",    # 		Stuttgart
     '.DE'  => "EUR",    # 		XETRA
@@ -91,6 +93,7 @@ my %currencies_by_suffix = (
     '.MX'  => "MXP",    # Mexico
     '.NZ'  => "NZD",    # New Zealand
     '.AS'  => "EUR",    # Netherlands	Amsterdam
+    '.AMS' => "EUR",    # Netherlands	Amsterdam
     '.OL'  => "NOK",    # Norway		Oslo
     '.LM'  => "PEN",    # Peru		Lima
     '.IN'  => "EUR",    # Portugal	Lisbon
@@ -206,7 +209,7 @@ sub alphavantage {
 
         my $try_cnt = 0;
         while (($try_cnt < 5) && ($json_data->{'Note'})) {
-            # print STDERR "INFORMATION:".$json_data->{'Note'}."\n";
+            # print STDERR "NOTE:".$json_data->{'Note'}."\n";
             # print STDERR "ADDITIONAL SLEEPING HERE !";
             sleep (20);
             &$get_content();

@@ -142,7 +142,7 @@ sub bsero {
 
 =head1 NAME
 
-Finance::Quote::BSERO Obtain quotes from Bucharest Stock Exchange.
+Finance::Quote::BSERO - Obtain quotes from Bucharest Stock Exchange.
 
 =head1 SYNOPSIS
 
@@ -159,7 +159,7 @@ This module fetches information from the "Bucharest Stock Exchange"
 (Bursa de Valori Bucuresti), http://www.bvb.ro. All stocks are available.
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "BSERO" in the argument
+also possible to load it explicitly by placing "BSERO" in the argument
 list to Finance::Quote->new().
 
 This module provides both the "bsero" and "romania" fetch methods.

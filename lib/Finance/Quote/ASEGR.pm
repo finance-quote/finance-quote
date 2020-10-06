@@ -111,7 +111,7 @@ sub asegr {
 
 =head1 NAME
 
-Finance::Quote::ASEGR Obtain quotes from Athens Stock Exchange.
+Finance::Quote::ASEGR - Obtain quotes from Athens Stock Exchange.
 
 =head1 SYNOPSIS
 
@@ -128,7 +128,7 @@ This module fetches information from the "Athens Stock Exchange",
 http://www.ase.gr. All stocks are available.
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "ASEGR" in the argument
+also possible to load it explicitly by placing "ASEGR" in the argument
 list to Finance::Quote->new().
 
 This module provides both the "asegr" and "greece" fetch methods.

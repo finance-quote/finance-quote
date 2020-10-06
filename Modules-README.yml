@@ -119,15 +119,25 @@
   testcases:
 #
 - module: Bourso.pm
-  state: TBD
-  added: TBD
-  changed: ~
-  removed: ~
-  urls:
+  state: working
+  added:
+  changed: 2020-03~31
+  removed:
+  urls: https://www.boursorama.com/cours/$stock
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: bourso.t
   testcases:
+    - MP-802941
+    - 1rPAF
+    - MSFT
+    - FF11-SOLB
+    - 1rPSOLB
+    - 1rPCNP
+    - 2rPDE000CX0QLH6
+    - 1rPFR0010371401
+    - 1rPCAC
+    - 1rTBX4
 #
 - module: CSE.pm
   state: TBD
@@ -232,15 +242,20 @@
   testcases:
 #
 - module: Fidelity.pm
-  state: TBD
+  state: working
   added: TBD
-  changed: ~
+  changed: 2020-03-21
   removed: ~
   urls:
+    - https://fundresearch.fidelity.com/mutual-funds/fidelity-funds-daily-pricing-yields/download
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: fidelity.t
   testcases:
+    - FGRIX
+    - FNMIX
+    - FASGX
+    - FEQTX
 #
 - module: FidelityFixed.pm
   state: TBD
@@ -457,6 +472,22 @@
   testfile: TBD
   testcases:
 #
+- module: Oslobors.pm
+  state: working
+  added: 2020-02-06
+  changed: 2020-02-06
+  removed:
+  urls:
+    - https://www.oslobors.no/ob/servlets/components?type=table&source=feed.omff.FUNDS&view=REALTIME&columns=ITEM%2C+PRICECHANGEPCT%2C+PRICE%2C+DATE%2C+QUOTATIONCURRENCY&filter=ITEM_SECTOR%3D%3Ds
+  apikey: false
+  notes: |
+    Module to fetch mutual fund data from oslobors.no
+  testfile: oslobors.t
+  testcases:
+    - OD-HORIA.OSE
+    - DK-EUROP.OSE
+    - ST-VEKST.OSE
+#
 - module: Platinum.pm
   state: TBD
   added: TBD
@@ -539,10 +570,14 @@
     - G
     - I
     - S
-    - L2020
     - L2030
+    - L2035
     - L2040
+    - L2045
     - L2050
+    - L2055
+    - L2060
+    - L2065
     - LINCOME
 #
 - module: TSX.pm

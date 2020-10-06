@@ -70,21 +70,11 @@ sub yahoo_json {
         my $headers = $reply->headers_as_string;
         my $body    = $reply->content;
 
-#       my $handle   = undef;
-##      my $filename = "/tmp/yahoo_JSON_content.txt";
-#       my $filename = "C:\\Users\\cgood\\Documents\\yahoo_JSON_content.txt";
-#       my $encoding = ":encoding(UTF-8)";
-#       open($handle, "> $encoding", $filename)
-#             || die "$0: can't open $filename in write-open mode: $!";
-#       print $handle "[DEBUG] headers=\r\n" . $headers . "\r\nbody=\r\n" .
-#             $body;
-#       close $handle;
-
         #Response variables available:
-        #Response code: 			$code
+        #Response code: 	$code
         #Response description: 	$desc
-        #HTTP Headers:				$headers
-        #Response body				$body
+        #HTTP Headers:		$headers
+        #Response body		$body
 
         $info{ $stocks, "symbol" } = $stocks;
 
@@ -93,25 +83,20 @@ sub yahoo_json {
             #HTTP_Response succeeded - parse the data
             my $json_data = JSON::decode_json $body;
 
-            #print ref($json_data);
-            #print "size of hash:  " . keys( $json_data ) . ".\n";
+            # Requests for invalid symbols sometimes return 200 with an empty
+            # JSON result array
+            my $json_data_count
+                = scalar @{ $json_data->{'quoteResponse'}{'result'} };
 
-            #my @json_data_count dd= $json_data->{'quoteResponse'}{'result'};
+            if ( $json_data_count < 1 ) {
+                $info{ $stocks, "success" } = 0;
+                $info{ $stocks, "errormsg" } =
+                    "Error retrieving quote for $stocks - no listing for this name found. Please check symbol and the two letter extension (if any)";
 
-	    #print "[DEBUG] <<<<  $#json_data_count";
-
-            #if ( $#json_data_count != 1 ) {
-            #    $info{ $stocks, "success" } = 0;
-            #    $info{ $stocks, "errormsg" } =
-            #        "Error retrieving quote for $stocks - no listing for this name found. Please check scrip name and the two letter extension (if any)";
-
-            #}
-            #else {
+            }
+            else {
 
                 my $json_resources = $json_data->{'quoteResponse'}{'result'}[0];
-
-                #my $json_response_type =
-                 #   $json_resources->{'resource'}{classname};
 
                 # TODO: Check if $json_response_type is "Quote"
                 # before attempting anything else
@@ -193,7 +178,7 @@ sub yahoo_json {
                 $quoter->store_date( \%info, $stocks,
                                      { eurodate => $my_date } );
 
-            #}
+            }
         }
 
         #HTTP request fail
@@ -228,7 +213,7 @@ Finance::Quote::YahooJSON - Obtain quotes from Yahoo Finance through JSON call
 This module fetches information from Yahoo as JSON
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "YahooJSON" in the argument
+also possible to load it explicitly by placing "YahooJSON" in the argument
 list to Finance::Quote->new().
 
 This module provides the "yahoo_json" fetch method.

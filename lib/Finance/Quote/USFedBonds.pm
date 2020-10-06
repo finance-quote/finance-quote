@@ -168,9 +168,7 @@ sub treasury {
 
 =head1 NAME
 
-Finance::Quote::USFedBonds
-Get US Federal Bond redemption values directly from the treasury at
-www.publicdebt.treas.gov/sav/savvalue.htm
+Finance::Quote::USFedBonds - Get US Federal Bond redemption values directly from the treasury at www.publicdebt.treas.gov/sav/savvalue.htm
 
 =head1 SYNOPSIS
 

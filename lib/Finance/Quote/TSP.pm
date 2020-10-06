@@ -33,51 +33,33 @@ use strict;
 
 package Finance::Quote::TSP;
 
-use vars qw( $TSP_URL $TSP_MAIN_URL %TSP_FUND_COLUMNS %TSP_FUND_NAMES);
+use vars qw( $TSP_URL $TSP_MAIN_URL );
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
-use HTML::TableExtract;
+use POSIX;
 
 # VERSION
 
 # URLs of where to obtain information
 
-$TSP_URL = 'https://www.tsp.gov/InvestmentFunds/FundPerformance/index.html';
-$TSP_MAIN_URL=("http://www.tsp.gov");
-
-# ENHANCE-ME: The decade target funds like 2020 appear and disappear.
-# Better not to hard code them.
-#
-%TSP_FUND_COLUMNS = (
-    L2050   => "L 2050",
-    L2040   => "L 2040",
-    L2030   => "L 2030",
-    L2020   => "L 2020",
-    LINCOME => "L INCOME",
-    G       => "G FUND",
-    F       => "F FUND",
-    C       => "C FUND",
-    S       => "S FUND",
-    I       => "I FUND" );
-
-%TSP_FUND_NAMES = (
-    L2050    => 'Lifecycle 2050 Fund',
-    L2040    => 'Lifecycle 2040 Fund',
-    L2030    => 'Lifecycle 2030 Fund',
-    L2020    => 'Lifecycle 2020 Fund',
-    LINCOME  => 'Lifecycle Income Fund',
-    G        => 'Government Securities Investment Fund',
-    F        => 'Fixed Income Index Investment Fund',
-    C        => 'Common Stock Index Investment Fund',
-    S        => 'Small Capitalization Stock Index Investment Fund',
-    I        => 'International Stock Index Investment Fund' );
+$TSP_URL      = 'https://secure.tsp.gov/components/CORS/getSharePricesRaw.html';
+$TSP_MAIN_URL = 'http://www.tsp.gov';
 
 sub methods { return (tsp => \&tsp) }
 
 {
   my @labels = qw/name date isodate currency close/;
   sub labels { return (tsp => \@labels); }
+}
+
+sub format_name {
+  my $name = shift;
+  $name =~ s/ //g;
+  $name = lc($name);
+
+  return $1 if $name =~ /^(.)fund$/;
+  return $name;
 }
 
 # ==============================================================================
@@ -87,47 +69,42 @@ sub tsp {
 
   return unless @symbols;
 
-  my(%info, %fundrows);
-  my($ua, $reply, $row, $te, $ts, $second_row);
+  my %info;
 
-  $ua = $quoter->user_agent;
-  $reply = $ua->request(GET $TSP_URL);
+  # Ask for the last 7 days
+  my $startdate = strftime("%Y%m%d", localtime (time - 7*24*3600));
+  my $enddate   = strftime("%Y%m%d", localtime time);
+
+  my $ua = $quoter->user_agent;
+  my $reply = $ua->request(GET "$TSP_URL?startdate=$startdate;enddate=$enddate;Lfunds=1;InvFunds=1");
   return unless ($reply->is_success);
-  $te = HTML::TableExtract->new( headers =>
-      ["Date", values %TSP_FUND_COLUMNS] );
 
-  $te->parse($reply->content);
+  my @line = split(/\n/, $reply->content);
 
-  # First row is newest data, older data follows, maybe there
-  # should be some way to get it (in addition to the second_row "close")
-  $ts = $te->first_table_found
-    || die 'TSP data table not recognised';
-  $row = $ts->row(0);
-  $second_row = $ts->row(1);
+  return unless (@line > 1);
 
-  # Make a hash that maps the order the columns are in
-  for(my $i=1; my $key = each %TSP_FUND_COLUMNS ; $i++) {
-    $fundrows{$key} = $i;
-  }
-  
+  my @header = split(/,/, $line[0]);
+  my %column = map { format_name($header[$_]) => $_ } 0 .. $#header;
+  my @latest = split(/,/, $line[-1]);
+
   foreach (@symbols) {
-    my $symbol = uc $_;
+    my $symbol = lc $_;
 
-    if(exists $fundrows{$symbol}) {
+    if(exists $column{$symbol}) {
       $info{$_, 'success'} = 1;
-      $info{$_, 'name'} = $TSP_FUND_NAMES{$symbol};
-      $quoter->store_date(\%info, $_, {usdate => $$row[0]});
-      ($info{$_, 'last'} = $second_row->[$fundrows{$symbol}]) =~ s/[^0-9]*([0-9.,]+).*/$1/s;
+      $quoter->store_date(\%info, $_, {usdate => $latest[$column{'date'}]});
+      ($info{$_, 'last'} = $latest[$column{$symbol}]) =~ s/[^0-9]*([0-9.,]+).*/$1/s;
       $info{$_, 'currency'} = 'USD';
       $info{$_, 'method'} = 'tsp';
       $info{$_, 'source'} = $TSP_MAIN_URL;
       $info{$_, 'symbol'} = $_;
-    } 
+    }
     else {
       $info{$_, 'success'} = 0;
-      $info{$_, 'errormsg'} = "Fund name unknown";
+      $info{$_, 'errormsg'} = "Fund not found";
     }
   }
+
   return %info if wantarray;
   return \%info;
 }
@@ -135,7 +112,7 @@ sub tsp {
 
 =head1 NAME
 
-Finance::Quote::TSP Obtain fund prices for US Federal Government Thrift Savings Plan
+Finance::Quote::TSP - Obtain fund prices for US Federal Government Thrift Savings Plan
 
 =head1 SYNOPSIS
 
@@ -143,17 +120,15 @@ Finance::Quote::TSP Obtain fund prices for US Federal Government Thrift Savings 
 
     $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("tsp","c"); #get value of C "Common Stock Index Investment" Fund
+    %info = Finance::Quote->fetch("tsp","c");       #get value of C - Common Stock Index Investment Fund
+    %info = Finance::Quote->fetch("tsp","l2040");   #get value of the L2040 Lifecycle Fund
+    %info = Finance::Quote->fetch("tsp","lincome"); #get value of the LINCOME Lifecycle Fund
 
 =head1 DESCRIPTION
 
 This module fetches fund information from the "Thrift Savings Plan"
 
     http://www.tsp.gov
-
-using its fund prices page
-
-    https://www.tsp.gov/investmentfunds/shareprice/sharePriceHistory.shtml
 
 The quote symbols are
 
@@ -162,17 +137,12 @@ The quote symbols are
     G          government securities fund
     I          international stock fund
     S          small cap stock fund
-    L2020      lifecycle fund year 2020
-    L2030      lifecycle fund year 2030
-    L2040      lifecycle fund year 2040
-    L2050      lifecycle fund year 2050
-    LINCOME    lifecycle income fund
+    LX         lifecycle fund X (eg 2050 or INCOME)
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::TSP :
+The following labels are returned by Finance::Quote::TSP :
 
-    name        eg. "Lifecycle 2050 Fund"
     date        latest date, eg. "21/02/10"
     isodate     latest date, eg. "2010-02-21"
     last        latest available price, eg. "16.1053"

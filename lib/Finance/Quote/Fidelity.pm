@@ -5,6 +5,7 @@
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
 #    Copyright (C) 2000, Paul Fenwick <pjf@cpan.org>
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
+#    Copyright (C) 2020, Caleb Begly <calebbegly@gmail.com>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -38,7 +39,7 @@ use HTTP::Request::Common;
 
 # VERSION
 
-$FIDELITY_URL = ("http://activequote.fidelity.com/nav/fulllist.csv");
+$FIDELITY_URL = ("https://fundresearch.fidelity.com/mutual-funds/fidelity-funds-daily-pricing-yields/download");
 
 sub methods {return (fidelity        => \&fidelity,
                      fidelity_direct => \&fidelity);}
@@ -74,8 +75,8 @@ sub fidelity
     if ($reply->is_success) {
       foreach (split('\015?\012',$reply->content)) {
 	my @q = $quoter->parse_csv($_) or next;
-
-	$sym = $q[2] or next;
+	
+	$sym = $q[1] or next;
 	$sym =~ s/^ +//;
 
     	# Skip symbols we didn't ask for.
@@ -86,14 +87,13 @@ sub fidelity
 	($aa {$sym, "name"}    	= $q[0]) =~ s/^\s+//;
 	 $aa {$sym, "name"}    	=~ s/\s+$//;
 	 $aa {$sym, "symbol"}  	= $sym;
-	($aa {$sym, "number"}  	= $q[1]) =~ s/^\s+//;
-	($aa {$sym, "nav"}     	= $q[4]) =~ s/^\s+// 	if defined($q[4]);
-	($aa {$sym, "div"}     	= $q[5]) =~ s/^\s+// 	if defined($q[5]);
-	($aa {$sym, "net"}     	= $q[6]) =~ s/^\s+// 	if defined($q[6]);
-	($aa {$sym, "p_change"} = $q[8]) =~ s/^\s+// 	if defined($q[8]);
-	($aa {$sym, "yield"}    = $q[9]) =~ s/^\s+// 	if defined($q[9]);
-	($aa {$sym, "yield"}    = $q[17]) =~ s/^\s+// 	if defined($q[17]);
-	 $aa {$sym, "price"}    = $aa{$sym, "nav"} 	if defined($q[4]);
+	($aa {$sym, "nav"}     	= $q[2]) =~ s/^\s+// 	if defined($q[2]);
+	($aa {$sym, "div"}     	= $q[3]) =~ s/^\s+// 	if defined($q[3]);
+	($aa {$sym, "p_change"} = $q[5]) =~ s/^\s+// 	if defined($q[5]);
+	($aa {$sym, "yield"}    = $q[6]) =~ s/^\s+// 	if defined($q[6]);
+	($aa {$sym, "yield"}    = $q[7]) =~ s/^\s+// 	if defined($q[7]);
+	($aa {$sym, "yield"}    = $q[8]) =~ s/^\s+// 	if defined($q[8]);
+	 $aa {$sym, "price"}    = $aa{$sym, "nav"} 	if defined($q[2]);
 	 $aa {$sym, "success"}  = 1;
 	 $aa {$sym, "currency"} = "USD";
 	 $quoter->store_date(\%aa, $sym, {usdate => $q[19]});
@@ -110,10 +110,6 @@ sub fidelity
 =head1 NAME
 
 Finance::Quote::Fidelity - Obtain information from Fidelity Investments.
-
-=head1 NOTE NOTE NOTE NOTE NOTE
-
-This module is currently non-functional.
 
 =head1 SYNOPSIS
 
@@ -142,12 +138,10 @@ Investment's terms and conditions.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::Fidelity:
-exchange, name, number, nav, change, ask, date, yield, price.
+exchange, name, nav, p_change, date, yield, price.
 
 =head1 SEE ALSO
 
 Fidelity Investments, http://www.fidelity.com/
-
-Finance::Quote::Yahoo::USA;
 
 =cut

@@ -81,14 +81,30 @@ the empty list may be returned, or undef in a scalar context.
 
 # INSTALLATION
 
-To install this module, run the following commands:
+Please note that the Github repository is not meant for general users
+of Finance::Quote for installation.
 
+If you downloaded the Finance-Quote-N.NN.tar.gz tarball from CPAN
+(N.NN is the version number, ex: Finance-Quote-1.47.tar.gz),
+run the following commands:
+    
+    tar xzf Finance-Quote-1.47.tar.gz
+    cd Finance-Quote-1.47.tar.gz
     perl Makefile.PL
-    make
-    make test
-    make install
+    make         
+    make test    
+    make install 
+    
+If you have the CPAN module installed:
+Using cpanm (Requires App::cpanminus) 
+                 
+    cpanm Finance::Quote
 
-For more detailed instructions, please see the INSTALL file.
+or 
+Using CPAN shell
+    
+    perl -MCPAN -e shell
+    install Finance::Quote
 
 # SUPPORT AND DOCUMENTATION
 

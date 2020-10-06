@@ -48,11 +48,10 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
               DWS FTPortfolios Fidelity FidelityFixed FinanceCanada Fool
               FTfunds HU GoldMoney HEX IEXCloud IndiaMutual LeRevenu
               ManInvestments Morningstar MorningstarAU MorningstarCH
-              MorningstarJP MStaruk NZX Platinum SEB SIXfunds SIXshares
+              MorningstarJP MStaruk NZX Oslobors Platinum SEB SIXfunds SIXshares
               StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref
               TNetuk Troweprice Trustnet Union USFedBonds VWD ZA
               Cominvest Finanzpartner YahooJSON YahooYQL ZA_UnitTrusts/;
- 
 
 # Call on the Yahoo API:
 #  - "f=l1" should return a single value - the "Last Trade (Price Only)"
@@ -739,9 +738,9 @@ sub currency {
     if ( !$json_data || $json_data->{'Error Message'} ) {
       return undef;
     }
-#     print "Failed: " . $json_data->{'Information'} . "\n" if (($try_cnt < 5) && ($json_data->{'Information'}));
-    sleep (20) if (($try_cnt < 5) && ($json_data->{'Information'}));
-  } while (($try_cnt < 5) && ($json_data->{'Information'}));
+#     print "Failed: " . $json_data->{'Note'} . "\n" if (($try_cnt < 5) && ($json_data->{'Note'}));
+    sleep (20) if (($try_cnt < 5) && ($json_data->{'Note'}));
+  } while (($try_cnt < 5) && ($json_data->{'Note'}));
 
   my $exchange_rate = $json_data->{'Realtime Currency Exchange Rate'}->{'5. Exchange Rate'};
 
@@ -761,7 +760,9 @@ if ( $exchange_rate < 0.001 ) {
         local $^W = 0;
         return undef unless ( $exchange_rate + 0 );
     }
-    $exchange_rate = int( 100000000 / $inverse_rate + .5 ) / 100000000;
+    if ($inverse_rate != 0.0) {
+        $exchange_rate = int( 100000000 / $inverse_rate + .5 ) / 100000000;
+    }
 }
 
   return ($exchange_rate * $amount);
@@ -1346,7 +1347,7 @@ conversion rates.
  Copyright 1998, Dj Padzensky
  Copyright 1998, 1999 Linas Vepstas
  Copyright 2000, Yannick LE NY (update for Yahoo Europe and YahooQuote)
- Copyright 2000-2001, Paul Fenwick (updates for ASX, maintainence and release)
+ Copyright 2000-2001, Paul Fenwick (updates for ASX, maintenance and release)
  Copyright 2000-2001, Brent Neal (update for TIAA-CREF)
  Copyright 2000 Volker Stuerzl (DWS and VWD support)
  Copyright 2000 Keith Refson (Trustnet support)
