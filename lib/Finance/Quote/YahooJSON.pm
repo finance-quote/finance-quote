@@ -96,17 +96,20 @@ sub yahoo_json {
             #print ref($json_data);
             #print "size of hash:  " . keys( $json_data ) . ".\n";
 
-            #my @json_data_count dd= $json_data->{'quoteResponse'}{'result'};
+            # Requests for invalid symbols sometimes return 200 with an empty
+            # JSON result array
+            my $json_data_count
+                = scalar @{ $json_data->{'quoteResponse'}{'result'} };
 
-	    #print "[DEBUG] <<<<  $#json_data_count";
+            #print "[DEBUG] <<<<  $#json_data_count";
 
-            #if ( $#json_data_count != 1 ) {
-            #    $info{ $stocks, "success" } = 0;
-            #    $info{ $stocks, "errormsg" } =
-            #        "Error retrieving quote for $stocks - no listing for this name found. Please check scrip name and the two letter extension (if any)";
+            if ( $json_data_count < 1 ) {
+                $info{ $stocks, "success" } = 0;
+                $info{ $stocks, "errormsg" } =
+                    "Error retrieving quote for $stocks - no listing for this name found. Please check scrip name and the two letter extension (if any)";
 
-            #}
-            #else {
+            }
+            else {
 
                 my $json_resources = $json_data->{'quoteResponse'}{'result'}[0];
 
@@ -193,7 +196,7 @@ sub yahoo_json {
                 $quoter->store_date( \%info, $stocks,
                                      { eurodate => $my_date } );
 
-            #}
+            }
         }
 
         #HTTP request fail
