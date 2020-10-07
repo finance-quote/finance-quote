@@ -309,21 +309,21 @@ This function will return a isoformatted time
 
 # ENVIRONMENT
 
-Finance::Quote respects all environment that your installed
-version of LWP::UserAgent respects.  Most importantly, it
-respects the http\_proxy environment variable.
+Finance::Quote respects all environment that your installed version of
+LWP::UserAgent respects.  Most importantly, it respects the http\_proxy
+environment variable.
 
 # BUGS
 
 There are no ways for a user to define a failover list.
 
-The two-dimensional hash is a somewhat unwieldly method of passing
-around information when compared to references.  A future release
-is planned that will allow for information to be returned in a
-more flexible $hash{$stock}{$label} style format.
+The two-dimensional hash is a somewhat unwieldly method of passing around
+information when compared to references.  A future release is planned that will
+allow for information to be returned in a more flexible $hash{$stock}{$label}
+style format.
 
-There is no way to override the default behaviour to cache currency
-conversion rates.
+There is no way to override the default behaviour to cache currency conversion
+rates.
 
 # COPYRIGHT & LICENSE
 
@@ -345,11 +345,11 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or (at
 your option) any later version.
 
-Currency information fetched through this module is bound by
-Yahoo!'s terms and conditons.
+Currency information fetched through this module is bound by the terms and
+conditons of the data source.
 
-Other copyrights and conditions may apply to data fetched through this
-module.  Please refer to the sub-modules for further information.
+Other copyrights and conditions may apply to data fetched through this module.
+Please refer to the sub-modules for further information.
 
 # AUTHORS
 
@@ -398,7 +398,7 @@ Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice, Finance::Quote::Trustnet,
 Finance::Quote::USFedBonds, Finance::Quote::Union, Finance::Quote::VWD,
 Finance::Quote::YahooJSON, Finance::Quote::YahooYQL, Finance::Quote::ZA,
-Finance::Quote::ZA_UnitTrusts
+Finance::Quote::ZA\_UnitTrusts
 
 You should have received the Finance::Quote hacker's guide with this package.
 Please read it if you are interested in adding extra methods to this package.
