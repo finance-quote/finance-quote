@@ -225,7 +225,7 @@ sub alphavantage {
         }
 
         my $quote = $json_data->{'Global Quote'};
-        if ( !$quote ) {
+        if ( ! %{$quote} ) {
             $info{ $stock, 'success' } = 0;
             $info{ $stock, 'errormsg' } = "json_data doesn't contain Global Quote";
             next;

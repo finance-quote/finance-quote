@@ -16,9 +16,33 @@ my $q        = Finance::Quote->new();
 my $year     = ( localtime() )[5] + 1900;
 my $lastyear = $year - 1;
 
-my @symbols =  qw/ IBM CSCO SOLB.BR SAP.DE TD.TO LSE.L VFIAX T DIVO11.SA OGZD.IL TWTR AAPL ORCL FB CMCSA INTC NFLX TSLA NOK BAC GOOG F AXP ERIC-B.STO/;
+my @symbols =  qw/
+    IBM
+    CSCO
+    SOLB.BR
+    SAP.DE
+    TD.TO
+    LSE.L
+    VFIAX
+    T
+    DIVO11.SA
+    TWTR
+    AAPL
+    ORCL
+    FB
+    CMCSA
+    INTC
+    NFLX
+    TSLA
+    NOK
+    BAC
+    GOOG
+    F
+    AXP
+    ERCB.DE
+/;
 
-plan tests => 10*(1+$#symbols)+11;
+plan tests => 10*(1+$#symbols)+10;
 
 my %quotes = $q->alphavantage( @symbols, "BOGUS" );
 ok(%quotes);
@@ -40,12 +64,11 @@ foreach my $symbol (@symbols) {
 
 is( $quotes{ "IBM", "currency" }, 'USD' );
 is( $quotes{ "CSCO", "currency" }, 'USD' );
-is( $quotes{ "ERIC-B.STO", "currency" }, 'SEK' );
+is( $quotes{ "ERCB.DE", "currency" }, 'EUR' );
 is( $quotes{ "SOLB.BR", "currency" }, 'EUR' );
 is( $quotes{ "SAP.DE", "currency" }, 'EUR' );
 is( $quotes{ "TD.TO", "currency" }, 'CAD' );
 is( $quotes{ "LSE.L", "currency" }, 'GBP' );
 is( $quotes{ "DIVO11.SA", "currency" }, 'BRL' );
-is( $quotes{ "OGZD.IL", "currency" }, 'USD' );
 
 ok( !$quotes{ "BOGUS", "success" } );
