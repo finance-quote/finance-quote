@@ -125,7 +125,6 @@ sub methods {
              usa          => \&alphavantage,
              nyse         => \&alphavantage,
              nasdaq       => \&alphavantage,
-             vanguard     => \&alphavantage,
     );
 }
 

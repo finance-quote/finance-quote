@@ -195,7 +195,6 @@ distribution, the following exchanges are recognised:
     nyse    New York Stock Exchange
     nasdaq    NASDAQ
     uk_unit_trusts  UK Unit Trusts
-    vanguard    Vanguard Investments
     vwd     Vereinigte Wirtschaftsdienste GmbH
 
 When called in an array context, a hash is returned.  In a scalar
