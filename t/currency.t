@@ -7,6 +7,11 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
+if ( not $ENV{"ALPHAVANTAGE_API_KEY"} ) {
+    plan skip_all =>
+        'Set $ENV{ALPHAVANTAGE_API_KEY} to run this test; get one at https://www.alphavantage.co';
+}
+
 plan tests => 11;
 
 # Test currency conversion, both explicit requests and automatic

@@ -39,7 +39,8 @@ sub methods {
 }
 
 {
-    our @labels = qw/date isodate open high low close volume last/;
+    our @labels = qw/symbol open close high low last volume method isodate currency/;
+
     sub labels {
         return ( iexcloud => \@labels, );
     }
@@ -48,13 +49,19 @@ sub methods {
 sub iexcloud {
     my $quoter = shift;
 
+    my $token = exists $quoter->{module_specific_data}->{iexcloud}->{API_KEY} ? 
+                $quoter->{module_specific_data}->{iexcloud}->{API_KEY}        :
+                $ENV{"IEXCLOUD_API_KEY"};
+
     my @stocks = @_;
     my $quantity = @stocks;
     my ( %info, $reply, $url, $code, $desc, $body );
     my $ua = $quoter->user_agent();
 
+    die "IEXCloud API_KEY not defined.  See documentation." unless defined $token;
+
     foreach my $symbol (@stocks) {
-        $url = $IEX_URL->fill_in(HASH => { symbol => $symbol, token => $IEX_API_KEY});
+        $url = $IEX_URL->fill_in(HASH => { symbol => $symbol, token => $token});
 
         $reply = $ua->request( GET $url);
         $code  = $reply->code;
@@ -102,4 +109,45 @@ sub iexcloud {
 
     return wantarray() ? %info : \%info;
 }
+1;
 
+=head1 NAME
+
+Finance::Quote::IEXClound - Obtain quotes from https://iexcloud.io
+
+=head1 SYNOPSIS
+
+    use Finance::Quote;
+    
+    $q = Finance::Quote->new(iexcloud => {API_KEY => 'your-iexcloud-api-key'});
+
+    %info = Finance::Quote->fetch("IBM", "AAPL");
+
+=head1 DESCRIPTION
+
+This module fetches information from https://iexcloud.io.
+
+This module is loaded by default on a Finance::Quote object. It's
+also possible to load it explicity by placing "iexcloud" in the argument
+list to Finance::Quote->new().
+
+This module provides the "iexcloud" fetch method.
+
+=head1 API_KEY
+
+https://iexcloud.io requires users to register and obtain an API key, which
+is also called a token.  The token may contain a prefix string, such as 'pk_'
+and then a sequence of random digits.
+
+The API key may be set by either providing a module specific hash to
+Finance::Quote->new as in the above example, or by setting the environment
+variable IEXCLOUD_API_KEY.
+
+=head1 LABELS RETURNED
+
+The following labels may be returned by Finance::Quote::IEXClound :
+symbol, open, close, high, low, last, volume, method, isodate, currency.
+
+=head1 SEE ALSO
+
+=cut
