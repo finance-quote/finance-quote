@@ -79,6 +79,11 @@ following steps provide a recipe for setup.
     $ ONLINE_TEST=1 dzil run prove -lv t/iexcloud.t
 
 
+    # Use prove to during test development - it is fast
+
+    $ prove -lv t/fq-class-methods.t
+
+
 3. How to write a Finance::Quote module
 =======================================
 
