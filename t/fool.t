@@ -11,7 +11,7 @@ my $q        = Finance::Quote->new();
 my $year     = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my @symbols =  qw/MSFT AMZN AAPL GOOGL GOOG FB CSCO INTC CMCSA PEP BRK-A SEB NVR BKNG IBKR/;
+my @symbols =  qw/MSFT AMZN AAPL GOOGL GOOG FB CSCO INTC PEP BRK-A SEB NVR BKNG IBKR/;
 
 plan tests => 11*(1+$#symbols)+2;
 
