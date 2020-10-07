@@ -7,11 +7,11 @@ if ( not $ENV{"ONLINE_TEST"} ) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-if ( not $ENV{"IEXCLOUD_API_KEY"} ) {
-    plan skip_all => 'Set $ENV{"IEXCLOUD_API_KEY"} to run this test';
+if ( not $ENV{"TEST_IEXCLOUD_API_KEY"} ) {
+    plan skip_all => 'Set $ENV{"TEST_IEXCLOUD_API_KEY"} to run this test';
 }
 
-my $q        = Finance::Quote->new();
+my $q        = Finance::Quote->new('IEXCloud', timeout => 120, iexcloud => {API_KEY => $ENV{"TEST_IEXCLOUD_API_KEY"}} );
 my $year     = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
@@ -22,7 +22,7 @@ my @symbols =  qw/MSFT AMZN AAPL GOOGL GOOG FB CSCO INTC CMCSA PEP BRK.A SEB NVR
 
 plan tests => 10*(1+$#symbols)+2;
 
-my %quotes = $q->iexcloud( @symbols, "BOGUS" );
+my %quotes = $q->iexcloud(@symbols, "BOGUS" );
 ok(%quotes);
 
 foreach my $symbol (@symbols) {

@@ -40,8 +40,18 @@ use JSON qw( decode_json );
 # use Data::Dumper;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
-            $TIMEOUT %MODULES %METHODS $AUTOLOAD
+            $TIMEOUT @MODULES %MODULES %METHODS $AUTOLOAD
             $ALPHAVANTAGE_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
+
+@MODULES = qw/AEX AIAHK AlphaVantage ASEGR ASX BMONesbittBurns
+              BSERO Bourso Cdnfundlibrary Citywire CSE Currencies Deka
+              DWS FTPortfolios Fidelity FidelityFixed FinanceCanada Fool
+              FTfunds HU GoldMoney HEX IEXCloud IndiaMutual LeRevenu
+              ManInvestments Morningstar MorningstarAU MorningstarCH
+              MorningstarJP MStaruk NZX Oslobors Platinum SEB SIXfunds SIXshares
+              StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref
+              TNetuk Troweprice Trustnet Union USFedBonds VWD ZA
+              Cominvest Finanzpartner XETRA YahooJSON YahooYQL ZA_UnitTrusts/;
 
 # Call on the Yahoo API:
 #  - "f=l1" should return a single value - the "Last Trade (Price Only)"
@@ -61,6 +71,12 @@ $ALPHAVANTAGE_CURRENCY_URL = "https://www.alphavantage.co/query?function=CURRENC
 # VERSION
 
 $USE_EXPERIMENTAL_UA = 0;
+
+################################################################################
+#
+# Private Class Methods
+#
+################################################################################
 
 # Autoload method for obsolete methods.  This also allows people to
 # call methods that objects export without having to go through fetch.
@@ -90,6 +106,86 @@ sub AUTOLOAD {
   }
 
   carp "$AUTOLOAD does not refer to a known method.";
+}
+
+# Dummy destroy function to avoid AUTOLOAD catching it.
+sub DESTROY { return; }
+
+# _convert (private object method)
+#
+# This function converts between one currency and another.  It expects
+# to receive a hashref to the information, a reference to a list
+# of the stocks to be converted, and a reference to a  list of fields
+# that conversion should apply to.
+
+{
+  my %conversion;   # Conversion lookup table.
+
+  sub _convert {
+    my $this = shift;
+    my $info = shift;
+    my $stocks = shift;
+    my $convert_fields = shift;
+    my $new_currency = $this->{"currency"};
+
+    # Skip all this unless they actually want conversion.
+    return unless $new_currency;
+
+    foreach my $stock (@$stocks) {
+      my $currency;
+
+      # Skip stocks that don't have a currency.
+      next unless ($currency = $info->{$stock,"currency"});
+
+      # Skip if it's already in the same currency.
+      next if ($currency eq $new_currency);
+
+      # Lookup the currency conversion if we haven't
+      # already.
+      unless (exists $conversion{$currency,$new_currency}) {
+        $conversion{$currency,$new_currency} =
+          $this->currency($currency,$new_currency);
+      }
+
+      # Make sure we have a reasonable currency conversion.
+      # If we don't, mark the stock as bad.
+      unless ($conversion{$currency,$new_currency}) {
+        $info->{$stock,"success"} = 0;
+        $info->{$stock,"errormsg"} =
+          "Currency conversion failed.";
+        next;
+      }
+
+      # Okay, we have clean data.  Convert it.  Ideally
+      # we'd like to just *= entire fields, but
+      # unfortunately some things (like ranges,
+      # capitalisation, etc) don't take well to that.
+      # Hence we pull out any numbers we see, convert
+      # them, and stick them back in.  That's pretty
+      # yucky, but it works.
+
+      foreach my $field (@$convert_fields) {
+        next unless (defined $info->{$stock,$field});
+
+        $info->{$stock,$field} = $this->scale_field($info->{$stock,$field},$conversion{$currency,$new_currency});
+      }
+
+      # Set the new currency.
+      $info->{$stock,"currency"} = $new_currency;
+    }
+  }
+}
+
+# =======================================================================
+# _dummy (private function)
+#
+# _dummy returns a Finance::Quote object.  I'd really rather not have
+# this, but to maintain backwards compatibility we hold on to it.
+{
+  my $dummy_obj;
+  sub _dummy {
+    return $dummy_obj ||= Finance::Quote->new;
+  }
 }
 
 # _load_module (private class method)
@@ -144,84 +240,452 @@ sub _load_modules {
   }
 }
 
+# _smart_compare (private method function)
+#
+# This function compares values where the method depends on the
+# type of the second parameter.
+#  regex  : compare as regex
+#  scalar : test for substring match
+sub _smart_compare {
+  my ($val1, $val2) = @_;
+
+  if ( ref $val2 eq 'Regexp' ) {
+    return $val1 =~ $val2;
+  }
+  else {
+    return index($val1, $val2) > -1
+  }
+}
+
+################################################################################
+#
+# Public Class Methods
+#
+################################################################################
+
+sub get_default_currency_fields {
+  return qw/last high low net bid ask close open day_range year_range
+            eps div cap nav price/;
+}
+
+sub get_default_timeout {
+  return $TIMEOUT;
+}
+
+sub get_sources {
+  # Create a dummy object to ensure METHODS is populated
+  my $t = Finance::Quote->new();
+  return(wantarray ? keys %METHODS : [keys %METHODS]);
+}
+
 # =======================================================================
 # new (public class method)
 #
-# Returns a new Finance::Quote object.  If methods are asked for, then
-# it will load the relevant modules.  With no arguments, this function
-# loads a default set of methods.
+# Returns a new Finance::Quote object.
+#
+# Arguments ::
+#    - zero or more module names from the Finance::Quote::get_sources list
+#    - zero or more named parameters, passes as name => value
+#
+# Named Parameters ::
+#    - timeout           # timeout in seconds for web requests
+#    - failover          # boolean value indicating if failover is acceptable
+#    - fetch_currency    # currency code for fetch results
+#    - required_labels   # array of required labels in fetch results
+#    - <module-name>     # hash specific to various Finance::Quote modules
+#
+# new()                              # default constructor
+# new('a', 'b')                      # load only modules a and b
+# new(timeout => 30)                 # load all default modules, set timeout
+# new('a', fetch_currency => 'X')    # load only module a, use currency X for results
+# new('z' => {API_KEY => 'K')        # load all modules, pass hash to module z constructor
+# new('z', 'z' => {API_KEY => 'K')   # load only module z and pass hash to its constructor
+#
+# Enivornment Variables ::
+#    - FQ_LOAD_QUOTELET  # if no modules named in argument list, use ones in this variable
+#
+# Return Value ::
+#    - Finanace::Quote object
 
 sub new {
+  # Create and bless object
   my $self = shift;
   my $class = ref($self) || $self;
 
   my $this = {};
   bless $this, $class;
 
-  my @modules = ();
-  my @reqmodules = ();  # Requested modules.
-
-  # If there's no argument list, but we have the appropriate
-  # environment variable set, we'll use that instead.
-  if ($ENV{FQ_LOAD_QUOTELET} and !@_) {
-    @reqmodules = split(' ',$ENV{FQ_LOAD_QUOTELET});
-  } else {
-    @reqmodules = @_;
-  }
-
-  # If we get an empty new(), or one starting with -defaults,
-  # then load up the default methods.
-
-  if ( !@reqmodules or $reqmodules[0] eq "-defaults" ) {
-    shift(@reqmodules) if (@reqmodules);
-
-    # Default modules
-
-    @modules = qw/AEX AIAHK AlphaVantage ASEGR ASX BMONesbittBurns
-        BSERO Bourso Cdnfundlibrary Citywire CSE Currencies Deka
-        DWS FTPortfolios Fidelity FidelityFixed FinanceCanada Fool
-        FTfunds HU GoldMoney HEX IEXCloud IndiaMutual LeRevenu
-        ManInvestments Morningstar MorningstarAU MorningstarCH
-        MorningstarJP MStaruk NZX Platinum Oslobors SEB SIXfunds
-        SIXshares StockHouseCanada TSP TSX Tdefunds Tdwaterhouse
-        Tiaacref TNetuk Troweprice Trustnet Union USFedBonds VWD ZA
-        Cominvest Finanzpartner YahooJSON YahooYQL ZA_UnitTrusts XETRA/;
-  }
-
-  $this->_load_modules(@modules,@reqmodules);
-
-  $this->{TIMEOUT} = $TIMEOUT if defined($TIMEOUT);
+  # Default values
   $this->{FAILOVER} = 1;
   $this->{REQUIRED} = [];
+  $this->{TIMEOUT} = $TIMEOUT if defined($TIMEOUT);
+
+  # Sort out arguments
+  my %named_parameter = (timeout         => ['', 'TIMEOUT'],
+                         failover        => ['', 'FAILOVER'],
+                         fetch_currency  => ['', 'currency'],
+                         required_labels => ['ARRAY', 'REQUIRED']);
+
+  $this->{module_specific_data} = {};
+  my @load_modules = ();
+
+  for (my $i = 0; $i < @_; $i++) {
+    if (exists $named_parameter{$_[$i]}) {
+      die "missing value for named parameter $_[$i]" if $i + 1 == @_;
+      die "unexpect type for value of named parameter $_[$i]" if ref $_[$i+1] ne $named_parameter{$_[$i]}[0];
+
+      $this->{$named_parameter{$_[$i]}[1]} = $_[$i+1];
+      $i += 1;
+    }
+    elsif ($i + 1 < @_ and ref $_[$i+1] eq 'HASH') {
+      $this->{module_specific_data}->{$_[$i]} = $_[$i+1];
+      $i += 1;
+    }
+    elsif ($_[$i] eq '-defaults') {
+      push (@load_modules, @MODULES);
+    }
+    else {
+      push (@load_modules, $_[$i]);
+    }
+  }
+
+  # Honor FQ_LOAD_QUOTELET if @load_modules is empty
+  if ($ENV{FQ_LOAD_QUOTELET} and !@load_modules) {
+    @load_modules = split(' ',$ENV{FQ_LOAD_QUOTELET});
+  }
+  elsif (@load_modules == 0) {
+    push(@load_modules, @MODULES);
+  }
+
+  $this->_load_modules(@load_modules);
 
   return $this;
 }
 
 # =======================================================================
-# _dummy (private function)
+# Helper function that can scale a field.  This is useful because it
+# handles things like ranges "105.4 - 108.3", and not just straight fields.
 #
-# _dummy returns a Finance::Quote object.  I'd really rather not have
-# this, but to maintain backwards compatibility we hold on to it.
-{
-  my $dummy_obj;
-  sub _dummy {
-    return $dummy_obj ||= Finance::Quote->new;
+# The function takes a string or number to scale, and the factor to scale
+# it by.  For example, scale_field("1023","0.01") would return "10.23".
+
+sub scale_field {
+  shift if ref $_[0]; # Shift off the object, if there is one.
+
+  my ($field, $scale) = @_;
+  my @chunks = split(/([^0-9.])/,$field);
+
+  for (my $i=0; $i < @chunks; $i++) {
+    next unless $chunks[$i] =~ /\d/;
+    $chunks[$i] *= $scale;
+  }
+  return join("",@chunks);
+}
+
+sub set_default_timeout {
+  $TIMEOUT  = shift;
+}
+
+################################################################################
+#
+# Private Object Methods
+#
+################################################################################
+
+# _require_test (private object method)
+#
+# This function takes an array.  It returns true if all required
+# labels appear in the arrayref.  It returns false otherwise.
+#
+# This function could probably be made more efficient.
+
+sub _require_test {
+  my $this = shift;
+  my %available;
+  @available{@_} = ();  # Ooooh, hash-slice.  :)
+  my @required = @{$this->{REQUIRED}};
+  return 1 unless @required;
+  for (my $i = 0; $i < @required; $i++) {
+    return 0 unless exists $available{$required[$i]};
+  }
+  return 1;
+}
+
+################################################################################
+#
+# Public Object Methods
+#
+################################################################################
+
+# If $str ends with a B like "20B" or "1.6B" then expand it as billions like
+# "20000000000" or "1600000000".
+#
+# This is done with string manipulations so floating-point rounding doesn't
+# produce spurious digits for values like "1.6" which aren't exactly
+# representable in binary.
+#
+# Is "B" for billions the only abbreviation from Yahoo?
+# Could extend and rename this if there's also millions or thousands.
+#
+# For reference, if the value was just for use within perl then simply
+# substituting to exponential "1.5e9" might work.  But expanding to full
+# digits seems a better idea as the value is likely to be printed directly
+# as a string.
+sub B_to_billions {
+  my ($self,$str) = @_;
+
+  ### B_to_billions(): $str
+  if ($str =~ s/B$//i) {
+    $str = $self->decimal_shiftup ($str, 9);
+  }
+  return $str;
+}
+
+# $str is a number like "123" or "123.45"
+# return it with the decimal point moved $shift places to the right
+# must have $shift>=1
+# eg. decimal_shiftup("123",3)    -> "123000"
+#     decimal_shiftup("123.45",1) -> "1234.5"
+#     decimal_shiftup("0.25",1)   -> "2.5"
+#
+sub decimal_shiftup {
+  my ($self, $str, $shift) = @_;
+
+  # delete decimal point and set $after to count of chars after decimal.
+  # Leading "0" as in "0.25" is deleted too giving "25" so as not to end up
+  # with something that might look like leading 0 for octal.
+  my $after = ($str =~ s/(?:^0)?\.(.*)/$1/ ? length($1) : 0);
+
+  $shift -= $after;
+  # now $str is an integer and $shift is relative to the end of $str
+
+  if ($shift >= 0) {
+    # moving right, eg. "1234" becomes "12334000"
+    return $str . ('0' x $shift);  # extra zeros appended
+  } else {
+    # negative means left, eg. "12345" becomes "12.345"
+    # no need to prepend zeros since demanding initial $shift>=1
+    substr ($str, $shift,0, '.');  # new '.' at shifted spot from end
+    return $str;
   }
 }
 
 # =======================================================================
-# sources (public object method)
+# fetch (public object method)
 #
-# sources returns a list of sources which can be passed to fetch to
-# obtain information.
-#
-# Usage: @sources   = $quoter->sources();
-#        $sourceref = $quoter->sources();
+# Fetch is a wonderful generic fetcher.  It takes a method and stuff to
+# fetch.  It's a nicer interface for when you have a list of stocks with
+# different sources which you wish to deal with.
+sub fetch {
+  my $this = shift if ref ($_[0]);
 
-sub sources {
-  return(wantarray ? keys %METHODS : [keys %METHODS]);
+  $this ||= _dummy();
+
+  my $method = lc(shift);
+  my @stocks = @_;
+
+  unless (exists $METHODS{$method}) {
+    carp "Undefined fetch-method $method passed to ".
+         "Finance::Quote::fetch";
+    return;
+  }
+
+  # Failover code.  This steps through all availabe methods while
+  # we still have failed stocks to look-up.  This loop only
+  # runs a single time unless FAILOVER is defined.
+  my %returnhash = ();
+
+  foreach my $methodinfo (@{$METHODS{$method}}) {
+    my $funcref = $methodinfo->{"function"};
+    next unless $this->_require_test(@{$methodinfo->{"labels"}});
+    my @failed_stocks = ();
+    %returnhash = (%returnhash,&$funcref($this,@stocks));
+
+    foreach my $stock (@stocks) {
+      push(@failed_stocks,$stock)
+        unless ($returnhash{$stock,"success"});
+    }
+
+    $this->_convert(\%returnhash,\@stocks,
+                    $methodinfo->{"currency_fields"});
+
+    last unless $this->{FAILOVER};
+    last unless @failed_stocks;
+    @stocks = @failed_stocks;
+  }
+
+  return wantarray() ? %returnhash : \%returnhash;
 }
 
+sub get_failover {
+  my $self = shift;
+  return $self->{FAILOVER};
+}
+
+sub get_fetch_currency {
+  my $self = shift;
+  return $self->{currency};
+}
+
+sub get_required_labels {
+  my $self = shift;
+  return $self->{REQUIRED};
+}
+
+sub get_timeout {
+  my $self = shift;
+  return $self->{TIMEOUT};
+}
+
+sub get_user_agent {
+  my $this = shift;
+
+  return $this->{UserAgent} if $this->{UserAgent};
+
+  my $ua;
+
+  if ($USE_EXPERIMENTAL_UA) {
+    $ua = Finance::Quote::UserAgent->new;
+  } else {
+    $ua = LWP::UserAgent->new;
+  }
+
+  $ua->timeout($this->{TIMEOUT}) if defined($this->{TIMEOUT});
+  $ua->env_proxy;
+
+  $this->{UserAgent} = $ua;
+
+  return $ua;
+}
+
+sub isoTime {
+  my ($self,$timeString) = @_ ;
+  $timeString =~ tr/ //d ;
+  $timeString = uc $timeString ;
+  my $retTime = "00:00"; # return zero time if unparsable input
+  if ($timeString=~m/^(\d+)[\.:UH](\d+)(AM|PM)?/) {
+    my ($hours,$mins)= ($1-0,$2-0) ;
+    $hours-=12 if ($hours==12);
+    $hours+=12 if ($3 && ($3 eq "PM")) ;
+    if ($hours>=0 && $hours<=23 && $mins>=0 && $mins<=59 ) {
+      $retTime = sprintf ("%02d:%02d", $hours, $mins) ;
+    }
+  }
+  return $retTime;
+}
+
+sub set_failover {
+  my $self          = shift;
+  $self->{FAILOVER} = shift;
+}
+
+sub set_fetch_currency {
+  my $self          = shift;
+  $self->{currency} = shift;
+}
+
+sub set_required_labels {
+  my $self          = shift;
+  $self->{REQUIRED} = shift;
+}
+
+sub set_timeout {
+  my $self         = shift;
+  $self->{TIMEOUT} = shift;
+}
+
+# =======================================================================
+# store_date (public object method)
+#
+# Given the various pieces of a date, this functions figure out how to
+# store them in both the pre-existing US date format (mm/dd/yyyy), and
+# also in the ISO date format (yyyy-mm-dd).  This function expects to
+# be called with the arguments:
+#
+# (inforef, symbol_name, data_hash)
+#
+# The components of date hash can be any of:
+#
+# usdate   - A date in mm/dd/yy or mm/dd/yyyy
+# eurodate - A date in dd/mm/yy or dd/mm/yyyy
+# isodate  - A date in yy-mm-dd or yyyy-mm-dd
+# year   - The year in yyyy
+# month  - The month in mm or mmm format (i.e. 07 or Jul)
+# day  - The day
+# today  - A flag to indicate todays date should be used.
+#
+# The separator for the *date forms is ignored.  It can be any
+# non-alphanumeric character.  Any combination of year, month, and day
+# values can be provided.  Missing fields are filled in based upon
+# today's date.
+#
+sub store_date
+{
+    my $this = shift;
+    my $inforef = shift;
+    my $symbol = shift;
+    my $piecesref = shift;
+
+    my ($year, $month, $day, $this_month, $year_specified);
+    my %mnames = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
+      jul => 7, aug => 8, sep => 9, oct =>10, nov =>11, dec =>12);
+
+#    printf "In store_date\n";
+#    print "inforef $inforef\n";
+#    print "piecesref $piecesref\n";
+#    foreach my $key (keys %$piecesref) {
+#      printf ("  %s: %s\n", $key, $piecesref->{$key});
+#    }
+
+    # Default to today's date.
+    ($month, $day, $year) = (localtime())[4,3,5];
+    $month++;
+    $year += 1900;
+    $this_month = $month;
+    $year_specified = 0;
+
+    # Process the inputs
+    if ((defined $piecesref->{isodate}) && ($piecesref->{isodate})) {
+      ($year, $month, $day) = ($piecesref->{isodate} =~ m/(\d+)\W+(\w+)\W+(\d+)/);
+      $year += 2000 if $year < 100;
+      $year_specified = 1;
+#      printf "ISO Date %s: Year %d, Month %s, Day %d\n", $piecesref->{isodate}, $year, $month, $day;
+    }
+
+    if ((defined $piecesref->{usdate}) && ($piecesref->{usdate})) {
+      ($month, $day, $year) = ($piecesref->{usdate} =~ /(\w+)\W+(\d+)\W+(\d+)/);
+      $year += 2000 if $year < 100;
+      $year_specified = 1;
+#      printf "US Date %s: Month %s, Day %d, Year %d\n", $piecesref->{usdate}, $month, $day, $year;
+    }
+
+    if ((defined $piecesref->{eurodate}) && ($piecesref->{eurodate})) {
+        ($day, $month, $year) = ($piecesref->{eurodate} =~ /(\d+)\W+(\w+)\W+(\d+)/);
+      $year += 2000 if $year < 100;
+      $year_specified = 1;
+#      printf "Euro Date %s: Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year;
+    }
+
+    if (defined ($piecesref->{year})) {
+      $year = $piecesref->{year};
+      $year += 2000 if $year < 100;
+      $year_specified = 1;
+    }
+    $month = $piecesref->{month} if defined ($piecesref->{month});
+    $month = $mnames{lc(substr($month,0,3))} if ($month =~ /\D/);
+    $day  = $piecesref->{day} if defined ($piecesref->{day});
+
+    $year-- if (($year_specified == 0) && ($this_month < $month));
+
+    $inforef->{$symbol, "date"} =  sprintf "%02d/%02d/%04d", $month, $day, $year;
+    $inforef->{$symbol, "isodate"} = sprintf "%04d-%02d-%02d", $year, $month, $day;
+}
+
+################################################################################
+#
+# Public Class or Object Methods
+#
+################################################################################
 
 # =======================================================================
 # currency (public object method)
@@ -250,7 +714,7 @@ sub currency {
 
   return $amount if ($from eq $to); # Trivial case.
 
-  my $ua = $this->user_agent;
+  my $ua = $this->get_user_agent;
 
   my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
   return undef unless ( defined $ALPHAVANTAGE_API_KEY );
@@ -367,291 +831,6 @@ sub currency_lookup {
   return $returned_currencies;
 }
 
-# _smart_compare (private method function)
-#
-# This function compares values where the method depends on the
-# type of the second parameter.
-#  regex  : compare as regex
-#  scalar : test for substring match
-sub _smart_compare {
-  my ($val1, $val2) = @_;
-
-  if ( ref $val2 eq 'Regexp' ) {
-    return $val1 =~ $val2;
-  }
-  else {
-    return index($val1, $val2) > -1
-  }
-}
-
-# =======================================================================
-# set_currency (public object method)
-#
-# set_currency allows information to be requested in the specified
-# currency.  If called with no arguments then information is returned
-# in the default currency.
-#
-# Requesting stocks in a particular currency increases the time taken,
-# and the likelyhood of failure, as additional operations are required
-# to fetch the currency conversion information.
-#
-# This method should only be called from the quote object unless you
-# know what you are doing.
-
-sub set_currency {
-  my $this = shift if (ref $_[0]);
-  $this ||= _dummy();
-
-  unless (defined($_[0])) {
-    delete $this->{"currency"};
-  } else {
-    $this->{"currency"} = $_[0];
-  }
-}
-
-# default_currency_fields (public method)
-#
-# This is a list of fields that will be automatically converted during
-# currency conversion.  If a module provides a currency_fields()
-# function then that list will be used instead.
-
-sub default_currency_fields {
-  return qw/last high low net bid ask close open day_range year_range
-            eps div cap nav price/;
-}
-
-# _convert (private object method)
-#
-# This function converts between one currency and another.  It expects
-# to receive a hashref to the information, a reference to a list
-# of the stocks to be converted, and a reference to a  list of fields
-# that conversion should apply to.
-
-{
-  my %conversion;   # Conversion lookup table.
-
-  sub _convert {
-    my $this = shift;
-    my $info = shift;
-    my $stocks = shift;
-    my $convert_fields = shift;
-    my $new_currency = $this->{"currency"};
-
-    # Skip all this unless they actually want conversion.
-    return unless $new_currency;
-
-    foreach my $stock (@$stocks) {
-      my $currency;
-
-      # Skip stocks that don't have a currency.
-      next unless ($currency = $info->{$stock,"currency"});
-
-      # Skip if it's already in the same currency.
-      next if ($currency eq $new_currency);
-
-      # Lookup the currency conversion if we haven't
-      # already.
-      unless (exists $conversion{$currency,$new_currency}) {
-        $conversion{$currency,$new_currency} =
-          $this->currency($currency,$new_currency);
-      }
-
-      # Make sure we have a reasonable currency conversion.
-      # If we don't, mark the stock as bad.
-      unless ($conversion{$currency,$new_currency}) {
-        $info->{$stock,"success"} = 0;
-        $info->{$stock,"errormsg"} =
-          "Currency conversion failed.";
-        next;
-      }
-
-      # Okay, we have clean data.  Convert it.  Ideally
-      # we'd like to just *= entire fields, but
-      # unfortunately some things (like ranges,
-      # capitalisation, etc) don't take well to that.
-      # Hence we pull out any numbers we see, convert
-      # them, and stick them back in.  That's pretty
-      # yucky, but it works.
-
-      foreach my $field (@$convert_fields) {
-        next unless (defined $info->{$stock,$field});
-
-        $info->{$stock,$field} = $this->scale_field($info->{$stock,$field},$conversion{$currency,$new_currency});
-      }
-
-      # Set the new currency.
-      $info->{$stock,"currency"} = $new_currency;
-    }
-  }
-}
-
-# =======================================================================
-# Helper function that can scale a field.  This is useful because it
-# handles things like ranges "105.4 - 108.3", and not just straight fields.
-#
-# The function takes a string or number to scale, and the factor to scale
-# it by.  For example, scale_field("1023","0.01") would return "10.23".
-
-sub scale_field {
-  shift if ref $_[0]; # Shift off the object, if there is one.
-
-  my ($field, $scale) = @_;
-  my @chunks = split(/([^0-9.])/,$field);
-
-  for (my $i=0; $i < @chunks; $i++) {
-    next unless $chunks[$i] =~ /\d/;
-    $chunks[$i] *= $scale;
-  }
-  return join("",@chunks);
-}
-
-
-# =======================================================================
-# Timeout code.  If called on a particular object, then it sets
-# the timout for that object only.  If called as a class method
-# (or as Finance::Quote::timeout) then it sets the default timeout
-# for all new objects that will be created.
-
-sub timeout {
-  if (@_ == 1 or !ref($_[0])) { # Direct or class call.
-    return $TIMEOUT = $_[0];
-  }
-
-  # Otherwise we were called through an object.  Yay.
-  # Set the timeout in this object only.
-  my $this = shift;
-  return $this->{TIMEOUT} = shift;
-}
-
-# =======================================================================
-# failover (public object method)
-#
-# This sets/gets whether or not it's acceptable to use failover techniques.
-
-sub failover {
-  my $this = shift;
-  my $value = shift;
-        return $this->{FAILOVER} = $value if (defined($value));
-  return $this->{FAILOVER};
-}
-
-# =======================================================================
-# require_labels (public object method)
-#
-# Require_labels indicates which labels are required for lookups.  Only methods
-# that have registered all the labels specified in the list passed to
-# require_labels() will be called.
-#
-# require_labels takes a list of required labels.  When called with no
-# arguments, the require list is cleared.
-#
-# This method always succeeds.
-
-sub require_labels {
-  my $this = shift;
-  my @labels = @_;
-  $this->{REQUIRED} = \@labels;
-  return;
-}
-
-# _require_test (private object method)
-#
-# This function takes an array.  It returns true if all required
-# labels appear in the arrayref.  It returns false otherwise.
-#
-# This function could probably be made more efficient.
-
-sub _require_test {
-  my $this = shift;
-  my %available;
-  @available{@_} = ();  # Ooooh, hash-slice.  :)
-  my @required = @{$this->{REQUIRED}};
-  return 1 unless @required;
-  for (my $i = 0; $i < @required; $i++) {
-    return 0 unless exists $available{$required[$i]};
-  }
-  return 1;
-}
-
-# =======================================================================
-# fetch (public object method)
-#
-# Fetch is a wonderful generic fetcher.  It takes a method and stuff to
-# fetch.  It's a nicer interface for when you have a list of stocks with
-# different sources which you wish to deal with.
-sub fetch {
-  my $this = shift if ref ($_[0]);
-
-  $this ||= _dummy();
-
-  my $method = lc(shift);
-  my @stocks = @_;
-
-  unless (exists $METHODS{$method}) {
-    carp "Undefined fetch-method $method passed to ".
-         "Finance::Quote::fetch";
-    return;
-  }
-
-  # Failover code.  This steps through all availabe methods while
-  # we still have failed stocks to look-up.  This loop only
-  # runs a single time unless FAILOVER is defined.
-
-  my %returnhash = ();
-
-  foreach my $methodinfo (@{$METHODS{$method}}) {
-    my $funcref = $methodinfo->{"function"};
-    next unless $this->_require_test(@{$methodinfo->{"labels"}});
-    my @failed_stocks = ();
-    %returnhash = (%returnhash,&$funcref($this,@stocks));
-
-    foreach my $stock (@stocks) {
-      push(@failed_stocks,$stock)
-        unless ($returnhash{$stock,"success"});
-    }
-
-    $this->_convert(\%returnhash,\@stocks,
-                    $methodinfo->{"currency_fields"});
-
-    last unless $this->{FAILOVER};
-    last unless @failed_stocks;
-    @stocks = @failed_stocks;
-  }
-
-  return wantarray() ? %returnhash : \%returnhash;
-}
-
-# =======================================================================
-# user_agent (public object method)
-#
-# Returns a LWP::UserAgent which conforms to the relevant timeouts,
-# proxies, and other settings on the particular Finance::Quote object.
-#
-# This function is mainly intended to be used by the modules that we load,
-# but it can be used by the application to directly play with the
-# user-agent settings.
-
-sub user_agent {
-  my $this = shift;
-
-  return $this->{UserAgent} if $this->{UserAgent};
-
-  my $ua;
-
-  if ($USE_EXPERIMENTAL_UA) {
-    $ua = Finance::Quote::UserAgent->new;
-  } else {
-    $ua = LWP::UserAgent->new;
-  }
-
-  $ua->timeout($this->{TIMEOUT}) if defined($this->{TIMEOUT});
-  $ua->env_proxy;
-
-  $this->{UserAgent} = $ua;
-
-  return $ua;
-}
-
 # =======================================================================
 # parse_csv (public object method)
 #
@@ -698,166 +877,141 @@ sub parse_csv_semicolon
        return @new;      # list of values that were comma-separated
 }
 
+###############################################################################
+#
+# Legacy Class Methods
+#
+###############################################################################
+
 # =======================================================================
-# store_date (public object method)
+# sources (public object method)
 #
-
-# Given the various pieces of a date, this functions figure out how to
-# store them in both the pre-existing US date format (mm/dd/yyyy), and
-# also in the ISO date format (yyyy-mm-dd).  This function expects to
-# be called with the arguments:
+# sources returns a list of sources which can be passed to fetch to
+# obtain information.
 #
-# (inforef, symbol_name, data_hash)
-#
-# The components of date hash can be any of:
-#
-# usdate   - A date in mm/dd/yy or mm/dd/yyyy
-# eurodate - A date in dd/mm/yy or dd/mm/yyyy
-# isodate  - A date in yy-mm-dd or yyyy-mm-dd
-# year   - The year in yyyy
-# month  - The month in mm or mmm format (i.e. 07 or Jul)
-# day  - The day
-# today  - A flag to indicate todays date should be used.
-#
-# The separator for the *date forms is ignored.  It can be any
-# non-alphanumeric character.  Any combination of year, month, and day
-# values can be provided.  Missing fields are filled in based upon
-# today's date.
-#
-sub store_date
-{
-    my $this = shift;
-    my $inforef = shift;
-    my $symbol = shift;
-    my $piecesref = shift;
+# Usage: @sources   = $quoter->sources();
+#        $sourceref = $quoter->sources();
 
-    my ($year, $month, $day, $this_month, $year_specified);
-    my %mnames = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
-      jul => 7, aug => 8, sep => 9, oct =>10, nov =>11, dec =>12);
-
-#    printf "In store_date\n";
-#    print "inforef $inforef\n";
-#    print "piecesref $piecesref\n";
-#    foreach my $key (keys %$piecesref) {
-#      printf ("  %s: %s\n", $key, $piecesref->{$key});
-#    }
-
-    # Default to today's date.
-    ($month, $day, $year) = (localtime())[4,3,5];
-    $month++;
-    $year += 1900;
-    $this_month = $month;
-    $year_specified = 0;
-
-    # Process the inputs
-    if ((defined $piecesref->{isodate}) && ($piecesref->{isodate})) {
-      ($year, $month, $day) = ($piecesref->{isodate} =~ m/(\d+)\W+(\w+)\W+(\d+)/);
-      $year += 2000 if $year < 100;
-      $year_specified = 1;
-#      printf "ISO Date %s: Year %d, Month %s, Day %d\n", $piecesref->{isodate}, $year, $month, $day;
-    }
-
-    if ((defined $piecesref->{usdate}) && ($piecesref->{usdate})) {
-      ($month, $day, $year) = ($piecesref->{usdate} =~ /(\w+)\W+(\d+)\W+(\d+)/);
-      $year += 2000 if $year < 100;
-      $year_specified = 1;
-#      printf "US Date %s: Month %s, Day %d, Year %d\n", $piecesref->{usdate}, $month, $day, $year;
-    }
-
-    if ((defined $piecesref->{eurodate}) && ($piecesref->{eurodate})) {
-        ($day, $month, $year) = ($piecesref->{eurodate} =~ /(\d+)\W+(\w+)\W+(\d+)/);
-      $year += 2000 if $year < 100;
-      $year_specified = 1;
-#      printf "Euro Date %s: Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year;
-    }
-
-    if (defined ($piecesref->{year})) {
-      $year = $piecesref->{year};
-      $year += 2000 if $year < 100;
-      $year_specified = 1;
-    }
-    $month = $piecesref->{month} if defined ($piecesref->{month});
-    $month = $mnames{lc(substr($month,0,3))} if ($month =~ /\D/);
-    $day  = $piecesref->{day} if defined ($piecesref->{day});
-
-    $year-- if (($year_specified == 0) && ($this_month < $month));
-
-    $inforef->{$symbol, "date"} =  sprintf "%02d/%02d/%04d", $month, $day, $year;
-    $inforef->{$symbol, "isodate"} = sprintf "%04d-%02d-%02d", $year, $month, $day;
+sub sources {
+  return get_sources();
 }
 
-sub isoTime {
-  my ($self,$timeString) = @_ ;
-  $timeString =~ tr/ //d ;
-  $timeString = uc $timeString ;
-  my $retTime = "00:00"; # return zero time if unparsable input
-  if ($timeString=~m/^(\d+)[\.:UH](\d+)(AM|PM)?/) {
-    my ($hours,$mins)= ($1-0,$2-0) ;
-    $hours-=12 if ($hours==12);
-    $hours+=12 if ($3 && ($3 eq "PM")) ;
-    if ($hours>=0 && $hours<=23 && $mins>=0 && $mins<=59 ) {
-      $retTime = sprintf ("%02d:%02d", $hours, $mins) ;
-    }
+# default_currency_fields (public method)
+#
+# This is a list of fields that will be automatically converted during
+# currency conversion.  If a module provides a currency_fields()
+# function then that list will be used instead.
+
+sub default_currency_fields {
+  return get_default_currency_fields();
+}
+
+###############################################################################
+#
+# Legacy Class or Object Methods
+#
+###############################################################################
+
+# =======================================================================
+# set_currency (public object method)
+#
+# set_currency allows information to be requested in the specified
+# currency.  If called with no arguments then information is returned
+# in the default currency.
+#
+# Requesting stocks in a particular currency increases the time taken,
+# and the likelyhood of failure, as additional operations are required
+# to fetch the currency conversion information.
+#
+# This method should only be called from the quote object unless you
+# know what you are doing.
+
+sub set_currency {
+  if (@_ == 1 or !ref($_[0])) {
+    # Direct or class call - there is no class default currency
+    return undef;
   }
-  return $retTime;
-}
 
-
-# If $str ends with a B like "20B" or "1.6B" then expand it as billions like
-# "20000000000" or "1600000000".
-#
-# This is done with string manipulations so floating-point rounding doesn't
-# produce spurious digits for values like "1.6" which aren't exactly
-# representable in binary.
-#
-# Is "B" for billions the only abbreviation from Yahoo?
-# Could extend and rename this if there's also millions or thousands.
-#
-# For reference, if the value was just for use within perl then simply
-# substituting to exponential "1.5e9" might work.  But expanding to full
-# digits seems a better idea as the value is likely to be printed directly
-# as a string.
-sub B_to_billions {
-
-  my ($self,$str) = @_;
-  ### B_to_billions(): $str
-  if ($str =~ s/B$//i) {
-    $str = $self->decimal_shiftup ($str, 9);
+  my $this = shift;
+  if (defined($_[0])) {
+    $this->set_fetch_currency($_[0]);
   }
-  return $str;
+
+  return $this->get_fetch_currency();
 }
 
-# $str is a number like "123" or "123.45"
-# return it with the decimal point moved $shift places to the right
-# must have $shift>=1
-# eg. decimal_shiftup("123",3)    -> "123000"
-#     decimal_shiftup("123.45",1) -> "1234.5"
-#     decimal_shiftup("0.25",1)   -> "2.5"
-#
-sub decimal_shiftup {
-  my ($self, $str, $shift) = @_;
+# =======================================================================
+# Timeout code.  If called on a particular object, then it sets
+# the timout for that object only.  If called as a class method
+# (or as Finance::Quote::timeout) then it sets the default timeout
+# for all new objects that will be created.
 
-  # delete decimal point and set $after to count of chars after decimal.
-  # Leading "0" as in "0.25" is deleted too giving "25" so as not to end up
-  # with something that might look like leading 0 for octal.
-  my $after = ($str =~ s/(?:^0)?\.(.*)/$1/ ? length($1) : 0);
-
-  $shift -= $after;
-  # now $str is an integer and $shift is relative to the end of $str
-
-  if ($shift >= 0) {
-    # moving right, eg. "1234" becomes "12334000"
-    return $str . ('0' x $shift);  # extra zeros appended
-  } else {
-    # negative means left, eg. "12345" becomes "12.345"
-    # no need to prepend zeros since demanding initial $shift>=1
-    substr ($str, $shift,0, '.');  # new '.' at shifted spot from end
-    return $str;
+sub timeout {
+  if (@_ == 1 or !ref($_[0])) {
+    # Direct or class call
+    Finance::Quote::set_default_timeout(shift);
+    return Finance::Quote::get_default_timeout();
   }
+
+  # Otherwise we were called through an object.  Yay.
+  # Set the timeout in this object only.
+  my $this = shift;
+  $this->set_timeout(shift);
+  return $this->get_timeout();
 }
 
-# Dummy destroy function to avoid AUTOLOAD catching it.
-sub DESTROY { return; }
+###############################################################################
+#
+# Legacy Object Methods
+#
+###############################################################################
+
+# =======================================================================
+# failover (public object method)
+#
+# This sets/gets whether or not it's acceptable to use failover techniques.
+
+sub failover {
+  my $this = shift;
+  my $value = shift;
+
+  $this->set_failover($value) if defined $value;
+  return $this->get_failover();
+}
+
+# =======================================================================
+# require_labels (public object method)
+#
+# Require_labels indicates which labels are required for lookups.  Only methods
+# that have registered all the labels specified in the list passed to
+# require_labels() will be called.
+#
+# require_labels takes a list of required labels.  When called with no
+# arguments, the require list is cleared.
+#
+# This method always succeeds.
+
+sub require_labels {
+  my $this = shift;
+  my @labels = @_;
+  $this->set_required_labels(\@labels);
+  return;
+}
+
+# =======================================================================
+# user_agent (public object method)
+#
+# Returns a LWP::UserAgent which conforms to the relevant timeouts,
+# proxies, and other settings on the particular Finance::Quote object.
+#
+# This function is mainly intended to be used by the modules that we load,
+# but it can be used by the application to directly play with the
+# user-agent settings.
+
+sub user_agent {
+  my $this = shift;
+  return $this->get_user_agent();
+}
 
 1;
 
