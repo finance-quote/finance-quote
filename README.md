@@ -115,17 +115,9 @@ perldoc command.
 
 You can also look for information at:
 
-- RT, CPAN's request tracker
+- Finance::Quote GitHub project
 
-    http://rt.cpan.org/NoAuth/Bugs.html?Dist=Finance-Quote
-
-- AnnoCPAN, Annotated CPAN documentation
-
-    http://annocpan.org/dist/Finance-Quote
-
-- CPAN Ratings
-
-    http://cpanratings.perl.org/d/Finance-Quote
+    https://github.com/finance-quote/finance-quote
 
 - Search CPAN
 
@@ -386,17 +378,29 @@ http://www.gnucash.org/
 
 # SEE ALSO
 
-Finance::Quote::AEX, Finance::Quote::ASX, Finance::Quote::Cdnfundlibrary,
-Finance::Quote::DWS, Finance::Quote::Fidelity, Finance::Quote::FinanceCanada,
-Finance::Quote::Fool,
-Finance::Quote::FTPortfolios, Finance::Quote::Tdefunds,
+Finance::Quote::AEX, Finance::Quote::AIAHK, Finance::Quote::ASEGR,
+Finance::Quote::ASX, Finance::Quote::BMONesbittBurns, Finance::Quote::BSERO,
+Finance::Quote::Bourso, Finance::Quote::CSE, Finance::Quote::Cdnfundlibrary,
+Finance::Quote::Citywire, Finance::Quote::Cominvest,
+Finance::Quote::Currencies, Finance::Quote::DWS, Finance::Quote::Deka,
+Finance::Quote::FTPortfolios, Finance::Quote::FTfunds,
+Finance::Quote::Fidelity, Finance::Quote::FidelityFixed,
+Finance::Quote::FinanceCanada, Finance::Quote::Finanzpartner,
+Finance::Quote::Fool, Finance::Quote::GoldMoney, Finance::Quote::HEX,
+Finance::Quote::HU, Finance::Quote::IEXCloud, Finance::Quote::IndiaMutual,
+Finance::Quote::LeRevenu, Finance::Quote::MStaruk,
+Finance::Quote::ManInvestments, Finance::Quote::Morningstar,
+Finance::Quote::MorningstarAU, Finance::Quote::MorningstarCH,
+Finance::Quote::MorningstarJP, Finance::Quote::NZX, Finance::Quote::Oslobors,
+Finance::Quote::Platinum, Finance::Quote::SEB, Finance::Quote::TNetuk,
+Finance::Quote::TSP, Finance::Quote::TSX, Finance::Quote::Tdefunds,
 Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice, Finance::Quote::Trustnet,
-Finance::Quote::VWD, Finance::Quote::Yahoo::Australia,
-Finance::Quote::Yahoo::Europe, Finance::Quote::Yahoo::USA,
-LWP::UserAgent
+Finance::Quote::USFedBonds, Finance::Quote::Union, Finance::Quote::VWD,
+Finance::Quote::YahooJSON, Finance::Quote::YahooYQL, Finance::Quote::ZA,
+Finance::Quote::ZA_UnitTrusts
 
-You should have also received the Finance::Quote hacker's guide with
-this package.  Please read it if you are interested in adding extra
-methods to this package.  The hacker's guide can also be found
-on the Finance::Quote website, http://finance-quote.sourceforge.net/
+You should have received the Finance::Quote hacker's guide with this package.
+Please read it if you are interested in adding extra methods to this package.
+The latest hacker's guide can also be found on GitHub at
+https://github.com/finance-quote/finance-quote/blob/master/Documentation/Hackers-Guide
