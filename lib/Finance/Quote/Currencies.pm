@@ -16,6 +16,7 @@
 package Finance::Quote::Currencies;
 use strict;
 use warnings;
+use utf8;
 
 use base 'Exporter';
 use vars qw/@EXPORT_OK  $CURRENCY_URL/;
@@ -38,41 +39,45 @@ sub methods { return ( known_currencies      => \&known_currencies
 
 sub labels { return () };
 
-my %currencies = 
-   ('AED' => {
+my %currencies = (
+
+    'AED' => {
         'country' => ['UNITED ARAB EMIRATES (THE)'],
         'name'    => 'UAE Dirham',
-        'number'  => 'AED'
+        'number'  => '784'
     },
     'AFN' => {
         'country' => ['AFGHANISTAN'],
         'name'    => 'Afghani',
-        'number'  => 'AFN'
+        'number'  => '971'
     },
     'ALL' => {
         'country' => ['ALBANIA'],
         'name'    => 'Lek',
-        'number'  => 'ALL'
+        'number'  => '008'
     },
     'AMD' => {
         'country' => ['ARMENIA'],
         'name'    => 'Armenian Dram',
-        'number'  => 'AMD'
+        'number'  => '051'
     },
     'ANG' => {
-        'country' => [ "CURA\x{c7}AO", 'SINT MAARTEN (DUTCH PART)' ],
+        'country' => [
+            'CURAÇAO',
+            'SINT MAARTEN (DUTCH PART)'
+        ],
         'name'    => 'Netherlands Antillean Guilder',
-        'number'  => 'ANG'
+        'number'  => '532'
     },
     'AOA' => {
         'country' => ['ANGOLA'],
         'name'    => 'Kwanza',
-        'number'  => 'AOA'
+        'number'  => '973'
     },
     'ARS' => {
         'country' => ['ARGENTINA'],
         'name'    => 'Argentine Peso',
-        'number'  => 'ARS'
+        'number'  => '032'
     },
     'AUD' => {
         'country' => [
@@ -85,732 +90,772 @@ my %currencies =
             'NORFOLK ISLAND',
             'TUVALU'
         ],
-        'name'   => 'Australian Dollar',
-        'number' => 'AUD'
+        'name'    => 'Australian Dollar',
+        'number'  => '036'
     },
     'AWG' => {
         'country' => ['ARUBA'],
         'name'    => 'Aruban Florin',
-        'number'  => 'AWG'
+        'number'  => '533'
     },
     'AZN' => {
         'country' => ['AZERBAIJAN'],
         'name'    => 'Azerbaijanian Manat',
-        'number'  => 'AZN'
+        'number'  => '944'
     },
     'BAM' => {
         'country' => ['BOSNIA AND HERZEGOVINA'],
         'name'    => 'Convertible Mark',
-        'number'  => 'BAM'
+        'number'  => '977'
     },
     'BBD' => {
         'country' => ['BARBADOS'],
         'name'    => 'Barbados Dollar',
-        'number'  => 'BBD'
+        'number'  => '052'
     },
     'BDT' => {
         'country' => ['BANGLADESH'],
         'name'    => 'Taka',
-        'number'  => 'BDT'
+        'number'  => '050'
     },
     'BGN' => {
         'country' => ['BULGARIA'],
         'name'    => 'Bulgarian Lev',
-        'number'  => 'BGN'
+        'number'  => '975'
     },
     'BHD' => {
         'country' => ['BAHRAIN'],
         'name'    => 'Bahraini Dinar',
-        'number'  => 'BHD'
+        'number'  => '048'
     },
     'BIF' => {
         'country' => ['BURUNDI'],
         'name'    => 'Burundi Franc',
-        'number'  => 'BIF'
+        'number'  => '108'
     },
     'BMD' => {
         'country' => ['BERMUDA'],
         'name'    => 'Bermudian Dollar',
-        'number'  => 'BMD'
+        'number'  => '060'
     },
     'BND' => {
         'country' => ['BRUNEI DARUSSALAM'],
         'name'    => 'Brunei Dollar',
-        'number'  => 'BND'
+        'number'  => '096'
     },
     'BOB' => {
         'country' => ['BOLIVIA (PLURINATIONAL STATE OF)'],
         'name'    => 'Boliviano',
-        'number'  => 'BOB'
+        'number'  => '068'
     },
     'BOV' => {
         'country' => ['BOLIVIA (PLURINATIONAL STATE OF)'],
         'name'    => 'Mvdol',
-        'number'  => 'BOV'
+        'number'  => '984'
     },
     'BRL' => {
         'country' => ['BRAZIL'],
         'name'    => 'Brazilian Real',
-        'number'  => 'BRL'
+        'number'  => '986'
     },
     'BSD' => {
         'country' => ['BAHAMAS (THE)'],
         'name'    => 'Bahamian Dollar',
-        'number'  => 'BSD'
+        'number'  => '044'
     },
     'BTN' => {
         'country' => ['BHUTAN'],
         'name'    => 'Ngultrum',
-        'number'  => 'BTN'
+        'number'  => '064'
     },
     'BWP' => {
         'country' => ['BOTSWANA'],
         'name'    => 'Pula',
-        'number'  => 'BWP'
+        'number'  => '072'
     },
     'BYN' => {
         'country' => ['BELARUS'],
         'name'    => 'Belarussian Ruble',
-        'number'  => 'BYN'
+        'number'  => '933'
     },
     'BZD' => {
         'country' => ['BELIZE'],
         'name'    => 'Belize Dollar',
-        'number'  => 'BZD'
+        'number'  => '084'
     },
     'CAD' => {
         'country' => ['CANADA'],
         'name'    => 'Canadian Dollar',
-        'number'  => 'CAD'
+        'number'  => '124'
     },
     'CDF' => {
         'country' => ['CONGO (THE DEMOCRATIC REPUBLIC OF THE)'],
         'name'    => 'Congolese Franc',
-        'number'  => 'CDF'
+        'number'  => '976'
     },
     'CHE' => {
         'country' => ['SWITZERLAND'],
         'name'    => 'WIR Euro',
-        'number'  => 'CHE'
+        'number'  => '947'
     },
     'CHF' => {
-        'country' => [ 'LIECHTENSTEIN', 'SWITZERLAND' ],
+        'country' => [
+            'LIECHTENSTEIN',
+            'SWITZERLAND'
+        ],
         'name'    => 'Swiss Franc',
-        'number'  => 'CHF'
+        'number'  => '756'
     },
     'CHW' => {
         'country' => ['SWITZERLAND'],
         'name'    => 'WIR Franc',
-        'number'  => 'CHW'
+        'number'  => '948'
     },
     'CLF' => {
         'country' => ['CHILE'],
         'name'    => 'Unidad de Fomento',
-        'number'  => 'CLF'
+        'number'  => '990'
     },
     'CLP' => {
         'country' => ['CHILE'],
         'name'    => 'Chilean Peso',
-        'number'  => 'CLP'
+        'number'  => '152'
     },
     'CNY' => {
         'country' => ['CHINA'],
         'name'    => 'Yuan Renminbi',
-        'number'  => 'CNY'
+        'number'  => '156'
     },
     'COP' => {
         'country' => ['COLOMBIA'],
         'name'    => 'Colombian Peso',
-        'number'  => 'COP'
+        'number'  => '170'
     },
     'COU' => {
         'country' => ['COLOMBIA'],
         'name'    => 'Unidad de Valor Real',
-        'number'  => 'COU'
+        'number'  => '970'
     },
     'CRC' => {
         'country' => ['COSTA RICA'],
         'name'    => 'Costa Rican Colon',
-        'number'  => 'CRC'
+        'number'  => '188'
     },
     'CUC' => {
         'country' => ['CUBA'],
         'name'    => 'Peso Convertible',
-        'number'  => 'CUC'
+        'number'  => '931'
     },
     'CUP' => {
         'country' => ['CUBA'],
         'name'    => 'Cuban Peso',
-        'number'  => 'CUP'
+        'number'  => '192'
     },
     'CVE' => {
         'country' => ['CABO VERDE'],
         'name'    => 'Cabo Verde Escudo',
-        'number'  => 'CVE'
+        'number'  => '132'
     },
     'CZK' => {
         'country' => ['CZECH REPUBLIC (THE)'],
         'name'    => 'Czech Koruna',
-        'number'  => 'CZK'
+        'number'  => '203'
     },
     'DJF' => {
         'country' => ['DJIBOUTI'],
         'name'    => 'Djibouti Franc',
-        'number'  => 'DJF'
+        'number'  => '262'
     },
     'DKK' => {
-        'country' => [ 'DENMARK', 'FAROE ISLANDS (THE)', 'GREENLAND' ],
+        'country' => [
+            'DENMARK',
+            'FAROE ISLANDS (THE)',
+            'GREENLAND'
+        ],
         'name'    => 'Danish Krone',
-        'number'  => 'DKK'
+        'number'  => '208'
     },
     'DOP' => {
         'country' => ['DOMINICAN REPUBLIC (THE)'],
         'name'    => 'Dominican Peso',
-        'number'  => 'DOP'
+        'number'  => '214'
     },
     'DZD' => {
         'country' => ['ALGERIA'],
         'name'    => 'Algerian Dinar',
-        'number'  => 'DZD'
+        'number'  => '012'
     },
     'EGP' => {
         'country' => ['EGYPT'],
         'name'    => 'Egyptian Pound',
-        'number'  => 'EGP'
+        'number'  => '818'
     },
     'ERN' => {
         'country' => ['ERITREA'],
         'name'    => 'Nakfa',
-        'number'  => 'ERN'
+        'number'  => '232'
     },
     'ETB' => {
         'country' => ['ETHIOPIA'],
         'name'    => 'Ethiopian Birr',
-        'number'  => 'ETB'
+        'number'  => '230'
     },
     'EUR' => {
         'country' => [
-            "\x{c5}LAND ISLANDS",                'ANDORRA',
-            'AUSTRIA',                           'BELGIUM',
-            'CYPRUS',                            'ESTONIA',
-            'EUROPEAN UNION',                    'FINLAND',
-            'FRANCE',                            'FRENCH GUIANA',
-            'FRENCH SOUTHERN TERRITORIES (THE)', 'GERMANY',
-            'GREECE',                            'GUADELOUPE',
-            'HOLY SEE (THE)',                    'IRELAND',
-            'ITALY',                             'LATVIA',
-            'LITHUANIA',                         'LUXEMBOURG',
-            'MALTA',                             'MARTINIQUE',
-            'MAYOTTE',                           'MONACO',
-            'MONTENEGRO',                        'NETHERLANDS (THE)',
-            'PORTUGAL',                          "R\x{c9}UNION",
-            "SAINT BARTH\x{c9}LEMY",             'SAINT MARTIN (FRENCH PART)',
-            'SAINT PIERRE AND MIQUELON',         'SAN MARINO',
-            'SLOVAKIA',                          'SLOVENIA',
+            'ÅLAND ISLANDS',
+            'ANDORRA',
+            'AUSTRIA',
+            'BELGIUM',
+            'CYPRUS',
+            'ESTONIA',
+            'EUROPEAN UNION',
+            'FINLAND',
+            'FRANCE',
+            'FRENCH GUIANA',
+            'FRENCH SOUTHERN TERRITORIES (THE)',
+            'GERMANY',
+            'GREECE',
+            'GUADELOUPE',
+            'HOLY SEE (THE)',
+            'IRELAND',
+            'ITALY',
+            'LATVIA',
+            'LITHUANIA',
+            'LUXEMBOURG',
+            'MALTA',
+            'MARTINIQUE',
+            'MAYOTTE',
+            'MONACO',
+            'MONTENEGRO',
+            'NETHERLANDS (THE)',
+            'PORTUGAL',
+            'RÉUNION',
+            'SAINT BARTHÉLEMY',
+            'SAINT MARTIN (FRENCH PART)',
+            'SAINT PIERRE AND MIQUELON',
+            'SAN MARINO',
+            'SLOVAKIA',
+            'SLOVENIA',
             'SPAIN'
         ],
-        'name'   => 'Euro',
-        'number' => 'EUR'
+        'name'    => 'Euro',
+        'number'  => '978'
     },
     'FJD' => {
         'country' => ['FIJI'],
         'name'    => 'Fiji Dollar',
-        'number'  => 'FJD'
+        'number'  => '242'
     },
     'FKP' => {
         'country' => ['FALKLAND ISLANDS (THE) [MALVINAS]'],
         'name'    => 'Falkland Islands Pound',
-        'number'  => 'FKP'
+        'number'  => '238'
     },
     'GBP' => {
         'country' => [
-            'GUERNSEY', 'ISLE OF MAN', 'JERSEY',
+            'GUERNSEY',
+            'ISLE OF MAN',
+            'JERSEY',
             'UNITED KINGDOM OF GREAT BRITAIN AND NORTHERN IRELAND (THE)'
         ],
-        'name'   => 'Pound Sterling',
-        'number' => 'GBP'
+        'name'    => 'Pound Sterling',
+        'number'  => '826'
     },
     'GEL' => {
         'country' => ['GEORGIA'],
         'name'    => 'Lari',
-        'number'  => 'GEL'
+        'number'  => '981'
     },
     'GHS' => {
         'country' => ['GHANA'],
         'name'    => 'Ghana Cedi',
-        'number'  => 'GHS'
+        'number'  => '936'
     },
     'GIP' => {
         'country' => ['GIBRALTAR'],
         'name'    => 'Gibraltar Pound',
-        'number'  => 'GIP'
+        'number'  => '292'
     },
     'GMD' => {
         'country' => ['GAMBIA (THE)'],
         'name'    => 'Dalasi',
-        'number'  => 'GMD'
+        'number'  => '270'
     },
     'GNF' => {
         'country' => ['GUINEA'],
         'name'    => 'Guinea Franc',
-        'number'  => 'GNF'
+        'number'  => '324'
     },
     'GTQ' => {
         'country' => ['GUATEMALA'],
         'name'    => 'Quetzal',
-        'number'  => 'GTQ'
+        'number'  => '320'
     },
     'GYD' => {
         'country' => ['GUYANA'],
         'name'    => 'Guyana Dollar',
-        'number'  => 'GYD'
+        'number'  => '328'
     },
     'HKD' => {
         'country' => ['HONG KONG'],
         'name'    => 'Hong Kong Dollar',
-        'number'  => 'HKD'
+        'number'  => '344'
     },
     'HNL' => {
         'country' => ['HONDURAS'],
         'name'    => 'Lempira',
-        'number'  => 'HNL'
+        'number'  => '340'
     },
     'HRK' => {
         'country' => ['CROATIA'],
         'name'    => 'Kuna',
-        'number'  => 'HRK'
+        'number'  => '191'
     },
     'HTG' => {
         'country' => ['HAITI'],
         'name'    => 'Gourde',
-        'number'  => 'HTG'
+        'number'  => '332'
     },
     'HUF' => {
         'country' => ['HUNGARY'],
         'name'    => 'Forint',
-        'number'  => 'HUF'
+        'number'  => '348'
     },
     'IDR' => {
         'country' => ['INDONESIA'],
         'name'    => 'Rupiah',
-        'number'  => 'IDR'
+        'number'  => '360'
     },
     'ILS' => {
         'country' => ['ISRAEL'],
         'name'    => 'New Israeli Sheqel',
-        'number'  => 'ILS'
+        'number'  => '376'
     },
     'INR' => {
-        'country' => [ 'BHUTAN', 'INDIA' ],
+        'country' => [
+            'BHUTAN',
+            'INDIA'
+        ],
         'name'    => 'Indian Rupee',
-        'number'  => 'INR'
+        'number'  => '356'
     },
     'IQD' => {
         'country' => ['IRAQ'],
         'name'    => 'Iraqi Dinar',
-        'number'  => 'IQD'
+        'number'  => '368'
     },
     'IRR' => {
         'country' => ['IRAN (ISLAMIC REPUBLIC OF)'],
         'name'    => 'Iranian Rial',
-        'number'  => 'IRR'
+        'number'  => '364'
     },
     'ISK' => {
         'country' => ['ICELAND'],
         'name'    => 'Iceland Krona',
-        'number'  => 'ISK'
+        'number'  => '352'
     },
     'JMD' => {
         'country' => ['JAMAICA'],
         'name'    => 'Jamaican Dollar',
-        'number'  => 'JMD'
+        'number'  => '388'
     },
     'JOD' => {
         'country' => ['JORDAN'],
         'name'    => 'Jordanian Dinar',
-        'number'  => 'JOD'
+        'number'  => '400'
     },
     'JPY' => {
         'country' => ['JAPAN'],
         'name'    => 'Yen',
-        'number'  => 'JPY'
+        'number'  => '392'
     },
     'KES' => {
         'country' => ['KENYA'],
         'name'    => 'Kenyan Shilling',
-        'number'  => 'KES'
+        'number'  => '404'
     },
     'KGS' => {
         'country' => ['KYRGYZSTAN'],
         'name'    => 'Som',
-        'number'  => 'KGS'
+        'number'  => '417'
     },
     'KHR' => {
         'country' => ['CAMBODIA'],
         'name'    => 'Riel',
-        'number'  => 'KHR'
+        'number'  => '116'
     },
     'KMF' => {
         'country' => ['COMOROS (THE)'],
         'name'    => 'Comoro Franc',
-        'number'  => 'KMF'
+        'number'  => '174'
     },
     'KPW' => {
-        'country' => ["KOREA (THE DEMOCRATIC PEOPLE\x{2019}S REPUBLIC OF)"],
+        'country' => ['KOREA (THE DEMOCRATIC PEOPLE’S REPUBLIC OF)'],
         'name'    => 'North Korean Won',
-        'number'  => 'KPW'
+        'number'  => '408'
     },
     'KRW' => {
         'country' => ['KOREA (THE REPUBLIC OF)'],
         'name'    => 'Won',
-        'number'  => 'KRW'
+        'number'  => '410'
     },
     'KWD' => {
         'country' => ['KUWAIT'],
         'name'    => 'Kuwaiti Dinar',
-        'number'  => 'KWD'
+        'number'  => '414'
     },
     'KYD' => {
         'country' => ['CAYMAN ISLANDS (THE)'],
         'name'    => 'Cayman Islands Dollar',
-        'number'  => 'KYD'
+        'number'  => '136'
     },
     'KZT' => {
         'country' => ['KAZAKHSTAN'],
         'name'    => 'Tenge',
-        'number'  => 'KZT'
+        'number'  => '398'
     },
     'LAK' => {
-        'country' => ["LAO PEOPLE\x{2019}S DEMOCRATIC REPUBLIC (THE)"],
+        'country' => ['LAO PEOPLE’S DEMOCRATIC REPUBLIC (THE)'],
         'name'    => 'Kip',
-        'number'  => 'LAK'
+        'number'  => '418'
     },
     'LBP' => {
         'country' => ['LEBANON'],
         'name'    => 'Lebanese Pound',
-        'number'  => 'LBP'
+        'number'  => '422'
     },
     'LKR' => {
         'country' => ['SRI LANKA'],
         'name'    => 'Sri Lanka Rupee',
-        'number'  => 'LKR'
+        'number'  => '144'
     },
     'LRD' => {
         'country' => ['LIBERIA'],
         'name'    => 'Liberian Dollar',
-        'number'  => 'LRD'
+        'number'  => '430'
     },
     'LSL' => {
         'country' => ['LESOTHO'],
         'name'    => 'Loti',
-        'number'  => 'LSL'
+        'number'  => '426'
     },
     'LYD' => {
         'country' => ['LIBYA'],
         'name'    => 'Libyan Dinar',
-        'number'  => 'LYD'
+        'number'  => '434'
     },
     'MAD' => {
-        'country' => [ 'MOROCCO', 'WESTERN SAHARA' ],
+        'country' => [
+            'MOROCCO',
+            'WESTERN SAHARA'
+        ],
         'name'    => 'Moroccan Dirham',
-        'number'  => 'MAD'
+        'number'  => '504'
     },
     'MDL' => {
         'country' => ['MOLDOVA (THE REPUBLIC OF)'],
         'name'    => 'Moldovan Leu',
-        'number'  => 'MDL'
+        'number'  => '498'
     },
     'MGA' => {
         'country' => ['MADAGASCAR'],
         'name'    => 'Malagasy Ariary',
-        'number'  => 'MGA'
+        'number'  => '969'
     },
     'MKD' => {
-        'country' => ['MACEDONIA (THE FORMER YUGOSLAV REPUBLIC OF)'],
+        'country' => ['REPUBLIC OF NORTH MACEDONIA'],
         'name'    => 'Denar',
-        'number'  => 'MKD'
+        'number'  => '807'
     },
     'MMK' => {
         'country' => ['MYANMAR'],
         'name'    => 'Kyat',
-        'number'  => 'MMK'
+        'number'  => '104'
     },
     'MNT' => {
         'country' => ['MONGOLIA'],
         'name'    => 'Tugrik',
-        'number'  => 'MNT'
+        'number'  => '496'
     },
     'MOP' => {
         'country' => ['MACAO'],
         'name'    => 'Pataca',
-        'number'  => 'MOP'
+        'number'  => '446'
     },
     'MRU' => {
         'country' => ['MAURITANIA'],
         'name'    => 'Ouguiya',
-        'number'  => 'MRU'
+        'number'  => '929'
     },
     'MUR' => {
         'country' => ['MAURITIUS'],
         'name'    => 'Mauritius Rupee',
-        'number'  => 'MUR'
+        'number'  => '480'
     },
     'MVR' => {
         'country' => ['MALDIVES'],
         'name'    => 'Rufiyaa',
-        'number'  => 'MVR'
+        'number'  => '462'
     },
     'MWK' => {
         'country' => ['MALAWI'],
         'name'    => 'Kwacha',
-        'number'  => 'MWK'
+        'number'  => '454'
     },
     'MXN' => {
         'country' => ['MEXICO'],
         'name'    => 'Mexican Peso',
-        'number'  => 'MXN'
+        'number'  => '484'
     },
     'MXV' => {
         'country' => ['MEXICO'],
         'name'    => 'Mexican Unidad de Inversion (UDI)',
-        'number'  => 'MXV'
+        'number'  => '979'
     },
     'MYR' => {
         'country' => ['MALAYSIA'],
         'name'    => 'Malaysian Ringgit',
-        'number'  => 'MYR'
+        'number'  => '458'
     },
     'MZN' => {
         'country' => ['MOZAMBIQUE'],
         'name'    => 'Mozambique Metical',
-        'number'  => 'MZN'
+        'number'  => '943'
     },
     'NAD' => {
         'country' => ['NAMIBIA'],
         'name'    => 'Namibia Dollar',
-        'number'  => 'NAD'
+        'number'  => '516'
     },
     'NGN' => {
         'country' => ['NIGERIA'],
         'name'    => 'Naira',
-        'number'  => 'NGN'
+        'number'  => '566'
     },
     'NIO' => {
         'country' => ['NICARAGUA'],
         'name'    => 'Cordoba Oro',
-        'number'  => 'NIO'
+        'number'  => '558'
     },
     'NOK' => {
-        'country' => [ 'BOUVET ISLAND', 'NORWAY', 'SVALBARD AND JAN MAYEN' ],
+        'country' => [
+            'BOUVET ISLAND',
+            'NORWAY',
+            'SVALBARD AND JAN MAYEN'
+        ],
         'name'    => 'Norwegian Krone',
-        'number'  => 'NOK'
+        'number'  => '578'
     },
     'NPR' => {
         'country' => ['NEPAL'],
         'name'    => 'Nepalese Rupee',
-        'number'  => 'NPR'
+        'number'  => '524'
     },
     'NZD' => {
         'country' => [
-            'COOK ISLANDS (THE)', 'NEW ZEALAND', 'NIUE', 'PITCAIRN', 'TOKELAU'
+            'COOK ISLANDS (THE)',
+            'NEW ZEALAND',
+            'NIUE',
+            'PITCAIRN',
+            'TOKELAU'
         ],
-        'name'   => 'New Zealand Dollar',
-        'number' => 'NZD'
+        'name'    => 'New Zealand Dollar',
+        'number'  => '554'
     },
     'OMR' => {
         'country' => ['OMAN'],
         'name'    => 'Rial Omani',
-        'number'  => 'OMR'
+        'number'  => '512'
     },
     'PAB' => {
         'country' => ['PANAMA'],
         'name'    => 'Balboa',
-        'number'  => 'PAB'
+        'number'  => '590'
     },
     'PEN' => {
         'country' => ['PERU'],
         'name'    => 'Nuevo Sol',
-        'number'  => 'PEN'
+        'number'  => '604'
     },
     'PGK' => {
         'country' => ['PAPUA NEW GUINEA'],
         'name'    => 'Kina',
-        'number'  => 'PGK'
+        'number'  => '598'
     },
     'PHP' => {
         'country' => ['PHILIPPINES (THE)'],
         'name'    => 'Philippine Peso',
-        'number'  => 'PHP'
+        'number'  => '608'
     },
     'PKR' => {
         'country' => ['PAKISTAN'],
         'name'    => 'Pakistan Rupee',
-        'number'  => 'PKR'
+        'number'  => '586'
     },
     'PLN' => {
         'country' => ['POLAND'],
         'name'    => 'Zloty',
-        'number'  => 'PLN'
+        'number'  => '985'
     },
     'PYG' => {
         'country' => ['PARAGUAY'],
         'name'    => 'Guarani',
-        'number'  => 'PYG'
+        'number'  => '600'
     },
     'QAR' => {
         'country' => ['QATAR'],
         'name'    => 'Qatari Rial',
-        'number'  => 'QAR'
+        'number'  => '634'
     },
     'RON' => {
         'country' => ['ROMANIA'],
         'name'    => 'Romanian Leu',
-        'number'  => 'RON'
+        'number'  => '946'
     },
     'RSD' => {
         'country' => ['SERBIA'],
         'name'    => 'Serbian Dinar',
-        'number'  => 'RSD'
+        'number'  => '941'
     },
     'RUB' => {
         'country' => ['RUSSIAN FEDERATION (THE)'],
         'name'    => 'Russian Ruble',
-        'number'  => 'RUB'
+        'number'  => '643'
     },
     'RWF' => {
         'country' => ['RWANDA'],
         'name'    => 'Rwanda Franc',
-        'number'  => 'RWF'
+        'number'  => '646'
     },
     'SAR' => {
         'country' => ['SAUDI ARABIA'],
         'name'    => 'Saudi Riyal',
-        'number'  => 'SAR'
+        'number'  => '682'
     },
     'SBD' => {
         'country' => ['SOLOMON ISLANDS'],
         'name'    => 'Solomon Islands Dollar',
-        'number'  => 'SBD'
+        'number'  => '090'
     },
     'SCR' => {
         'country' => ['SEYCHELLES'],
         'name'    => 'Seychelles Rupee',
-        'number'  => 'SCR'
+        'number'  => '690'
     },
     'SDG' => {
         'country' => ['SUDAN (THE)'],
         'name'    => 'Sudanese Pound',
-        'number'  => 'SDG'
+        'number'  => '938'
     },
     'SEK' => {
         'country' => ['SWEDEN'],
         'name'    => 'Swedish Krona',
-        'number'  => 'SEK'
+        'number'  => '752'
     },
     'SGD' => {
         'country' => ['SINGAPORE'],
         'name'    => 'Singapore Dollar',
-        'number'  => 'SGD'
+        'number'  => '702'
     },
     'SHP' => {
         'country' => ['SAINT HELENA, ASCENSION AND TRISTAN DA CUNHA'],
         'name'    => 'Saint Helena Pound',
-        'number'  => 'SHP'
+        'number'  => '654'
     },
     'SLL' => {
         'country' => ['SIERRA LEONE'],
         'name'    => 'Leone',
-        'number'  => 'SLL'
+        'number'  => '694'
     },
     'SOS' => {
         'country' => ['SOMALIA'],
         'name'    => 'Somali Shilling',
-        'number'  => 'SOS'
+        'number'  => '706'
     },
     'SRD' => {
         'country' => ['SURINAME'],
         'name'    => 'Surinam Dollar',
-        'number'  => 'SRD'
+        'number'  => '968'
     },
     'SSP' => {
         'country' => ['SOUTH SUDAN'],
         'name'    => 'South Sudanese Pound',
-        'number'  => 'SSP'
+        'number'  => '728'
     },
     'STN' => {
         'country' => ['SAO TOME AND PRINCIPE'],
         'name'    => 'Dobra',
-        'number'  => 'STN'
+        'number'  => '930'
     },
     'SVC' => {
         'country' => ['EL SALVADOR'],
         'name'    => 'El Salvador Colon',
-        'number'  => 'SVC'
+        'number'  => '222'
     },
     'SYP' => {
         'country' => ['SYRIAN ARAB REPUBLIC'],
         'name'    => 'Syrian Pound',
-        'number'  => 'SYP'
+        'number'  => '760'
     },
     'SZL' => {
         'country' => ['SWAZILAND'],
         'name'    => 'Lilangeni',
-        'number'  => 'SZL'
+        'number'  => '748'
     },
     'THB' => {
         'country' => ['THAILAND'],
         'name'    => 'Baht',
-        'number'  => 'THB'
+        'number'  => '764'
     },
     'TJS' => {
         'country' => ['TAJIKISTAN'],
         'name'    => 'Somoni',
-        'number'  => 'TJS'
+        'number'  => '972'
     },
     'TMT' => {
         'country' => ['TURKMENISTAN'],
         'name'    => 'Turkmenistan New Manat',
-        'number'  => 'TMT'
+        'number'  => '934'
     },
     'TND' => {
         'country' => ['TUNISIA'],
         'name'    => 'Tunisian Dinar',
-        'number'  => 'TND'
+        'number'  => '788'
     },
     'TOP' => {
         'country' => ['TONGA'],
-        'name'    => "Pa\x{2019}anga",
-        'number'  => 'TOP'
+        'name'    => 'Pa’anga',
+        'number'  => '776'
     },
     'TRY' => {
         'country' => ['TURKEY'],
         'name'    => 'Turkish Lira',
-        'number'  => 'TRY'
+        'number'  => '949'
     },
     'TTD' => {
         'country' => ['TRINIDAD AND TOBAGO'],
         'name'    => 'Trinidad and Tobago Dollar',
-        'number'  => 'TTD'
+        'number'  => '780'
     },
     'TWD' => {
         'country' => ['TAIWAN (PROVINCE OF CHINA)'],
         'name'    => 'New Taiwan Dollar',
-        'number'  => 'TWD'
+        'number'  => '901'
     },
     'TZS' => {
         'country' => ['TANZANIA, UNITED REPUBLIC OF'],
         'name'    => 'Tanzanian Shilling',
-        'number'  => 'TZS'
+        'number'  => '834'
     },
     'UAH' => {
         'country' => ['UKRAINE'],
         'name'    => 'Hryvnia',
-        'number'  => 'UAH'
+        'number'  => '980'
     },
     'UGX' => {
         'country' => ['UGANDA'],
         'name'    => 'Uganda Shilling',
-        'number'  => 'UGX'
+        'number'  => '800'
     },
     'USD' => {
         'country' => [
@@ -834,120 +879,138 @@ my %currencies =
             'VIRGIN ISLANDS (BRITISH)',
             'VIRGIN ISLANDS (U.S.)'
         ],
-        'name'   => 'US Dollar',
-        'number' => 'USD'
+        'name'    => 'US Dollar',
+        'number'  => '840'
     },
     'USN' => {
         'country' => ['UNITED STATES OF AMERICA (THE)'],
         'name'    => 'US Dollar (Next day)',
-        'number'  => 'USN'
+        'number'  => '997'
     },
     'UYI' => {
         'country' => ['URUGUAY'],
         'name'    => 'Uruguay Peso en Unidades Indexadas (URUIURUI)',
-        'number'  => 'UYI'
+        'number'  => '940'
     },
     'UYU' => {
         'country' => ['URUGUAY'],
         'name'    => 'Peso Uruguayo',
-        'number'  => 'UYU'
+        'number'  => '858'
     },
     'UZS' => {
         'country' => ['UZBEKISTAN'],
         'name'    => 'Uzbekistan Sum',
-        'number'  => 'UZS'
+        'number'  => '860'
     },
     'VEF' => {
         'country' => ['VENEZUELA (BOLIVARIAN REPUBLIC OF)'],
         'name'    => 'Bolivar',
-        'number'  => 'VEF'
+        'number'  => '937'
     },
     'VND' => {
         'country' => ['VIET NAM'],
         'name'    => 'Dong',
-        'number'  => 'VND'
+        'number'  => '704'
     },
     'VUV' => {
         'country' => ['VANUATU'],
         'name'    => 'Vatu',
-        'number'  => 'VUV'
+        'number'  => '548'
     },
     'WST' => {
         'country' => ['SAMOA'],
         'name'    => 'Tala',
-        'number'  => 'WST'
+        'number'  => '882'
     },
     'XAF' => {
         'country' => [
-            'CAMEROON',          'CENTRAL AFRICAN REPUBLIC (THE)',
-            'CHAD',              'CONGO (THE)',
-            'EQUATORIAL GUINEA', 'GABON'
+            'CAMEROON',
+            'CENTRAL AFRICAN REPUBLIC (THE)',
+            'CHAD',
+            'CONGO (THE)',
+            'EQUATORIAL GUINEA',
+            'GABON'
         ],
-        'name'   => 'CFA Franc BEAC',
-        'number' => 'XAF'
+        'name'    => 'CFA Franc BEAC',
+        'number'  => '950'
     },
     'XCD' => {
         'country' => [
-            'ANGUILLA',    'ANTIGUA AND BARBUDA',
-            'DOMINICA',    'GRENADA',
-            'MONTSERRAT',  'SAINT KITTS AND NEVIS',
-            'SAINT LUCIA', 'SAINT VINCENT AND THE GRENADINES'
+            'ANGUILLA',
+            'ANTIGUA AND BARBUDA',
+            'DOMINICA',
+            'GRENADA',
+            'MONTSERRAT',
+            'SAINT KITTS AND NEVIS',
+            'SAINT LUCIA',
+            'SAINT VINCENT AND THE GRENADINES'
         ],
-        'name'   => 'East Caribbean Dollar',
-        'number' => 'XCD'
+        'name'    => 'East Caribbean Dollar',
+        'number'  => '951'
     },
     'XDR' => {
-        'country' => ["INTERNATIONAL MONETARY FUND (IMF)\x{a0}"],
+        'country' => ['INTERNATIONAL MONETARY FUND (IMF) '],
         'name'    => 'SDR (Special Drawing Right)',
-        'number'  => 'XDR'
+        'number'  => '960'
     },
     'XOF' => {
         'country' => [
-            'BENIN',              'BURKINA FASO',
-            "C\x{d4}TE D'IVOIRE", 'GUINEA-BISSAU',
-            'MALI',               'NIGER (THE)',
-            'SENEGAL',            'TOGO'
+            'BENIN',
+            'BURKINA FASO',
+            'CÔTE D\'IVOIRE',
+            'GUINEA-BISSAU',
+            'MALI',
+            'NIGER (THE)',
+            'SENEGAL',
+            'TOGO'
         ],
-        'name'   => 'CFA Franc BCEAO',
-        'number' => 'XOF'
+        'name'    => 'CFA Franc BCEAO',
+        'number'  => '952'
     },
     'XPF' => {
-        'country' =>
-          [ 'FRENCH POLYNESIA', 'NEW CALEDONIA', 'WALLIS AND FUTUNA' ],
-        'name'   => 'CFP Franc',
-        'number' => 'XPF'
+        'country' => [
+            'FRENCH POLYNESIA',
+            'NEW CALEDONIA',
+            'WALLIS AND FUTUNA'
+        ],
+        'name'    => 'CFP Franc',
+        'number'  => '953'
     },
     'XSU' => {
-        'country' =>
-          ['SISTEMA UNITARIO DE COMPENSACION REGIONAL DE PAGOS "SUCRE"'],
-        'name'   => 'Sucre',
-        'number' => 'XSU'
+        'country' => ['SISTEMA UNITARIO DE COMPENSACION REGIONAL DE PAGOS "SUCRE"'],
+        'name'    => 'Sucre',
+        'number'  => '994'
     },
     'XUA' => {
         'country' => ['MEMBER COUNTRIES OF THE AFRICAN DEVELOPMENT BANK GROUP'],
         'name'    => 'ADB Unit of Account',
-        'number'  => 'XUA'
+        'number'  => '965'
     },
     'YER' => {
         'country' => ['YEMEN'],
         'name'    => 'Yemeni Rial',
-        'number'  => 'YER'
+        'number'  => '886'
     },
     'ZAR' => {
-        'country' => [ 'LESOTHO', 'NAMIBIA', 'SOUTH AFRICA' ],
+        'country' => [
+            'LESOTHO',
+            'NAMIBIA',
+            'SOUTH AFRICA'
+        ],
         'name'    => 'Rand',
-        'number'  => 'ZAR'
+        'number'  => '710'
     },
     'ZMW' => {
         'country' => ['ZAMBIA'],
         'name'    => 'Zambian Kwacha',
-        'number'  => 'ZMW'
+        'number'  => '967'
     },
     'ZWL' => {
         'country' => ['ZIMBABWE'],
         'name'    => 'Zimbabwe Dollar',
-        'number'  => 'ZWL'
-    }
+        'number'  => '932'
+    },
+
 );
 
 # =======================================================================
@@ -979,6 +1042,9 @@ sub fetch_live_currencies {
   foreach my $row ($ts->rows) {
     my ($country, $currency, $code, $number) = @$row;
     next unless defined $code;
+
+    # some country names in the HTML source have multi-space breaks
+    $country =~ s/ +/ /g;
   
     if (exists $result{$code}) {
       push(@{$result{$code}->{'country'}}, $country);
