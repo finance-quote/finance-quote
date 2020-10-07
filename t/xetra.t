@@ -31,10 +31,13 @@ sub test_stock_success {
     my $exchange = $_[1] eq "" ? "XETR" : substr($_[1], 1);
     ok( $quotes{ $stock, "exchange" } eq $exchange, "exchange is correct" );
 
-    my @fields = ( "close", "high", "low", "last", "date", "isodate" );
+    my @fields = ( "close", "last", "date", "isodate" );
     foreach my $field (@fields) {
         ok( $quotes { $stock, $field }, $field . " is defined");
     }
+
+    ok( exists ( $quotes { $stock, "high" } ), "high key exists" );
+    ok( exists ( $quotes { $stock, "low" } ), "low key exists" );
 }
 
 my @stocks = ( "IE0031442068", "IE00B4L5YC18" );
