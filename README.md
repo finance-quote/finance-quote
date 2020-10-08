@@ -87,22 +87,23 @@ of Finance::Quote for installation.
 If you downloaded the Finance-Quote-N.NN.tar.gz tarball from CPAN
 (N.NN is the version number, ex: Finance-Quote-1.47.tar.gz),
 run the following commands:
-    
-    tar xzf Finance-Quote-1.47.tar.gz
-    cd Finance-Quote-1.47.tar.gz
+
+    tar xzf Finance-Quote-1.50.tar.gz
+    cd Finance-Quote-1.50.tar.gz
     perl Makefile.PL
     make         
     make test    
     make install 
     
+
 If you have the CPAN module installed:
 Using cpanm (Requires App::cpanminus) 
-                 
+
     cpanm Finance::Quote
 
 or 
 Using CPAN shell
-    
+
     perl -MCPAN -e shell
     install Finance::Quote
 
@@ -330,7 +331,7 @@ rates.
     Copyright 1998, Dj Padzensky
     Copyright 1998, 1999 Linas Vepstas
     Copyright 2000, Yannick LE NY (update for Yahoo Europe and YahooQuote)
-    Copyright 2000-2001, Paul Fenwick (updates for ASX, maintainence and release)
+    Copyright 2000-2001, Paul Fenwick (updates for ASX, maintenance and release)
     Copyright 2000-2001, Brent Neal (update for TIAA-CREF)
     Copyright 2000 Volker Stuerzl (DWS and VWD support)
     Copyright 2000 Keith Refson (Trustnet support)

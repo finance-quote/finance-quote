@@ -1100,14 +1100,30 @@ the empty list may be returned, or undef in a scalar context.
 
 =head1 INSTALLATION
 
-To install this module, run the following commands:
+Please note that the Github repository is not meant for general users
+of Finance::Quote for installation.
 
+If you downloaded the Finance-Quote-N.NN.tar.gz tarball from CPAN
+(N.NN is the version number, ex: Finance-Quote-1.47.tar.gz),
+run the following commands:
+    
+    tar xzf Finance-Quote-1.50.tar.gz
+    cd Finance-Quote-1.50.tar.gz
     perl Makefile.PL
-    make
-    make test
-    make install
+    make         
+    make test    
+    make install 
+    
+If you have the CPAN module installed:
+Using cpanm (Requires App::cpanminus) 
+                 
+    cpanm Finance::Quote
 
-For more detailed instructions, please see the INSTALL file.
+or 
+Using CPAN shell
+    
+    perl -MCPAN -e shell
+    install Finance::Quote
 
 =head1 SUPPORT AND DOCUMENTATION
 
@@ -1120,17 +1136,9 @@ You can also look for information at:
 
 =over
 
-=item RT, CPAN's request tracker
+=item Finance::Quote GitHub project
 
-http://rt.cpan.org/NoAuth/Bugs.html?Dist=Finance-Quote
-
-=item AnnoCPAN, Annotated CPAN documentation
-
-http://annocpan.org/dist/Finance-Quote
-
-=item CPAN Ratings
-
-http://cpanratings.perl.org/d/Finance-Quote
+https://github.com/finance-quote/finance-quote
 
 =item Search CPAN
 
@@ -1325,21 +1333,21 @@ This function will return a isoformatted time
 
 =head1 ENVIRONMENT
 
-Finance::Quote respects all environment that your installed
-version of LWP::UserAgent respects.  Most importantly, it
-respects the http_proxy environment variable.
+Finance::Quote respects all environment that your installed version of
+LWP::UserAgent respects.  Most importantly, it respects the http_proxy
+environment variable.
 
 =head1 BUGS
 
 There are no ways for a user to define a failover list.
 
-The two-dimensional hash is a somewhat unwieldly method of passing
-around information when compared to references.  A future release
-is planned that will allow for information to be returned in a
-more flexible $hash{$stock}{$label} style format.
+The two-dimensional hash is a somewhat unwieldly method of passing around
+information when compared to references.  A future release is planned that will
+allow for information to be returned in a more flexible $hash{$stock}{$label}
+style format.
 
-There is no way to override the default behaviour to cache currency
-conversion rates.
+There is no way to override the default behaviour to cache currency conversion
+rates.
 
 =head1 COPYRIGHT & LICENSE
 
@@ -1361,11 +1369,11 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or (at
 your option) any later version.
 
-Currency information fetched through this module is bound by
-Yahoo!'s terms and conditons.
+Currency information fetched through this module is bound by the terms and
+conditons of the data source.
 
-Other copyrights and conditions may apply to data fetched through this
-module.  Please refer to the sub-modules for further information.
+Other copyrights and conditions may apply to data fetched through this module.
+Please refer to the sub-modules for further information.
 
 =head1 AUTHORS
 
@@ -1394,19 +1402,31 @@ http://www.gnucash.org/
 
 =head1 SEE ALSO
 
-Finance::Quote::AEX, Finance::Quote::ASX, Finance::Quote::Cdnfundlibrary,
-Finance::Quote::DWS, Finance::Quote::Fidelity, Finance::Quote::FinanceCanada,
-Finance::Quote::Fool,
-Finance::Quote::FTPortfolios, Finance::Quote::Tdefunds,
+Finance::Quote::AEX, Finance::Quote::AIAHK, Finance::Quote::ASEGR,
+Finance::Quote::ASX, Finance::Quote::BMONesbittBurns, Finance::Quote::BSERO,
+Finance::Quote::Bourso, Finance::Quote::CSE, Finance::Quote::Cdnfundlibrary,
+Finance::Quote::Citywire, Finance::Quote::Cominvest,
+Finance::Quote::Currencies, Finance::Quote::DWS, Finance::Quote::Deka,
+Finance::Quote::FTPortfolios, Finance::Quote::FTfunds,
+Finance::Quote::Fidelity, Finance::Quote::FidelityFixed,
+Finance::Quote::FinanceCanada, Finance::Quote::Finanzpartner,
+Finance::Quote::Fool, Finance::Quote::GoldMoney, Finance::Quote::HEX,
+Finance::Quote::HU, Finance::Quote::IEXCloud, Finance::Quote::IndiaMutual,
+Finance::Quote::LeRevenu, Finance::Quote::MStaruk,
+Finance::Quote::ManInvestments, Finance::Quote::Morningstar,
+Finance::Quote::MorningstarAU, Finance::Quote::MorningstarCH,
+Finance::Quote::MorningstarJP, Finance::Quote::NZX, Finance::Quote::Oslobors,
+Finance::Quote::Platinum, Finance::Quote::SEB, Finance::Quote::TNetuk,
+Finance::Quote::TSP, Finance::Quote::TSX, Finance::Quote::Tdefunds,
 Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice, Finance::Quote::Trustnet,
-Finance::Quote::VWD, Finance::Quote::Yahoo::Australia,
-Finance::Quote::Yahoo::Europe, Finance::Quote::Yahoo::USA,
-LWP::UserAgent
+Finance::Quote::USFedBonds, Finance::Quote::Union, Finance::Quote::VWD,
+Finance::Quote::YahooJSON, Finance::Quote::YahooYQL, Finance::Quote::ZA,
+Finance::Quote::ZA_UnitTrusts
 
-You should have also received the Finance::Quote hacker's guide with
-this package.  Please read it if you are interested in adding extra
-methods to this package.  The hacker's guide can also be found
-on the Finance::Quote website, http://finance-quote.sourceforge.net/
+You should have received the Finance::Quote hacker's guide with this package.
+Please read it if you are interested in adding extra methods to this package.
+The latest hacker's guide can also be found on GitHub at
+https://github.com/finance-quote/finance-quote/blob/master/Documentation/Hackers-Guide
 
 =cut
