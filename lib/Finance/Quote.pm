@@ -45,7 +45,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
 
 @MODULES = qw/AEX AIAHK ASEGR ASX AlphaVantage BMONesbittBurns BSERO Bourso CSE Cdnfundlibrary
               Citywire Cominvest Currencies DWS Deka FTPortfolios FTfunds Fidelity FidelityFixed
-              Finanzpartner Fool GoldMoney HEX HU IEXCloud IndiaMutual LeRevenu MStaruk
+              Finanzpartner Fool Fundata GoldMoney HEX HU IEXCloud IndiaMutual LeRevenu MStaruk
               ManInvestments Morningstar MorningstarAU MorningstarCH MorningstarJP NZX Oslobors
               Platinum SEB SIXfunds SIXshares TNetuk TSP TSX Tdefunds Tdwaterhouse
               Tiaacref Troweprice Trustnet USFedBonds Union VWD XETRA YahooJSON YahooYQL ZA ZA_UnitTrusts/;
@@ -1460,9 +1460,10 @@ Finance::Quote::Citywire, Finance::Quote::Cominvest,
 Finance::Quote::Currencies, Finance::Quote::DWS, Finance::Quote::Deka,
 Finance::Quote::FTPortfolios, Finance::Quote::FTfunds,
 Finance::Quote::Fidelity, Finance::Quote::FidelityFixed,
-Finance::Quote::Finanzpartner, Finance::Quote::Fool, Finance::Quote::GoldMoney,
-Finance::Quote::HEX, Finance::Quote::HU, Finance::Quote::IEXCloud,
-Finance::Quote::IndiaMutual, Finance::Quote::LeRevenu, Finance::Quote::MStaruk,
+Finance::Quote::Finanzpartner, Finance::Quote::Fool, Finance::Quote::Fundata
+Finance::Quote::GoldMoney, Finance::Quote::HEX, Finance::Quote::HU,
+Finance::Quote::IEXCloud, Finance::Quote::IndiaMutual,
+Finance::Quote::LeRevenu, Finance::Quote::MStaruk,
 Finance::Quote::ManInvestments, Finance::Quote::Morningstar,
 Finance::Quote::MorningstarAU, Finance::Quote::MorningstarCH,
 Finance::Quote::MorningstarJP, Finance::Quote::NZX, Finance::Quote::Oslobors,

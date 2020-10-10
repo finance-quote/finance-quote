@@ -316,6 +316,20 @@
     - NVR
     - BKNG
 #
+- module: Fundata.pm
+  state: TBD
+  added: TBD
+  change: TBD
+  removed:
+  urls:
+    - http://idata.fundata.com/MutualFunds/FundSnapshot.aspx?IID={$symbol}
+  apikey: false
+  notes: ~
+  testfile: fundata.t
+  testcases:
+    - 301871
+    - 234263
+#
 - module: GoldMoney.pm
   state: TBD
   added: TBD
