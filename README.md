@@ -143,8 +143,8 @@ set default class values, and one helper function.
     my $q = Finance::Quote->new('AEX', 'Fool')
     my $q = Finance::Quote->new(timeout => 30)
     my $q = Finance::Quote->new('YahooJSON', fetch_currency => 'EUR')
-    my $q = Finance::Quote->new('AlphaVantage' => {API_KEY => '...')
-    my $q = Finance::Quote->new('IEXCloud', 'iexcloud' => {API_KEY => '...');
+    my $q = Finance::Quote->new('alphavantage' => {API_KEY => '...'})
+    my $q = Finance::Quote->new('IEXCloud', 'iexcloud' => {API_KEY => '...'});
 
 A Finance::Quote object uses one or more methods to fetch quotes for
 securities. `new` constructs a Finance::Quote object and enables the caller
@@ -155,7 +155,7 @@ fetch method, and pass method-specific parameters to the corresponding method.
 - `failover =` B> where `B` is a boolean value indicating if failover is acceptable
 - `fetch_currency =` C> sets the desired currency code to `C` for fetch results
 - `required_labels =` A> sets the required labels for fetch results to array `A`
-- `<method-name`> as a string is the name of a specific method to load
+- `<Module-name`> as a string is the name of a specific Finance::Quote::Module to load
 - `<method-name` => H> passes hash `H` to the method-name constructor
 
 With no arguments, `new` creates a Finance::Quote object with the default
@@ -165,7 +165,7 @@ list.  This allows users to load their own custom modules without having to
 change existing code. If any method names are passed to `new` or the flag
 '-defaults' is included in the argument list, then FQ\_LOAD\_QUOTELET is ignored.
 
-When new() is passed one or more method arguments, an object is created with
+When new() is passed one or more class name arguments, an object is created with
 only the specified modules loaded.  If the first argument is '-defaults', then
 the default modules will be loaded first, followed by any other specified
 modules. Note that the FQ\_LOAD\_QUOTELET environment variable must begin with
@@ -173,7 +173,7 @@ modules. Note that the FQ\_LOAD\_QUOTELET environment variable must begin with
 
 Method names correspond to the Perl module in the Finance::Quote module space.
 For example, `Finance::Quote-`new('ASX')> will load the module
-Finance::Quote::ASX.
+Finance::Quote::ASX, which provides the method "asx".
 
 ## GET\_DEFAULT\_CURRENCY\_FIELDS
 

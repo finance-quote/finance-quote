@@ -1149,8 +1149,8 @@ set default class values, and one helper function.
     my $q = Finance::Quote->new('AEX', 'Fool')
     my $q = Finance::Quote->new(timeout => 30)
     my $q = Finance::Quote->new('YahooJSON', fetch_currency => 'EUR')
-    my $q = Finance::Quote->new('AlphaVantage' => {API_KEY => '...')
-    my $q = Finance::Quote->new('IEXCloud', 'iexcloud' => {API_KEY => '...');
+    my $q = Finance::Quote->new('alphavantage' => {API_KEY => '...'})
+    my $q = Finance::Quote->new('IEXCloud', 'iexcloud' => {API_KEY => '...'});
 
 A Finance::Quote object uses one or more methods to fetch quotes for
 securities. C<new> constructs a Finance::Quote object and enables the caller
@@ -1167,7 +1167,7 @@ fetch method, and pass method-specific parameters to the corresponding method.
 
 =item C<required_labels => A> sets the required labels for fetch results to array C<A>
 
-=item C<<method-name>> as a string is the name of a specific method to load
+=item C<<Module-name>> as a string is the name of a specific Finance::Quote::Module to load
 
 =item C<<method-name> => H> passes hash C<H> to the method-name constructor
 
@@ -1180,7 +1180,7 @@ list.  This allows users to load their own custom modules without having to
 change existing code. If any method names are passed to C<new> or the flag
 '-defaults' is included in the argument list, then FQ_LOAD_QUOTELET is ignored.
 
-When new() is passed one or more method arguments, an object is created with
+When new() is passed one or more class name arguments, an object is created with
 only the specified modules loaded.  If the first argument is '-defaults', then
 the default modules will be loaded first, followed by any other specified
 modules. Note that the FQ_LOAD_QUOTELET environment variable must begin with
@@ -1188,7 +1188,7 @@ modules. Note that the FQ_LOAD_QUOTELET environment variable must begin with
 
 Method names correspond to the Perl module in the Finance::Quote module space.
 For example, C<Finance::Quote->new('ASX')> will load the module
-Finance::Quote::ASX.
+Finance::Quote::ASX, which provides the method "asx".
 
 =head2 GET_DEFAULT_CURRENCY_FIELDS
 
