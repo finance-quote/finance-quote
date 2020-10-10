@@ -330,6 +330,15 @@ Finance::Quote.
 4. How to contribute your module to the world
 =============================================
 
+Check list:
+
+  o Created a well-named module file in the Finance/Quote/ directory
+  o Included POD documentation at the bottom of module file
+  o Included a VERSION comment just before the use module statements
+  o Added the module name in alphabetical order to the @MODULES variable in Quote.pm
+  o Added the module name in alphabetical order in the SEE ALSO section of the Quote.pm POD
+  o Created a well-named test file in the t/ directory, including a test that succeeds and a test that fails
+
 Contributions to Finance-Quote are best presented as pull requests on GitHub.com.  
 
   A. Create a GitHub account and sign-in
@@ -339,7 +348,6 @@ Contributions to Finance-Quote are best presented as pull requests on GitHub.com
   E. Click "New Pull Request" on https://github.com/finance-quote/finance-quote
   F. Click "Compare Across Forks"
   G. Select the appropriate commits and create the merge request
-
 
 Contact developers at finance-quote-devel@sourceforge.net to discuss
 new modules, ask questions, or get help opening a merge request.
