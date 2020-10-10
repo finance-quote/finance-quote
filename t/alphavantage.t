@@ -56,6 +56,7 @@ foreach my $symbol (@symbols) {
     ok( $quotes{ $symbol, "high" } > 0, "$symbol returned high" );
     ok( $quotes{ $symbol, "low" } > 0, "$symbol returned low" );
     ok( $quotes{ $symbol, "volume" } >= 0, "$symbol returned volume" );
+    ok( $quotes{ $symbol, "p_change" } =~ /^[\-\.\d]+$/, "$symbol returned p_change" );
     ok(    substr( $quotes{ $symbol, "isodate" }, 0, 4 ) == $year
                || substr( $quotes{ $symbol, "isodate" }, 0, 4 ) == $lastyear );
     ok(    substr( $quotes{ $symbol, "date" }, 6, 4 ) == $year
