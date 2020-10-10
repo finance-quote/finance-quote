@@ -51,7 +51,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
               MorningstarJP MStaruk NZX Oslobors Platinum SEB SIXfunds SIXshares
               StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref
               TNetuk Troweprice Trustnet Union USFedBonds VWD ZA
-              Cominvest Finanzpartner YahooJSON YahooYQL ZA_UnitTrusts/;
+              Cominvest Finanzpartner XETRA YahooJSON YahooYQL ZA_UnitTrusts/;
 
 # Call on the Yahoo API:
 #  - "f=l1" should return a single value - the "Last Trade (Price Only)"
