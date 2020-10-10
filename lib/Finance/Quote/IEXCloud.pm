@@ -28,8 +28,7 @@ use HTTP::Request::Common;
 use Text::Template;
 use DateTime::Format::Strptime qw( strptime strftime );
 
-my $IEX_URL     = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://cloud.iexapis.com/v1/stock/{$symbol}/quote?token={$token}');
-my $IEX_API_KEY = $ENV{"IEXCLOUD_API_KEY"};
+my $IEX_URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://cloud.iexapis.com/v1/stock/{$symbol}/quote?token={$token}');
 
 sub methods { 
   return ( iexcloud => \&iexcloud,
@@ -119,7 +118,7 @@ Finance::Quote::IEXClound - Obtain quotes from https://iexcloud.io
 
     use Finance::Quote;
     
-    $q = Finance::Quote->new(iexcloud => {API_KEY => 'your-iexcloud-api-key'});
+    $q = Finance::Quote->new('IEXCloud', iexcloud => {API_KEY => 'your-iexcloud-api-key'});
 
     %info = Finance::Quote->fetch("IBM", "AAPL");
 
@@ -128,7 +127,7 @@ Finance::Quote::IEXClound - Obtain quotes from https://iexcloud.io
 This module fetches information from https://iexcloud.io.
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "iexcloud" in the argument
+also possible to load it explicity by placing "IEXCloud" in the argument
 list to Finance::Quote->new().
 
 This module provides the "iexcloud" fetch method.
@@ -147,7 +146,5 @@ variable IEXCLOUD_API_KEY.
 
 The following labels may be returned by Finance::Quote::IEXClound :
 symbol, open, close, high, low, last, volume, method, isodate, currency.
-
-=head1 SEE ALSO
 
 =cut

@@ -7,12 +7,12 @@ if ( not $ENV{"ONLINE_TEST"} ) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-if ( not $ENV{"ALPHAVANTAGE_API_KEY"} ) {
+if ( not $ENV{"TEST_ALPHAVANTAGE_API_KEY"} ) {
     plan skip_all =>
-        'Set $ENV{ALPHAVANTAGE_API_KEY} to run this test; get one at https://www.alphavantage.co';
+        'Set $ENV{TEST_ALPHAVANTAGE_API_KEY} to run this test; get one at https://www.alphavantage.co';
 }
 
-my $q        = Finance::Quote->new();
+my $q        = Finance::Quote->new('AlphaVantage', 'alphavantage' => {'API_KEY' => $ENV{"TEST_ALPHAVANTAGE_API_KEY"}} );
 my $year     = ( localtime() )[5] + 1900;
 my $lastyear = $year - 1;
 

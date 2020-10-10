@@ -42,7 +42,6 @@ my $maxQueries = { quantity =>5 , seconds => 60}; # no more than x
 
 my $ALPHAVANTAGE_URL =
     'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&datatype=json';
-my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
 
 my %currencies_by_suffix = (
 
@@ -163,19 +162,23 @@ sub alphavantage {
     my $ua = $quoter->user_agent();
     my $launch_time = time();
 
+    my $token = exists $quoter->{module_specific_data}->{alphavantage}->{API_KEY} ? 
+                $quoter->{module_specific_data}->{alphavantage}->{API_KEY}        :
+                $ENV{"ALPHAVANTAGE_API_KEY"};
+
     foreach my $stock (@stocks) {
 
-        if ( !defined $ALPHAVANTAGE_API_KEY ) {
+        if ( !defined $token ) {
             $info{ $stock, 'success' } = 0;
             $info{ $stock, 'errormsg' } =
-                'Expected ALPHAVANTAGE_API_KEY to be set; get an API key at https://www.alphavantage.co';
+                'An AlphaVantage API is required. Get an API key at https://www.alphavantage.co';
             next;
         }
 
         $url =
               $ALPHAVANTAGE_URL
             . '&apikey='
-            . $ALPHAVANTAGE_API_KEY
+            . $token
             . '&symbol='
             . $stock;
 
@@ -299,3 +302,42 @@ sub alphavantage {
 
     return wantarray() ? %info : \%info;
 }
+1;
+
+=head1 NAME
+
+Finance::Quote::AlphaVantage - Obtain quotes from https://iexcloud.io
+
+=head1 SYNOPSIS
+
+    use Finance::Quote;
+    
+    $q = Finance::Quote->new('AlphaVantage', alphavantage => {API_KEY => 'your-alphavantage-api-key'});
+
+    %info = Finance::Quote->fetch("IBM", "AAPL");
+
+=head1 DESCRIPTION
+
+This module fetches information from https://www.alphavantage.co.
+
+This module is loaded by default on a Finance::Quote object. It's also possible
+to load it explicity by placing "AlphaVantage" in the argument list to
+Finance::Quote->new().
+
+This module provides the "alphavantage" fetch method.
+
+=head1 API_KEY
+
+https://www.alphavantage.co requires users to register and obtain an API key, which
+is also called a token.  The token is a sequence of random characters.
+
+The API key may be set by either providing a module specific hash to
+Finance::Quote->new as in the above example, or by setting the environment
+variable ALPHAVANTAGE_API_KEY.
+
+=head1 LABELS RETURNED
+
+The following labels may be returned by Finance::Quote::AlphaVantage :
+symbol, open, close, high, low, last, volume, method, isodate, currency.
+
+=cut
