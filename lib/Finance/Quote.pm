@@ -43,15 +43,12 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $TIMEOUT @MODULES %MODULES %METHODS $AUTOLOAD
             $ALPHAVANTAGE_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
 
-@MODULES = qw/AEX AIAHK AlphaVantage ASEGR ASX BMONesbittBurns
-              BSERO Bourso Cdnfundlibrary Citywire CSE Currencies Deka
-              DWS FTPortfolios Fidelity FidelityFixed FinanceCanada Fool
-              FTfunds HU GoldMoney HEX IEXCloud IndiaMutual LeRevenu
-              ManInvestments Morningstar MorningstarAU MorningstarCH
-              MorningstarJP MStaruk NZX Oslobors Platinum SEB SIXfunds SIXshares
-              StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref
-              TNetuk Troweprice Trustnet Union USFedBonds VWD ZA
-              Cominvest Finanzpartner YahooJSON YahooYQL ZA_UnitTrusts/;
+@MODULES = qw/AEX AIAHK ASEGR ASX AlphaVantage BMONesbittBurns BSERO Bourso CSE Cdnfundlibrary
+              Citywire Cominvest Currencies DWS Deka FTPortfolios FTfunds Fidelity FidelityFixed
+              FinanceCanada Finanzpartner Fool GoldMoney HEX HU IEXCloud IndiaMutual LeRevenu MStaruk
+              ManInvestments Morningstar MorningstarAU MorningstarCH MorningstarJP NZX Oslobors
+              Platinum SEB SIXfunds SIXshares StockHouseCanada TNetuk TSP TSX Tdefunds Tdwaterhouse
+              Tiaacref Troweprice Trustnet USFedBonds Union VWD XETRA YahooJSON YahooYQL ZA ZA_UnitTrusts/;
 
 # Call on the Yahoo API:
 #  - "f=l1" should return a single value - the "Last Trade (Price Only)"
@@ -1475,8 +1472,8 @@ Finance::Quote::TSP, Finance::Quote::TSX, Finance::Quote::Tdefunds,
 Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice, Finance::Quote::Trustnet,
 Finance::Quote::USFedBonds, Finance::Quote::Union, Finance::Quote::VWD,
-Finance::Quote::YahooJSON, Finance::Quote::YahooYQL, Finance::Quote::ZA,
-Finance::Quote::ZA_UnitTrusts
+Finance::Quote::XETRA, Finance::Quote::YahooJSON, Finance::Quote::YahooYQL,
+Finance::Quote::ZA, Finance::Quote::ZA_UnitTrusts
 
 You should have received the Finance::Quote hacker's guide with this package.
 Please read it if you are interested in adding extra methods to this package.

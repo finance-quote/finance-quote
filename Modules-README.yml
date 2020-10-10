@@ -1,5 +1,5 @@
 # Modules
-# vi: set filetype=yaml syntax=yaml noai ts=2 sw=2 ic:   
+# vi: set filetype=yaml syntax=yaml noai ts=2 sw=2 ic:
 # state: working | failing | obsolete | removed
 ---
 - module: AEX.pm
@@ -295,7 +295,7 @@
   added: 2001-05-08
   changed: 2019-06-21
   removed:
-  urls: 
+  urls:
     - http://caps.fool.com/Ticker/{$symbol}.aspx
   apikey: false
   notes: ~
@@ -375,7 +375,7 @@
   apikey: true
   notes: |
     Module retrieves data from IEX Trading (https://iextrading.com/).
-    For API Key - https://iextrading.com/developer/ and set the 
+    For API Key - https://iextrading.com/developer/ and set the
     environment variable IEXCLOUD_API_KEY.
   testfile: iexcloud.t
   testcases:
@@ -559,12 +559,12 @@
   added: 2005-03-02
   changed: 2019-06-09
   removed:
-  urls: 
+  urls:
     - https://www.tsp.gov/InvestmentFunds/FundPerformance/index.html
   apikey: false
-  notes: 
+  notes:
   testfile: tsp.t
-  testcases: 
+  testcases:
     - C
     - F
     - G
@@ -625,11 +625,11 @@
   testfile: tiaacref.t
   testcases:
     - CREFmony
-    - TIAAreal 
-    - TLSRX 
-    - TCMVX 
-    - TLGRX 
-    - CREFbond 
+    - TIAAreal
+    - TLSRX
+    - TCMVX
+    - TLGRX
+    - CREFbond
 #
 - module: Troweprice.pm
   state: TBD
@@ -687,6 +687,17 @@
   testcases:
 #
 - module: VWD.pm
+  state: TBD
+  added: TBD
+  changed: ~
+  removed: ~
+  urls:
+  apikey: false
+  notes: ~
+  testfile: TBD
+  testcases:
+#
+- module: XETRA.pm
   state: TBD
   added: TBD
   changed: ~
