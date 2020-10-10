@@ -42,7 +42,7 @@ my @symbols =  qw/
     ERCB.DE
 /;
 
-plan tests => 10*(1+$#symbols)+10;
+plan tests => 11*(1+$#symbols)+10;
 
 my %quotes = $q->alphavantage( @symbols, "BOGUS" );
 ok(%quotes);
