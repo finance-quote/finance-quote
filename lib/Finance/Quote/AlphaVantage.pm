@@ -246,6 +246,9 @@ sub alphavantage {
         #     }
         # }
 
+        # remove trailing percent sign, if present
+        $quote->{'10. change percent'} =~ s/\%$//;
+
         $info{ $stock, 'success' } = 1;
         $info{ $stock, 'success' }  = 1;
         $info{ $stock, 'symbol' }   = $quote->{'01. symbol'};
