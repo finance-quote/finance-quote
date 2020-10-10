@@ -14,8 +14,8 @@ ok( join(",", sort @target) eq join(",", sort @result), "get_default_currency_fi
 my $timeout = Finance::Quote::get_default_timeout();
 ok( !defined $timeout, "check default timeout is undef");
 
-my @sources = Finance::Quote::get_sources();
-ok( grep( /alphavantage/, @sources), "check for a known source");
+my @methods = Finance::Quote::get_methods();
+ok( grep( /alphavantage/, @methods), "check for a known method");
 
 # new tested in fq-object-methods.t
 

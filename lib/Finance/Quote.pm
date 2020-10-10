@@ -37,7 +37,7 @@ use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
 use Encode;
 use JSON qw( decode_json );
-# use Data::Dumper;
+use Data::Dumper;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $TIMEOUT @MODULES %MODULES %METHODS $AUTOLOAD
@@ -243,17 +243,32 @@ sub _load_modules {
 # _smart_compare (private method function)
 #
 # This function compares values where the method depends on the
-# type of the second parameter.
-#  regex  : compare as regex
-#  scalar : test for substring match
+# type of the parameters.
+#  val1, val2
+#  scalar,scaler - test for substring match
+#  scalar,regex  - test val1 against val2 regex
+#  array,scalar  - return true if any element of array substring matches scalar
+#  array,regex   - return true if any element of array matches regex
 sub _smart_compare {
   my ($val1, $val2) = @_;
-
-  if ( ref $val2 eq 'Regexp' ) {
-    return $val1 =~ $val2;
+ 
+  if ( ref $val1 eq 'ARRAY' ) {
+    if ( ref $val2 eq 'Regexp' ) {
+      my @r = grep {$_ =~ $val2} @$val1;
+      return @r > 0;
+    }
+    else {
+      my @r = grep {$_ =~ /$val2/} @$val1;
+      return @r > 0;
+    }
   }
   else {
-    return index($val1, $val2) > -1
+    if ( ref $val2 eq 'Regexp' ) {
+      return $val1 =~ $val2;
+    }
+    else {
+      return index($val1, $val2) > -1
+    }
   }
 }
 
@@ -263,16 +278,23 @@ sub _smart_compare {
 #
 ################################################################################
 
+# This is a list of fields that will be automatically converted during
+# currency conversion.  If a module provides a currency_fields()
+# function then that list will be used instead.
+
 sub get_default_currency_fields {
   return qw/last high low net bid ask close open day_range year_range
             eps div cap nav price/;
 }
 
 sub get_default_timeout {
-  return $TIMEOUT; 
+  return $TIMEOUT;
 }
 
-sub get_sources {
+# get_methods returns a list of sources which can be passed to fetch to
+# obtain information.
+
+sub get_methods {
   # Create a dummy object to ensure METHODS is populated
   my $t = Finance::Quote->new();
   return(wantarray ? keys %METHODS : [keys %METHODS]);
@@ -281,9 +303,9 @@ sub get_sources {
 # =======================================================================
 # new (public class method)
 #
-# Returns a new Finance::Quote object.  
+# Returns a new Finance::Quote object.
 #
-# Arguments :: 
+# Arguments ::
 #    - zero or more module names from the Finance::Quote::get_sources list
 #    - zero or more named parameters, passes as name => value
 #
@@ -294,12 +316,12 @@ sub get_sources {
 #    - required_labels   # array of required labels in fetch results
 #    - <module-name>     # hash specific to various Finance::Quote modules
 #
-# new()                              # default constructor
-# new('a', 'b')                      # load only modules a and b
-# new(timeout => 30)                 # load all default modules, set timeout
-# new('a', fetch_currency => 'X')    # load only module a, use currency X for results
-# new('z' => {API_KEY => 'K')        # load all modules, pass hash to module z constructor
-# new('z', 'z' => {API_KEY => 'K')   # load only module z and pass hash to its constructor
+# new()                               # default constructor
+# new('a', 'b')                       # load only modules a and b
+# new(timeout => 30)                  # load all default modules, set timeout
+# new('a', fetch_currency => 'X')     # load only module a, use currency X for results
+# new('z' => {API_KEY => 'K'})        # load all modules, pass hash to module z constructor
+# new('z', 'z' => {API_KEY => 'K'})   # load only module z and pass hash to its constructor
 #
 # Enivornment Variables ::
 #    - FQ_LOAD_QUOTELET  # if no modules named in argument list, use ones in this variable
@@ -321,8 +343,8 @@ sub new {
   $this->{TIMEOUT} = $TIMEOUT if defined($TIMEOUT);
 
   # Sort out arguments
-  my %named_parameter = (timeout         => ['', 'TIMEOUT'], 
-                         failover        => ['', 'FAILOVER'], 
+  my %named_parameter = (timeout         => ['', 'TIMEOUT'],
+                         failover        => ['', 'FAILOVER'],
                          fetch_currency  => ['', 'currency'],
                          required_labels => ['ARRAY', 'REQUIRED']);
 
@@ -348,7 +370,7 @@ sub new {
       push (@load_modules, $_[$i]);
     }
   }
-  
+
   # Honor FQ_LOAD_QUOTELET if @load_modules is empty
   if ($ENV{FQ_LOAD_QUOTELET} and !@load_modules) {
     @load_modules = split(' ',$ENV{FQ_LOAD_QUOTELET});
@@ -360,26 +382,6 @@ sub new {
   $this->_load_modules(@load_modules);
 
   return $this;
-}
-
-# =======================================================================
-# Helper function that can scale a field.  This is useful because it
-# handles things like ranges "105.4 - 108.3", and not just straight fields.
-#
-# The function takes a string or number to scale, and the factor to scale
-# it by.  For example, scale_field("1023","0.01") would return "10.23".
-
-sub scale_field {
-  shift if ref $_[0]; # Shift off the object, if there is one.
-
-  my ($field, $scale) = @_;
-  my @chunks = split(/([^0-9.])/,$field);
-
-  for (my $i=0; $i < @chunks; $i++) {
-    next unless $chunks[$i] =~ /\d/;
-    $chunks[$i] *= $scale;
-  }
-  return join("",@chunks);
 }
 
 sub set_default_timeout {
@@ -490,7 +492,7 @@ sub fetch {
     return;
   }
 
-  # Failover code.  This steps through all availabe methods while
+  # Failover code.  This steps through all available methods while
   # we still have failed stocks to look-up.  This loop only
   # runs a single time unless FAILOVER is defined.
   my %returnhash = ();
@@ -688,6 +690,26 @@ sub store_date
 ################################################################################
 
 # =======================================================================
+# Helper function that can scale a field.  This is useful because it
+# handles things like ranges "105.4 - 108.3", and not just straight fields.
+#
+# The function takes a string or number to scale, and the factor to scale
+# it by.  For example, scale_field("1023","0.01") would return "10.23".
+
+sub scale_field {
+  shift if ref $_[0]; # Shift off the object, if there is one.
+
+  my ($field, $scale) = @_;
+  my @chunks = split(/([^0-9.])/,$field);
+
+  for (my $i=0; $i < @chunks; $i++) {
+    next unless $chunks[$i] =~ /\d/;
+    $chunks[$i] *= $scale;
+  }
+  return join("",@chunks);
+}
+
+# =======================================================================
 # currency (public object method)
 #
 # currency allows the conversion of one currency to another.
@@ -773,10 +795,11 @@ if ( $exchange_rate < 0.001 ) {
 #
 # search for available currency codes
 #
-# Usage: $quoter->currency_lookup({ name => qr/australia/i });
-#  $quoter->currency_lookup( code => 'EU' );
-#  $quoter->currency_lookup( name => 'Euro', code => qr/eu/i );
-#  $quoter->currency_lookup();
+# Usage: 
+#   $currency = $quoter->currency_lookup();
+#   $currency = $quoter->currency_lookup( name => "Dollar");
+#   $currency = $quoter->currency_loopup( country => qw/denmark/i );
+#   $currency = $q->currency_lookup(country => qr/united states/i, number => 840);
 #
 # If more than one lookup parameter is given all must match for
 # a currency to match.
@@ -787,48 +810,23 @@ sub currency_lookup {
   my $this = shift if (ref $_[0]);
   $this ||= _dummy();
 
-  # Validate parameters
-  my %valid_params = map { $_ => 1 } qw( name code );
   my %params = @_;
-  my $param_errors = 0;
-  for my $key ( keys %params ) {
-    if ( ! exists $valid_params{$key} ) {
+  my $currencies = Finance::Quote::Currencies::known_currencies();
+
+  my %attributes = map {$_ => 1} map {keys %$_} values %$currencies;
+
+  for my $key (keys %params ) {
+    if ( ! exists $attributes{$key}) {
       warn "Invalid parameter: $key";
-      $param_errors++;
+      return undef;
     }
   }
-  return undef if $param_errors > 0;
-
-  # Retrieve known currencies
-  my $known_currencies = Finance::Quote::Currencies::known_currencies();
-
-  # Return currencies based on parameters
-  my $returned_currencies = {};
-  if ( scalar keys %params == 0 ) {
-    $returned_currencies = $known_currencies;
+  
+  while (my ($tag, $check) = each(%params)) {
+    $currencies = {map {$_ => $currencies->{$_}} grep {_smart_compare($currencies->{$_}->{$tag}, $check)} keys %$currencies};
   }
-  else {
-    for my $code ( keys %{$known_currencies} ) {
-      # Make sure all parameters match
-      my $matched = 0;
-      if ( exists $params{name}
-           &&
-           _smart_compare( $known_currencies->{$code}->{name}, $params{name} )
-         ) {
-        $matched++;
-      }
-      if ( exists $params{code}
-           &&
-           _smart_compare( $code, $params{code} )
-         ) {
-        $matched++;
-      }
-      if ( $matched == scalar keys %params ) {
-        $returned_currencies->{$code} = $known_currencies->{$code}
-      }
-    }
-  }
-  return $returned_currencies;
+  
+  return $currencies;
 }
 
 # =======================================================================
@@ -883,24 +881,9 @@ sub parse_csv_semicolon
 #
 ###############################################################################
 
-# =======================================================================
-# sources (public object method)
-#
-# sources returns a list of sources which can be passed to fetch to
-# obtain information.
-#
-# Usage: @sources   = $quoter->sources();
-#        $sourceref = $quoter->sources();
-
 sub sources {
-  return get_sources();
+  return get_methods();
 }
-
-# default_currency_fields (public method)
-#
-# This is a list of fields that will be automatically converted during
-# currency conversion.  If a module provides a currency_fields()
-# function then that list will be used instead.
 
 sub default_currency_fields {
   return get_default_currency_fields();
@@ -927,7 +910,7 @@ sub default_currency_fields {
 # know what you are doing.
 
 sub set_currency {
-  if (@_ == 1 or !ref($_[0])) { 
+  if (@_ == 1 or !ref($_[0])) {
     # Direct or class call - there is no class default currency
     return undef;
   }
@@ -947,7 +930,7 @@ sub set_currency {
 # for all new objects that will be created.
 
 sub timeout {
-  if (@_ == 1 or !ref($_[0])) { 
+  if (@_ == 1 or !ref($_[0])) {
     # Direct or class call
     Finance::Quote::set_default_timeout(shift);
     return Finance::Quote::get_default_timeout();
@@ -1028,40 +1011,36 @@ Finance::Quote - Get stock and mutual fund quotes from various exchanges
 
    $q->timeout(60);
 
-   $conversion_rate = $q->currency("AUD","USD");
+   $conversion_rate = $q->currency("AUD", "USD");
    $q->set_currency("EUR");  # Return all info in Euros.
 
    $q->require_labels(qw/price date high low volume/);
 
    $q->failover(1); # Set failover support (on by default).
 
-   %quotes  = $q->fetch("nasdaq",@stocks);
-   $hashref = $q->fetch("nyse",@stocks);
+   %quotes  = $q->fetch("nasdaq", @stocks);
+   $hashref = $q->fetch("nyse", @stocks);
 
 =head1 DESCRIPTION
 
-This module gets stock quotes from various internet sources, including
-Yahoo! Finance, Fidelity Investments, and the Australian Stock Exchange.
-There are two methods of using this module -- a functional interface
-that is deprecated, and an object-orientated method that provides
-greater flexibility and stability.
+This module gets stock quotes from various internet sources all over the world.
+Quotes are obtained by constructing a quoter object and using the fetch method
+to gather data, which is returned as a two-dimensional hash (or a reference to
+such a hash, if called in a scalar context).  For example:
 
-With the exception of straight currency exchange rates, all information
-is returned as a two-dimensional hash (or a reference to such a hash,
-if called in a scalar context).  For example:
-
-    %info = $q->fetch("australia","CML");
-    print "The price of CML is ".$info{"CML","price"};
+    $q = Finance::Quote->new;
+    %info = $q->fetch("australia", "CML");
+    print "The price of CML is ".$info{"CML", "price"};
 
 The first part of the hash (eg, "CML") is referred to as the stock.
 The second part (in this case, "price") is referred to as the label.
 
 =head2 LABELS
 
-When information about a stock is returned, the following standard labels
-may be used.  Some custom-written modules may use labels not mentioned
-here.  If you wish to be certain that you obtain a certain set of labels
-for a given stock, you can specify that using require_labels().
+When information about a stock is returned, the following standard labels may
+be used.  Some custom-written modules may use labels not mentioned here.  If
+you wish to be certain that you obtain a certain set of labels for a given
+stock, you can specify that using require_labels().
 
     name         Company or Mutual Fund Name
     last         Last Price
@@ -1095,8 +1074,8 @@ for a given stock, you can specify that using require_labels().
                  information.
     type         The type of equity returned
 
-If all stock lookups fail (possibly because of a failed connection) then
-the empty list may be returned, or undef in a scalar context.
+If all stock lookups fail (possibly because of a failed connection) then the
+empty list may be returned, or undef in a scalar context.
 
 =head1 INSTALLATION
 
@@ -1104,24 +1083,24 @@ Please note that the Github repository is not meant for general users
 of Finance::Quote for installation.
 
 If you downloaded the Finance-Quote-N.NN.tar.gz tarball from CPAN
-(N.NN is the version number, ex: Finance-Quote-1.47.tar.gz),
+(N.NN is the version number, ex: Finance-Quote-1.50.tar.gz),
 run the following commands:
-    
+
     tar xzf Finance-Quote-1.50.tar.gz
     cd Finance-Quote-1.50.tar.gz
     perl Makefile.PL
-    make         
-    make test    
-    make install 
-    
+    make
+    make test
+    make install
+
 If you have the CPAN module installed:
-Using cpanm (Requires App::cpanminus) 
-                 
+Using cpanm (Requires App::cpanminus)
+
     cpanm Finance::Quote
 
-or 
+or
 Using CPAN shell
-    
+
     perl -MCPAN -e shell
     install Finance::Quote
 
@@ -1158,178 +1137,248 @@ http://www.gnucash.org/
 
 =back
 
-=head1 AVAILABLE METHODS
+=head1 PUBLIC CLASS METHODS
+
+Finance::Quote has public class methods to construct a quoter object, get or
+set default class values, and one helper function.
 
 =head2 NEW
 
-    my $q = Finance::Quote->new;
-    my $q = Finance::Quote->new("ASX");
-    my $q = Finance::Quote->new("-defaults", "CustomModule");
+    my $q = Finance::Quote->new()
+    my $q = Finance::Quote->new('-defaults')
+    my $q = Finance::Quote->new('AEX', 'Fool')
+    my $q = Finance::Quote->new(timeout => 30)
+    my $q = Finance::Quote->new('YahooJSON', fetch_currency => 'EUR')
+    my $q = Finance::Quote->new('AlphaVantage' => {API_KEY => '...')
+    my $q = Finance::Quote->new('IEXCloud', 'iexcloud' => {API_KEY => '...');
 
-With no arguents, this creates a new Finance::Quote object
-with the default methods.  If the environment variable
-FQ_LOAD_QUOTELET is set, then the contents of FQ_LOAD_QUOTELET
-(split on whitespace) will be used as the argument list.  This allows
-users to load their own custom modules without having to change
-existing code.  If you do not want users to be able to load their own
-modules at run-time, pass an explicit argumetn to ->new() (usually
-"-defaults").
+A Finance::Quote object uses one or more methods to fetch quotes for
+securities. C<new> constructs a Finance::Quote object and enables the caller
+to load only specific methods, set parameters that control the behavior of the
+fetch method, and pass method-specific parameters to the corresponding method.
 
-When new() is passed one or more arguments, an object is created with
-only the specified modules loaded.  If the first argument is
-"-defaults", then the default modules will be loaded first, followed
-by any other specified modules.
+=over
+=item C<timeout => T> sets the web request timeout to C<T> seconds
+=item C<failover => B> where C<B> is a boolean value indicating if failover is acceptable
+=item C<fetch_currency => C> sets the desired currency code to C<C> for fetch results
+=item C<required_labels => A> sets the required labels for fetch results to array C<A>
+=item C<<method-name>> as a string is the name of a specific method to load
+=item C<<method-name> => H> passes hash C<H> to the method-name constructor
+=back
 
-Note that the FQ_LOAD_QUOTELET environment variable must begin
-with "-defaults" if you wish the default modules to be loaded.
+With no arguments, C<new> creates a Finance::Quote object with the default
+methods.  If the environment variable FQ_LOAD_QUOTELET is set, then the
+contents of FQ_LOAD_QUOTELET (split on whitespace) will be used as the argument
+list.  This allows users to load their own custom modules without having to
+change existing code. If any method names are passed to C<new> or the flag
+'-defaults' is included in the argument list, then FQ_LOAD_QUOTELET is ignored.
 
-Any modules specified will automatically be looked for in the
-Finance::Quote:: module-space.  Hence,
-Finance::Quote->new("ASX") will load the module Finance::Quote::ASX.
+When new() is passed one or more method arguments, an object is created with
+only the specified modules loaded.  If the first argument is '-defaults', then
+the default modules will be loaded first, followed by any other specified
+modules. Note that the FQ_LOAD_QUOTELET environment variable must begin with
+'-defaults' if you wish the default modules to be loaded.
 
-Please read the Finance::Quote hacker's guide for information
-on how to create new modules for Finance::Quote.
+Method names correspond to the Perl module in the Finance::Quote module space.
+For example, C<Finance::Quote->new('ASX')> will load the module
+Finance::Quote::ASX.
+
+=head2 GET_DEFAULT_CURRENCY_FIELDS
+
+    my @fields = Finance::Quote::get_default_currency_fields();
+
+C<get_default_currency_fields> returns the standard list of fields in a quote
+that are automatically converted during currency conversion. Individual modules
+may override this list.
+
+=head2 GET_DEFAULT_TIMEOUT
+  
+    my $value = Finance::Quote::get_default_timeout();
+
+C<get_default_timeout> returns the current Finance::Quote default timeout in
+seconds for web requests. Finance::Quote does not specify a default timeout,
+deferring to the underlying user agent for web requests. So this function
+will return undef unless C<set_default_timeout> was previously called.
+
+=head2 SET_DEFAULT_TIMEOUT
+
+    Finance::Quote::set_default_timeout(45);
+
+C<set_default_timeout> sets the Finance::Quote default timeout to a new value.
+
+=head2 GET_METHODS
+
+    my @methods = Finance::Quote::get_methods();
+
+C<get_methods> returns the list of methods that can be passed to C<new> when
+creating a quoter object and as the first argument to C<fetch>.
+
+=head1 PUBLIC OBJECT METHODS
+
+=head2 B_TO_BILLIONS
+
+    my $value = $q->B_to_billions("20B");
+
+C<B_to_billions> is a utility function that expands a numeric string with a "B"
+suffix to the corresponding multiple of 1000000000.
+
+=head2 DECIMAL_SHIFTUP
+
+    my $value = $q->decimal_shiftup("123.45", 1);  # returns 1234.5
+    my $value = $q->decimal_shiftup("0.25", 1);    # returns 2.5
+
+C<decimal_shiftup> moves a the decimal point in a numeric string the specified
+number of places to the right.
 
 =head2 FETCH
 
-    my %stocks  = $q->fetch("usa","IBM","MSFT","LNUX");
-    my $hashref = $q->fetch("usa","IBM","MSFT","LNUX");
+    my %stocks  = $q->fetch("alphavantage", "IBM", "MSFT", "LNUX");
+    my $hashref = $q->fetch("usa", "IBM", "MSFT", "LNUX");
 
-Fetch takes an exchange as its first argument.  The second and remaining
-arguments are treated as stock-names.  In the standard Finance::Quote
-distribution, the following exchanges are recognised:
+C<fetch> takes a method as its first argument and the remaining arguments are
+treated as securities.  If the quoter C<$q> was constructed with a specific
+method or methods, then only those methods are available.
 
-    australia   Australan Stock Exchange
-    dwsfunds    Deutsche Bank Gruppe funds
-    fidelity    Fidelity Investments
-    tiaacref    TIAA-CREF
-    troweprice    T. Rowe Price
-    europe    European Markets
-    canada    Canadian Markets
-    usa     USA Markets
-    nyse    New York Stock Exchange
-    nasdaq    NASDAQ
-    uk_unit_trusts  UK Unit Trusts
-    vwd     Vereinigte Wirtschaftsdienste GmbH
+When called in an array context, a hash is returned.  In a scalar context, a
+reference to a hash will be returned. 
 
-When called in an array context, a hash is returned.  In a scalar
-context, a reference to a hash will be returned.  The structure
-of this hash is described earlier in this document.
+The keys for the returned hash are C<{SECURITY,LABEL}>.  For the above example
+call, C<$stocks{"IBM","high"}> is the high value for IBM as determined by the
+AlphaVantage method.
 
-The fetch method automatically arranges for failover support and
-currency conversion if requested.
+=head2 GET_FAILOVER
 
-If you wish to fetch information from only one particular source,
-then consult the documentation of that sub-module for further
-information.
+    my $failover = $q->get_failover();
 
-=head2 SOURCES
+Failover is when the C<fetch> method attempts to retrieve quote information for
+a security from alternate sources when the requested method fails.
+C<get_failover> returns a boolean value indicating if the quoter object will
+use failover or not.
 
-    my @sources = $q->sources;
-    my $listref = $q->sources;
+=head2 SET_FAILOVER
 
-The sources method returns a list of sources that have currently been loaded and
-can be passed to the fetch method.  If you're providing a user with a list of
-sources to choose from, then it is recommended that you use this method.
+    $q->set_failover(False);
 
-=head2 CURRENCY_LOOKUP
+C<set_failover> sets the failover flag on the quoter object. 
 
-    $currencies_by_name = $q->currency_lookup( name => 'Australian' );
-    $currencies_by_code = $q->currency_lookup( code => qr/^b/i      );
-    $currencies_by_both = $q->currency_lookup( name => qr/pound/i
-                                             , code => 'GB'         );
+=head2 GET_FETCH_CURRENCY
 
-The currency_lookup method provides a search against the known currencies. The
-list of currencies is based on the available currencies in the Yahoo Currency
-Converter (the list is stored within the module as the list should be fairly
-static).
+    my $currency = $q->get_fetch_currency();
 
-The lookup can be done by currency name (ie "Australian Dollar"), by
-code (ie "AUD") or both. You can pass either a scalar or regular expression
-as a search value - scalar values are matched by substring while regular
-expressions are matched as-is (no changes are made to the expression).
+C<get_fetch_currency> returns either the desired currency code for the quoter
+object or undef if no target currency was set during construction or with the
+C<set_fetch_currency> function.
 
-See L<Finance::Quote::Currencies::fetch_live_currencies> (and the
-C<t/currencies.t> test file) for a way to make sure that the stored
-currency list is up to date.
+=head2 SET_FETCH_CURRENCY
 
-=head2 CURRENCY
+    $q->set_fetch_currency("FRF");  # Get results in French Francs.
 
-    $conversion_rate = $q->currency("USD","AUD");
+C<set_fetch_currency> method is used to request that all information be
+returned in the specified currency.  Note that this increases the chance
+stock-lookup failure, as remote requests must be made to fetch both the stock
+information and the currency rates.  In order to improve reliability and speed
+performance, currency conversion rates are cached and are assumed not to change
+for the duration of the Finance::Quote object.
 
-The currency method takes two arguments, and returns a conversion rate
-that can be used to convert from the first currency into the second.
-In the example above, we've requested the factor that would convert
-US dollars into Australian dollars.
+Currency conversions are requested through AlphaVantage, which requires an API
+key.  Please see Finance::Quote::AlphaVantage for more information.
 
-The currency method will return a false value if a given currency
-conversion cannot be fetched.
+=head2 GET_REQUIRED_LABELS
 
-At the moment, currency rates are fetched from Yahoo!, and the
-information returned is governed by Yahoo!'s terms and conditions.
-See Finance::Quote::Yahoo for more information.
+    my @labels = $q->get_required_labels();
 
-=head2 SET_CURRENCY
+C<get_required_labels> returns the list of labels that must be populated for a
+security quote to be considered valid and returned by C<fetch>.
 
-    $q->set_currency("FRF");  # Get results in French Francs.
+=head2 SET_REQUIRED_LABELS
 
-The set_currency method can be used to request that all information be
-returned in the specified currency.  Note that this increases the
-chance stock-lookup failure, as remote requests must be made to fetch
-both the stock information and the currency rates.  In order to
-improve reliability and speed performance, currency conversion rates
-are cached and are assumed not to change for the duration of the
-Finance::Quote object.
+    my $labels = ['close', 'isodate', 'last'];
+    $q->set_required_labels($labels);
 
-At this time, currency conversions are only looked up using Yahoo!'s
-services, and hence information obtained with automatic currency
-conversion is bound by Yahoo!'s terms and conditions.
+C<set_required_labels> updates the list of required labels for the quoter object.
 
-=head2 FAILOVER
+=head2 GET_TIMEOUT
 
-    $q->failover(1);  # Set automatic failover support.
-    $q->failover(0);  # Disable failover support.
+    my $timeout = $q->get_timeout();
 
-The failover method takes a single argument which either sets (if
-true) or unsets (if false) automatic failover support.  If automatic
-failover support is enabled (default) then multiple information
-sources will be tried if one or more sources fail to return the
-requested information.  Failover support will significantly increase
-the time spent looking for a non-existant stock.
+C<get_timeout> returns the timeout in seconds the quoter object is using for
+web requests.
 
-If the failover method is called with no arguments, or with an
-undefined argument, it will return the current failover state
-(true/false).
+=head2 SET_TIMEOUT
 
-=head2 USER_AGENT
+    $q->set_timeout(45);
 
-    my $ua = $q->user_agent;
+C<set_timeout> updated teh timeout in seconds for the quoter object.
 
-The user_agent method returns the LWP::UserAgent object that
-Finance::Quote and its helpers use.  Normally this would not
-be useful to an application, however it is possible to modify
-the user-agent directly using this method:
+=head2 GET_USER_AGENT
 
-    $q->user_agent->timeout(10);  # Set the timeout directly.
+    my $ua = $q->get_user_agent();
 
-
-=head2 SCALE_FIELD
-
-    my $pounds = $q->scale_field($item_in_pence,0.01);
-
-The scale_field() function is a helper that can scale complex fields such
-as ranges (eg, "102.5 - 103.8") and other fields where the numbers should
-be scaled but any surrounding text preserved.  It's most useful in writing
-new Finance::Quote modules where you may retrieve information in a
-non-ISO4217 unit (such as cents) and would like to scale it to a more
-useful unit (like dollars).
+C<get_user_agent> returns the LWP::UserAgent the quoter object is using for web
+requests.
 
 =head2 ISOTIME
 
     $q->isoTime("11:39PM");    # returns "23:39"
     $q->isoTime("9:10 AM");    # returns "09:10"
 
-This function will return a isoformatted time
+C<isoTime> returns an ISO formatted time.
+
+=head1 PUBLIC CLASS OR OBJECT METHODS
+
+The following methods are available as class methods, but can also be called
+from Finance::Quote objects.
+
+=head2 SCALE_FIELD
+
+    my $value = Finance::Quote->scale_field('1023', '0.01')
+
+C<scale_field> is a utility function that scales the first argument by the
+second argument.  In the above example, C<value> is C<'10.23'>.
+
+=head2 CURRENCY
+
+    my $value = Finance::Quote->currency('15.95 USD', 'AUD');
+
+C<currency> converts a value with a currency code suffix to another currency
+using the current exchange rate returned by the AlphaVantage method.
+AlphaVantage requires an API key. See Finance::Quote::AlphaVantage for more
+information.
+
+=head2 CURRENCY_LOOKUP
+
+    my $currency = $quoter->currency_lookup();
+    my $currency = $quoter->currency_lookup( name => "Caribbean");
+    my $currency = $quoter->currency_loopup( country => qw/denmark/i );
+    my $currency = $q->currency_lookup(country => qr/united states/i, number => 840);
+
+C<currency_lookup> takes zero or more constraints and filters the list of
+currencies known to Finance::Quote. It returns a hash reference where the keys
+are ISO currency codes and the values are hash references containing metadata
+about the currency. 
+
+A constraint is a key name and either  a scalar or regular expression.  A
+currency satisfies the constraint if its metadata hash contains the constraint
+key and the value of that metadata field matches the regular expression or
+contains the constraint value as a substring.  If the metadata field is an
+array, then it satisfies the constraint if any value in the array satisfies the
+constraint.
+
+=head2 PARSE_CSV
+
+    my @list = Finance::Quote::parse_csv($string);
+
+C<parse_csv> is a utility function for spliting a comma seperated value string
+into a list of terms, treating double-quoted strings that contain commas as a
+single value.
+
+=head2 PARSE_CSV_SEMICOLON
+
+    my @list = Finance::Quote::parse_csv_semicolon($string);
+
+C<parse_csv> is a utility function for spliting a semicolon seperated value string
+into a list of terms, treating double-quoted strings that contain semicolons as a
+single value.
 
 =head1 ENVIRONMENT
 
@@ -1342,9 +1391,7 @@ environment variable.
 There are no ways for a user to define a failover list.
 
 The two-dimensional hash is a somewhat unwieldly method of passing around
-information when compared to references.  A future release is planned that will
-allow for information to be returned in a more flexible $hash{$stock}{$label}
-style format.
+information when compared to references
 
 There is no way to override the default behaviour to cache currency conversion
 rates.
@@ -1364,10 +1411,10 @@ rates.
  Copyright 2001 James Treacy (TD Waterhouse support)
  Copyright 2008 Erik Colson (isoTime)
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or (at
-your option) any later version.
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later
+version.
 
 Currency information fetched through this module is bound by the terms and
 conditons of the data source.

@@ -38,14 +38,14 @@ Finance::Quote::_convert                     # does currency conversion
 Finance::Quote::_dummy                       # return dummy quoter
 Finance::Quote::_load_modules                # Load all the modules
 Finance::Quote::_smart_compare               # compare where methods depends on type of parameter
+Finance::Quote::store_date                   # normalize date
 
 Public Class Methods
 --------------------
 Finance::Quote::get_default_currency_fields  # [new] fields converted during currency change
 Finance::Quote::get_default_timeout          # [new] get (if set) default timeout for new quote objects
-Finance::Quote::get_sources                  # [new] returns a list of valid sources for fetch
+Finance::Quote::get_methods                  # [new] returns a list of valid methods for fetch
 Finance::Quote::new                          # [new] add option to set module-specific instance variables
-Finance::Quote::scale_field                  # helper function to manipulate decimals
 Finance::Quote::set_default_timeout          # [new] set default timeout for new quote objects
 
 
@@ -68,10 +68,10 @@ Finance::Quote::set_failover                 # [new] Set failover control to tru
 Finance::Quote::set_fetch_currency           # [new] Set target currency for results from fetch
 Finance::Quote::set_required_labels          # [new] Set required labels for lookup
 Finance::Quote::set_timeout                  # [new] Set timeout for this quoter object
-Finance::Quote::store_date                   # normalize date
 
 Public Class or Object Methods
 ------------------------------
+Finance::Quote::scale_field                  # helper function to manipulate decimals
 Finance::Quote::currency                     # convert between currencies
 Finance::Quote::currency_lookup              # search for currencies codes
 Finance::Quote::parse_csv                    # parse csv
