@@ -460,8 +460,8 @@ Finance::Quote::TSP, Finance::Quote::TSX, Finance::Quote::Tdefunds,
 Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice, Finance::Quote::Trustnet,
 Finance::Quote::USFedBonds, Finance::Quote::Union, Finance::Quote::VWD,
-Finance::Quote::YahooJSON, Finance::Quote::YahooYQL, Finance::Quote::ZA,
-Finance::Quote::ZA\_UnitTrusts
+Finance::Quote::XETRA, Finance::Quote::YahooJSON, Finance::Quote::YahooYQL,
+Finance::Quote::ZA, Finance::Quote::ZA\_UnitTrusts
 
 You should have received the Finance::Quote hacker's guide with this package.
 Please read it if you are interested in adding extra methods to this package.

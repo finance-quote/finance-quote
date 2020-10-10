@@ -18,6 +18,8 @@ package Finance::Quote::XETRA;
 
 require 5.005;
 
+# VERSION
+
 use strict;
 use JSON qw( decode_json );
 use vars qw($VERSION $YIND_URL_HEAD $YIND_URL_TAIL);
