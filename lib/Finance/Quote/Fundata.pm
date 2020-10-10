@@ -126,7 +126,7 @@ sub fundata {
             #print $class if ($DEBUG);
             #print $id if ($DEBUG);
            
-            if ($id eq "ctl00_MainContent_lblNavpsDate") {
+            if (defined $id and $id eq "ctl00_MainContent_lblNavpsDate") {
                 my $rawline = $parser->get_trimmed_text('/span');
                 print $rawline."\n" if ($DEBUG);
                 # (9/3/2020)
@@ -139,7 +139,7 @@ sub fundata {
                 }
             }
 
-            if ($id eq "ctl00_MainContent_txtNavps") {
+            if (defined $id and $id eq "ctl00_MainContent_txtNavps") {
                 $nav = $parser->get_trimmed_text('/span');
                 $nav =~ s/\$//g;
                 print $nav if ($DEBUG);
