@@ -1158,12 +1158,19 @@ to load only specific methods, set parameters that control the behavior of the
 fetch method, and pass method-specific parameters to the corresponding method.
 
 =over
+
 =item C<timeout => T> sets the web request timeout to C<T> seconds
+
 =item C<failover => B> where C<B> is a boolean value indicating if failover is acceptable
+
 =item C<fetch_currency => C> sets the desired currency code to C<C> for fetch results
+
 =item C<required_labels => A> sets the required labels for fetch results to array C<A>
+
 =item C<<method-name>> as a string is the name of a specific method to load
+
 =item C<<method-name> => H> passes hash C<H> to the method-name constructor
+
 =back
 
 With no arguments, C<new> creates a Finance::Quote object with the default

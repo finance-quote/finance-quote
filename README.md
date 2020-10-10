@@ -151,22 +151,29 @@ securities. `new` constructs a Finance::Quote object and enables the caller
 to load only specific methods, set parameters that control the behavior of the
 fetch method, and pass method-specific parameters to the corresponding method.
 
-> With no arguments, `new` creates a Finance::Quote object with the default
-> methods.  If the environment variable FQ\_LOAD\_QUOTELET is set, then the
-> contents of FQ\_LOAD\_QUOTELET (split on whitespace) will be used as the argument
-> list.  This allows users to load their own custom modules without having to
-> change existing code. If any method names are passed to `new` or the flag
-> '-defaults' is included in the argument list, then FQ\_LOAD\_QUOTELET is ignored.
->
-> When new() is passed one or more method arguments, an object is created with
-> only the specified modules loaded.  If the first argument is '-defaults', then
-> the default modules will be loaded first, followed by any other specified
-> modules. Note that the FQ\_LOAD\_QUOTELET environment variable must begin with
-> '-defaults' if you wish the default modules to be loaded.
->
-> Method names correspond to the Perl module in the Finance::Quote module space.
-> For example, `Finance::Quote-`new('ASX')> will load the module
-> Finance::Quote::ASX.
+- `timeout =` T> sets the web request timeout to `T` seconds
+- `failover =` B> where `B` is a boolean value indicating if failover is acceptable
+- `fetch_currency =` C> sets the desired currency code to `C` for fetch results
+- `required_labels =` A> sets the required labels for fetch results to array `A`
+- `<method-name`> as a string is the name of a specific method to load
+- `<method-name` => H> passes hash `H` to the method-name constructor
+
+With no arguments, `new` creates a Finance::Quote object with the default
+methods.  If the environment variable FQ\_LOAD\_QUOTELET is set, then the
+contents of FQ\_LOAD\_QUOTELET (split on whitespace) will be used as the argument
+list.  This allows users to load their own custom modules without having to
+change existing code. If any method names are passed to `new` or the flag
+'-defaults' is included in the argument list, then FQ\_LOAD\_QUOTELET is ignored.
+
+When new() is passed one or more method arguments, an object is created with
+only the specified modules loaded.  If the first argument is '-defaults', then
+the default modules will be loaded first, followed by any other specified
+modules. Note that the FQ\_LOAD\_QUOTELET environment variable must begin with
+'-defaults' if you wish the default modules to be loaded.
+
+Method names correspond to the Perl module in the Finance::Quote module space.
+For example, `Finance::Quote-`new('ASX')> will load the module
+Finance::Quote::ASX.
 
 ## GET\_DEFAULT\_CURRENCY\_FIELDS
 
@@ -460,15 +467,3 @@ You should have received the Finance::Quote hacker's guide with this package.
 Please read it if you are interested in adding extra methods to this package.
 The latest hacker's guide can also be found on GitHub at
 https://github.com/finance-quote/finance-quote/blob/master/Documentation/Hackers-Guide
-
-# POD ERRORS
-
-Hey! **The above document had some coding errors, which are explained below:**
-
-- Around line 160:
-
-    &#x3d;over should be: '=over' or '=over positive\_number'
-
-- Around line 186:
-
-    You forgot a '=back' before '=head2'
