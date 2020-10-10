@@ -47,7 +47,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
               Citywire Cominvest Currencies DWS Deka FTPortfolios FTfunds Fidelity FidelityFixed
               Finanzpartner Fool GoldMoney HEX HU IEXCloud IndiaMutual LeRevenu MStaruk
               ManInvestments Morningstar MorningstarAU MorningstarCH MorningstarJP NZX Oslobors
-              Platinum SEB SIXfunds SIXshares StockHouseCanada TNetuk TSP TSX Tdefunds Tdwaterhouse
+              Platinum SEB SIXfunds SIXshares TNetuk TSP TSX Tdefunds Tdwaterhouse
               Tiaacref Troweprice Trustnet USFedBonds Union VWD XETRA YahooJSON YahooYQL ZA ZA_UnitTrusts/;
 
 # Call on the Yahoo API:
