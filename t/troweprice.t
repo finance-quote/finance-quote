@@ -2,42 +2,46 @@
 use strict;
 use Test::More;
 use Finance::Quote;
+use Time::Piece;
 
 if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 13;
+plan tests => 42;
 
 # Test troweprice functions.
 
-my $q      = Finance::Quote->new();
-my $year   = (localtime())[5] + 1900;
-my $lastyear = $year - 1;
+my $q    = Finance::Quote->new();
+my $year = localtime()->year;
 
-my %quotes = $q->troweprice;
-ok(%quotes);
+my @symbols = qw/
+    PRFDX
+    PRIDX
+    TEUIX
+    RPGEX
+    GTFBX
+/;
 
-# Check that nav and date are defined as our tests.
-ok($quotes{"PRFDX","nav"} > 0);
-ok($quotes{"PRFDX","success"});
-ok($quotes{"PRFDX","currency"} eq "USD");
-ok(length($quotes{"PRFDX","date"}) > 0);
-ok(substr($quotes{"PRFDX","isodate"},0,4) == $year ||
-   substr($quotes{"PRFDX","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"PRFDX","date"},6,4) == $year ||
-   substr($quotes{"PRFDX","date"},6,4) == $lastyear);
+ok( my %quotes = $q->troweprice(@symbols, 'BOGUS'), 'Fetched quotes' );
 
+foreach my $symbol (@symbols) {
 
-ok($quotes{"PRIDX","success"});
-ok($quotes{"PRIDX","nav"} > 0);
-ok(length($quotes{"PRIDX","date"}) > 0);
-ok(substr($quotes{"PRIDX","isodate"},0,4) == $year ||
-   substr($quotes{"PRIDX","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"PRIDX","date"},6,4) == $year ||
-   substr($quotes{"PRIDX","date"},6,4) == $lastyear);
+    ok( length $quotes{$symbol, "name"} > 0,   "$symbol name length > 0");
+    ok( $quotes{$symbol, "nav"} > 0,           "$symbol nav > 0");
+    ok( $quotes{$symbol, "price"} > 0,         "$symbol price > 0");
+    ok( $quotes{$symbol, "symbol"} eq $symbol, "$symbol symbol match");
+    ok( length $quotes{$symbol, "date"} > 0,   "$symbol date length > 0");
+    
+    my $quote_year = substr($quotes{$symbol, "isodate"}, 0, 4 );
+    ok ($quote_year == $year || $quote_year - 1 == $year,
+        "$symbol isodate year check");
+    ok($quotes{$symbol, "method"} eq "troweprice",
+        "$symbol method is troweprice");
+    ok($quotes{$symbol, "currency"} eq 'USD',
+        "$symbol currency as expected");
+
+}
 
 # Check a bogus fund returns no-success
-
-%quotes = $q->troweprice("BOGUS");
 ok(! $quotes{"BOGUS","success"});
