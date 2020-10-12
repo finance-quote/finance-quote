@@ -45,13 +45,13 @@ use Try::Tiny;
 $TROWEPRICE_URL = ("https://www3.troweprice.com/fb2/ppfweb/downloadPrices.do");
 
 sub methods { return (troweprice        => \&troweprice,
- 		      troweprice_direct => \&troweprice); }
+               troweprice_direct => \&troweprice); }
 
 {
   my @labels = qw/method exchange name nav date isodate price/;
 
   sub labels { return (troweprice        => \@labels,
-		       troweprice_direct => \@labels); }
+               troweprice_direct => \@labels); }
 }
 
 # =======================================================================
@@ -122,20 +122,20 @@ sub troweprice {
             next SYMBOL;
         }
 
-	    $info{ $symbol, "success"  } = 1;
+        $info{ $symbol, "success"  } = 1;
         $info{ $symbol, 'symbol'   } = $symbol;
         $info{ $symbol, "exchange" } = "T. Rowe Price";
-	    $info{ $symbol, "method"   } = "troweprice";
+        $info{ $symbol, "method"   } = "troweprice";
         $info{ $symbol, "name"     } = $symbol;  # no name supplied ...
         $info{ $symbol, "nav"      } = $quotes->{$symbol}->{price};
-	    $info{ $symbol, "price"    } = $info{$symbol,"nav"};
+        $info{ $symbol, "price"    } = $info{$symbol,"nav"};
         $info{ $symbol, "currency" } = "USD";
-	    $quoter->store_date(
+        $quoter->store_date(
             \%info,
             $symbol,
             {isodate => $quotes->{$symbol}->{date}->ymd}
         );
-	}
+    }
 
     return wantarray() ? %info : \%info;
 
@@ -145,7 +145,7 @@ sub troweprice {
 
 =head1 NAME
 
-Finance::Quote::Troweprice	- Obtain quotes from T. Rowe Price
+Finance::Quote::Troweprice    - Obtain quotes from T. Rowe Price
 
 =head1 SYNOPSIS
 
