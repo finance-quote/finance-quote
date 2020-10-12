@@ -646,15 +646,20 @@
     - CREFbond
 #
 - module: Troweprice.pm
-  state: TBD
+  state: working
   added: TBD
-  changed: ~
+  changed: 2020-10-11
   removed: ~
-  urls:
+  urls: https://www3.troweprice.com/fb2/ppfweb/downloadPrices.do
   apikey: false
-  notes: ~
-  testfile: TBD
+  notes: data available elsewhere -- marked for deprecation
+  testfile: troweprice.t
   testcases:
+    - PRFDX
+    - PRIDX
+    - TEUIX
+    - RPGEX
+    - GTFBX
 #
 - module: Trustnet.pm
   state: TBD
