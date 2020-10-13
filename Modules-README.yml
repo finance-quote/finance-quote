@@ -630,20 +630,22 @@
 - module: Tiaacref.pm
   state: working
   added: 2000-05-14
-  changed: 2015-08-24
+  changed: 2020-10-11
   removed: ~
   urls:
-    - https://www.tiaa-cref.org/public/tcfpi/Export/InvestmentDetails?Details=DailyPerformance
+    - https://www.tiaa.org/public/investment-performance 
   apikey: false
   notes: ~
   testfile: tiaacref.t
   testcases:
-    - CREFmony
-    - TIAAreal
-    - TLSRX
-    - TCMVX
-    - TLGRX
-    - CREFbond
+    - QCBMIX
+    - TEMLX
+    - TLFIX
+    - TSBPX
+    - W156#
+    - W323#
+    - W464#
+    - W719#
 #
 - module: Troweprice.pm
   state: TBD
