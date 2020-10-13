@@ -43,10 +43,10 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $TIMEOUT @MODULES %MODULES %METHODS $AUTOLOAD
             $ALPHAVANTAGE_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
 
-@MODULES = qw/AEX AIAHK ASEGR ASX AlphaVantage BMONesbittBurns BSERO Bourso CSE Cdnfundlibrary
+@MODULES = qw/AEX AIAHK ASEGR ASX AlphaVantage BMONesbittBurns BSEIndia BSERO Bourso CSE Cdnfundlibrary
               Citywire Cominvest Currencies DWS Deka FTPortfolios FTfunds Fidelity FidelityFixed
               Finanzpartner Fool Fundata GoldMoney HEX HU IEXCloud IndiaMutual LeRevenu MStaruk
-              ManInvestments Morningstar MorningstarAU MorningstarCH MorningstarJP NZX Oslobors
+              ManInvestments Morningstar MorningstarAU MorningstarCH MorningstarJP NSEIndia NZX Oslobors
               Platinum SEB SIXfunds SIXshares TNetuk TSP TSX Tdefunds Tdwaterhouse
               Tiaacref Troweprice Trustnet USFedBonds Union VWD XETRA YahooJSON YahooYQL ZA ZA_UnitTrusts/;
 
