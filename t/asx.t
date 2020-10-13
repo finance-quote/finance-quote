@@ -1,73 +1,83 @@
 #!/usr/bin/perl -w
-
-# 16-Feb-2014 Change RZR (delisted in 2012) to BOQ.
-# 28-Feb-2014 Add tests with 11 stocks at once. plan tests 11 -> 34.
-
 use strict;
-use Test::More;
+use warnings;
+use Scalar::Util qw(looks_like_number);
 use Finance::Quote;
+use Test::More;
+use Time::Piece;
+use feature "say";
 
 if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 35;
+plan tests => 98;
 
-# Test ASX functions.
+my $now = localtime;;
+my $a_year_ago = $now->add_years(-1);
 
-my $q      = Finance::Quote->new();
+my @symbols = qw/
+    WES
+    BOQ
+    XRO
+    IAG
+    TLS
+/;
+my @indices = qw/
+    XAO
+/;
 
-$q->timeout(120);	# ASX is broken regularly, so timeouts are good.
+# Invoke test subject
+my $q = Finance::Quote->new();
+ok( my %quotes = $q->asx(@symbols, @indices, 'BOGUS'), "fetch quotes" );
 
-my %quotes = $q->asx("WES","BHP");
-ok( %quotes, "Data returned for call to asx" );
+# Check the valid securities
+for my $symbol (@symbols) {
 
-# Check the last values are defined.  These are the most used and most
-# reliable indicators of success.
-ok( $quotes{"WES","success"}, "WES query was successful" );
-cmp_ok( $quotes{"WES","last"}, '>', 0
-      , "Last price for WES was > 0" );
-ok( $quotes{"BHP","success"}, "BHP query was successful" );
-cmp_ok( $quotes{"BHP","last"}, '>', 0
-      , "Last price for BHP was > 0" );
+    ok( $quotes{$symbol, 'success'} == 1,      "success for $symbol"   );
+    ok( $quotes{$symbol, 'currency'} eq 'AUD', "got expected currency" );
+    ok( $quotes{$symbol, 'method'} eq 'asx',   "got expected method"   );
+    ok( length $quotes{$symbol,'name'},        "got a name"            );
+    ok( $quotes{$symbol,'symbol'} eq $symbol,  "matching symbol"       );
 
-# Exercise the fetch function a little.
-%quotes = $q->fetch("asx","BOQ");
-ok( %quotes, "Data returned for call to fetch" );
-ok( $quotes{"BOQ","success"}, "BOQ query was successful" );
-cmp_ok( $quotes{"BOQ","last"}, '>', 0
-      , "Last price for BOQ was > 0" );
+    ok( $quotes{$symbol, 'exchange'} eq 'Australian Securities Exchange',
+        "got expected exchange" );
 
-# Check that we're getting currency information.
-cmp_ok( $quotes{"BOQ", "currency"}, "eq", "AUD"
-      , "Currency of BOQ is AUD" );
+    my $date = Time::Piece->strptime($quotes{$symbol,"date"}, '%m/%d/%Y');
+    ok( $date >= localtime()->add_years(-1), "date recent enough" );
+    my $isodate = Time::Piece->strptime($quotes{$symbol,"isodate"}, '%Y-%m-%d');
+    ok( $isodate >= localtime()->add_years(-1), "isodate recent enough" );
 
-# Check that we're getting currency information from Share starting with X
-# which is NOT an index
-%quotes = $q->fetch("asx","XRO");
-cmp_ok( $quotes{"XRO", "currency"}, "eq", "AUD"
-      , "Currency of XRO is AUD" );
+    for my $field (qw/last price open close high low volume/) {
+        ok( $quotes{$symbol, $field} > 0, "$field > 0" );
+    }
 
-# Check we're not getting bogus percentage signs.
-unlike( $quotes{"BOQ","p_change"}
-      , qr/%/
-      , "No percentage sign in p_change value" );
-
-# Check that looking up a bogus stock returns failure:
-%quotes = $q->asx("BOG");
-ok( ! $quotes{"BOG","success"}, "asx call for invalid stock BOG returns failure");
-
-# Check 11 stocks at once to test batching of price enquiries into groups of 10
-my @stocks = qw/AMP ANZ BHP BOQ BEN CSR IAG NAB TLS WBC WES/;
-
-%quotes = $q->asx(@stocks);
-ok( %quotes, "Data returned for call to asx" );
-
-# Check the last values are defined.  These are the most used and most
-# reliable indicators of success.
-
-foreach my $stock (@stocks) {
-	ok( $quotes{$stock, "success"}, $stock . " query was successful" );
-	cmp_ok( $quotes{$stock,"last"}, '>', 0
-	      , "Last price for " . $stock . " was > 0" );
+    for my $field (qw/net p_change/) {
+        ok( looks_like_number($quotes{$symbol, $field}),
+            "$field looks like number" );
+    }
 }
+
+# Check the indexes 
+for my $symbol (@indices) {
+
+    ok( $quotes{$symbol, 'success'} == 1,      "success for $symbol"   );
+    ok( $quotes{$symbol, 'method'} eq 'asx',   "got expected method"   );
+    ok( length $quotes{$symbol,'name'},        "got a name"            );
+    ok( $quotes{$symbol,'symbol'} eq $symbol,  "matching symbol"       );
+
+    ok( $quotes{$symbol, 'exchange'} eq 'Australian Securities Exchange',
+        "got expected exchange" );
+
+    for my $field (qw/last price volume/) {
+        ok( $quotes{$symbol, $field} > 0, "$field > 0" );
+    }
+
+    for my $field (qw/net p_change/) {
+        ok( looks_like_number($quotes{$symbol, $field}),
+            "$field looks like number" );
+    }
+}
+# Check that an invalid fund returns failure:
+ok( !$quotes{'BOGUS', "success"},      , "bad symbol returned no result"    );
+ok( $quotes{'BOGUS',  "errormsg"} ne '', "got error message for bad symbol" );

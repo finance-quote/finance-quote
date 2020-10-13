@@ -36,30 +36,38 @@ use warnings;
 
 package Finance::Quote::ASX;
 
-use HTTP::Request::Common;
 use LWP::UserAgent;
-use HTML::TableExtract;
-use Encode;
+use JSON qw/decode_json/;
 
-use vars qw/$ASX_URL @ASX_SEC_CODES/;
+use vars qw/$ASX_URL $ASX_URL_FALLBACK/;
 
 # VERSION
 
-$ASX_URL = 'http://www.asx.com.au/asx/markets/priceLookup.do?by=asxCodes&asxCodes=';
+$ASX_URL = 'https://www.asx.com.au/asx/1/share';
+$ASX_URL_FALLBACK =
+    'https://asx.api.markitdigital.com/asx-research/1.0/companies';
 
-# These are the ASX codes starting with X that are securities not indexes
-#  and thus need currency AUD returned
-# See http://www.asx.com.au/asx/research/listedCompanies.do
-@ASX_SEC_CODES = (qw/XAM XIP XRO XPD XPE XF1 XRF XST XTD XTE XTV/);
 
 sub methods {return (australia => \&asx,asx => \&asx)}
 
 {
-	my @labels = qw/last net p_change bid offer high low volume
-	                price method exchange/;
+    my @labels = qw/
+        last
+        net
+        p_change
+        bid
+        offer
+        open
+        close
+        high
+        low
+        volume
+        price
+        method
+        exchange/;
 
-	sub labels { return (australia => \@labels,
-	                     asx       => \@labels); }
+    sub labels { return (australia => \@labels,
+                         asx       => \@labels); }
 }
 
 # Australian Stock Exchange (ASX)
@@ -68,130 +76,109 @@ sub methods {return (australia => \&asx,asx => \&asx)}
 # Maintainer of this section is Paul Fenwick <pjf@cpan.org>
 # 5-May-2001 Updated by Leigh Wedding <leigh.wedding@telstra.com>
 # 24-Feb-2014 Updated by Chris Good <chris.good@@ozemail.com.au>
+# 12-Oct-2020 Updated by Jeremy Volkening
 
 sub asx {
-	my $quoter = shift;
-	my @all_stocks = @_;
-	return unless @all_stocks;
-	my @stocks;
-	my %info;
 
-	my $ua = $quoter->user_agent;
+    my $quoter = shift;
+    my @symbols = @_
+        or return;
 
-	# ASX webpage only handles up to 10 quote requests at once
+    my %info;
 
-	while (@stocks = splice(@all_stocks, 0, 10)) {
-		my $response = $ua->request(GET $ASX_URL.join("%20",@stocks));
-		unless ($response->is_success) {
-			foreach my $stock (@stocks, @all_stocks) {
-				$info{$stock,"success"} = 0;
-				$info{$stock,"errormsg"} = "HTTP session failed";
-			}
-			return wantarray() ? %info : \%info;
-		}
+    my $ua = $quoter->user_agent;
 
-		my $te = HTML::TableExtract->new(
-			automap => 0,
-			headers => ["Code", "Last", '\+/-', "% Chg", "Bid",
-			    "Offer", "Open", "High", "Low", "Volume"]);
+    SYMBOL:
+    for my $symbol (@symbols) {
 
-		$te->parse(decode('utf-8',$response->content));
+        # there are multiple endpoints returning JSON data on a security. The
+        # primary endpoint returns the most readily-consumable data and works
+        # for most securities, so try that first
 
-		# Extract table contents.
-		my @rows;
-		unless (($te->tables > 0) && ( @rows = $te->rows)) {
-			foreach my $stock (@stocks, @all_stocks) {
-				$info{$stock,"success"} = 0;
-				$info{$stock,"errormsg"} = "Failed to parse HTML table.";
-			}
-			return wantarray() ? %info : \%info;
-		}
+        my $res = $ua->get(
+            join( '/', $ASX_URL, $symbol),
+            'Accept' => 'application/json'
+        );
+        if ($res->is_success && $res->header('content-type') =~ /application\/json/) {
+            my $data = decode_json( $res->content );
+            $info{ $symbol, 'success'  } = 1;
+            $info{ $symbol, 'symbol'   } = $symbol;
+            $info{ $symbol, 'last'     } = $data->{last_price};
+            $info{ $symbol, 'net'      } = $data->{change_price};
+            $info{ $symbol, 'p_change' } = $data->{change_in_percent};
+            $info{ $symbol, 'p_change' } =~ s/\%$//; # strip suffix
+            $info{ $symbol, 'bid'      } = $data->{bid_price};
+            $info{ $symbol, 'offer'    } = $data->{offer_price};
+            $info{ $symbol, 'open'     } = $data->{open_price};
+            $info{ $symbol, 'close'    } = $data->{previous_close_price};
+            $info{ $symbol, 'high'     } = $data->{day_high_price};
+            $info{ $symbol, 'low'      } = $data->{day_low_price};
+            $info{ $symbol, 'volume'   } = $data->{volume};
+            $info{ $symbol, 'price'    } = $data->{last_price};
+            $info{ $symbol, 'method'   } = 'asx',
+            $info{ $symbol, 'exchange' } = 'Australian Securities Exchange',
+            $info{ $symbol, 'currency' } = 'AUD',
+            my $date = $data->{last_trade_date};
+            my $t = Time::Piece->strptime($date, '%Y-%m-%dT%H:%M:%S%z');
+            $quoter->store_date(
+                \%info,
+                $symbol,
+                { isodate => $t->ymd }
+            );
 
-		# Pack the resulting data into our structure.
-		foreach my $row (@rows) {
-			my $stock = shift(@$row);
+        }
+        elsif ($res->header('content-type') =~ /application\/json/) {
+            my $data = decode_json( $res->content );
+            $info{ $symbol, 'success'  } = 0;
+            $info{ $symbol, 'errormsg' } = "The server returned an error"
+                . " for $symbol: $data->{error_desc}";
+        }
+        else {
+            $info{ $symbol, 'success'  } = 0;
+            $info{ $symbol, 'errormsg' } = "Unable to fetch data from the
+            server. HTTP status: " . $res->status_line;
+        }
 
-			# Skip any blank lines.
-			next unless $stock;
+        # this secondary endpoint contains the security name, and for a few
+        # securities that fail above may contain limited price data. For
+        # instance, the indexes seem to not be available above but will return
+        # basic data here
 
-			# Delete spaces and '*' which sometimes appears after the code.
-			# Also delete high bit characters.
-			$stock =~ tr/* \200-\377//d;
+        $res = $ua->get(
+            join( '/', $ASX_URL_FALLBACK, $symbol, 'header'),
+            'Accept' => 'application/json'
+        );
+        if ($res->is_success && $res->header('content-type') =~ /application\/json/) {
+            my $data = decode_json( $res->content )->{data};
+            $info{ $symbol, 'name'     } = $data->{displayName};
+            if (! $info{ $symbol, 'success'  }) {
+                delete $info{ $symbol, 'errormsg'  }; # set previously
+                $info{ $symbol, 'success'  } = 1;
+                $info{ $symbol, 'symbol'   } = $symbol;
+                $info{ $symbol, 'last'     } = $data->{priceLast};
+                $info{ $symbol, 'net'      } = $data->{priceChange};
+                $info{ $symbol, 'p_change' } = $data->{priceChangePercent};
+                $info{ $symbol, 'volume'   } = $data->{volume};
+                $info{ $symbol, 'price'    } = $data->{priceLast};
+                $info{ $symbol, 'method'   } = 'asx';
+                $info{ $symbol, 'exchange' } = 'Australian Securities Exchange';
+                # $info{ $symbol, 'currency' } = 'AUD', # apparently shouldn't be set?
+            }
 
-			# Delete any whitespace characters
-			$stock =~ s/\s//g;
+        }
+            
+    }
 
-			$info{$stock,'symbol'} = $stock;
+    return %info if wantarray;
+    return \%info;
 
-			foreach my $label (qw/last net p_change bid offer open
-				      high low volume/) {
-				$info{$stock,$label} = shift(@$row);
-
-				# Again, get rid of nasty high-bit characters.
-				$info{$stock,$label} =~ tr/ \200-\377//d
-					unless ($label eq "name");
-			}
-
-			# get rid of trailing whitespace after 'last'
-			$info{$stock,'last'} =~ s/\s//g;
-
-			# If that stock does not exist, it will have a empty
-			# string for all the fields.  The "last" price should
-			# always be defined (even if zero), if we see an empty
-			# string here then we know we've found a bogus stock.
-
-			if ($info{$stock,'last'} eq '') {
-				$info{$stock,'success'} = 0;
-				$info{$stock,'errormsg'}="Stock does not exist on ASX.";
-				next;
-			}
-
-			# Drop commas from volume.
-			$info{$stock,"volume"} =~ tr/,//d;
-
-			# The ASX returns zeros for a number of things if there
-			# has been no trading.  This not only looks silly, but
-			# can break things later.  "correct" zero'd data.
-
-			foreach my $label (qw/open high low/) {
-				if ($info{$stock,$label} == 0) {
-					$info{$stock,$label} = $info{$stock,"last"};
-				}
-			}
-
-			# Remove trailing percentage sign from p_change
-			$info{$stock,"p_change"} =~ tr/%//d;
-
-			# Australian indexes all begin with X, so don't tag them
-			# as having currency info.
-
-			$info{$stock, "currency"} = "AUD" unless ($stock =~ /^X/);
-
-			# There are some companies starting with X, so DO tag
-			#  them with currency AUD
-
-			if ( grep( /^$stock$/, @ASX_SEC_CODES ) ) {
-				$info{$stock, "currency"} = "AUD";
-			}
-
-			$info{$stock, "method"} = "asx";
-			$info{$stock, "exchange"} = "Australian Stock Exchange";
-			$info{$stock, "price"} = $info{$stock,"last"};
-			$info{$stock, "success"} = 1;
-		}
-	}
-
-	# All done.
-
-	return %info if wantarray;
-	return \%info;
 }
 
 1;
 
 =head1 NAME
 
-Finance::Quote::ASX	- Obtain quotes from the Australian Stock Exchange.
+Finance::Quote::ASX - Obtain quotes from the Australian Stock Exchange.
 
 =head1 SYNOPSIS
 
@@ -199,7 +186,7 @@ Finance::Quote::ASX	- Obtain quotes from the Australian Stock Exchange.
 
     $q = Finance::Quote->new;
 
-    %stockinfo = $q->fetch("asx","BHP");	   # Only query ASX.
+    %stockinfo = $q->fetch("asx","BHP");       # Only query ASX.
     %stockinfo = $q->fetch("australia","BHP"); # Failover to other sources OK.
 
 =head1 DESCRIPTION

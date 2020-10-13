@@ -44,15 +44,22 @@
   testcases:
 #
 - module: ASX.pm
-  state: failing
+  state: working
   added: TBD
-  changed: ~
+  changed: 2020-10-12
   removed: ~
   urls:
   apikey: false
-  notes: ~
+  notes: >-
+    Most securities are available from YahooJSON (and possibly other sources).
   testfile: asx.t
   testcases:
+    - WES
+    - BOQ
+    - XRO
+    - IAG
+    - TLS
+    - XAO
 #
 - module: AlphaVantage.pm
   state: working
