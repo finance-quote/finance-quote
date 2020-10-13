@@ -43,10 +43,10 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $TIMEOUT @MODULES %MODULES %METHODS $AUTOLOAD
             $ALPHAVANTAGE_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
 
-@MODULES = qw/AEX AIAHK ASEGR ASX AlphaVantage BMONesbittBurns BSERO Bourso CSE Cdnfundlibrary
+@MODULES = qw/AEX AIAHK ASEGR ASX AlphaVantage BMONesbittBurns BSEIndia BSERO Bourso CSE Cdnfundlibrary
               Citywire Cominvest Currencies DWS Deka FTPortfolios FTfunds Fidelity FidelityFixed
               Finanzpartner Fool Fundata GoldMoney HEX HU IEXCloud IndiaMutual LeRevenu MStaruk
-              ManInvestments Morningstar MorningstarAU MorningstarCH MorningstarJP NZX Oslobors
+              ManInvestments Morningstar MorningstarAU MorningstarCH MorningstarJP NSEIndia NZX Oslobors
               Platinum SEB SIXfunds SIXshares TNetuk TSP TSX Tdefunds Tdwaterhouse
               Tiaacref Troweprice Trustnet USFedBonds Union VWD XETRA YahooJSON YahooYQL ZA ZA_UnitTrusts/;
 
@@ -1453,27 +1453,61 @@ http://www.gnucash.org/
 
 =head1 SEE ALSO
 
-Finance::Quote::AEX, Finance::Quote::AIAHK, Finance::Quote::ASEGR,
-Finance::Quote::ASX, Finance::Quote::BMONesbittBurns, Finance::Quote::BSERO,
-Finance::Quote::Bourso, Finance::Quote::CSE, Finance::Quote::Cdnfundlibrary,
-Finance::Quote::Citywire, Finance::Quote::Cominvest,
-Finance::Quote::Currencies, Finance::Quote::DWS, Finance::Quote::Deka,
-Finance::Quote::FTPortfolios, Finance::Quote::FTfunds,
-Finance::Quote::Fidelity, Finance::Quote::FidelityFixed,
-Finance::Quote::Finanzpartner, Finance::Quote::Fool, Finance::Quote::Fundata
-Finance::Quote::GoldMoney, Finance::Quote::HEX, Finance::Quote::HU,
-Finance::Quote::IEXCloud, Finance::Quote::IndiaMutual,
-Finance::Quote::LeRevenu, Finance::Quote::MStaruk,
-Finance::Quote::ManInvestments, Finance::Quote::Morningstar,
-Finance::Quote::MorningstarAU, Finance::Quote::MorningstarCH,
-Finance::Quote::MorningstarJP, Finance::Quote::NZX, Finance::Quote::Oslobors,
-Finance::Quote::Platinum, Finance::Quote::SEB, Finance::Quote::TNetuk,
-Finance::Quote::TSP, Finance::Quote::TSX, Finance::Quote::Tdefunds,
-Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
-Finance::Quote::Troweprice, Finance::Quote::Trustnet,
-Finance::Quote::USFedBonds, Finance::Quote::Union, Finance::Quote::VWD,
-Finance::Quote::XETRA, Finance::Quote::YahooJSON, Finance::Quote::YahooYQL,
-Finance::Quote::ZA, Finance::Quote::ZA_UnitTrusts
+Finance::Quote::AEX,
+Finance::Quote::AIAHK,
+Finance::Quote::ASEGR,
+Finance::Quote::ASX,
+Finance::Quote::BMONesbittBurns,
+Finance::Quote::BSEIndia,
+Finance::Quote::BSERO,
+Finance::Quote::Bourso,
+Finance::Quote::CSE,
+Finance::Quote::Cdnfundlibrary,
+Finance::Quote::Citywire,
+Finance::Quote::Cominvest,
+Finance::Quote::Currencies,
+Finance::Quote::DWS,
+Finance::Quote::Deka,
+Finance::Quote::FTPortfolios,
+Finance::Quote::FTfunds,
+Finance::Quote::Fidelity,
+Finance::Quote::FidelityFixed,
+Finance::Quote::Finanzpartner,
+Finance::Quote::Fool,
+Finance::Quote::Fundata
+Finance::Quote::GoldMoney,
+Finance::Quote::HEX,
+Finance::Quote::HU,
+Finance::Quote::IEXCloud,
+Finance::Quote::IndiaMutual,
+Finance::Quote::LeRevenu,
+Finance::Quote::MStaruk,
+Finance::Quote::ManInvestments,
+Finance::Quote::Morningstar,
+Finance::Quote::MorningstarAU,
+Finance::Quote::MorningstarCH,
+Finance::Quote::MorningstarJP,
+Finance::Quote::NSEIndia,
+Finance::Quote::NZX,
+Finance::Quote::Oslobors,
+Finance::Quote::Platinum,
+Finance::Quote::SEB,
+Finance::Quote::TNetuk,
+Finance::Quote::TSP,
+Finance::Quote::TSX,
+Finance::Quote::Tdefunds,
+Finance::Quote::Tdwaterhouse,
+Finance::Quote::Tiaacref,
+Finance::Quote::Troweprice,
+Finance::Quote::Trustnet,
+Finance::Quote::USFedBonds,
+Finance::Quote::Union,
+Finance::Quote::VWD,
+Finance::Quote::XETRA,
+Finance::Quote::YahooJSON,
+Finance::Quote::YahooYQL,
+Finance::Quote::ZA,
+Finance::Quote::ZA_UnitTrusts
 
 You should have received the Finance::Quote hacker's guide with this package.
 Please read it if you are interested in adding extra methods to this package.
