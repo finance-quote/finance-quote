@@ -23,11 +23,11 @@ ok(%quotes);
 foreach my $symbol (@valid) {
     ok($quotes{$symbol, 'success'}, "$symbol success");
     ok($quotes{$symbol, 'symbol'} eq $symbol, "$symbol defined");
-    ok($quotes{$symbol, 'last'} > 0, "$symbol returned last");
-    ok(substr( $quotes{ $symbol, "isodate" }, 0, 4 ) == $year or
-       substr( $quotes{ $symbol, "isodate" }, 0, 4 ) == $lastyear );
+    ok($quotes{$symbol, 'last'} > 0, "$symbol returned last as $quotes{$symbol, 'last'}");
+    ok((substr($quotes{$symbol, 'isodate'}, 0, 4) == $year or
+        substr($quotes{$symbol, 'isodate'}, 0, 4) == $lastyear), "$symbol returned isodate as $quotes{$symbol, 'isodate'}");
 }
 
 foreach my $symbol (@invalid) {
-  ok(not $quotes{'BOGUS', 'failed as expected'});
+  ok((not $quotes{'BOGUS', 'success'}), 'failed as expected');
 }

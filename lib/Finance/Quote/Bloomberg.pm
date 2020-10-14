@@ -9,9 +9,7 @@ use HTTP::Request::Common;
 use HTML::TreeBuilder;
 use Encode;
 
-use Data::Dumper;
-
-use vars qw($VERSION $BLOOMBERG_URL);
+use vars qw($BLOOMBERG_URL);
 
 $BLOOMBERG_URL = 'https://www.bloomberg.com/quote/';
 
@@ -83,7 +81,7 @@ sub bloomberg {
 
 =head1 NAME
 
-Finance::Quote::Bloomberg - Obtain fund prices the Fredrik way
+Finance::Quote::Bloomberg - Obtain fund prices from Bloomberg.com 
 
 =head1 SYNOPSIS
 
@@ -91,25 +89,23 @@ Finance::Quote::Bloomberg - Obtain fund prices the Fredrik way
 
     $q = Finance::Quote->new;
 
-    %fundinfo = $q->fetch("bloomberg","fund name");
+    %fundinfo = $q->fetch("bloomberg", "security");
 
 =head1 DESCRIPTION
 
-This module obtains information about fund prices from
-www.bloomberg.com.
+This module obtains information about fund prices from www.bloomberg.com.  
 
-=head1 FUND NAMES
+=head1 SECURITY NAME
 
-Use some smart fund name...
+The security string must match the format expected by the site, such as
+'AAPL:US' not 'AAPL'.
 
 =head1 LABELS RETURNED
 
-Information available from Bloomberg funds may include the following labels:
-date method source name currency price. The prices are updated at the
-end of each bank day.
+Labels returned by this module include: last, currency, symbol, isodate
 
 =head1 SEE ALSO
 
-Perhaps bloomberg?
+Finance::Quote
 
 =cut
