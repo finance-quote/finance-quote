@@ -82,6 +82,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     MorningstarJP
     NSEIndia
     NZX
+    OnVista
     Oslobors
     Platinum
     SEB
@@ -1539,6 +1540,7 @@ Finance::Quote::MorningstarCH,
 Finance::Quote::MorningstarJP,
 Finance::Quote::NSEIndia,
 Finance::Quote::NZX,
+Finance::Quote::OnVista,
 Finance::Quote::Oslobors,
 Finance::Quote::Platinum,
 Finance::Quote::SEB,
