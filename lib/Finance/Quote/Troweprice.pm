@@ -35,68 +35,117 @@ use strict;
 use vars qw( $TROWEPRICE_URL);
 
 use LWP::UserAgent;
-use HTTP::Request::Common;
-use Carp;
+use Time::Piece;
+use Try::Tiny;
 
 # VERSION
 
 # URLs of where to obtain information.
 
-$TROWEPRICE_URL = ("http://www.troweprice.com/mutual/prices.csv");
+$TROWEPRICE_URL = ("https://www3.troweprice.com/fb2/ppfweb/downloadPrices.do");
 
 sub methods { return (troweprice        => \&troweprice,
- 		      troweprice_direct => \&troweprice); }
+               troweprice_direct => \&troweprice); }
 
 {
   my @labels = qw/method exchange name nav date isodate price/;
 
   sub labels { return (troweprice        => \@labels,
-		       troweprice_direct => \@labels); }
+               troweprice_direct => \@labels); }
 }
 
 # =======================================================================
 
-sub troweprice
-{
+sub troweprice {
+
     my $quoter = shift;
-    my(@q,%aa,$ua,$url,$sym);
+    my @symbols = @_;
+
+    return if (! scalar @symbols);
 
     # for T Rowe Price,  we get them all.
-    $url = $TROWEPRICE_URL;
-    $ua = $quoter->user_agent;
-    my $reply = $ua->request(GET $url);
-    return unless ($reply->is_success);
-    foreach (split('\015?\012',$reply->content))
-    {
-        @q = $quoter->parse_csv($_);
+    my %info;
+    my $url = $TROWEPRICE_URL;
+    my $ua = $quoter->user_agent;
+    my $reply = $ua->get( $url, 'Accept-Language' => 'en-US,en' );
 
-        # extract the date which is usually on the second line fo the file.
-        ($sym = $q[0]) =~ s/^ +//;
-        if ($sym) {
-            $aa {$sym, "exchange"} = "T. Rowe Price";  # TRP
-	    $aa {$sym, "method"} = "troweprice";
-            # ($aa {$sym, "name"} = $q[0]) =~ s/^ +//;
-            $aa {$sym, "name"} = $sym;  # no name supplied ...
-            $aa {$sym, "nav"} = $q[1];
-	    $quoter->store_date(\%aa, $sym, {usdate => $q[2]});
-	    $aa {$sym, "price"} = $aa{$sym,"nav"};
-	    $aa {$sym, "success"} = 1;
-            $aa {$sym, "currency"} = "USD";
-        } else {
-	    $aa {$sym, "success"} = 0;
-	    $aa {$sym, "errormsg"} = "Stock lookup failed.";
-	}
+    if (! $reply->is_success) {
+
+        for my $stock (@symbols) {
+            $info{ $stock, "success" } = 0;
+            $info{ $stock, "errormsg" } =
+                "Error retrieving quote for $stock. Attempt to fetch the URL
+                $url resulted in HTTP response:i " . $reply->status_line;
+        }
+        return wantarray() ? %info : \%info;
     }
 
-    return %aa if wantarray;
-    return \%aa;
+    my $quotes;
+
+    my $csv = $reply->content;
+    open my $in, '<', \$csv;
+    RECORD:
+    while (my $line = <$in>) {
+        next RECORD if ($line !~ /\S/);
+        #$line =~ s/\s+$//;
+        my @q = $quoter->parse_csv($line);
+        my $symbol = $q[0];
+        next RECORD
+            if (! grep {$_ eq $symbol} @symbols);
+
+        my $date;
+        try {
+            $date = Time::Piece->strptime($q[2], "%m/%d/%Y");
+        } catch {
+            $info{ $symbol, "success" } = 0;
+            $info{ $symbol, "errormsg" } =
+                "Failed to parse quote date. Please contact developers";
+            next RECORD;
+        };
+        $quotes->{$symbol} = {
+            price => $q[1],
+            date  => $date,
+        }
+    }
+
+    SYMBOL:
+    for my $symbol (@symbols) {
+        
+        # skip if already defined due to earlier parsing error
+        next SYMBOL if (defined $info{ $symbol, 'success' });
+
+        if (! defined $quotes->{$symbol}) {
+            $info{ $symbol, "success" } = 0;
+            $info{ $symbol, "errormsg" } =
+                "Error retrieving quote for $symbol - no listing for this"
+              . " name found. Please check symbol.";
+            next SYMBOL;
+        }
+
+        $info{ $symbol, "success"  } = 1;
+        $info{ $symbol, 'symbol'   } = $symbol;
+        $info{ $symbol, "exchange" } = "T. Rowe Price";
+        $info{ $symbol, "method"   } = "troweprice";
+        $info{ $symbol, "name"     } = $symbol;  # no name supplied ...
+        $info{ $symbol, "nav"      } = $quotes->{$symbol}->{price};
+        $info{ $symbol, "price"    } = $info{$symbol,"nav"};
+        $info{ $symbol, "currency" } = "USD";
+        $quoter->store_date(
+            \%info,
+            $symbol,
+            {isodate => $quotes->{$symbol}->{date}->ymd}
+        );
+    }
+
+    return wantarray() ? %info : \%info;
+
 }
 
 1;
 
 =head1 NAME
 
-Finance::Quote::Troweprice	- Obtain quotes from T. Rowe Price
+Finance::Quote::Troweprice    - Obtain quotes from T. Rowe Price
 
 =head1 SYNOPSIS
 
@@ -104,17 +153,13 @@ Finance::Quote::Troweprice	- Obtain quotes from T. Rowe Price
 
     $q = Finance::Quote->new;
 
-    %stockinfo = $q->fetch("troweprice","PRFDX"); # Can failover to other methods
-    %stockinfo = $q->fetch("troweprice_direct","PRFDX"); # Use this module only.
+    %stockinfo = $q->fetch("troweprice","PRFDX");
 
 =head1 DESCRIPTION
 
 This module obtains information about managed funds from T. Rowe Price.
 Information about T. Rowe Price funds is available from a variety of
-sources.  The information source "troweprice" can be used if you don't
-care which source you obtain information from.  If you wish to be
-guaranteed of fetching information from T. Rowe Price directly,
-then the information source "troweprice_direct" should be used.
+sources.  This module fetches information directly from T. Rowe Price.
 
 =head1 LABELS RETURNED
 
@@ -124,7 +169,5 @@ labels:  exchange, name, nav, date, price.
 =head1 SEE ALSO
 
 T. Rowe Price website - http://www.troweprice.com/
-
-Finance::Quote::Yahoo::USA
 
 =cut
