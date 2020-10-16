@@ -3,7 +3,6 @@
 use strict;
 use Test::More;
 use Finance::Quote;
-use Data::Dumper;
 
 if (not $ENV{'ONLINE_TEST'}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
