@@ -29,7 +29,7 @@ use HTML::TableExtract;
 use Time::Piece;
 
 
-my $PRICE_URL = "https://api.boerse-frankfurt.de/data/price_information";
+my $PRICE_URL = "https://api.boerse-frankfurt.de/v1/data/price_information";
 
 sub methods {
     return ( xetra => \&xetra,
@@ -52,7 +52,13 @@ sub xetra {
 
     # server reply is a perpetual event stream with continuous updates
     # disconnect after we receive the first event
-    $ua->max_size(10);
+    $ua->add_handler( response_data => sub {
+        my($response, $ua, $handler, $data) = @_;
+        if(index($response->content, "\n") != -1) {
+            croak();
+        }
+        return 1;
+    });
 
     foreach my $stocks (@stocks) {
         my @parts = split /\./, $stocks;
@@ -80,7 +86,8 @@ sub xetra {
         $info{ $stocks, "symbol" } = $stocks;
 
         if ( $code == 200 && $len > 5 ) {
-            my $payload = substr($resp->content, 5);
+            my @lines = split /\n/, $resp->content;
+            my $payload = substr($lines[0], 5);
             my $data = JSON::decode_json $payload;
 
             $info{$stocks, 'success'} = 1;
