@@ -6,7 +6,6 @@ require 5.004;
 use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
-use Data::Dumper;
 
 use vars qw( $OSLOBORS_COMPONENTS_URL );
 
