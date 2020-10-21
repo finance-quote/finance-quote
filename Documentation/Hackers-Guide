@@ -275,7 +275,10 @@ conversion, but the "commission" field would also be converted.
 There are multiple ways to include extra code in Perl modules to facilitate
 development and debugging. For Finance::Quote modules, please use the following
 strategy that uses a combination of a DEBUG constant and the Smart::Comments
-module.
+module. If DEBUG is in the environment and set to a value that Perl evaluates
+to true, then Smart::Comments is active and code blocks wrapped with if(DEBUG)
+are also active. Otherwise, all the debugging code disappears during
+compilation.
 
   # At the top of the module create a constant from the environment
   use constant DEBUG => $ENV{DEBUG};
