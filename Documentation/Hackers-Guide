@@ -270,9 +270,38 @@ to use the defaults, but also add some of your own:
 In the example above, the default fields would be available for currency
 conversion, but the "commission" field would also be converted.
 
-3.5. Dates
-----------
+3.5 Development & Debugging Code
+--------------------------------
+There are multiple ways to include extra code in Perl modules to facilitate
+development and debugging. For Finance::Quote modules, please use the following
+strategy that uses a combination of a DEBUG constant and the Smart::Comments
+module.
 
+  # At the top of the module create a constant from the environment
+  use constant DEBUG => $ENV{DEBUG};
+  
+  use if DEBUG, Smart::Comments;       # conditionally use Smart::Comments
+  use if DEBUG, Another::Module;       # example module only needed for debugging
+  
+  use strict;                          # use strict & warnings AFTER debug setup
+  use warnings;
+
+  use LWP::UserAgent;                  # and finally production module dependencies
+  
+  my %h = ('a' => 1);                  # just an example variable
+  
+  # These first two lines are always a comment.  The third line
+  # prints a debugging string if DEBUG is in the environment.
+  ### [<now>] h: \%h
+  
+  # For more complicated debugging, the following if-block
+  # will disappear during compilation because of constant folding.
+  if (DEBUG) {
+    print "More complex debugging code\n";
+  }
+
+3.6. Dates
+----------
 Do not parse dates directly in your module.  Instead you should use
 the function $q->store_date(), which handles a variety of date
 formats.  In its simplest form, you simply tell the function what
@@ -289,7 +318,7 @@ function this way:
 See the documentation in Quote.pm for more information.
 
 
-3.6. Things to avoid
+3.7. Things to avoid
 --------------------
 Some sources of information will provide more stock information than
 requested.  Some code may rely upon your code only returning information
@@ -297,7 +326,7 @@ about the stocks that the caller requested.  As such, you should
 never return information about stocks that were not requested, even
 if you fetch and/or process that information.
 
-3.7. Using your new module
+3.8. Using your new module
 --------------------------
 Using your new module is easy.  Normally when using Finance::Quote you'd
 do something like the following:

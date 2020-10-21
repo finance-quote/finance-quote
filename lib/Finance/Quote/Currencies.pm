@@ -14,6 +14,11 @@
 #    02110-1301, USA
 #
 package Finance::Quote::Currencies;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, Smart::Comments;
+use if DEBUG, Data::Dumper::Perltidy;
+
 use strict;
 use warnings;
 use utf8;
@@ -25,9 +30,9 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 use Encode qw(decode);
-#use Data::Dumper::Perltidy;
 
 @EXPORT_OK = qw( known_currencies fetch_live_currencies );
+
 # VERSION
 
 $CURRENCY_URL = 'https://www.iban.com/currency-codes';
@@ -1198,6 +1203,7 @@ sub known_currencies {
 # website. This function should really only be used to test if the known
 # currency list in this module is out of date.
 sub fetch_live_currencies {
+  ### [<now>] Calling fetch_live_currencies with URL: $CURRENCY_URL
   my $ua    = LWP::UserAgent->new();
   my $reply = $ua->request(GET $CURRENCY_URL);
   return unless $reply->is_success;
@@ -1225,15 +1231,13 @@ sub fetch_live_currencies {
     }
   }
 
+  if (DEBUG) {
+    $Data::Dumper::Sortkeys = 1;
+    ### result: \%result
+  }
+
   return \%result;
 }
-
-# use of D::D goes against the package testing policy
-#unless (caller) {
-  #my $hash = fetch_live_currencies();
-  #$Data::Dumper::Sortkeys = 1;
-  #print Dumper $hash;
-#}
 
 1;
 
