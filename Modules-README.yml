@@ -111,6 +111,26 @@
   testfile: TBD
   testcases:
 #
+- module: BSEIndia.pm
+  state: working
+  added: 2020-06-27
+  changed:
+  removed:
+  urls:
+    - https://www.bseindia.com/download/BhavCopy/Equity/EQ_ISINCODE_${DDMMYY}.zip
+  methods:
+    - india
+    - bseindia
+  apikey: false
+  notes: |
+    Module to fetch equity quotes from https://www.bseindia.com/
+  testfile: bseindia.t
+  testcases:
+    - 500010
+    - 532540
+    - INE009A01021
+    - INE062A01020
+#
 - module: BSERO.pm
   state: failing
   added: TBD
@@ -492,6 +512,26 @@
   testfile: TBD
   testcases:
 #
+- module: NSEIndia.pm
+  state: working
+  added: 2020-06-27
+  changed:
+  removed:
+  urls:
+    - https://archives.nseindia.com/content/historical/EQUITIES/${YYYY}/${MMM}/cm${DDMMMYYYY}bhav.csv.zip
+  methods:
+    - india
+    - nseindia
+  apikey: false
+  notes: |
+    Module to fetch equity quotes from https://www.nseindia.com/
+  testfile: nseindia.t
+  testcases:
+    - HDFC
+    - TCS
+    - INE009A01021
+    - INE062A01020
+#
 - module: NZX.pm
   state: TBD
   added: TBD
@@ -647,31 +687,38 @@
 - module: Tiaacref.pm
   state: working
   added: 2000-05-14
-  changed: 2015-08-24
+  changed: 2020-10-11
   removed: ~
   urls:
-    - https://www.tiaa-cref.org/public/tcfpi/Export/InvestmentDetails?Details=DailyPerformance
+    - https://www.tiaa.org/public/investment-performance 
   apikey: false
   notes: ~
   testfile: tiaacref.t
   testcases:
-    - CREFmony
-    - TIAAreal
-    - TLSRX
-    - TCMVX
-    - TLGRX
-    - CREFbond
+    - QCBMIX
+    - TEMLX
+    - TLFIX
+    - TSBPX
+    - W156#
+    - W323#
+    - W464#
+    - W719#
 #
 - module: Troweprice.pm
-  state: TBD
+  state: working
   added: TBD
-  changed: ~
+  changed: 2020-10-11
   removed: ~
-  urls:
+  urls: https://www3.troweprice.com/fb2/ppfweb/downloadPrices.do
   apikey: false
-  notes: ~
-  testfile: TBD
+  notes: data available elsewhere -- marked for deprecation
+  testfile: troweprice.t
   testcases:
+    - PRFDX
+    - PRIDX
+    - TEUIX
+    - RPGEX
+    - GTFBX
 #
 - module: Trustnet.pm
   state: TBD
