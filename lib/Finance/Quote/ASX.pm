@@ -99,39 +99,39 @@ sub asx {
             join( '/', $ASX_URL, $symbol),
             'Accept' => 'application/json'
         );
-        if ($res->is_success && $res->header('content-type') =~ /application\/json/) {
+        if ($res->header('content-type') =~ /application\/json/) {
             my $data = decode_json( $res->content );
-            $info{ $symbol, 'success'  } = 1;
-            $info{ $symbol, 'symbol'   } = $symbol;
-            $info{ $symbol, 'last'     } = $data->{last_price};
-            $info{ $symbol, 'net'      } = $data->{change_price};
-            $info{ $symbol, 'p_change' } = $data->{change_in_percent};
-            $info{ $symbol, 'p_change' } =~ s/\%$//; # strip suffix
-            $info{ $symbol, 'bid'      } = $data->{bid_price};
-            $info{ $symbol, 'offer'    } = $data->{offer_price};
-            $info{ $symbol, 'open'     } = $data->{open_price};
-            $info{ $symbol, 'close'    } = $data->{previous_close_price};
-            $info{ $symbol, 'high'     } = $data->{day_high_price};
-            $info{ $symbol, 'low'      } = $data->{day_low_price};
-            $info{ $symbol, 'volume'   } = $data->{volume};
-            $info{ $symbol, 'price'    } = $data->{last_price};
-            $info{ $symbol, 'method'   } = 'asx',
-            $info{ $symbol, 'exchange' } = 'Australian Securities Exchange',
-            $info{ $symbol, 'currency' } = 'AUD',
-            my $date = $data->{last_trade_date};
-            my $t = Time::Piece->strptime($date, '%Y-%m-%dT%H:%M:%S%z');
-            $quoter->store_date(
-                \%info,
-                $symbol,
-                { isodate => $t->ymd }
-            );
-
-        }
-        elsif ($res->header('content-type') =~ /application\/json/) {
-            my $data = decode_json( $res->content );
-            $info{ $symbol, 'success'  } = 0;
-            $info{ $symbol, 'errormsg' } = "The server returned an error"
-                . " for $symbol: $data->{error_desc}";
+            if ($res->is_success && defined $data->{last_price}) {
+                $info{ $symbol, 'success'  } = 1;
+                $info{ $symbol, 'symbol'   } = $symbol;
+                $info{ $symbol, 'last'     } = $data->{last_price};
+                $info{ $symbol, 'net'      } = $data->{change_price};
+                $info{ $symbol, 'p_change' } = $data->{change_in_percent};
+                $info{ $symbol, 'p_change' } =~ s/\%$//; # strip suffix
+                $info{ $symbol, 'bid'      } = $data->{bid_price};
+                $info{ $symbol, 'offer'    } = $data->{offer_price};
+                $info{ $symbol, 'open'     } = $data->{open_price};
+                $info{ $symbol, 'close'    } = $data->{previous_close_price};
+                $info{ $symbol, 'high'     } = $data->{day_high_price};
+                $info{ $symbol, 'low'      } = $data->{day_low_price};
+                $info{ $symbol, 'volume'   } = $data->{volume};
+                $info{ $symbol, 'price'    } = $data->{last_price};
+                $info{ $symbol, 'method'   } = 'asx',
+                $info{ $symbol, 'exchange' } = 'Australian Securities Exchange',
+                $info{ $symbol, 'currency' } = 'AUD',
+                my $date = $data->{last_trade_date};
+                my $t = Time::Piece->strptime($date, '%Y-%m-%dT%H:%M:%S%z');
+                $quoter->store_date(
+                    \%info,
+                    $symbol,
+                    { isodate => $t->ymd }
+                );
+            }
+            else {
+                $info{ $symbol, 'success'  } = 0;
+                $info{ $symbol, 'errormsg' } = "The security $symbol is not"
+                    . " available from this endpoint";
+            }
         }
         else {
             $info{ $symbol, 'success'  } = 0;

@@ -59,6 +59,7 @@
     - XRO
     - IAG
     - TLS
+    - NABHA
     - XAO
 #
 - module: AlphaVantage.pm

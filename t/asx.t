@@ -11,7 +11,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 98;
+plan tests => 108;
 
 my $now = localtime;;
 my $a_year_ago = $now->add_years(-1);
@@ -25,6 +25,7 @@ my @symbols = qw/
 /;
 my @indices = qw/
     XAO
+    NABHA
 /;
 
 # Invoke test subject
