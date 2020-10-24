@@ -28,12 +28,10 @@ use vars qw( $BSERO_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
-use HTML::TableExtract;
 
-# VERSION
+our $VERSION = '1.47'; # VERSION
 
-my $BSERO_URL = 'http://www.bvb.ro/mobile/m_SecurityDetails.aspx?';
-
+my $BSERO_URL = 'https://tradeville.eu/actiuni/actiuni-';
 
 sub methods { return ( romania => \&bsero,
                        bsero => \&bsero,
@@ -50,65 +48,58 @@ sub bsero {
 
   my $quoter = shift;
   my @stocks = @_;
-  my (%info,$reply,$url,$te,$ts,$row,@cells, $ce);
-  my($my_date,$my_last,$my_p_change,$my_volume,$my_high,$my_low,$my_open);
+  my (%info,$reply,$url);
+  my($my_date,$my_last,$my_p_change,$my_volume,$my_high,$my_low,$my_open,$my_price);
   my $ua = $quoter->user_agent();
 
   $url = $BSERO_URL;
 
   foreach my $stocks (@stocks)
     {
-      $reply = $ua->request(GET $url.join('',"s=",$stocks));
+      $reply = $ua->request(GET $url.join('', $stocks));
 
       if ($reply->is_success)
         {
+          my $htmlstream	=	HTML::TokeParser->new(\$reply->content);
 
-          $te = HTML::TableExtract->new();
+          my ($tag, $name, $var);
+          while ( $tag = $htmlstream->get_tag('div') )
+          {
+            $var = $htmlstream->get_trimmed_text();
 
-          $te->parse($reply->content);
-
-          unless ( $te->tables)
-            {
-              $info {$stocks,"success"} = 0;
-              $info {$stocks,"errormsg"} = "Stock name $stocks not found";
-              next;
-            }
-
-          $ts = $te->first_table_found();
-
-          foreach $row ($ts->rows) {
-            @cells = @$row;
-
-            # The date is not a number, so we don't bother modifying it
-            if($cells[0] eq 'Data'){
-              $my_date = $cells[1];
-            }
-            #The rest of the data needs to be modified
-            else {
-              foreach $ce (@cells) {
-                next unless $ce;
-                $ce =~ s/\.//;    #remove thouthand separator
-                $ce =~ s/,/\./g; #replace european decimal separator with american ones
+            if ( index($var, 'Ultimul pret') != -1 ) {
+              $tag = $htmlstream->get_tag('div');
+              if ( index($tag->[1]{'class'}, 'right') != -1 ) {
+                $my_last = $htmlstream->get_trimmed_text();
+                $my_last =~ tr/,//d;
               }
 
-              #go through each row and get the data
-              if($cells[0] eq 'Ultimul pret'){
-                $my_last = $cells[1];
+            } elsif ( $var eq 'Variatie:' ) {
+              $tag = $htmlstream->get_tag('div');
+              if ( index($tag->[1]{'class'}, 'right') != -1 ) {
+                $my_p_change = $htmlstream->get_trimmed_text();
+                substr($my_p_change, -1) = "";
               }
-              if($cells[0] eq 'Var (%)'){
-                $my_p_change = $cells[1];
+
+            } elsif ( $var eq 'Volum:' ) {
+              $tag = $htmlstream->get_tag('div');
+              if ( index($tag->[1]{'class'}, 'right') != -1 ) {
+                $my_volume = $htmlstream->get_trimmed_text();
+                $my_volume =~ tr/,//d;
               }
-              if($cells[0] eq 'Volum'){
-                $my_volume = $cells[1];
+
+            } elsif ( $var eq 'Deschidere:' ) {
+              $tag = $htmlstream->get_tag('div');
+              if ( index($tag->[1]{'class'}, 'right') != -1 ) {
+                $my_open = $htmlstream->get_trimmed_text();
+                $my_open =~ tr/,//d;
               }
-              if($cells[0] eq 'Pret maxim'){
-                $my_high = $cells[1];
-              }
-              if($cells[0] eq 'Pret minim'){
-                $my_low = $cells[1];
-              }
-              if($cells[0] eq 'Pret deschidere'){
-                $my_open = $cells[1];
+
+            } elsif ( $var eq 'Pret mediu:' ) {
+              $tag = $htmlstream->get_tag('div');
+              if ( index($tag->[1]{'class'}, 'right') != -1 ) {
+                $my_price = $htmlstream->get_trimmed_text();
+                $my_price =~ tr/,//d;
               }
             }
           }
@@ -116,14 +107,13 @@ sub bsero {
           $info{$stocks, "success"}  =1;
           $info{$stocks, "exchange"} ="Bucharest Stock Exchange";
           $info{$stocks, "method"}   ="bsero";
-          $info{$stocks, "name"}     =$stocks;
+          $info{$stocks, "symbol"}   =$stocks;
           $info{$stocks, "last"}     =$my_last;
           $info{$stocks, "close"}    =$my_last;
           $info{$stocks, "p_change"} =$my_p_change;
           $info{$stocks, "volume"}   =$my_volume;
-          $info{$stocks, "high"}     =$my_high;
-          $info{$stocks, "low"}      =$my_low;
           $info{$stocks, "open"}     =$my_open;
+          $info{$stocks, "price"}    =$my_price;
 
           $quoter->store_date(\%info, $stocks, {eurodate => $my_date});
 
