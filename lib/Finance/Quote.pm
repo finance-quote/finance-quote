@@ -65,6 +65,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Fidelity
     FidelityFixed
     Finanzpartner
+    Fondsweb
     Fool
     Fundata
     GoldMoney
@@ -1523,6 +1524,7 @@ Finance::Quote::FTfunds,
 Finance::Quote::Fidelity,
 Finance::Quote::FidelityFixed,
 Finance::Quote::Finanzpartner,
+Finance::Quote::Fondsweb,
 Finance::Quote::Fool,
 Finance::Quote::Fundata
 Finance::Quote::GoldMoney,
