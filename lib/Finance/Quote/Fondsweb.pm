@@ -13,16 +13,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-# $Id: $
-#
 
 package Finance::Quote::Fondsweb;
 use v5.010;
 
+# VERSION 
+
 use warnings;
 use strict;
-#~ use LWP::ConsoleLogger::Easy qw( debug_ua );
+
 use HTTP::Request::Common;
 use HTML::TreeBuilder::XPath;
 use Data::Dumper;
