@@ -81,19 +81,18 @@ sub fondsweb {
 			my $details = $te->table(0, 6);
 			my $lastRowIndex = @{$details->rows} - 1;
 			# extract data with re
-			my @highest = $details->cell($lastRowIndex - 1, 1) =~ m/^(\d+,\d+)\s.+/;
-			my @lowest = $details->cell($lastRowIndex, 1) =~ m/^(\d+,\d+)\s.+/;			
-			$info{ $symbol, "year_range" } = join('', @highest) . " - " . join('', @lowest);
+			my @highest = $details->cell($lastRowIndex - 1, 1) =~ m/^(\d+),(\d+)\s.+/;
+			my @lowest = $details->cell($lastRowIndex, 1) =~ m/^(\d+),(\d+)\s.+/;			
+			$info{ $symbol, "year_range" } = join('.', @highest) . " - " . join('.', @lowest);
 			
 			# nav, last, currency
 			my $raw_nav_currency = $tree->findvalue( '//div[@class="fw--fondDetail-price"]' );
-			my @nav_currency = $raw_nav_currency =~ m/^(\d+,\d+)\s(\w+)/;
-			$info{ $symbol, 'nav' } = $nav_currency[0];
-			$info{ $symbol, 'last' } = $nav_currency[0];
-			$info{ $symbol, 'currency' } = $nav_currency[1];
+			my @nav_currency = $raw_nav_currency =~ m/^(\d+),(\d+)\s(\w+)/;
+			$info{ $symbol, 'nav' } = join('.', @nav_currency[0,1]);
+			$info{ $symbol, 'last' } = $info{ $symbol, 'nav' };
+			$info{ $symbol, 'currency' } = $nav_currency[-1];
 			
 			# Other metadata					
-			$info{ $symbol, 'source' } = 'Finance::Quote::Fondsweb';
 			$info{ $symbol, 'method' } = 'fondsweb';
 			$info{ $symbol, "type" } = "fund";
 			$info{ $symbol,	"success" } = 1;
@@ -138,19 +137,18 @@ one would supply LU0804734787 as the symbol argument on the fetch API call.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::Fondsweb:
+The following labels are returned by Finance::Quote::Fondsweb:
 
-- name
-- isin
-- date
-- isodate
-- year_range
-- nav
-- last
 - currency
-- source
+- date
+- isin
+- isodate
+- last
 - method
+- name
+- nav
 - type
+- year_range
 
 =head1 REQUIREMENTS
 
