@@ -51,7 +51,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     AlphaVantage
     BMONesbittBurns
     BSEIndia
-    BSERO
     Bloomberg
     Bourso
     CSE
@@ -89,6 +88,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     SIXfunds
     SIXshares
     TNetuk
+    Tradeville
     TSP
     TSX
     Tdefunds
@@ -1089,37 +1089,37 @@ be used.  Some custom-written modules may use labels not mentioned here.  If
 you wish to be certain that you obtain a certain set of labels for a given
 stock, you can specify that using require_labels().
 
-    name         Company or Mutual Fund Name
-    last         Last Price
-    high         Highest trade today
-    low          Lowest trade today
-    date         Last Trade Date  (MM/DD/YY format)
-    time         Last Trade Time
-    net          Net Change
-    p_change     Percent Change from previous day's close
-    volume       Volume
+    ask          Ask
     avg_vol      Average Daily Vol
     bid          Bid
-    ask          Ask
-    close        Previous Close
-    open         Today's Open
-    day_range    Day's Range
-    year_range   52-Week Range
-    eps          Earnings per Share
-    pe           P/E Ratio
-    div_date     Dividend Pay Date
-    div          Dividend per Share
-    div_yield    Dividend Yield
     cap          Market Capitalization
-    ex_div       Ex-Dividend Date.
-    nav          Net Asset Value
-    yield        Yield (usually 30 day avg)
-    exchange     The exchange the information was obtained from.
-    success      Did the stock successfully return information? (true/false)
+    close        Previous Close
+    currency     Currency code for the returned data
+    date         Last Trade Date  (MM/DD/YY format)
+    day_range    Day's Range
+    div          Dividend per Share
+    div_date     Dividend Pay Date
+    div_yield    Dividend Yield
+    eps          Earnings per Share
     errormsg     If success is false, this field may contain the reason why.
-    method       The module (as could be passed to fetch) which found this
-                 information.
+    ex_div       Ex-Dividend Date.
+    exchange     The exchange the information was obtained from.
+    high         Highest trade today
+    last         Last Price
+    low          Lowest trade today
+    method       The module (as could be passed to fetch) which found this information.
+    name         Company or Mutual Fund Name
+    nav          Net Asset Value
+    net          Net Change
+    open         Today's Open
+    p_change     Percent Change from previous day's close
+    pe           P/E Ratio
+    success      Did the stock successfully return information? (true/false)
+    time         Last Trade Time
     type         The type of equity returned
+    volume       Volume
+    year_range   52-Week Range
+    yield        Yield (usually 30 day avg)
 
 If all stock lookups fail (possibly because of a failed connection) then the
 empty list may be returned, or undef in a scalar context.
@@ -1510,7 +1510,6 @@ Finance::Quote::ASX,
 Finance::Quote::Bloomberg,
 Finance::Quote::BMONesbittBurns,
 Finance::Quote::BSEIndia,
-Finance::Quote::BSERO,
 Finance::Quote::Bourso,
 Finance::Quote::CSE,
 Finance::Quote::Cdnfundlibrary,
@@ -1545,6 +1544,7 @@ Finance::Quote::Oslobors,
 Finance::Quote::Platinum,
 Finance::Quote::SEB,
 Finance::Quote::TNetuk,
+Finance::Quote::Tradeville,
 Finance::Quote::TSP,
 Finance::Quote::TSX,
 Finance::Quote::Tdefunds,
