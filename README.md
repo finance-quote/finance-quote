@@ -56,6 +56,8 @@ stock, you can specify that using require\_labels().
     ex_div       Ex-Dividend Date.
     exchange     The exchange the information was obtained from.
     high         Highest trade today
+    isin         International Securities Identification Number
+    isodate      ISO 8601 formatted date 
     last         Last Price
     low          Lowest trade today
     method       The module (as could be passed to fetch) which found this information.
@@ -461,6 +463,7 @@ Finance::Quote::FTfunds,
 Finance::Quote::Fidelity,
 Finance::Quote::FidelityFixed,
 Finance::Quote::Finanzpartner,
+Finance::Quote::Fondsweb,
 Finance::Quote::Fool,
 Finance::Quote::Fundata
 Finance::Quote::GoldMoney,
