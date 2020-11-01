@@ -30,7 +30,11 @@
 package Finance::Quote;
 require 5.005;
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, Smart::Comments, '###';
+
 use strict;
+use Module::Load;
 use Exporter ();
 use Carp;
 use Finance::Quote::UserAgent;
@@ -41,7 +45,15 @@ use Data::Dumper;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $TIMEOUT @MODULES %MODULES %METHODS $AUTOLOAD
-            $ALPHAVANTAGE_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
+            @CURRENCY_RATES_MODULES $USE_EXPERIMENTAL_UA/;
+
+# VERSION
+
+@CURRENCY_RATES_MODULES = qw/
+    AlphaVantage
+    ECB
+    Fixer
+/;
 
 @MODULES = qw/
     AEX
@@ -107,22 +119,11 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     ZA_UnitTrusts
 /;
 
-# Call on the Yahoo API:
-#  - "f=l1" should return a single value - the "Last Trade (Price Only)"
-#  - "s=" the value of s should be "<FROM><TO>=X"
-#         where <FROM> and <TO> are currencies
-# Excample: http://finance.yahoo.com/d/quotes.csv?f=l1&s=AUDGBP=X
-# Documentation can be found here:
-#     http://code.google.com/p/yahoo-finance-managed/wiki/csvQuotesDownload
-$ALPHAVANTAGE_CURRENCY_URL = "https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE";
-
 @ISA    = qw/Exporter/;
 @EXPORT = ();
 @EXPORT_OK = qw/fidelity troweprice asx tiaacref
                 currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
-
-# VERSION
 
 $USE_EXPERIMENTAL_UA = 0;
 
@@ -131,7 +132,6 @@ $USE_EXPERIMENTAL_UA = 0;
 # Private Class Methods
 #
 ################################################################################
-
 # Autoload method for obsolete methods.  This also allows people to
 # call methods that objects export without having to go through fetch.
 
@@ -385,16 +385,23 @@ sub new {
   my $this = {};
   bless $this, $class;
 
+  # To add a named parameter:
+  # 0. Document it in the POD for new
+  # 1. Add a default value for $this->{object-name}
+  # 2. Add the 'user-visible-name' => [type, object-name] to %named_parameter
+
   # Default values
-  $this->{FAILOVER} = 1;
-  $this->{REQUIRED} = [];
-  $this->{TIMEOUT} = $TIMEOUT if defined($TIMEOUT);
+  $this->{FAILOVER}       = 1;
+  $this->{REQUIRED}       = [];
+  $this->{TIMEOUT}        = $TIMEOUT if defined($TIMEOUT);
+  $this->{currency_rates} = {order => ['AlphaVantage']};
 
   # Sort out arguments
   my %named_parameter = (timeout         => ['', 'TIMEOUT'],
                          failover        => ['', 'FAILOVER'],
                          fetch_currency  => ['', 'currency'],
-                         required_labels => ['ARRAY', 'REQUIRED']);
+                         required_labels => ['ARRAY', 'REQUIRED'],
+                         currency_rates  => ['HASH', 'currency_rates']);
 
   $this->{module_specific_data} = {};
   my @load_modules = ();
@@ -428,6 +435,31 @@ sub new {
   }
 
   $this->_load_modules(@load_modules);
+
+  # Load the currency rate methods
+  my %currency_check = map { $_ => 1 } @CURRENCY_RATES_MODULES;
+  $this->{currency_rate_method} = [];
+  foreach my $method (@{$this->{currency_rates}->{order}}) {
+    unless (defined($currency_check{$method})) {
+      carp "Unknown curreny rates method: $method";
+      return undef;
+    }
+
+    my $method_path = "${class}::CurrencyRates::${method}";
+    eval {
+      autoload $method_path;
+      my $args = exists $this->{currency_rates}->{lc($method)} ? $this->{currency_rates}->{lc($method)} : {};
+      my $rate = $method_path->new($args);
+      die unless defined $rate;
+      
+      push(@{$this->{currency_rate_method}}, $rate);
+    };
+
+    if ($@) {
+      carp "Failed to load $method_path: $@";
+      return undef;
+    }
+  }
 
   return $this;
 }
@@ -484,7 +516,7 @@ sub _require_test {
 sub B_to_billions {
   my ($self,$str) = @_;
 
-  ### B_to_billions(): $str
+  # B_to_billions() $str
   if ($str =~ s/B$//i) {
     $str = $self->decimal_shiftup ($str, 9);
   }
@@ -771,71 +803,56 @@ sub currency {
   my $this = shift if (ref($_[0]));
   $this ||= _dummy();
 
-  my ($from, $to) = @_;
-  return undef unless ($from and $to);
+  my ($from_code, $to_code) = @_;
+  return undef unless ($from_code and $to_code);
 
-  $from =~ s/^\s*(\d*\.?\d*)\s*//;
+  $from_code =~ s/^\s*(\d*\.?\d*)\s*//;
   my $amount = $1 || 1;
 
-  # Don't know if these have to be in upper case, but it's
-  # better to be safe than sorry.
-  $to = uc($to);
-  $from = uc($from);
+  $to_code   = uc($to_code);
+  $from_code = uc($from_code);
 
-  return $amount if ($from eq $to); # Trivial case.
+  return $amount if ($from_code eq $to_code); # Trivial case.
 
   my $ua = $this->get_user_agent;
+  
+  foreach my $rate (@{$this->{currency_rate_method}}) {
+    ### rate: ref($rate)
+    my $final = eval {
+      my ($from, $to) = $rate->multipliers($ua, $from_code, $to_code);
 
-  my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
-  return undef unless ( defined $ALPHAVANTAGE_API_KEY );
+      die("Failed to find currency rates for $from_code or $to_code") unless defined $from and defined $to;
 
-  my $try_cnt = 0;
-  my $json_data;
-  do {
-    $try_cnt += 1;
-    my $reply = $ua->request(GET "${ALPHAVANTAGE_CURRENCY_URL}"
-      . "&from_currency=" . ${from}
-      . "&to_currency=" . ${to}
-      . "&apikey=" . ${ALPHAVANTAGE_API_KEY} );
+      ### to weight  : $to
+      ### from weight: $from
+      ### amount     : $amount
 
-    my $code = $reply->code;
-    my $desc = HTTP::Status::status_message($code);
-    return undef unless ($code == 200);
+      # Is from closest to (amount, to, amount * to)?
+      # (amount * to) / from
+      my $delta  = abs($amount - $from);
+      my $result = ($amount/$from) * $to;
+      ### amount/from -> delta/result : ($delta, $result)
+      if ($delta > abs($to - $from)) {
+        $delta = abs($to - $from);
+        $result = ($to/$from) * $amount;
+        ### to/from -> delta/result : ($delta, $result)
+      }
+      if ($delta > abs($amount*$to - $from)) {
+        $delta = abs($amount*$to - $from);
+        $result = ($amount * $to)/$from;
+        ### (amount * to)/from -> delta/result : ($delta, $result)
+      }
 
-    my $body = $reply->content;
+      return $result;
+    };
 
-    $json_data = JSON::decode_json $body;
-    if ( !$json_data || $json_data->{'Error Message'} ) {
+    if ($@) {
+      ### Rate Error: $@
       return undef;
     }
-#     print "Failed: " . $json_data->{'Note'} . "\n" if (($try_cnt < 5) && ($json_data->{'Note'}));
-    sleep (20) if (($try_cnt < 5) && ($json_data->{'Note'}));
-  } while (($try_cnt < 5) && ($json_data->{'Note'}));
 
-  my $exchange_rate = $json_data->{'Realtime Currency Exchange Rate'}->{'5. Exchange Rate'};
-
-  {
-    local $^W = 0;  # Avoid undef warnings.
-
-    # We force this to a number to avoid situations where
-    # we may have extra cruft, or no amount.
-    return undef unless ($exchange_rate+0);
+    return $final;
   }
-
-if ( $exchange_rate < 0.001 ) {
-    # exchange_rate is too little. we'll get more accuracy by using
-    # the inverse rate and inverse it
-    my $inverse_rate = $this->currency( $to, $from );
-    {
-        local $^W = 0;
-        return undef unless ( $exchange_rate + 0 );
-    }
-    if ($inverse_rate != 0.0) {
-        $exchange_rate = int( 100000000 / $inverse_rate + .5 ) / 100000000;
-    }
-}
-
-  return ($exchange_rate * $amount);
 }
 
 # =======================================================================
@@ -1201,6 +1218,7 @@ set default class values, and one helper function.
     my $q = Finance::Quote->new('YahooJSON', fetch_currency => 'EUR')
     my $q = Finance::Quote->new('alphavantage' => {API_KEY => '...'})
     my $q = Finance::Quote->new('IEXCloud', 'iexcloud' => {API_KEY => '...'});
+    my $q = Finance::Quote->new(currency_rates => {order => ['ECB', 'Fixer'], 'fixer' => {API_KEY => '...'}});
 
 A Finance::Quote object uses one or more methods to fetch quotes for
 securities. C<new> constructs a Finance::Quote object and enables the caller
@@ -1239,6 +1257,15 @@ modules. Note that the FQ_LOAD_QUOTELET environment variable must begin with
 Method names correspond to the Perl module in the Finance::Quote module space.
 For example, C<Finance::Quote->new('ASX')> will load the module
 Finance::Quote::ASX, which provides the method "asx".
+
+The key 'currency_rates' configures the Finanace::Quote currency rate
+conversion.  By default, to maintain backward compatability,
+Finance::Quote::CurrencyRates::AlphaVantage is used for currency conversion.
+This end point requires an API key, which can either be set in the environment
+or included in the configuration hash. To specify a different primary currency
+conversion method or configure fallback methods, include the 'order' key, which
+points to an array of Finance::Quote::CurrencyRates module names. See the
+documentation for the individual Finance::Quote::CurrencyRates to learn more. 
 
 =head2 GET_DEFAULT_CURRENCY_FIELDS
 
@@ -1337,8 +1364,8 @@ information and the currency rates.  In order to improve reliability and speed
 performance, currency conversion rates are cached and are assumed not to change
 for the duration of the Finance::Quote object.
 
-Currency conversions are requested through AlphaVantage, which requires an API
-key.  Please see Finance::Quote::AlphaVantage for more information.
+See the introduction to this page for information on how to configure the
+souce of currency conversion rates.
 
 =head2 GET_REQUIRED_LABELS
 
@@ -1395,12 +1422,16 @@ second argument.  In the above example, C<value> is C<'10.23'>.
 
 =head2 CURRENCY
 
-    my $value = Finance::Quote->currency('15.95 USD', 'AUD');
+    my $value = $q->currency('15.95 USD', 'AUD');
+    my $value = Finance::Quote->currency('23.45 EUR', 'RUB');
 
 C<currency> converts a value with a currency code suffix to another currency
-using the current exchange rate returned by the AlphaVantage method.
-AlphaVantage requires an API key. See Finance::Quote::AlphaVantage for more
-information.
+using the current exchange rate as determined by the
+Finance::Quote::CurrencyRates method or methods configured for the quoter $q.
+When called as a class method, only Finance::Quote::AlphaVantage is used, which
+requires an API key. See the introduction for information on configuring
+currency rate conversions and see Finance::Quote::CurrencyRates::AlphaVantage
+for information about the API key.
 
 =head2 CURRENCY_LOOKUP
 
@@ -1445,13 +1476,10 @@ environment variable.
 
 =head1 BUGS
 
-There are no ways for a user to define a failover list.
+There are no ways for a user to define a failover list for fetch.
 
 The two-dimensional hash is a somewhat unwieldly method of passing around
 information when compared to references
-
-There is no way to override the default behaviour to cache currency conversion
-rates.
 
 =head1 COPYRIGHT & LICENSE
 
@@ -1506,6 +1534,9 @@ http://www.gnucash.org/
 
 =head1 SEE ALSO
 
+Finance::Quote::CurrencyRates::AlphaVantage,
+Finance::Quote::CurrencyRates::ECB,
+Finance::Quote::CurrencyRates::Fixer,
 Finance::Quote::AEX,
 Finance::Quote::AIAHK,
 Finance::Quote::ASEGR,

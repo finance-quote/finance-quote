@@ -147,6 +147,7 @@ set default class values, and one helper function.
     my $q = Finance::Quote->new('YahooJSON', fetch_currency => 'EUR')
     my $q = Finance::Quote->new('alphavantage' => {API_KEY => '...'})
     my $q = Finance::Quote->new('IEXCloud', 'iexcloud' => {API_KEY => '...'});
+    my $q = Finance::Quote->new(currency_rates => {order => ['ECB', 'Fixer'], 'fixer' => {API_KEY => '...'}});
 
 A Finance::Quote object uses one or more methods to fetch quotes for
 securities. `new` constructs a Finance::Quote object and enables the caller
@@ -176,6 +177,15 @@ modules. Note that the FQ\_LOAD\_QUOTELET environment variable must begin with
 Method names correspond to the Perl module in the Finance::Quote module space.
 For example, `Finance::Quote-`new('ASX')> will load the module
 Finance::Quote::ASX, which provides the method "asx".
+
+The key 'currency\_rates' configures the Finanace::Quote currency rate
+conversion.  By default, to maintain backward compatability,
+Finance::Quote::CurrencyRates::AlphaVantage is used for currency conversion.
+This end point requires an API key, which can either be set in the environment
+or included in the configuration hash. To specify a different primary currency
+conversion method or configure fallback methods, include the 'order' key, which
+points to an array of Finance::Quote::CurrencyRates module names. See the
+documentation for the individual Finance::Quote::CurrencyRates to learn more. 
 
 ## GET\_DEFAULT\_CURRENCY\_FIELDS
 
@@ -274,8 +284,8 @@ information and the currency rates.  In order to improve reliability and speed
 performance, currency conversion rates are cached and are assumed not to change
 for the duration of the Finance::Quote object.
 
-Currency conversions are requested through AlphaVantage, which requires an API
-key.  Please see Finance::Quote::AlphaVantage for more information.
+See the introduction to this page for information on how to configure the
+souce of currency conversion rates.
 
 ## GET\_REQUIRED\_LABELS
 
@@ -332,12 +342,16 @@ second argument.  In the above example, `value` is `'10.23'`.
 
 ## CURRENCY
 
-    my $value = Finance::Quote->currency('15.95 USD', 'AUD');
+    my $value = $q->currency('15.95 USD', 'AUD');
+    my $value = Finance::Quote->currency('23.45 EUR', 'RUB');
 
 `currency` converts a value with a currency code suffix to another currency
-using the current exchange rate returned by the AlphaVantage method.
-AlphaVantage requires an API key. See Finance::Quote::AlphaVantage for more
-information.
+using the current exchange rate as determined by the
+Finance::Quote::CurrencyRates method or methods configured for the quoter $q.
+When called as a class method, only Finance::Quote::AlphaVantage is used, which
+requires an API key. See the introduction for information on configuring
+currency rate conversions and see Finance::Quote::CurrencyRates::AlphaVantage
+for information about the API key.
 
 ## CURRENCY\_LOOKUP
 
@@ -382,13 +396,10 @@ environment variable.
 
 # BUGS
 
-There are no ways for a user to define a failover list.
+There are no ways for a user to define a failover list for fetch.
 
 The two-dimensional hash is a somewhat unwieldly method of passing around
 information when compared to references
-
-There is no way to override the default behaviour to cache currency conversion
-rates.
 
 # COPYRIGHT & LICENSE
 
@@ -443,6 +454,9 @@ http://www.gnucash.org/
 
 # SEE ALSO
 
+Finance::Quote::CurrencyRates::AlphaVantage,
+Finance::Quote::CurrencyRates::ECB,
+Finance::Quote::CurrencyRates::Fixer,
 Finance::Quote::AEX,
 Finance::Quote::AIAHK,
 Finance::Quote::ASEGR,
