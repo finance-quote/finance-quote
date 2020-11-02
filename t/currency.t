@@ -12,6 +12,41 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
+sub module_check
+{
+  my ($module, $valid, $invalid, $options) = @_;
+
+  plan tests => 1 + 2*@{$valid} + @{$invalid};
+  
+  my $hash = {order => [$module]};
+  $hash->{lc($module)} = $options if defined $options;
+
+  my $q = Finance::Quote->new('currency_rates' => $hash);
+  ok($q);
+
+  foreach my $test (@{$valid}) {
+    my ($from, $to) = @{$test};
+    my $v = $q->currency($from, $to);
+    ok(looks_like_number($v), "$from -> $to = $v");
+
+    my ($from_amount, $from_code) = $from =~ m/^([0-9.]+) ([A-Z]+)$/;
+    SKIP: {
+      skip "identity check because different currencies", 1 unless $from_code eq $to;
+
+      my ($suffix) = $from_amount =~ m/[.]([0-9]+)/;
+      my $string = sprintf("%.*f", length($suffix), $v);
+
+      ok($from_amount eq $string, "identity check");
+    };
+  }
+
+  foreach my $test (@{$invalid}) {
+    my ($from, $to) = @{$test};
+    my $v = $q->currency($from, $to);
+    is($v, undef, "$from -> $to failed as expected");
+  }
+}
+
 plan tests => 4;
 
 # Check that FQ fails on bogus CurrencyRates method
@@ -25,38 +60,19 @@ subtest 'AlphaVantage' => sub {
         'Set $ENV{TEST_ALPHAVANTAGE_API_KEY} to run this test; get one at https://www.alphavantage.co';
   }
 
-  plan tests => 1;
-
-  my $q = Finance::Quote->new('currency_rates' => {order => ['AlphaVantage'],
-                                                   alphavantage => {API_KEY => $ENV{TEST_ALPHAVANTAGE_API_KEY}}
-                                                  });
-  ok($q);
-
-  $q->currency( "100.00 USD", "EUR");
-  $q->currency( "20000 IDR", "EUR");
-};
-  
-# Check ECB
-subtest 'ECB' => sub {
-  my @valid   = (['100.00 USD', 'EUR'], ['1.00 GBP', 'IDR'], ['20000.00 IDR', 'CAD']);
+  my @valid   = (['1.00 GBP', 'IQD'], ['10.00 AUD', 'AUD']);
   my @invalid = (['20.12 ZZZ', 'GBP']);
 
-  plan tests => 1 + @valid + @invalid;
+  module_check('AlphaVantage', \@valid, \@invalid, {API_KEY => $ENV{TEST_ALPHAVANTAGE_API_KEY}});
+};
 
-  my $q = Finance::Quote->new('currency_rates' => {order => ['ECB']});
-  ok($q);
 
-  foreach my $test (@valid) {
-    my ($from, $to) = @{$test};
-    my $v = $q->currency($from, $to);
-    ok(looks_like_number($v), "$from -> $to = $v");
-  }
+# Check ECB
+subtest 'ECB' => sub {
+  my @valid   = (['100.00 USD', 'EUR'], ['1.00 GBP', 'IDR'], ['1.23 IDR', 'CAD'], ['10.00 AUD', 'AUD']);
+  my @invalid = (['20.12 ZZZ', 'GBP']);
 
-  foreach my $test (@invalid) {
-    my ($from, $to) = @{$test};
-    my $v = $q->currency($from, $to);
-    is($v, undef, "$from -> $to failed as expected");
-  }
+  module_check('ECB', \@valid, \@invalid);
 };
 
 # Check Fixer
@@ -66,49 +82,9 @@ subtest 'Fixer' => sub {
         'Set $ENV{TEST_FIXER_API_KEY} to run this test; get one at https://fixer.io';
   }
 
-  plan tests => 1;
+  my @valid   = (['100.00 USD', 'EUR'], ['1.00 GBP', 'IDR'], ['1.23 IDR', 'CAD'], ['10.00 AUD', 'AUD']);
+  my @invalid = (['20.12 ZZZ', 'GBP']);
 
-  my $q = Finance::Quote->new('currency_rates' => {order => ['Fixer'],
-                                                   fixer => {API_KEY => $ENV{TEST_FIXER_API_KEY}}
-                                                  });
-  ok($q);
+  module_check('Fixer', \@valid, \@invalid);
 };
   
-
-
-# # Explicit conversion...
-# ok($q->currency("USD","AUD"));			# Test 1
-# ok($q->currency("EUR","JPY"));			# Test 2
-# ok(! defined($q->currency("XXX","YYY")));	# Test 3
-# 
-# # test for thousands : GBP -> IQD. This should be > 1000
-# ok($q->currency("GBP","IQD")>1000) ;            # Test 4
-# 
-# # Test 5
-# ok(($q->currency("10 AUD","AUD")) == (10 * ($q->currency("AUD","AUD"))));
-# 
-# # Euros into French Francs are fixed at a conversion rate of
-# # 1:6.559576 .  We can use this knowledge to test that a stock is
-# # converting correctly.
-# 
-# # Test 6
-# my %baseinfo = $q->fetch("alphavantage","BA.L");
-# ok($baseinfo{"BA.L","success"});
-# 
-# $q->set_currency("AUD");	# All new requests in Aussie Dollars.
-# 
-# my %info = $q->fetch("alphavantage","BA.L");
-# ok($info{"BA.L","success"});		# Test 7
-# ok($info{"BA.L","currency"} eq "AUD");	# Test 8
-# ok($info{"BA.L","last"} > 0);		# Test 9
-# 
-# # Check if inverse is working ok
-# ok(check_inverse("EUR","RUB"),"Inverse is calculated correctly: multiplication should be 1");
-# ok(check_inverse("CZK","USD"),"Inverse is calculated correctly: multiplication should be 1");
-# 
-# sub check_inverse {
-#     my ($cur1,$cur2)=@_;
-#     my $a = $q->currency($cur1,$cur2);
-#     my $b = $q->currency($cur2,$cur1);
-#     return $a*$b;
-# }
