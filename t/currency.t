@@ -85,6 +85,6 @@ subtest 'Fixer' => sub {
   my @valid   = (['100.00 USD', 'EUR'], ['1.00 GBP', 'IDR'], ['1.23 IDR', 'CAD'], ['10.00 AUD', 'AUD']);
   my @invalid = (['20.12 ZZZ', 'GBP']);
 
-  module_check('Fixer', \@valid, \@invalid);
+  module_check('Fixer', \@valid, \@invalid, {cache => 1, API_KEY => $ENV{TEST_FIXER_API_KEY}});
 };
   

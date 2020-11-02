@@ -93,8 +93,8 @@ of the Finance::Quote object after the first currency conversion.
 
 =head1 Terms & Conditions
 
-Any use of https://www.ecb.europa.eu is governed by any terms & conditions
-of that site.
+Use of https://www.ecb.europa.eu is governed by any terms & conditions of that
+site.
 
 Finance::Quote is released under the GNU General Public License, version 2,
 which explicitly carries a "No Warranty" clause.

@@ -118,13 +118,13 @@ https://www.alphavantage.co requires users to register and obtain an API key,
 which is also called a token.  
 
 The API key may be set by either providing a alphavantage hash inside the
-currency-rate hash to Finance::Quote->new as in the above example, or by
+currency_rates hash to Finance::Quote->new as in the above example, or by
 setting the environment variable ALPHAVANTAGE_API_KEY.
 
 =head1 Terms & Conditions
 
-Any use of https://www.alphavantage.co is governed by any terms & conditions
-of that site.
+Use of https://www.alphavantage.co is governed by any terms & conditions of
+that site.
 
 Finance::Quote is released under the GNU General Public License, version 2,
 which explicitly carries a "No Warranty" clause.
