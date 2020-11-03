@@ -53,6 +53,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     AlphaVantage
     ECB
     Fixer
+    OpenExchange
 /;
 
 @MODULES = qw/
@@ -1537,6 +1538,7 @@ http://www.gnucash.org/
 Finance::Quote::CurrencyRates::AlphaVantage,
 Finance::Quote::CurrencyRates::ECB,
 Finance::Quote::CurrencyRates::Fixer,
+Finance::Quote::CurrencyRates::OpenExchange,
 Finance::Quote::AEX,
 Finance::Quote::AIAHK,
 Finance::Quote::ASEGR,
