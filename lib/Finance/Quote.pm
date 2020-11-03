@@ -1232,13 +1232,20 @@ fetch method, and pass method-specific parameters to the corresponding method.
 
 =item C<timeout => T> sets the web request timeout to C<T> seconds
 
-=item C<failover => B> where C<B> is a boolean value indicating if failover is acceptable
+=item C<failover => B> where C<B> is a boolean value indicating if failover is
+acceptable
 
-=item C<fetch_currency => C> sets the desired currency code to C<C> for fetch results
+=item C<fetch_currency => C> sets the desired currency code to C<C> for fetch
+results
 
-=item C<required_labels => A> sets the required labels for fetch results to array C<A>
+=item C<currency_rates => H> configures the order currency rate modules are
+consulted for exchange rates and currency rate module options
 
-=item C<<Module-name>> as a string is the name of a specific Finance::Quote::Module to load
+=item C<required_labels => A> sets the required labels for fetch results to
+array C<A>
+
+=item C<<Module-name>> as a string is the name of a specific
+Finance::Quote::Module to load
 
 =item C<<method-name> => H> passes hash C<H> to the method-name constructor
 
@@ -1320,18 +1327,22 @@ number of places to the right.
 =head2 FETCH
 
     my %stocks  = $q->fetch("alphavantage", "IBM", "MSFT", "LNUX");
-    my $hashref = $q->fetch("usa", "IBM", "MSFT", "LNUX");
+    my $hashref = $q->fetch("nasdaq", "IBM", "MSFT", "LNUX");
 
 C<fetch> takes a method as its first argument and the remaining arguments are
 treated as securities.  If the quoter C<$q> was constructed with a specific
 method or methods, then only those methods are available.
 
 When called in an array context, a hash is returned.  In a scalar context, a
-reference to a hash will be returned. 
+reference to a hash will be returned. The keys for the returned hash are
+C<{SECURITY,LABEL}>.  For the above example call, C<$stocks{"IBM","high"}> is
+the high value for IBM.
 
-The keys for the returned hash are C<{SECURITY,LABEL}>.  For the above example
-call, C<$stocks{"IBM","high"}> is the high value for IBM as determined by the
-AlphaVantage method.
+$q->get_methods() returns the list of valid methods for quoter object $q. Some
+methods specify a specific Finance::Quote module, such as 'alphavantage'. Other
+methods are available from multiple Finance::Quote modules, such as 'nasdaq'.
+The quoter failover over option determines if multiple modules are consulted
+for methods such as 'nasdaq' that more than one implementation.
 
 =head2 GET_FAILOVER
 
@@ -1479,7 +1490,7 @@ environment variable.
 
 =head1 BUGS
 
-There are no ways for a user to define a failover list for fetch.
+The caller cannot control the fetch failover order.
 
 The two-dimensional hash is a somewhat unwieldly method of passing around
 information when compared to references
