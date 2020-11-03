@@ -458,7 +458,7 @@ sub new {
 
     if ($@) {
       carp "Failed to load $method_path: $@";
-      return undef;
+      next;
     }
   }
 
