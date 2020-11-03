@@ -125,8 +125,9 @@ You can also look for information at:
 
 # PUBLIC CLASS METHODS
 
-Finance::Quote has public class methods to construct a quoter object, get or
-set default class values, and one helper function.
+Finance::Quote implements public class methods for constructing a quoter
+object, getting or setting default class values, and for listing available
+methods.
 
 ## NEW
 
@@ -139,23 +140,31 @@ set default class values, and one helper function.
     my $q = Finance::Quote->new('IEXCloud', 'iexcloud' => {API_KEY => '...'});
     my $q = Finance::Quote->new(currency_rates => {order => ['ECB', 'Fixer'], 'fixer' => {API_KEY => '...'}});
 
+Finance::Quote modules access a wide range of sources to provide quotes.  A
+module provides one or more methods to fetch quotes. One method is usually the
+name of the module in lower case. Other methods, if provided, are descriptive
+names, such as 'canada', 'nasdaq', or 'nyse'.
+
 A Finance::Quote object uses one or more methods to fetch quotes for
-securities. `new` constructs a Finance::Quote object and enables the caller
-to load only specific methods, set parameters that control the behavior of the
-fetch method, and pass method-specific parameters to the corresponding method.
+securities. 
+
+`new` constructs a Finance::Quote object and enables the caller to load only
+specific modules, set parameters that control the behavior of the fetch method,
+and pass method specific parameters.
 
 - `timeout =` T> sets the web request timeout to `T` seconds
-- `failover =` B> where `B` is a boolean value indicating if failover is
-acceptable
+- `failover =` B> where `B` is a boolean value indicating if failover in
+fetch is permitted
 - `fetch_currency =` C> sets the desired currency code to `C` for fetch
 results
 - `currency_rates =` H> configures the order currency rate modules are
 consulted for exchange rates and currency rate module options
 - `required_labels =` A> sets the required labels for fetch results to
 array `A`
-- `<Module-name`> as a string is the name of a specific
+- `<ModuleName`> as a string is the name of a specific
 Finance::Quote::Module to load
-- `<method-name` => H> passes hash `H` to the method-name constructor
+- `<methodname` => H> passes hash `H` to methodname during fetch to 
+configure the method
 
 With no arguments, `new` creates a Finance::Quote object with the default
 methods.  If the environment variable FQ\_LOAD\_QUOTELET is set, then the

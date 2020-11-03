@@ -1199,8 +1199,9 @@ http://www.gnucash.org/
 
 =head1 PUBLIC CLASS METHODS
 
-Finance::Quote has public class methods to construct a quoter object, get or
-set default class values, and one helper function.
+Finance::Quote implements public class methods for constructing a quoter
+object, getting or setting default class values, and for listing available
+methods.
 
 =head2 NEW
 
@@ -1213,17 +1214,24 @@ set default class values, and one helper function.
     my $q = Finance::Quote->new('IEXCloud', 'iexcloud' => {API_KEY => '...'});
     my $q = Finance::Quote->new(currency_rates => {order => ['ECB', 'Fixer'], 'fixer' => {API_KEY => '...'}});
 
+Finance::Quote modules access a wide range of sources to provide quotes.  A
+module provides one or more methods to fetch quotes. One method is usually the
+name of the module in lower case. Other methods, if provided, are descriptive
+names, such as 'canada', 'nasdaq', or 'nyse'.
+
 A Finance::Quote object uses one or more methods to fetch quotes for
-securities. C<new> constructs a Finance::Quote object and enables the caller
-to load only specific methods, set parameters that control the behavior of the
-fetch method, and pass method-specific parameters to the corresponding method.
+securities. 
+
+C<new> constructs a Finance::Quote object and enables the caller to load only
+specific modules, set parameters that control the behavior of the fetch method,
+and pass method specific parameters.
 
 =over
 
 =item C<timeout => T> sets the web request timeout to C<T> seconds
 
-=item C<failover => B> where C<B> is a boolean value indicating if failover is
-acceptable
+=item C<failover => B> where C<B> is a boolean value indicating if failover in
+fetch is permitted
 
 =item C<fetch_currency => C> sets the desired currency code to C<C> for fetch
 results
@@ -1234,10 +1242,11 @@ consulted for exchange rates and currency rate module options
 =item C<required_labels => A> sets the required labels for fetch results to
 array C<A>
 
-=item C<<Module-name>> as a string is the name of a specific
+=item C<<ModuleName>> as a string is the name of a specific
 Finance::Quote::Module to load
 
-=item C<<method-name> => H> passes hash C<H> to the method-name constructor
+=item C<<methodname> => H> passes hash C<H> to methodname during fetch to 
+configure the method
 
 =back
 
