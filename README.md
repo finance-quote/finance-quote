@@ -5,19 +5,9 @@ Finance::Quote - Get stock and mutual fund quotes from various exchanges
 # SYNOPSIS
 
     use Finance::Quote;
+
     $q = Finance::Quote->new;
-
-    $q->timeout(60);
-
-    $conversion_rate = $q->currency("AUD", "USD");
-    $q->set_currency("EUR");  # Return all info in Euros.
-
-    $q->require_labels(qw/price date high low volume/);
-
-    $q->failover(1); # Set failover support (on by default).
-
     %quotes  = $q->fetch("nasdaq", @stocks);
-    $hashref = $q->fetch("nyse", @stocks);
 
 # DESCRIPTION
 
@@ -183,6 +173,10 @@ modules. Note that the FQ\_LOAD\_QUOTELET environment variable must begin with
 Method names correspond to the Perl module in the Finance::Quote module space.
 For example, `Finance::Quote-`new('ASX')> will load the module
 Finance::Quote::ASX, which provides the method "asx".
+
+Some methods require API keys or have unique options. Passing 'method => HASH'
+to new() enables the caller to provide a configuration HASH to the corresponding
+method.
 
 The key 'currency\_rates' configures the Finanace::Quote currency rate
 conversion.  By default, to maintain backward compatability,
