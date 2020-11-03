@@ -848,12 +848,14 @@ sub currency {
     };
 
     if ($@) {
-      ### Rate Error: $@
-      return undef;
+      ### Rate Error: chomp($@), $@
+      next;
     }
 
     return $final;
   }
+
+  return undef;
 }
 
 # =======================================================================

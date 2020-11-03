@@ -47,7 +47,7 @@ sub module_check
   }
 }
 
-plan tests => 4;
+plan tests => 5;
 
 # Check that FQ fails on bogus CurrencyRates method
 my $q = Finance::Quote->new('currency_rates' => {order => ['DoesNotExist']});
@@ -86,5 +86,23 @@ subtest 'Fixer' => sub {
   my @invalid = (['20.12 ZZZ', 'GBP']);
 
   module_check('Fixer', \@valid, \@invalid, {cache => 1, API_KEY => $ENV{TEST_FIXER_API_KEY}});
+};
+
+# Check Failover
+subtest 'Failover' => sub {
+  if ( not $ENV{TEST_FIXER_API_KEY} ) {
+    plan skip_all =>
+        'Set $ENV{TEST_FIXER_API_KEY} to run this test; get one at https://fixer.io';
+  }
+
+  plan tests => 2;
+
+  my $q = Finance::Quote->new('currency_rates' => {order => ['ECB', 'Fixer'],
+                                                   fixer => {API_KEY => $ENV{TEST_FIXER_API_KEY}}});
+  ok($q);
+
+  my ($from, $to) = ('1000 KZT', 'JPY');
+  my $v = $q->currency($from, $to);
+  ok(looks_like_number($v), "$from -> $to = $v");
 };
   
