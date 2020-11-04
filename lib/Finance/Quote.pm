@@ -457,7 +457,6 @@ sub new {
     };
 
     if ($@) {
-      carp "Failed to load $method_path: $@";
       next;
     }
   }
@@ -713,12 +712,8 @@ sub store_date
     my %mnames = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
       jul => 7, aug => 8, sep => 9, oct =>10, nov =>11, dec =>12);
 
-#    printf "In store_date\n";
-#    print "inforef $inforef\n";
-#    print "piecesref $piecesref\n";
-#    foreach my $key (keys %$piecesref) {
-#      printf ("  %s: %s\n", $key, $piecesref->{$key});
-#    }
+    ### store_date symbol: $symbol
+    ### store_date pieces: $piecesref
 
     # Default to today's date.
     ($month, $day, $year) = (localtime())[4,3,5];
@@ -732,33 +727,50 @@ sub store_date
       ($year, $month, $day) = ($piecesref->{isodate} =~ m/(\d+)\W+(\w+)\W+(\d+)/);
       $year += 2000 if $year < 100;
       $year_specified = 1;
-#      printf "ISO Date %s: Year %d, Month %s, Day %d\n", $piecesref->{isodate}, $year, $month, $day;
+
+      ### format: printf "isodate %s -> Day %d, Month %s, Year %d\n", $piecesref->{isodate}, $day, $month, $year
     }
 
     if ((defined $piecesref->{usdate}) && ($piecesref->{usdate})) {
       ($month, $day, $year) = ($piecesref->{usdate} =~ /(\w+)\W+(\d+)\W+(\d+)/);
       $year += 2000 if $year < 100;
       $year_specified = 1;
-#      printf "US Date %s: Month %s, Day %d, Year %d\n", $piecesref->{usdate}, $month, $day, $year;
+
+      ### format: printf "usdate %s -> Day %d, Month %s, Year %d\n", $piecesref->{usdate}, $day, $month, $year
     }
 
     if ((defined $piecesref->{eurodate}) && ($piecesref->{eurodate})) {
         ($day, $month, $year) = ($piecesref->{eurodate} =~ /(\d+)\W+(\w+)\W+(\d+)/);
       $year += 2000 if $year < 100;
       $year_specified = 1;
-#      printf "Euro Date %s: Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year;
+
+      ### format: printf "eurodate %s -> Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year
     }
 
     if (defined ($piecesref->{year})) {
       $year = $piecesref->{year};
       $year += 2000 if $year < 100;
       $year_specified = 1;
-    }
-    $month = $piecesref->{month} if defined ($piecesref->{month});
-    $month = $mnames{lc(substr($month,0,3))} if ($month =~ /\D/);
-    $day  = $piecesref->{day} if defined ($piecesref->{day});
 
+      ### format: printf "year %s -> Year %d\n", $piecesref->{year}, $year
+    }
+
+    if (defined ($piecesref->{month})) {
+      $month = $piecesref->{month};
+
+      ### format: printf "month %s -> Month %d\n", $piecesref->{month}, $month
+    }
+
+    if (defined ($piecesref->{day})) {
+      $day = $piecesref->{day};
+
+      ### format: printf "day %s -> Day %d\n", $piecesref->{day}, $day
+    }
+
+    $month = $mnames{lc(substr($month,0,3))} if ($month =~ /\D/);
     $year-- if (($year_specified == 0) && ($this_month < $month));
+
+    ### format: printf "Final Year-Month-Day -> %04d-%02d-%02d\n", $year, $month, $day
 
     $inforef->{$symbol, "date"} =  sprintf "%02d/%02d/%04d", $month, $day, $year;
     $inforef->{$symbol, "isodate"} = sprintf "%04d-%02d-%02d", $year, $month, $day;
