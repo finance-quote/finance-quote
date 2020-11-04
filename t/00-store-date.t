@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
-# Test to see if Finance::Quote can at least be loaded and used.
+# Test to see if Finance::Quote can at least be loaded and store_date is
+# working
 
 use strict;
 use Test::More;
