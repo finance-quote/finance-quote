@@ -57,7 +57,8 @@ following steps provide a recipe for setup.
     $ perlbrew install-cpanm
     $ cpanm install Dist::Zilla
     
-    # inside the finance-quote directory
+    # inside the finance-quote directory 
+    # remove --missing to install missing & upgrade existing required package
   
     $ dzil authordeps --missing | cpanm --notest
     $ dzil listdeps --missing | cpanm --notest
@@ -463,6 +464,7 @@ Check list:
   o Added the module name in alphabetical order to the @MODULES or @CURRENCY_MODULES variable in Quote.pm
   o Added the module name in alphabetical order in the SEE ALSO section of the Quote.pm POD
   o Created a well-named test file in the t/ directory, including a test that succeeds and a test that fails
+  o Ensure tests 00-store-date.t, 01-pod.t, 02-pod-coverage.t, 03-kwalitee.t, 04-critic.t, 05-data-dumper.t pass
 
 Contributions to Finance-Quote are best presented as pull requests on GitHub.com.  
 
