@@ -24,7 +24,6 @@ use strict;
 
 use HTTP::Request::Common;
 use HTML::TreeBuilder::XPath;
-use Data::Dumper;
 
 our $FONDSWEB_URL = "https://www.fondsweb.com/de/";
 

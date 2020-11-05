@@ -41,7 +41,6 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TreeBuilder;
 use Encode;
-use Data::Dumper;
 
 use vars qw($OnVista_URL);
 
