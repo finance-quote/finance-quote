@@ -28,12 +28,13 @@
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 
 package Finance::Quote;
-require 5.005;
 
-use constant DEBUG => $ENV{DEBUG};
-use if DEBUG, Smart::Comments, '###';
 
 use strict;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments', '###';
+
 use Module::Load;
 use Exporter ();
 use Carp;
@@ -1214,7 +1215,7 @@ Finance::Quote implements public class methods for constructing a quoter
 object, getting or setting default class values, and for listing available
 methods.
 
-=head2 NEW
+=head2 new
 
     my $q = Finance::Quote->new()
     my $q = Finance::Quote->new('-defaults')
@@ -1291,7 +1292,7 @@ conversion method or configure fallback methods, include the 'order' key, which
 points to an array of Finance::Quote::CurrencyRates module names. See the
 documentation for the individual Finance::Quote::CurrencyRates to learn more. 
 
-=head2 GET_DEFAULT_CURRENCY_FIELDS
+=head2 get_default_currency_fields
 
     my @fields = Finance::Quote::get_default_currency_fields();
 
@@ -1299,7 +1300,7 @@ C<get_default_currency_fields> returns the standard list of fields in a quote
 that are automatically converted during currency conversion. Individual modules
 may override this list.
 
-=head2 GET_DEFAULT_TIMEOUT
+=head2 get_default_timeout
   
     my $value = Finance::Quote::get_default_timeout();
 
@@ -1308,13 +1309,13 @@ seconds for web requests. Finance::Quote does not specify a default timeout,
 deferring to the underlying user agent for web requests. So this function
 will return undef unless C<set_default_timeout> was previously called.
 
-=head2 SET_DEFAULT_TIMEOUT
+=head2 set_default_timeout
 
     Finance::Quote::set_default_timeout(45);
 
 C<set_default_timeout> sets the Finance::Quote default timeout to a new value.
 
-=head2 GET_METHODS
+=head2 get_methods
 
     my @methods = Finance::Quote::get_methods();
 
@@ -1323,14 +1324,14 @@ creating a quoter object and as the first argument to C<fetch>.
 
 =head1 PUBLIC OBJECT METHODS
 
-=head2 B_TO_BILLIONS
+=head2 B_to_billions
 
     my $value = $q->B_to_billions("20B");
 
 C<B_to_billions> is a utility function that expands a numeric string with a "B"
 suffix to the corresponding multiple of 1000000000.
 
-=head2 DECIMAL_SHIFTUP
+=head2 decimal_shiftup
 
     my $value = $q->decimal_shiftup("123.45", 1);  # returns 1234.5
     my $value = $q->decimal_shiftup("0.25", 1);    # returns 2.5
@@ -1338,7 +1339,7 @@ suffix to the corresponding multiple of 1000000000.
 C<decimal_shiftup> moves a the decimal point in a numeric string the specified
 number of places to the right.
 
-=head2 FETCH
+=head2 fetch
 
     my %stocks  = $q->fetch("alphavantage", "IBM", "MSFT", "LNUX");
     my $hashref = $q->fetch("nasdaq", "IBM", "MSFT", "LNUX");
@@ -1358,7 +1359,7 @@ methods are available from multiple Finance::Quote modules, such as 'nasdaq'.
 The quoter failover over option determines if multiple modules are consulted
 for methods such as 'nasdaq' that more than one implementation.
 
-=head2 GET_FAILOVER
+=head2 get_failover
 
     my $failover = $q->get_failover();
 
@@ -1367,13 +1368,13 @@ a security from alternate sources when the requested method fails.
 C<get_failover> returns a boolean value indicating if the quoter object will
 use failover or not.
 
-=head2 SET_FAILOVER
+=head2 set_failover
 
     $q->set_failover(False);
 
 C<set_failover> sets the failover flag on the quoter object. 
 
-=head2 GET_FETCH_CURRENCY
+=head2 get_fetch_currency
 
     my $currency = $q->get_fetch_currency();
 
@@ -1381,7 +1382,7 @@ C<get_fetch_currency> returns either the desired currency code for the quoter
 object or undef if no target currency was set during construction or with the
 C<set_fetch_currency> function.
 
-=head2 SET_FETCH_CURRENCY
+=head2 set_fetch_currency
 
     $q->set_fetch_currency("FRF");  # Get results in French Francs.
 
@@ -1395,41 +1396,50 @@ for the duration of the Finance::Quote object.
 See the introduction to this page for information on how to configure the
 souce of currency conversion rates.
 
-=head2 GET_REQUIRED_LABELS
+=head2 get_required_labels
 
     my @labels = $q->get_required_labels();
 
 C<get_required_labels> returns the list of labels that must be populated for a
 security quote to be considered valid and returned by C<fetch>.
 
-=head2 SET_REQUIRED_LABELS
+=head2 set_required_labels
 
     my $labels = ['close', 'isodate', 'last'];
     $q->set_required_labels($labels);
 
 C<set_required_labels> updates the list of required labels for the quoter object.
 
-=head2 GET_TIMEOUT
+=head2 get_timeout
 
     my $timeout = $q->get_timeout();
 
 C<get_timeout> returns the timeout in seconds the quoter object is using for
 web requests.
 
-=head2 SET_TIMEOUT
+=head2 set_timeout
 
     $q->set_timeout(45);
 
 C<set_timeout> updated teh timeout in seconds for the quoter object.
 
-=head2 GET_USER_AGENT
+=head2 store_date
+
+    $quoter->store_date(\%info, $stocks, {eurodate => '06/11/2020'});
+
+C<store_date> is used by modules to consistent store date information about 
+securities. Given the various pieces of a date, this function figures out how to
+construct a ISO date (yyyy-mm-dd) and US date (mm/dd/yyyy) and stores those
+values in C<%info> for security C<$stock>.
+
+=head2 get_user_agent
 
     my $ua = $q->get_user_agent();
 
 C<get_user_agent> returns the LWP::UserAgent the quoter object is using for web
 requests.
 
-=head2 ISOTIME
+=head2 isoTime
 
     $q->isoTime("11:39PM");    # returns "23:39"
     $q->isoTime("9:10 AM");    # returns "09:10"
@@ -1441,14 +1451,14 @@ C<isoTime> returns an ISO formatted time.
 The following methods are available as class methods, but can also be called
 from Finance::Quote objects.
 
-=head2 SCALE_FIELD
+=head2 scale_field
 
     my $value = Finance::Quote->scale_field('1023', '0.01')
 
 C<scale_field> is a utility function that scales the first argument by the
 second argument.  In the above example, C<value> is C<'10.23'>.
 
-=head2 CURRENCY
+=head2 currency
 
     my $value = $q->currency('15.95 USD', 'AUD');
     my $value = Finance::Quote->currency('23.45 EUR', 'RUB');
@@ -1461,7 +1471,7 @@ requires an API key. See the introduction for information on configuring
 currency rate conversions and see Finance::Quote::CurrencyRates::AlphaVantage
 for information about the API key.
 
-=head2 CURRENCY_LOOKUP
+=head2 currency_lookup
 
     my $currency = $quoter->currency_lookup();
     my $currency = $quoter->currency_lookup( name => "Caribbean");
@@ -1480,7 +1490,7 @@ contains the constraint value as a substring.  If the metadata field is an
 array, then it satisfies the constraint if any value in the array satisfies the
 constraint.
 
-=head2 PARSE_CSV
+=head2 parse_csv
 
     my @list = Finance::Quote::parse_csv($string);
 
@@ -1488,13 +1498,39 @@ C<parse_csv> is a utility function for spliting a comma seperated value string
 into a list of terms, treating double-quoted strings that contain commas as a
 single value.
 
-=head2 PARSE_CSV_SEMICOLON
+=head2 parse_csv_semicolon
 
     my @list = Finance::Quote::parse_csv_semicolon($string);
 
 C<parse_csv> is a utility function for spliting a semicolon seperated value string
 into a list of terms, treating double-quoted strings that contain semicolons as a
 single value.
+
+=head1 LEGACY METHODS
+
+=head2 default_currency_fields
+
+Replaced with get_default_currency_fields().
+
+=head2 sources
+
+Replaced with get_methods().
+
+=head2 failover
+
+Replaced with get_failover() and set_failover().
+
+=head2 require_labels
+
+Replaced with get_required_labels() and set_required_labels().
+
+=head2 user_agent
+
+Replaced with get_user_agent().
+
+=head2 set_currency
+
+Replaced with get_fetch_currency() and set_fetch_currency().
 
 =head1 ENVIRONMENT
 

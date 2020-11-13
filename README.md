@@ -129,7 +129,7 @@ Finance::Quote implements public class methods for constructing a quoter
 object, getting or setting default class values, and for listing available
 methods.
 
-## NEW
+## new
 
     my $q = Finance::Quote->new()
     my $q = Finance::Quote->new('-defaults')
@@ -196,7 +196,7 @@ conversion method or configure fallback methods, include the 'order' key, which
 points to an array of Finance::Quote::CurrencyRates module names. See the
 documentation for the individual Finance::Quote::CurrencyRates to learn more. 
 
-## GET\_DEFAULT\_CURRENCY\_FIELDS
+## get\_default\_currency\_fields
 
     my @fields = Finance::Quote::get_default_currency_fields();
 
@@ -204,7 +204,7 @@ documentation for the individual Finance::Quote::CurrencyRates to learn more.
 that are automatically converted during currency conversion. Individual modules
 may override this list.
 
-## GET\_DEFAULT\_TIMEOUT
+## get\_default\_timeout
 
     my $value = Finance::Quote::get_default_timeout();
 
@@ -213,13 +213,13 @@ seconds for web requests. Finance::Quote does not specify a default timeout,
 deferring to the underlying user agent for web requests. So this function
 will return undef unless `set_default_timeout` was previously called.
 
-## SET\_DEFAULT\_TIMEOUT
+## set\_default\_timeout
 
     Finance::Quote::set_default_timeout(45);
 
 `set_default_timeout` sets the Finance::Quote default timeout to a new value.
 
-## GET\_METHODS
+## get\_methods
 
     my @methods = Finance::Quote::get_methods();
 
@@ -228,14 +228,14 @@ creating a quoter object and as the first argument to `fetch`.
 
 # PUBLIC OBJECT METHODS
 
-## B\_TO\_BILLIONS
+## B\_to\_billions
 
     my $value = $q->B_to_billions("20B");
 
 `B_to_billions` is a utility function that expands a numeric string with a "B"
 suffix to the corresponding multiple of 1000000000.
 
-## DECIMAL\_SHIFTUP
+## decimal\_shiftup
 
     my $value = $q->decimal_shiftup("123.45", 1);  # returns 1234.5
     my $value = $q->decimal_shiftup("0.25", 1);    # returns 2.5
@@ -243,7 +243,7 @@ suffix to the corresponding multiple of 1000000000.
 `decimal_shiftup` moves a the decimal point in a numeric string the specified
 number of places to the right.
 
-## FETCH
+## fetch
 
     my %stocks  = $q->fetch("alphavantage", "IBM", "MSFT", "LNUX");
     my $hashref = $q->fetch("nasdaq", "IBM", "MSFT", "LNUX");
@@ -263,7 +263,7 @@ methods are available from multiple Finance::Quote modules, such as 'nasdaq'.
 The quoter failover over option determines if multiple modules are consulted
 for methods such as 'nasdaq' that more than one implementation.
 
-## GET\_FAILOVER
+## get\_failover
 
     my $failover = $q->get_failover();
 
@@ -272,13 +272,13 @@ a security from alternate sources when the requested method fails.
 `get_failover` returns a boolean value indicating if the quoter object will
 use failover or not.
 
-## SET\_FAILOVER
+## set\_failover
 
     $q->set_failover(False);
 
 `set_failover` sets the failover flag on the quoter object. 
 
-## GET\_FETCH\_CURRENCY
+## get\_fetch\_currency
 
     my $currency = $q->get_fetch_currency();
 
@@ -286,7 +286,7 @@ use failover or not.
 object or undef if no target currency was set during construction or with the
 `set_fetch_currency` function.
 
-## SET\_FETCH\_CURRENCY
+## set\_fetch\_currency
 
     $q->set_fetch_currency("FRF");  # Get results in French Francs.
 
@@ -300,41 +300,50 @@ for the duration of the Finance::Quote object.
 See the introduction to this page for information on how to configure the
 souce of currency conversion rates.
 
-## GET\_REQUIRED\_LABELS
+## get\_required\_labels
 
     my @labels = $q->get_required_labels();
 
 `get_required_labels` returns the list of labels that must be populated for a
 security quote to be considered valid and returned by `fetch`.
 
-## SET\_REQUIRED\_LABELS
+## set\_required\_labels
 
     my $labels = ['close', 'isodate', 'last'];
     $q->set_required_labels($labels);
 
 `set_required_labels` updates the list of required labels for the quoter object.
 
-## GET\_TIMEOUT
+## get\_timeout
 
     my $timeout = $q->get_timeout();
 
 `get_timeout` returns the timeout in seconds the quoter object is using for
 web requests.
 
-## SET\_TIMEOUT
+## set\_timeout
 
     $q->set_timeout(45);
 
 `set_timeout` updated teh timeout in seconds for the quoter object.
 
-## GET\_USER\_AGENT
+## store\_date
+
+    $quoter->store_date(\%info, $stocks, {eurodate => '06/11/2020'});
+
+`store_date` is used by modules to consistent store date information about 
+securities. Given the various pieces of a date, this function figures out how to
+construct a ISO date (yyyy-mm-dd) and US date (mm/dd/yyyy) and stores those
+values in `%info` for security `$stock`.
+
+## get\_user\_agent
 
     my $ua = $q->get_user_agent();
 
 `get_user_agent` returns the LWP::UserAgent the quoter object is using for web
 requests.
 
-## ISOTIME
+## isoTime
 
     $q->isoTime("11:39PM");    # returns "23:39"
     $q->isoTime("9:10 AM");    # returns "09:10"
@@ -346,14 +355,14 @@ requests.
 The following methods are available as class methods, but can also be called
 from Finance::Quote objects.
 
-## SCALE\_FIELD
+## scale\_field
 
     my $value = Finance::Quote->scale_field('1023', '0.01')
 
 `scale_field` is a utility function that scales the first argument by the
 second argument.  In the above example, `value` is `'10.23'`.
 
-## CURRENCY
+## currency
 
     my $value = $q->currency('15.95 USD', 'AUD');
     my $value = Finance::Quote->currency('23.45 EUR', 'RUB');
@@ -366,7 +375,7 @@ requires an API key. See the introduction for information on configuring
 currency rate conversions and see Finance::Quote::CurrencyRates::AlphaVantage
 for information about the API key.
 
-## CURRENCY\_LOOKUP
+## currency\_lookup
 
     my $currency = $quoter->currency_lookup();
     my $currency = $quoter->currency_lookup( name => "Caribbean");
@@ -385,7 +394,7 @@ contains the constraint value as a substring.  If the metadata field is an
 array, then it satisfies the constraint if any value in the array satisfies the
 constraint.
 
-## PARSE\_CSV
+## parse\_csv
 
     my @list = Finance::Quote::parse_csv($string);
 
@@ -393,13 +402,39 @@ constraint.
 into a list of terms, treating double-quoted strings that contain commas as a
 single value.
 
-## PARSE\_CSV\_SEMICOLON
+## parse\_csv\_semicolon
 
     my @list = Finance::Quote::parse_csv_semicolon($string);
 
 `parse_csv` is a utility function for spliting a semicolon seperated value string
 into a list of terms, treating double-quoted strings that contain semicolons as a
 single value.
+
+# LEGACY METHODS
+
+## default\_currency\_fields
+
+Replaced with get\_default\_currency\_fields().
+
+## sources
+
+Replaced with get\_methods().
+
+## failover
+
+Replaced with get\_failover() and set\_failover().
+
+## require\_labels
+
+Replaced with get\_required\_labels() and set\_required\_labels().
+
+## user\_agent
+
+Replaced with get\_user\_agent().
+
+## set\_currency
+
+Replaced with get\_fetch\_currency() and set\_fetch\_currency().
 
 # ENVIRONMENT
 
