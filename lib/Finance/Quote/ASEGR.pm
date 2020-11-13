@@ -15,18 +15,18 @@
 #    02110-1301, USA
 package Finance::Quote::ASEGR;
 
-# VERSION 
-
-use constant DEBUG => $ENV{DEBUG};
-use if DEBUG, Smart::Comments;
-
 use strict;
 use warnings;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
 
 use LWP::UserAgent;
 use Web::Scraper;
 use Spreadsheet::XLSX;
 use String::Util qw(trim);
+
+# VERSION 
 
 our @labels = qw/symbol date isodate close volume high low isin/;
 

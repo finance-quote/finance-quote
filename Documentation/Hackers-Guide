@@ -287,15 +287,14 @@ to true, then Smart::Comments is active and code blocks wrapped with if(DEBUG)
 are also active. Otherwise, all the debugging code disappears during
 compilation.
 
-  # At the top of the module create a constant from the environment
-  use constant DEBUG => $ENV{DEBUG};
-  
-  use if DEBUG, Smart::Comments;       # conditionally use Smart::Comments
-  use if DEBUG, Another::Module;       # example module only needed for debugging
-  
-  use strict;                          # use strict & warnings AFTER debug setup
+  use strict;                          # use strict & warnings FIRST
   use warnings;
 
+  use constant DEBUG => $ENV{DEBUG};   # create a constant from the environment
+  
+  use if DEBUG, 'Smart::Comments';     # conditionally use Smart::Comments
+  use if DEBUG, 'Another::Module';     # example module only needed for debugging
+ 
   use LWP::UserAgent;                  # and finally production module dependencies
   
   my %h = ('a' => 1);                  # just an example variable
@@ -460,7 +459,7 @@ Check list:
 
   o Created a well-named module file in the Finance directory tree
   o Included POD documentation at the bottom of module file
-  o Included a VERSION comment just before the use module statements
+  o Included a VERSION comment just *after* the use module statements
   o Added the module name in alphabetical order to the @MODULES or @CURRENCY_MODULES variable in Quote.pm
   o Added the module name in alphabetical order in the SEE ALSO section of the Quote.pm POD
   o Created a well-named test file in the t/ directory, including a test that succeeds and a test that fails
