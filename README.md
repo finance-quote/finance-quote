@@ -507,7 +507,6 @@ Finance::Quote::CurrencyRates::ECB,
 Finance::Quote::CurrencyRates::Fixer,
 Finance::Quote::CurrencyRates::OpenExchange,
 Finance::Quote::AEX,
-Finance::Quote::AIAHK,
 Finance::Quote::ASEGR,
 Finance::Quote::ASX,
 Finance::Quote::Bloomberg,
@@ -560,8 +559,7 @@ Finance::Quote::Union,
 Finance::Quote::VWD,
 Finance::Quote::XETRA,
 Finance::Quote::YahooJSON,
-Finance::Quote::ZA,
-Finance::Quote::ZA\_UnitTrusts
+Finance::Quote::ZA
 
 You should have received the Finance::Quote hacker's guide with this package.
 Please read it if you are interested in adding extra methods to this package.

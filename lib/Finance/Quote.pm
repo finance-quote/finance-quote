@@ -114,7 +114,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     XETRA
     YahooJSON
     ZA
-    ZA_UnitTrusts
 /;
 
 @ISA    = qw/Exporter/;
@@ -1652,8 +1651,7 @@ Finance::Quote::Union,
 Finance::Quote::VWD,
 Finance::Quote::XETRA,
 Finance::Quote::YahooJSON,
-Finance::Quote::ZA,
-Finance::Quote::ZA_UnitTrusts
+Finance::Quote::ZA
 
 You should have received the Finance::Quote hacker's guide with this package.
 Please read it if you are interested in adding extra methods to this package.
