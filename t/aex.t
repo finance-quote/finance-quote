@@ -17,7 +17,7 @@ if (not $ENV{ONLINE_TEST}) {
 }
 
 my @valid    = ('AD', 'AMG', 'LVMH', 'XS0937858271', 'NL0000009165');
-my @invalid  = ();
+my @invalid  = ('BOGUS');
 my @symbols  = (@valid, @invalid);
 my $today    = today();
 
