@@ -58,7 +58,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
 
 @MODULES = qw/
     AEX
-    AIAHK
     ASEGR
     ASX
     AlphaVantage
@@ -1601,7 +1600,6 @@ Finance::Quote::CurrencyRates::ECB,
 Finance::Quote::CurrencyRates::Fixer,
 Finance::Quote::CurrencyRates::OpenExchange,
 Finance::Quote::AEX,
-Finance::Quote::AIAHK,
 Finance::Quote::ASEGR,
 Finance::Quote::ASX,
 Finance::Quote::Bloomberg,
