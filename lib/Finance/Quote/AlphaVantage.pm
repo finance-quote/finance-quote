@@ -22,13 +22,11 @@
 
 package Finance::Quote::AlphaVantage;
 
-require 5.005;
-
-# VERSION
-
 use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
+
+# VERSION
 
 # Alpha Vantage recommends that API call frequency does not extend far
 # beyond ~1 call per second so that they can continue to deliver

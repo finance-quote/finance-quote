@@ -19,14 +19,16 @@
 
 package Finance::Quote::MorningstarAU;
 
-# VERSION
+use strict;
+use warnings;
 
 use constant DEBUG => $ENV{DEBUG};
-use if DEBUG, Smart::Comments;
+use if DEBUG, 'Smart::Comments';
 
-use strict;
 use JSON;
 use Web::Scraper;
+
+# VERSION
 
 sub methods {
   return (aufunds => \&morningstarau, morningstarau => \&morningstarau,);

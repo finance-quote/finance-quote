@@ -17,13 +17,15 @@
 
 package Finance::Quote::CurrencyRates::AlphaVantage;
 
-# VERSION
+use strict;
+use warnings;
 
 use constant DEBUG => $ENV{DEBUG};
-use if DEBUG, Smart::Comments;
+use if DEBUG, 'Smart::Comments';
 
-use strict;
 use JSON;
+
+# VERSION
 
 sub new
 {
@@ -37,7 +39,7 @@ sub new
 
   ### AlphaVantage->new args : $args
 
-  return undef unless (ref $args eq 'HASH') and (exists $args->{API_KEY});
+  return unless (ref $args eq 'HASH') and (exists $args->{API_KEY});
 
   $this->{API_KEY} = $args->{API_KEY};
 
@@ -58,13 +60,13 @@ sub multipliers
         . '&to_currency=' . ${to}
         . '&apikey=' . $this->{API_KEY});
 
-    return undef unless ($reply->code == 200);
+    return unless ($reply->code == 200);
 
     my $body = $reply->content;
 
     $json_data = JSON::decode_json $body;
     if ( !$json_data || $json_data->{'Error Message'} ) {
-      return undef;
+      return;
     }
 
     ### JSON: $json_data
@@ -74,7 +76,7 @@ sub multipliers
 
   my $rate = $json_data->{'Realtime Currency Exchange Rate'}->{'5. Exchange Rate'};
 
-  return undef unless $rate + 0;
+  return unless $rate + 0;
 
   # For small rates, request the inverse 
   if ($rate < 0.001) {
