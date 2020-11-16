@@ -1,15 +1,5 @@
 #!/usr/bin/perl -w
-#
-#    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
-#    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
-#    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
-#    Copyright (C) 2000, Paul Fenwick <pjf@cpan.org>
-#    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
-#    Copyright (C) 2001, Rob Sessink <rob_ses@users.sourceforge.net>
-#    Copyright (C) 2003, Pawel Konieczny <konieczp@users.sourceforge.net>
-#    Copyright (C) 2004, Johan van Oostrum
-#    Copyright (C) 2009, Herman van Rink
-#
+
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -24,148 +14,150 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #    02110-1301, USA
-#
-#
-# This code derived from Padzensky's work on package Finance::YahooQuote,
-# but extends its capabilites to encompas a greater number of data sources.
-#
-# This code was developed as part of GnuCash <http://www.gnucash.org/>
-
-require 5.005;
-
-use strict;
 
 package Finance::Quote::AEX;
+
+use strict;
+use warnings;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
 
 use vars qw( $AEX_URL);
 
 use LWP::UserAgent;
-use HTTP::Request::Common qw(POST);
-use HTML::TableExtract;
-use CGI;
+use Web::Scraper;
+use String::Util qw(trim);
 
 # VERSION
 
-# URLs of where to obtain information
-
-my $AEX_URL = "http://www.euronext.com/search/download/trapridownloadpopup.jcsv?pricesearchresults=actif&filter=1&belongsToList=market_EURLS&mep=8626&lan=NL&resultsTitle=Amsterdam+-+Euronext&cha=1800&format=txt&formatDecimal=.&formatDate=dd/MM/yy";
-
-sub methods { return (dutch       => \&aex,
-                      aex         => \&aex) }
-
-{
-  my @labels = qw/name symbol price last date time p_change bid ask offer open high low close volume currency method exchange/;
-
-  sub labels { return (dutch       => \@labels,
-                       aex         => \@labels) }
+sub methods { 
+  return (dutch => \&aex,
+          aex   => \&aex);
 }
 
-# ==============================================================================
-########################################################################
-# Stocks and indices
+our @labels = qw/name symbol price last date time p_change bid ask offer open high low close volume currency method exchange/;
+
+sub labels { 
+  return (dutch => \@labels,
+          aex   => \@labels);
+}
 
 sub aex {
   my $quoter = shift;
-  my @symbols = @_;
-  return unless @symbols;
+  my $ua     = $quoter->user_agent();
+  my $agent  = $ua->agent;
+  $ua->agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36');
 
-  my (%info,$url,$reply,$te);
-  my ($row, $datarow, $matches);
-  my ($time);
+  my %info;
 
-  $url = $AEX_URL;    		# base url
+  foreach my $symbol (@_) {
+    my $isin = undef;
 
-  # Create a user agent object and HTTP headers
-  my $ua = LWP::UserAgent->new(agent => 'Mozilla/4.0 (compatible; MSIE 5.5; Windows 98)');
+    eval {
+      my $search = "https://live.euronext.com/en/search_instruments/$symbol";
+      my $reply  = $ua->get($search);
 
-  # Compose POST request
-  my $request = HTTP::Request->new("GET", $url);
+      ### Search : $search, $reply->code
 
-  $reply = $ua->request( $request );
-  #print Dumper $reply;
-  if ($reply->is_success) {
+      if (not defined $reply->previous) {
+        # Got a search page
+        my $widget = scraper {
+          process 'table#awl-lookup-instruments-directory-table a', 'link[]' => '@href';
+        };
 
-    # Write retreived data to temp file for debugging
-    use File::Temp;
-    my ($tmp_fh, $filename) = File::Temp::tempfile();
-    open my $fw, ">", $filename or die "$filename: $!";
-    print $fw $reply->content;
-    close $fw;
-    close $tmp_fh;
+        my $result = $widget->scrape($reply);
 
-    # Open reply to read lins
-    open FP, "<", \$reply->content or die "Unable to read data: $!";
+        die "Failed to find $symbol" unless exists $result->{link} and @{$result->{link}} > 0;
 
-    # Open temp file instead while debugging
-    #open FP, "<", $filename or die "Unable to read data: $!";
-
-    # Skip the first 4 lines, which are not CSV
-    my $dummy = <FP>;	# Typical content: Stocks
-    $dummy = <FP>;		# Typical content: Amsterdam - Euronext
-    $dummy = <FP>;		# Typical content:
-    $dummy = <FP>;		# Typical content: Instrument's name;ISIN;Euronext code;Market;Symbol;ICB Sector (Level 4);Handelsvaluta;Laatst;Aantal;D/D-1 (%);Datum-tijd (CET);Omzet;Totaal aantal aandelen;Capitalisation;Trading mode;Dag Open;Dag Hoog;Dag Hoog / Datum-tijd (CET);Dag Laag;Dag Laag / Datum-tijd (CET); 31-12/Change (%); 31-12/Hoog; 31-12/Hoog/Datum; 31-12/Laag; 31-12/Laag/Datum; 52 weken/Change (%); 52 weken/Hoog; 52 weken/Hoog/Datum; 52 weken/Laag; 52 weken/Laag/Datum;Suspended;Suspended / Datum-tijd (CET);Reserved;Reserved / Datum-tijd (CET)
-
-    while (my $line = <FP>) {
-      #print Dumper $line;
-      my @row_data = $quoter->parse_csv_semicolon($line);
-      #print Dumper \@row_data;
-      my $row = \@row_data;
-      #print Dumper $row;
-      next unless @row_data;
-
-      foreach my $symbol (@symbols) {
-
-        my $found = 0;
-
-        # Match Fund's name, ISIN or symbol
-        my $currentSymbol = 0;
-        foreach my $i (0,1,4) {
-            $currentSymbol = ( @$row[$i] eq $symbol ) if defined(@$row[$i]);
-            last if $currentSymbol;
-        }
-        if ( $currentSymbol ) {
-          $info {$symbol, "exchange"} = "Amsterdam Euronext eXchange";
-          $info {$symbol, "method"} = "aex";
-          $info {$symbol, "symbol"} = @$row[4];
-          ($info {$symbol, "last"} = @$row[7]) =~ s/\s*//g;
-          $info {$symbol, "bid"} = undef;
-          $info {$symbol, "offer"} = undef;
-          $info {$symbol, "low"} = @$row[18];
-          $info {$symbol, "close"} = undef;
-          $info {$symbol, "p_change"} = @$row[9];
-          ($info {$symbol, "high"} = @$row[16]) =~ s/\s*//g;
-          ($info {$symbol, "volume"} = @$row[8]) =~ s/\s*//g;
-
-          # Split the date and time from one table entity
-          my $dateTime = @$row[10];
-
-          # Check for "dd mmm yyyy hh:mm" date/time format like "01 Aug 2004 16:34"
-          if ($dateTime =~ m/(\d{2})\/(\d{2})\/(\d{2}) \s
-                             (\d{2}:\d{2})/xi ) {
-            $quoter->store_date(\%info, $symbol, {month => $2, day => $1, year => $3});
-          }
-
-          $info {$symbol, "currency"} = "EUR";
-          $info {$symbol, "success"} = 1;
-        }
+        my $url = $result->{link}->[0];
+        
+        die "Failed to find isin" unless $url->as_string =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)/|;
+        
+        $isin = uc($1);
       }
+      else {
+        # Redirected
+        my $widget = scraper {
+          process 'a', 'redirect' => '@href';
+        };
+
+        my $result = $widget->scrape($reply->previous->content);
+
+        die "Failed to find $symbol in redirect" unless exists $result->{redirect};
+        
+        my $url = $result->{redirect};
+        
+        die "Failed to find isin in redirect" unless $url =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)|;
+        
+        $isin = uc($1);
+      }
+  
+      die "No isin set" unless defined $isin;
+    };
+    
+    if ($@) {
+      $info{$symbol, 'success'}  = 0;
+      $info{$symbol, 'errormsg'} = "Search failed: $@";
+      next;
+    }
+
+    eval {
+      my $url   = "https://live.euronext.com/en/ajax/getDetailedQuote/$isin";
+      my %form  = (theme_name => 'euronext_live');
+      my $reply = $ua->post($url, \%form);
+
+      ### Header : $url, $reply->code
+
+      my $widget = scraper {
+        process 'h1#header-instrument-name strong', 'name' => ['TEXT', sub {trim($_)}];
+        process 'span#header-instrument-price', 'last' => ['TEXT', sub {trim($_)}];
+        process 'div.head_detail_bottom div.col span, div.head_detail > div > div:last-child', 'date' => ['TEXT', sub {trim($_)}];
+      };
+
+      my $header = $widget->scrape($reply);
+
+      $url = "https://live.euronext.com/en/intraday_chart/getDetailedQuoteAjax/$isin/full";
+
+      $reply  = $ua->get($url);
+      $widget = scraper {
+        process 'div.table-responsive td:first-child, div.table-responsive td:first-child + td', 'data[]' => ['TEXT', sub {trim($_)}];
+      };
+
+      ### Body : $url, $reply->code
+
+      my $body = $widget->scrape($reply);
+
+      die "Failed to find detailed quote table" unless exists $body->{data};
+     
+      my %table = @{$body->{data}};
+
+      $info{$symbol, 'success'}  = 1;
+      $info{$symbol, 'currency'} = $table{Currency};
+      $info{$symbol, 'volume'}   = $table{Volume};
+      $info{$symbol, 'volume'}   =~ s/,//g;
+      $info{$symbol, 'open'}     = $table{Open};
+      $info{$symbol, 'high'}     = $table{High};
+      $info{$symbol, 'low'}      = $table{Low};
+
+      $info{$symbol, 'name'}     = $header->{name};
+      $info{$symbol, 'isin'}     = $1 if $isin =~ /([A-Z0-9]{12})/;
+      $info{$symbol, 'last'}     = $header->{last};
+
+      $quoter->store_date(\%info, $symbol, {eurodate => $1}) if  $header->{date} =~ m|([0-9]{2}/[0-9]{2}/[0-9]{4})|;
+    };
+
+    if ($@) {
+      $info{$symbol, 'success'}  = 0;
+      $info{$symbol, 'errormsg'} = "Fetch/Parse failed: $@";
+      next;
     }
   }
 
-  foreach my $symbol (@symbols) {
-    unless ( !defined($info {$symbol, "success"}) || $info {$symbol, "success"} == 1 )
-      {
-        $info {$symbol,"success"} = 0;
-        $info {$symbol,"errormsg"} = "Fund name $symbol not found";
-        next;
-      }
-  }
+  $ua->agent($agent);
 
-  #print Dumper \%info;
-  return %info if wantarray;
-  return \%info;
+  return wantarray() ? %info : \%info;
 }
-
 
 1;
 
@@ -179,40 +171,28 @@ Finance::Quote::AEX - Obtain quotes from Amsterdam Euronext eXchange
 
     $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("aex","AAB 93-08 7.5");  # Only query AEX
-    %info = Finance::Quote->fetch("dutch","AAB 93-08 7.5"); # Failover to other sources OK
+    %info = Finance::Quote->fetch("aex", "AMG");   # Only query AEX
+    %info = Finance::Quote->fetch("dutch", "AMG"); # Failover to other sources OK
 
 =head1 DESCRIPTION
 
-This module fetches information from the "Amsterdam Euronext
-eXchange AEX" http://www.aex.nl. Only local Dutch investment funds
-and all traded here options and futures are available.
+Thie module fetches information from https://live.euronext.com.  Stocks and bonds
+are supported.
 
-This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicitly by placing "AEX" in the argument
-list to Finance::Quote->new().
-
-Information obtained by this module may be covered by www.aex.nl
-terms and conditions See http://www.aex.nl/ for details.
-
-=head2 Stocks And Indices
-
-This module provides both the "aex" and "dutch" fetch methods for fetching
-stock and index quotes.  Please use the "dutch" fetch method if you wish
-to have failover with future sources for Dutch stocks. Using the "aex"
-method will guarantee that your information only comes from the Euronext
-Amsterdam website.
-
-Note that options and futures are not supported by this module.
+This module is loaded by default on a Finance::Quote object. It's also possible
+to load it explicitly by placing 'aex' in the argument list to
+Finance::Quote->new().
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::AEX :
-name, last, date, p_change, bid, offer, open, high, low, close,
-volume, currency, method, exchange, time.
+The following labels may be returned: currency date high isin isodate last low
+name open success symbol volume. 
 
-=head1 SEE ALSO
+=head1 Terms & Conditions
 
-Amsterdam Euronext eXchange, http://www.aex.nl
+Use of live.euronext.com is governed by any terms & conditions of that site.
+
+Finance::Quote is released under the GNU General Public License, version 2,
+which explicitly carries a "No Warranty" clause.
 
 =cut

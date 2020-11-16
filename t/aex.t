@@ -1,49 +1,51 @@
 #!/usr/bin/perl -w
+
 use strict;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use Test::More;
 use Finance::Quote;
+use Date::Simple qw(today);
+use Scalar::Util qw(looks_like_number);
+use Date::Range;
+use Date::Manip;
 
 if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 13;
+my @valid    = ('AD', 'AMG', 'LVMH', 'XS0937858271', 'NL0000009165');
+my @invalid  = ();
+my @symbols  = (@valid, @invalid);
+my $today    = today();
 
-# Test AEX functions.
+my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_reference)
+                'success' => sub {$_[0]},
+                'last'    => sub {looks_like_number($_[0])},
+                'volume'  => sub {looks_like_number($_[0])},
+                'isodate' => sub {Date::Range->new($today - 7, $today)->includes(Date::Simple::ISO->new($_[0]))},
+                'date'    => sub {my $a = Date::Manip::Date->new(); $a->parse_format('%m/%d/%Y', $_[0]);
+                                  my $b = Date::Manip::Date->new(); $b->parse_format('%Y-%m-%d', $_[2]->{$_[1], 'isodate'});
+                                  return $a->cmp($b) == 0;},
+               );
+my $q        = Finance::Quote->new();
 
-TODO:{
-  local $TODO="To be debugged";
+plan tests => 1 + %check*@valid + @invalid;
 
-  my $quoter = Finance::Quote->new();
+my %quotes = $q->fetch('aex', @symbols);
+ok(%quotes);
 
-  my %quotes = $quoter->aex("AH");
-  ok(%quotes);
+### [<now>] quotes: %quotes
 
-  # Check that some values are defined.
-  ok($quotes{"AH","success"});
-  ok($quotes{"AH","last"} > 0);
-  ok($quotes{"AH","date"});
-  ok($quotes{"AH","volume"} > 0);
-
-  my $year = (localtime())[5] + 1900;
-  my $lastyear = $year - 1;
-  ok(substr($quotes{"AH","isodate"},0,4) == $year ||
-         substr($quotes{"AH","isodate"},0,4) == $lastyear);
-  ok(substr($quotes{"AH","date"},6,4) == $year ||
-         substr($quotes{"AH","date"},6,4) == $lastyear);
-
-  # Exercise the fetch function
-  %quotes = $quoter->fetch("aex","AMG");
-  ok(%quotes);
-  ok($quotes{"AMG","success"});
-  ok($quotes{"AMG","last"} > 0);
-
-  # Check fetching on based on ISIN
-  %quotes = $quoter->aex("NL0000009165");  # NL0000009165 ==  Heineken == HEIA
-  ok(%quotes);
-  ok($quotes{"NL0000009165","success"});
-
-  # Check that a bogus fund returns no-success.
-  %quotes = $quoter->aex("BOGUS");
-  ok( ! $quotes{"BOGUS","success"});
+foreach my $symbol (@valid) {
+  while (my ($key, $lambda) = each %check) {
+    ok($lambda->($quotes{$symbol, $key}, $symbol, \%quotes), "$key -> $quotes{$symbol, $key}");
+  }
 }
+    
+foreach my $symbol (@invalid) {
+  ok((not $quotes{'BOGUS', 'success'}), 'failed as expected');
+}
+
