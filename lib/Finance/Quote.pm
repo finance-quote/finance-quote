@@ -62,7 +62,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     ASEGR
     ASX
     AlphaVantage
-    BMONesbittBurns
     BSEIndia
     Bloomberg
     Bourso
@@ -1607,7 +1606,6 @@ Finance::Quote::AIAHK,
 Finance::Quote::ASEGR,
 Finance::Quote::ASX,
 Finance::Quote::Bloomberg,
-Finance::Quote::BMONesbittBurns,
 Finance::Quote::BSEIndia,
 Finance::Quote::Bourso,
 Finance::Quote::CSE,
