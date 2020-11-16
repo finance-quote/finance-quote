@@ -97,8 +97,9 @@ sub aex {
     };
     
     if ($@) {
+      my $error = "Search failed: $@";
       $info{$symbol, 'success'}  = 0;
-      $info{$symbol, 'errormsg'} = "Search failed: $@";
+      $info{$symbol, 'errormsg'} = trim($error);
       next;
     }
 
@@ -148,8 +149,9 @@ sub aex {
     };
 
     if ($@) {
+      my $error = "Fetch/Parse failed: $@";
       $info{$symbol, 'success'}  = 0;
-      $info{$symbol, 'errormsg'} = "Fetch/Parse failed: $@";
+      $info{$symbol, 'errormsg'} = trim($error);
       next;
     }
   }
