@@ -114,7 +114,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     VWD
     XETRA
     YahooJSON
-    YahooYQL
     ZA
     ZA_UnitTrusts
 /;
@@ -1655,7 +1654,6 @@ Finance::Quote::Union,
 Finance::Quote::VWD,
 Finance::Quote::XETRA,
 Finance::Quote::YahooJSON,
-Finance::Quote::YahooYQL,
 Finance::Quote::ZA,
 Finance::Quote::ZA_UnitTrusts
 
