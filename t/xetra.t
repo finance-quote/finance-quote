@@ -1,57 +1,69 @@
 #!/usr/bin/perl -w
 
-# A test script to check for working of the XETRA module.
-
 use strict;
+use warnings;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use Test::More;
 use Finance::Quote;
-use Data::Dumper;
+use Date::Simple qw(today);
+use Scalar::Util qw(looks_like_number);
+use Date::Range;
+use Date::Manip;
 
 if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 76;
-my $q = Finance::Quote->new();
+my %valid    = ('IE0031442068'      => 'XETR',
+                'IE0031442068.XFRA' => 'XFRA',
+                'IE0031442068.XETR' => 'XETR',
+                'IE00B4L5YC18'      => 'XETR',
+                'IE00B4L5YC18.XFRA' => 'XFRA',
+                'IE00B4L5YC18.XETR' => 'XETR',
+               );
 
-sub test_stock_success {
-    # arguments:
-    #   $_[0]: isin
-    #   $_[1]: exchange (starting with '.') or empty string
+my @invalid  = ('BOGUS');
+my @symbols  = (keys %valid, @invalid);
 
-    my $stock = $_[0] . $_[1];
-    my %quotes = $q->fetch( "xetra", $stock );
+my $method   = 'xetra';  # Name of the target method for testing
+my $currency = 'EUR';    # expected quote curreny
+my $today    = today();  # together with $window, validate date/isodate  
+my $window   = 7;        # quote must be within last $window days
 
-    ok( %quotes, "Data returned" );
-    ok( $quotes{ $stock, "success" } == 1, "successful" );
-    ok( $quotes{ $stock, "symbol" } eq $_[0], "symbol matches" );
-    ok( $quotes{ $stock, "currency" } eq "EUR", "currency is euro" );
-    ok( $quotes{ $stock, "method" } eq "xetra", "method is correct" );
+my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_reference)
+                'success'  => sub {$_[0]},
+                'symbol'   => sub {$_[0] eq (split(/[.]/, $_[1]))[0]},
+                'method'   => sub {$_[0] eq $method},
+                'currency' => sub {$_[0] eq $currency},
+                'exchange' => sub {$_[0] eq $valid{$_[1]}},
+                'close'    => sub {looks_like_number($_[0])},
+                'last'     => sub {looks_like_number($_[0])},
+                'high'     => sub {looks_like_number($_[0])},
+                'low'      => sub {looks_like_number($_[0])},
+                'isodate'  => sub {Date::Range->new($today - $window, $today)->includes(Date::Simple::ISO->new($_[0]))},
+                'date'     => sub {my $a = Date::Manip::Date->new(); $a->parse_format('%m/%d/%Y', $_[0]);
+                                   my $b = Date::Manip::Date->new(); $b->parse_format('%Y-%m-%d', $_[2]->{$_[1], 'isodate'});
+                                   return $a->cmp($b) == 0;},
+               );
+my $q        = Finance::Quote->new();
 
-    my $exchange = $_[1] eq "" ? "XETR" : substr($_[1], 1);
-    ok( $quotes{ $stock, "exchange" } eq $exchange, "exchange is correct" );
+plan tests => 1 + %check*%valid + @invalid;
 
-    my @fields = ( "close", "last", "date", "isodate" );
-    foreach my $field (@fields) {
-        ok( $quotes { $stock, $field }, $field . " is defined");
-    }
+my %quotes = $q->fetch($method, @symbols);
+ok(%quotes);
 
-    ok( exists ( $quotes { $stock, "high" } ), "high key exists" );
-    ok( exists ( $quotes { $stock, "low" } ), "low key exists" );
+### [<now>] quotes: %quotes
+
+foreach my $symbol (keys %valid) {
+  while (my ($key, $lambda) = each %check) {
+    ok($lambda->($quotes{$symbol, $key}, $symbol, \%quotes), "$key -> $quotes{$symbol, $key}");
+  }
 }
-
-my @stocks = ( "IE0031442068", "IE00B4L5YC18" );
-foreach my $stock (@stocks) {
-    test_stock_success( $stock, ".XFRA" );
-    test_stock_success( $stock, ".XETR" );
-    test_stock_success( $stock, "" );
+    
+foreach my $symbol (@invalid) {
+  ok((not $quotes{'BOGUS', 'success'}), 'failed as expected');
 }
-
-my %qu1 = $q->fetch( "xetra", "ABC.DEF.GHI" );
-ok( $qu1{ "ABC.DEF.GHI", "success" } == 0, "wrong format fails" );
-ok( index( $qu1{ "ABC.DEF.GHI", "errormsg" }, "Invalid format" )  != -1, "descriptive error message" );
-
-my %qu2 = $q->fetch( "xetra", "notfound" );
-ok( $qu2{ "notfound", "success" } == 0, "not existing fails" );
-ok( index( $qu2{ "notfound", "errormsg" }, "HTTP response 400" )  != -1, "http code 400" );
 

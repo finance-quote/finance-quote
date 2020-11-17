@@ -16,10 +16,6 @@
 
 package Finance::Quote::XETRA;
 
-require 5.005;
-
-# VERSION
-
 use strict;
 use JSON qw( decode_json );
 use vars qw($VERSION $YIND_URL_HEAD $YIND_URL_TAIL);
@@ -28,6 +24,7 @@ use HTTP::Request::Common;
 use HTML::TableExtract;
 use Time::Piece;
 
+# VERSION
 
 my $PRICE_URL = "https://api.boerse-frankfurt.de/v1/data/price_information";
 
@@ -101,9 +98,8 @@ sub xetra {
             $info{$stocks, 'currency'} = $data->{'currency'}{'originalValue'};
 
             my $isodate = substr($data->{'timestampLastPrice'}, 0, 10);
-            $info{$stocks, 'isodate'} = $isodate;
-            $info{$stocks, 'date'} = substr($isodate, 5, 2) . "/" . substr($isodate, 8, 10) . "/" . substr($isodate, 0, 4);
 
+            $quoter->store_date(\%info, $stocks, {isodate => $isodate});
         }
         else {
             $info{ $stocks, "success" } = 0;
