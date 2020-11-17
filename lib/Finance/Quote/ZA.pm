@@ -1,175 +1,86 @@
 #!/usr/bin/perl -w
-#
-# ZA.pm
-#
-# 2013.05.01
-# Changes to table references to correct for new sharenet web page layout
-# Timothy Boyle
 
-# 2008.02.18
-# This version corrects the data downloaded by removing spaces and converting
-# cent values into Rand values  this ensures that the Price Editor in GNUCash
-# can import the data. The rest of the module and all the hard work
-# remains that of Stephen Langenhoven!
-# Rolf Endres
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
 #
-# 2005.07.19
-# Download of South African (ZA) stocks from sharenet
-# This version based largely upon FinanceCanada.pm module [any errors
-# are my own of course ;-) ]
-# Stephen Langenhoven
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+#    02110-1301, USA
 
 package Finance::Quote::ZA;
-require 5.004;
 
 use strict;
+use warnings;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
 
 use LWP::UserAgent;
-use HTTP::Request::Common;
-use HTML::TableExtract;
+use Web::Scraper;
+use String::Util qw(trim);
 
 # VERSION
 
-my $SHARENET_MAINURL = ("http://www.sharenet.co.za/");
-my $SHARENET_URL     = ( $SHARENET_MAINURL . "jse/" );
-
-sub methods {
-    return ( za => \&sharenet );
-}
+our @labels = qw/method source name symbol currency last date isodate high low p_change/;
 
 sub labels {
-    my @labels =
-        qw/method source name symbol currency last date isodate high low p_change/;
-    return ( sharenet => \@labels );
+  return ( sharenet => \@labels );
+}
+
+sub methods {
+  return ( za => \&sharenet );
 }
 
 sub sharenet {
     my $quoter  = shift;
     my @symbols = @_;
+    my $ua      = $quoter->user_agent();
     my %info;
-    my ( $te, $ts, $row );
-    my @rows;
 
-    return unless @symbols;
+    foreach my $symbol (@_) {
+      eval {
+        my $url   = "https://www.sharenet.co.za/jse/$symbol";
+        my $reply = $ua->get($url);
 
-    my $ua = $quoter->user_agent;
+        my $widget = scraper {
+          process 'h1.share-chart-title', 'name' => ['TEXT', sub{trim($_)}],
+          process 'h1.share-chart-title + h2', 'last' => ['TEXT', sub{$_ =~ /([0-9,.]+)/ ? $1 : '<unknown>';}],
+          process 'h1.share-chart-title + h2 + div b', 'day' => ['TEXT', sub{$_ =~ /(\w{3}\s+\d+\s+\w{3}),/ ? $1 : '<unknown>';}],
+        };
 
-    foreach my $symbol (@symbols) {
-        my $url = $SHARENET_URL . $symbol;
+        my $result = $widget->scrape($reply);
 
-        # print "[debug]: ", $url, "\n";
-        my $response = $ua->request( GET $url);
+        die "Failed to find $symbol" unless exists $result->{name};
+     
+        ### RESULT : $result
+        
+        $info{$symbol, 'success'}  = 1;
+        $info{$symbol, 'currency'} = 'ZAR';
+        $info{$symbol, 'name'}     = $result->{name};
+        $info{$symbol, 'price'}    = $result->{last};
+        $info{$symbol, 'price'}    =~ s/,//;
 
-        # print "[debug]: ", $response->content, "\n";
-
-        if ( !$response->is_success ) {
-            $info{ $symbol, "success" }  = 0;
-            $info{ $symbol, "errormsg" } = "Error contacting URL";
-            next;
+        if ($result->{day} =~ /(\d+)\s+(\w{3})/) {
+          $quoter->store_date(\%info, $symbol, {day => $1, month => $2});
         }
-
-        $te = HTML::TableExtract->new();
-        $te->parse( $response->content );
-
-        # print "[debug]: (parsed HTML)",$te, "\n";
-
-        unless ( $te->first_table_found() ) {
-
-            # print STDERR  "no tables on this page\n";
-            $info{ $symbol, "success" }  = 0;
-            $info{ $symbol, "errormsg" } = "Parse error";
-            next;
-        }
-
-        # Debug to dump all tables in HTML...
-
-        #   print "\n \n \n \n[debug]: ++++ ==== ++++ ==== ++++ ==== ++++ ==== START OF TABLE DUMP ++++ ==== ++++ ==== ++++ ==== ++++ ==== \n \n \n \n";
-        #
-        # foreach $ts ($te->table_states) {;
-        #
-        #   printf "\n \n \n \n[debug]: //// \\\\ //// \\\\ //// \\\\ //// \\\\ START OF TABLE %d,%d //// \\\\ //// \\\\ //// \\\\ //// \\\\ \n \n \n \n",
-        #    $ts->depth, $ts->count;
-        #
-        #  foreach $row ($ts->rows) {
-        #    print "[debug]: ", $row->[0], " | ", $row->[1], " | ", $row->[2], " | ", $row->[3], "\n";
-        #   }
-        # }
-        #
-        #   print "\n \n \n \n[debug]: ++++ ==== ++++ ==== ++++ ==== ++++ ==== END OF TABLE DUMP ++++ ==== ++++ ==== ++++ ==== ++++ ==== \n \n \n \n";
-
-        # GENERAL FIELDS
-        $info{ $symbol, "success" } = 1;
-        $info{ $symbol, "method" }  = "sharenet";
-
-        $info{ $symbol, "symbol" }   = $symbol;
-        $info{ $symbol, "currency" } = "ZAR";
-        $info{ $symbol, "source" }   = $SHARENET_MAINURL;
-
-        # NAME
-        $ts = $te->table_state( 2, 1 );    # new table reference
-        if ($ts) {
-            (@rows) = $ts->rows;
-            $info{ $symbol, "name" } = $rows[2][1];
-        }
-
-        $info{ $symbol, "name" } =~ tr/ //d;
-
-        # DATE AND CLOSING PRICE
-        $ts = $te->table_state( 3, 0 );   # change table for new sharenet layout
-
-        # print "[debug]: ", "got this far...", "\n";
-        # print "[debug]: (table_state)",$ts, "\n";
-        if ($ts) {
-            (@rows) = $ts->rows;
-
-            # date for last trade sale, high, low
-            # sharenet only gives the day and month. We could use today's date, but this would not
-            # be correct over weekends and public holidays (if it matters)
-            my $date =
-                substr( $rows[0][0], 16, 5 )
-                . "/";    #extract the day/month from the string and add /
-
-            # this does the same as above in a more robust fashion
-            #     my $date  = $rows[0][0]; # day/month plus time plus text
-            #     $date =~ s/[^0-9\/]//g; # remove most unwanted characters
-            #     $date =~ s/\d{4}$/\//; # remove last 4 digits = time and add / for the year
-
-            my $year =
-                ( localtime() )[5]
-                + 1900;    # extract year from system time vector
-            $date = $date . $year;    # add it to the day/month
-
-            # print $date, "\n"; # we now have the date of the trades as dd/mm/yyyy
-            $quoter->store_date( \%info, $symbol, { eurodate => $date } )
-                ;                     # gives eurodate and isodate symbols
-
-            # $quoter->store_date(\%info, $symbol, {today => 1}); # could use today's date
-            # last traded price
-            $info{ $symbol, "last" } = $rows[2][1];
-            $info{ $symbol, "last" } =~ tr/ //d;
-            $info{ $symbol, "last" } = 0.01 * $info{ $symbol, "last" };
-
-            # highest price today
-            $info{ $symbol, "high" } = $rows[16][1];
-            $info{ $symbol, "high" } =~ tr/ //d;
-            $info{ $symbol, "high" } = 0.01 * $info{ $symbol, "high" };
-
-            # lowest price today
-            $info{ $symbol, "low" } = $rows[18][1];
-            $info{ $symbol, "low" } =~ tr/ //d;
-            $info{ $symbol, "low" } = 0.01 * $info{ $symbol, "low" };
-
-            # percent change from previous close
-            $info{ $symbol, "p_change" } = $rows[10][1];
-            $info{ $symbol, "p_change" } =~ tr/ //d;
-
-            # actual net change from previous close
-            $info{ $symbol, "net" } = $rows[8][1];
-            $info{ $symbol, "net" } =~ tr/ //d;
-
-        }
-
+      };
+      
+      if ($@) {
+        my $error = "Search failed: $@";
+        $info{$symbol, 'success'}  = 0;
+        $info{$symbol, 'errormsg'} = trim($error);
+      }
     }
+    
+    ### info : %info
 
     return wantarray() ? %info : \%info;
 }
@@ -179,31 +90,34 @@ sub sharenet {
 =head1 NAME
 
 Finance::Quote::ZA - Obtain South African stock and prices from
-www.sharenet.co.za
+https://www.sharenet.co.za
 
 =head1 SYNOPSIS
 
     use Finance::Quote;
 
-    $q = Finance::Quote->new;
-
-    # Don't know anything about failover yet...
+    $q    = Finance::Quote->new;
+    %info = Finance::Quote->fetch('za', 'AGL');
 
 =head1 DESCRIPTION
 
 This module obtains information about South African Stocks from
 www.sharenet.co.za.
 
+This module is loaded by default on a Finance::Quote object. It's also possible
+to load it explicitly by placing 'za' in the argument list to
+Finance::Quote->new().
+
 =head1 LABELS RETURNED
 
-Information available from sharenet may include the following labels:
+The following labels will be returned: success currency name price date isodate.
 
-method source name symbol currency date nav last price
+=head1 Terms & Conditions
 
-=head1 SEE ALSO
+Use of sharenet.co.za is governed by any terms & conditions of that site.
 
-Sharenet website - http://www.sharenet.co.za/
-
-Finance::Quote
+Finance::Quote is released under the GNU General Public License, version 2,
+which explicitly carries a "No Warranty" clause.
 
 =cut
+

@@ -754,7 +754,7 @@ sub store_date
     if (defined ($piecesref->{month})) {
       $month = $piecesref->{month};
 
-      ### format: printf "month %s -> Month %d\n", $piecesref->{month}, $month
+      ### format: printf "month %s -> Month %s\n", $piecesref->{month}, $month
     }
 
     if (defined ($piecesref->{day})) {
