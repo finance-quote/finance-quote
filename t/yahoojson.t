@@ -10,13 +10,13 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 75;
+plan tests => 67;
 
 my $q = Finance::Quote->new();
 
 #List of stocks to fetch. Feel free to change this during testing
 my @stocks =
-    ( "SUZLON.BO", "ANDHRABANK.BO", "RECLTD.NS", "AMZN", "SOLB.BR", "^DJI", "BEL20.BR", "INGDIRECTFNE.BC", "AENA.MC", "CFR.JO" );
+    ( "SUZLON.BO", "RECLTD.NS", "AMZN", "SOLB.BR", "^DJI", "BEL20.BR", "INGDIRECTFNE.BC", "AENA.MC", "CFR.JO" );
 
 my %quotes = $q->fetch( "yahoo_json", @stocks );
 ok( %quotes, "Data returned" );
