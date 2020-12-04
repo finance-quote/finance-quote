@@ -17,13 +17,15 @@
 
 package Finance::Quote::CurrencyRates::ECB;
 
-# VERSION
+use strict;
+use warnings;
 
 use constant DEBUG => $ENV{DEBUG};
-use if DEBUG, Smart::Comments;
+use if DEBUG, 'Smart::Comments';
 
-use strict;
 use XML::LibXML;
+
+# VERSION
 
 sub new
 {
@@ -45,7 +47,7 @@ sub multipliers
 
     my $reply = $ua->get($url);
 
-    return undef unless ($reply->code == 200);
+    return unless ($reply->code == 200);
     my $xml = XML::LibXML->load_xml(string => $reply->content);
 
     $this->{cache}        = {map {$_->getAttribute('currency'), $_->getAttribute('rate')} $xml->findnodes('//*[@currency]')};
@@ -63,7 +65,7 @@ sub multipliers
 
   ### At least one code not found: $from, $to
 
-  return undef;
+  return;
 }
 
 1;

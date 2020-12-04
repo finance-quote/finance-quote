@@ -812,7 +812,7 @@ sub currency {
   $this ||= _dummy();
 
   my ($from_code, $to_code) = @_;
-  return undef unless ($from_code and $to_code);
+  return unless ($from_code and $to_code);
 
   $from_code =~ s/^\s*(\d*\.?\d*)\s*//;
   my $amount = $1 || 1;
@@ -862,7 +862,7 @@ sub currency {
     return $final;
   }
 
-  return undef;
+  return;
 }
 
 # =======================================================================
@@ -882,8 +882,7 @@ sub currency {
 # undef is returned upon error.
 
 sub currency_lookup {
-  my $this = shift if (ref $_[0]);
-  $this ||= _dummy();
+  my $this = ref $_[0] ? shift : _dummy();
 
   my %params = @_;
   my $currencies = Finance::Quote::Currencies::known_currencies();
@@ -893,7 +892,7 @@ sub currency_lookup {
   for my $key (keys %params ) {
     if ( ! exists $attributes{$key}) {
       warn "Invalid parameter: $key";
-      return undef;
+      return;
     }
   }
   
@@ -987,7 +986,7 @@ sub default_currency_fields {
 sub set_currency {
   if (@_ == 1 or !ref($_[0])) {
     # Direct or class call - there is no class default currency
-    return undef;
+    return;
   }
 
   my $this = shift;

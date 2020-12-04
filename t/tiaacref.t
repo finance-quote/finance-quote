@@ -16,7 +16,7 @@ my $q      = Finance::Quote->new();
 my $year   = localtime()->year;
 my $lastyear = $year - 1;
 
-my @symbols = qw/
+my @symbols = do { no warnings 'qw'; qw/
     QCBMIX
     TEMLX
     TLFIX
@@ -25,7 +25,7 @@ my @symbols = qw/
     W323#
     W464#
     W719#
-/;
+/};
 
 ok( my %quotes = $q->tiaacref( @symbols, 'BOGUS' ), 'retrieved quotes' );
 

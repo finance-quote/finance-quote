@@ -17,13 +17,15 @@
 
 package Finance::Quote::CurrencyRates::OpenExchange;
 
-# VERSION
+use strict;
+use warnings;
 
 use constant DEBUG => $ENV{DEBUG};
-use if DEBUG, Smart::Comments;
+use if DEBUG, 'Smart::Comments';
 
-use strict;
 use JSON;
+
+# VERSION
 
 sub new
 {
@@ -37,7 +39,7 @@ sub new
 
   ### OpenExchange->new args : $args
 
-  return undef unless (ref $args eq 'HASH') and (exists $args->{API_KEY});
+  return unless (ref $args eq 'HASH') and (exists $args->{API_KEY});
 
   $this->{API_KEY} = $args->{API_KEY};
   $this->{refresh} = 0;
@@ -54,14 +56,14 @@ sub multipliers
     my $url = "https://openexchangerates.org/api/latest.json?app_id=$this->{API_KEY}";
     my $reply = $ua->get($url);
 
-    return undef unless ($reply->code == 200);
+    return unless ($reply->code == 200);
 
     my $body = $reply->content;
 
     my $json_data = JSON::decode_json $body;
     if ( !$json_data || $json_data->{error} || not exists $json_data->{rates}) {
       ### OpenExchange error : $json_data->{description}
-      return undef;
+      return;
     }
 
     $this->{cache} = $json_data->{rates};
@@ -77,7 +79,7 @@ sub multipliers
 
   ### At least one code not found: $from, $to
 
-  return undef;
+  return;
 }
 
 1;

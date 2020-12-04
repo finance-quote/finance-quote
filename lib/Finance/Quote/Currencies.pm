@@ -15,13 +15,13 @@
 #
 package Finance::Quote::Currencies;
 
-use constant DEBUG => $ENV{DEBUG};
-use if DEBUG, Smart::Comments;
-use if DEBUG, Data::Dumper::Perltidy;
-
 use strict;
 use warnings;
 use utf8;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+use if DEBUG, 'Data::Dumper::Perltidy';
 
 use base 'Exporter';
 use vars qw/@EXPORT_OK  $CURRENCY_URL/;
@@ -31,9 +31,9 @@ use HTTP::Request::Common;
 use HTML::TableExtract;
 use Encode qw(decode);
 
-@EXPORT_OK = qw( known_currencies fetch_live_currencies );
-
 # VERSION
+
+@EXPORT_OK = qw( known_currencies fetch_live_currencies );
 
 $CURRENCY_URL = 'https://www.iban.com/currency-codes';
 
