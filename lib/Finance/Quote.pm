@@ -67,7 +67,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     CSE
     Cdnfundlibrary
     Citywire
-    Cominvest
+    Comdirect
     Currencies
     DWS
     Deka
@@ -1605,7 +1605,7 @@ Finance::Quote::Bourso,
 Finance::Quote::CSE,
 Finance::Quote::Cdnfundlibrary,
 Finance::Quote::Citywire,
-Finance::Quote::Cominvest,
+Finance::Quote::Comdirect,
 Finance::Quote::Currencies,
 Finance::Quote::DWS,
 Finance::Quote::Deka,
