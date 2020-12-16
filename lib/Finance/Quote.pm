@@ -66,7 +66,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Bourso
     CSE
     Cdnfundlibrary
-    Citywire
     Comdirect
     Currencies
     DWS
@@ -1602,7 +1601,6 @@ Finance::Quote::BSEIndia,
 Finance::Quote::Bourso,
 Finance::Quote::CSE,
 Finance::Quote::Cdnfundlibrary,
-Finance::Quote::Citywire,
 Finance::Quote::Comdirect,
 Finance::Quote::Currencies,
 Finance::Quote::DWS,
