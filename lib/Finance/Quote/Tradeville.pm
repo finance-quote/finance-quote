@@ -13,20 +13,19 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #    02110-1301, USA
-require 5.005;
 
 package Finance::Quote::Tradeville;
-
-# VERSION 
-
-use constant DEBUG => $ENV{DEBUG};
-use if DEBUG, Smart::Comments;
 
 use strict;
 use warnings;
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use LWP::UserAgent;
 use Web::Scraper;
+
+# VERSION
 
 my $TRADEVILLE_URL = 'https://tradeville.eu/actiuni/actiuni-';
 

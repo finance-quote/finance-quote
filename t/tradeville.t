@@ -1,9 +1,10 @@
 #!/usr/bin/perl -w
 
-use constant DEBUG => $ENV{DEBUG};
-use if DEBUG, Smart::Comments;
-
 use strict;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use Test::More;
 use Finance::Quote;
 
