@@ -106,7 +106,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Tdwaterhouse
     Tiaacref
     Troweprice
-    Trustnet
     USFedBonds
     Union
     VWD
@@ -1547,7 +1546,6 @@ information when compared to references
  Copyright 2000-2001, Paul Fenwick (updates for ASX, maintenance and release)
  Copyright 2000-2001, Brent Neal (update for TIAA-CREF)
  Copyright 2000 Volker Stuerzl (DWS and VWD support)
- Copyright 2000 Keith Refson (Trustnet support)
  Copyright 2001 Rob Sessink (AEX support)
  Copyright 2001 Leigh Wedding (ASX updates)
  Copyright 2001 Tobias Vancura (Fool support)
@@ -1644,7 +1642,6 @@ Finance::Quote::Tdefunds,
 Finance::Quote::Tdwaterhouse,
 Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice,
-Finance::Quote::Trustnet,
 Finance::Quote::USFedBonds,
 Finance::Quote::Union,
 Finance::Quote::VWD,
