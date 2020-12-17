@@ -1,45 +1,58 @@
 #!/usr/bin/perl -w
+
 use strict;
+use warnings;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use Test::More;
 use Finance::Quote;
+use Date::Simple qw(today);
+use Scalar::Util qw(looks_like_number);
+use Date::Range;
+use Date::Manip;
 
 if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 8;
+my %valid    = ('NBC887' => 1,
+                'TDB3533' => 1 );
+my @invalid  = ('00000');
+my @symbols  = (keys %valid, @invalid);
 
-# Test Canadian Fund Library functions.
+my $method   = 'fundlibrary';    # Name of the target method for testing
+my $currency = 'CAD';            # expected quote curreny
+my $today    = today();          # together with $window, validate date/isodate  
+my $window   = 7;                # quote must be within last $window days
 
-my $q      = Finance::Quote->new();
+my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_reference)
+                'success'  => sub {$_[0] == 1},
+                'currency' => sub {$_[0] =~ /^[A-Z]{3}$/},
+                'last'     => sub {looks_like_number($_[0])},
+                'isodate'  => sub {Date::Range->new($today - $window, $today)->includes(Date::Simple::ISO->new($_[0]))},
+                'date'     => sub {my $a = Date::Manip::Date->new(); $a->parse_format('%m/%d/%Y', $_[0]);
+                                   my $b = Date::Manip::Date->new(); $b->parse_format('%Y-%m-%d', $_[2]->{$_[1], 'isodate'});
+                                   return $a->cmp($b) == 0;}
+               );
+my $q        = Finance::Quote->new();
 
-my %quotes = $q->fundlibrary("NBC887","TDB3533","00000");
+plan tests => 1 + %check*%valid + @invalid;
+
+my %quotes = $q->fetch($method, @symbols);
 ok(%quotes);
 
-# Check the last values are defined.  These are the most
-#  used and most reliable indicators of success.
+### [<now>] quotes: %quotes
 
-my $year = (localtime())[5] + 1900;
-my $lastyear = $year - 1;
+foreach my $symbol (keys %valid) {
+  while (my ($key, $lambda) = each %check) {
+    ok($lambda->($quotes{$symbol, $key}, $symbol, \%quotes), "$key -> " . (defined $quotes{$symbol, $key} ? $quotes{$symbol, $key} : '<undefined>'));
+  }
+}
+    
+foreach my $symbol (@invalid) {
+  ok((not $quotes{'BOGUS', 'success'}), 'failed as expected');
+}
 
-ok($quotes{"NBC887","last"} > 0);
-ok($quotes{"NBC887","success"});
-ok($quotes{"NBC887", "currency"} eq "CAD");
-ok(length($quotes{"NBC887","date"}) > 0);
-ok(substr($quotes{"NBC887","isodate"},0,4) == $year ||
-   substr($quotes{"NBC887","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"NBC887","date"},6,4) == $year ||
-   substr($quotes{"NBC887","date"},6,4) == $lastyear);
 
-ok($quotes{"TDB3533","last"} > 0);
-ok($quotes{"TDB3533","success"});
-ok($quotes{"TDB3533", "currency"} eq "CAD");
-ok(length($quotes{"TDB3533","date"}) > 0);
-ok(substr($quotes{"TDB3533","isodate"},0,4) == $year ||
-   substr($quotes{"TDB3533","isodate"},0,4) == $lastyear);
-ok(substr($quotes{"TDB3533","date"},6,4) == $year ||
-   substr($quotes{"TDB3533","date"},6,4) == $lastyear);
-
-# Check that bogus stocks return failure:
-
-ok(! $quotes{"00000","success"});
