@@ -15,15 +15,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package Finance::Quote::Fondsweb;
-use v5.010;
 
-# VERSION 
 
 use warnings;
 use strict;
 
 use HTTP::Request::Common;
 use HTML::TreeBuilder::XPath;
+
+# VERSION 
 
 our $FONDSWEB_URL = "https://www.fondsweb.com/de/";
 

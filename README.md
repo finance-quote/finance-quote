@@ -456,7 +456,7 @@ information when compared to references
     Copyright 2000, Yannick LE NY (update for Yahoo Europe and YahooQuote)
     Copyright 2000-2001, Paul Fenwick (updates for ASX, maintenance and release)
     Copyright 2000-2001, Brent Neal (update for TIAA-CREF)
-    Copyright 2000 Volker Stuerzl (DWS and VWD support)
+    Copyright 2000 Volker Stuerzl (DWS)
     Copyright 2001 Rob Sessink (AEX support)
     Copyright 2001 Leigh Wedding (ASX updates)
     Copyright 2001 Tobias Vancura (Fool support)
@@ -554,7 +554,6 @@ Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice,
 Finance::Quote::USFedBonds,
 Finance::Quote::Union,
-Finance::Quote::VWD,
 Finance::Quote::XETRA,
 Finance::Quote::YahooJSON,
 Finance::Quote::ZA
