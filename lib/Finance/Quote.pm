@@ -97,7 +97,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Platinum
     SEB
     SIX
-    TNetuk
     Tradeville
     TSP
     TMX
@@ -1629,7 +1628,6 @@ Finance::Quote::Oslobors,
 Finance::Quote::Platinum,
 Finance::Quote::SEB,
 Finance::Quote::SIX,
-Finance::Quote::TNetuk,
 Finance::Quote::Tradeville,
 Finance::Quote::TSP,
 Finance::Quote::TMX,
