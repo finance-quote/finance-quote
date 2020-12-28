@@ -94,7 +94,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     NZX
     OnVista
     Oslobors
-    Platinum
     SEB
     SIX
     Tradeville
@@ -1625,7 +1624,6 @@ Finance::Quote::NSEIndia,
 Finance::Quote::NZX,
 Finance::Quote::OnVista,
 Finance::Quote::Oslobors,
-Finance::Quote::Platinum,
 Finance::Quote::SEB,
 Finance::Quote::SIX,
 Finance::Quote::Tradeville,
