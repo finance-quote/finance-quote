@@ -100,7 +100,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     TNetuk
     Tradeville
     TSP
-    TSX
+    TMX
     Tiaacref
     Troweprice
     USFedBonds
@@ -1632,7 +1632,7 @@ Finance::Quote::SIX,
 Finance::Quote::TNetuk,
 Finance::Quote::Tradeville,
 Finance::Quote::TSP,
-Finance::Quote::TSX,
+Finance::Quote::TMX,
 Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice,
 Finance::Quote::USFedBonds,
