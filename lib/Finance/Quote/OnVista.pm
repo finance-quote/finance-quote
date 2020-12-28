@@ -34,13 +34,13 @@
 package Finance::Quote::OnVista;
 require 5.005;
 
-# VERSION
-
 use strict;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TreeBuilder;
 use Encode;
+
+# VERSION
 
 use vars qw($OnVista_URL);
 
