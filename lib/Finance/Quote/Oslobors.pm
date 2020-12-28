@@ -1,16 +1,14 @@
 package Finance::Quote::Oslobors;
-require 5.004;
-
-# VERSION
 
 use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
 
+# VERSION
+
 use vars qw( $OSLOBORS_COMPONENTS_URL );
 
 $OSLOBORS_COMPONENTS_URL = "https://www.oslobors.no/ob/servlets/components?type=table&source=feed.omff.FUNDS&view=REALTIME&columns=ITEM%2C+PRICECHANGEPCT%2C+PRICE%2C+DATE%2C+QUOTATIONCURRENCY&filter=ITEM_SECTOR%3D%3Ds";
-
 
 sub methods { return (oslobors => \&oslobors); }
 
