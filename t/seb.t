@@ -1,7 +1,12 @@
 #!/usr/bin/perl -w
+
 use strict;
+
 use Test::More;
 use Finance::Quote;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
 
 if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
@@ -18,6 +23,8 @@ plan tests => 1 + 5*@valid + @invalid;
 
 my %quotes = $q->seb_funds(@symbols);
 ok(%quotes);
+
+### quotes : %quotes
 
 foreach my $symbol (@valid) {
     ok($quotes{$symbol, 'success'}, "$symbol success");
