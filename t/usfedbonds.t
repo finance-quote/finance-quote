@@ -1,63 +1,55 @@
 #!/usr/bin/perl -w
+
 use strict;
+use warnings;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use Test::More;
 use Finance::Quote;
+use Date::Simple qw(today);
+use Scalar::Util qw(looks_like_number);
+use Date::Range;
+use Date::Manip;
 
 if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 19;
+my %valid    = ('E197001.200606' => '137.00',
+                'E194112.200610' => '94.35',
+                'E194105.200610' => '90.59',
+                'S196712.202006' => '156.28');
+my @invalid  = ('BOGUS');
+my @symbols  = (keys %valid, @invalid);
 
-# Test usfedbonds functions.
+my $method   = 'usfedbonds';    # Name of the target method for testing
+my $currency = 'USD';           # expected quote curreny
 
-my $year = (localtime())[5] + 1900;
-my $lastyear = $year - 1;
-my $q      = Finance::Quote->new("USFedBonds");
+my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_reference)
+                'price'    => sub {looks_like_number($_[0]) && $_[0] eq $valid{$_[1]}},
+                'currency' => sub {$_[0] eq $currency},
+                'date'     => sub {$_[0] =~ m,^[0-9]{2}/[0-9]{2}/[0-9]{4},},
+                'isodate'  => sub {$_[0] =~ m,[0-9]{4}-[0-9]{2}-[0-9]{2},},
+                'success'  => sub {$_[0] == 1},
+              );
+my $q        = Finance::Quote->new();
 
-#my %quotes = $q->usfedbonds("E197001.200606");
-my %quotes = $q->usfedbonds("E197001.200606","E194112.200610","E194101.200610","E194001.200610","BOGUS");
+plan tests => 1 + %check*%valid + @invalid;
+
+my %quotes = $q->fetch($method, @symbols);
 ok(%quotes);
 
-TODO: {
-  local $TODO="To be debugged";
+### [<now>] quotes: %quotes
 
-  # Check that the last and date values are defined.
-  ok($quotes{"E197001.200606","success"});
-  ok($quotes{"E197001.200606","price"} > 0);
-  ok(length($quotes{"E197001.200606","date"}) > 0);
-  ok(substr($quotes{"E197001.200606","isodate"},0,4) eq $year ||
-       substr($quotes{"E197001.200606","isodate"},0,4) eq $lastyear);
-  ok(substr($quotes{"E197001.200606","date"},6,4) eq $year ||
-       substr($quotes{"E197001.200606","date"},6,4) eq $lastyear);
-  ok($quotes{"E197001.200606","currency"} eq "USD");
-
-  ok($quotes{"E194112.200610","success"});
-  ok($quotes{"E194112.200610","price"} > 0);
-  ok(length($quotes{"E194112.200610","date"}) > 0);
-  ok(substr($quotes{"E194112.200610","isodate"},0,4) eq $year ||
-       substr($quotes{"E194112.200610","isodate"},0,4) eq $lastyear);
-  ok(substr($quotes{"E194112.200610","date"},6,4) eq $year ||
-       substr($quotes{"E194112.200610","date"},6,4) eq $lastyear);
-  ok($quotes{"E194112.200610","currency"} eq "USD");
+foreach my $symbol (keys %valid) {
+  while (my ($key, $lambda) = each %check) {
+    ok($lambda->($quotes{$symbol, $key}, $symbol, \%quotes), "$key -> " . (defined $quotes{$symbol, $key} ? $quotes{$symbol, $key} : '<undefined>'));
+  }
+}
+    
+foreach my $symbol (@invalid) {
+  ok((not $quotes{'BOGUS', 'success'}), 'failed as expected');
 }
 
-# Check that a non-existent price returns no-success.
-ok($quotes{"E194101.200610","success"} == 0);
-
-TODO: {
-  local $TODO="To be debugged";
-  ok($quotes{"E194101.200610","errormsg"} eq "No value found");
-}
-
-# Check that a non-existent price returns no-success.
-ok($quotes{"E194001.200610","success"} == 0);
-
-TODO: {
-  local $TODO="To be debugged";
-  ok($quotes{"E194001.200610","errormsg"} eq "Date not found");
-}
-
-# Check that a bogus fund returns no-success.
-ok($quotes{"BOGUS","success"} == 0);
-ok($quotes{"BOGUS","errormsg"} eq "Parse error");
