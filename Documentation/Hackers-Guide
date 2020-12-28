@@ -62,6 +62,8 @@ following steps provide a recipe for setup.
   
     $ dzil authordeps --missing | cpanm --notest
     $ dzil listdeps --missing | cpanm --notest
+
+    $ cpanm install Data::Dumper::Perltidy Smart::Comments
   
   C. Test out finance-quote
   
