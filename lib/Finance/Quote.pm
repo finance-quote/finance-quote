@@ -79,7 +79,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Fool
     Fundata
     GoldMoney
-    HEX
     HU
     IEXCloud
     IndiaMutual
@@ -1592,7 +1591,7 @@ Finance::Quote::Bourso,
 Finance::Quote::CSE,
 Finance::Quote::Cdnfundlibrary,
 Finance::Quote::Comdirect,
-Finance::Quote::Currencies,
+Financ::Quote::Currencies,
 Finance::Quote::DWS,
 Finance::Quote::Deka,
 Finance::Quote::FTPortfolios,
@@ -1604,7 +1603,6 @@ Finance::Quote::Fondsweb,
 Finance::Quote::Fool,
 Finance::Quote::Fundata
 Finance::Quote::GoldMoney,
-Finance::Quote::HEX,
 Finance::Quote::HU,
 Finance::Quote::IEXCloud,
 Finance::Quote::IndiaMutual,
