@@ -29,7 +29,6 @@
 
 package Finance::Quote;
 
-
 use strict;
 
 use constant DEBUG => $ENV{DEBUG};
@@ -119,26 +118,20 @@ $USE_EXPERIMENTAL_UA = 0;
 
 sub AUTOLOAD {
   my $method = $AUTOLOAD;
-  $method =~ s/.*:://;
+  (my $name = $method) =~ s/.*:://;
 
   # Force the dummy object (and hence default methods) to be loaded.
   _dummy();
 
-  # If the method we want is in %METHODS, then set up an appropriate
-  # subroutine for it next time.
+  if (exists($METHODS{$name})) {
+    no strict 'refs'; ## no critic
+    
+    *$method = sub { 
+      my $this = ref($_[0]) ? shift : _dummy();
+      $this->fetch($name, @_);
+    };
 
-  if (exists($METHODS{$method})) {
-    eval qq[sub $method {
-      my \$this;
-      if (ref \$_[0]) {
-        \$this = shift;
-      }
-      \$this ||= _dummy();
-      \$this->fetch("$method",\@_);
-     }];
-    carp $@ if $@;
-    no strict 'refs'; # So we can use &$method
-    return &$method(@_);
+    return &$method;
   }
 
   carp "$AUTOLOAD does not refer to a known method.";
@@ -241,37 +234,25 @@ sub _load_modules {
     my $modpath = "${baseclass}::${module}";
     unless (defined($MODULES{$modpath})) {
 
-      # Have to use an eval here because perl doesn't
-      # like to use strings.
-      eval "use $modpath;";
+      eval {
+        load $modpath;
+        $MODULES{$modpath}   = 1;
+
+        my %methodhash       = $modpath->methods;
+        my %labelhash        = $modpath->labels;
+        my $curr_fields_func = $modpath->can("currency_fields") || \&default_currency_fields;
+        my @currency_fields  = &$curr_fields_func;
+        my %seen;
+        @currency_fields     = grep {!$seen{$_}++} @currency_fields;
+
+        foreach my $method (keys %methodhash) {
+          push (@{$METHODS{$method}},
+              { function => $methodhash{$method},
+              labels   => $labelhash{$method},
+              currency_fields => \@currency_fields});
+        }
+      };
       carp $@ if $@;
-      $MODULES{$modpath} = 1;
-
-      # Methodhash will continue method-name, function ref
-      # pairs.
-      my %methodhash = $modpath->methods;
-      my %labelhash = $modpath->labels;
-
-      # Find the labels that we can do currency conversion
-      # on.
-
-      my $curr_fields_func = $modpath->can("currency_fields")
-            || \&default_currency_fields;
-
-      my @currency_fields = &$curr_fields_func;
-
-      # @currency_fields may contain duplicates.
-      # This following chunk of code removes them.
-
-      my %seen;
-      @currency_fields=grep {!$seen{$_}++} @currency_fields;
-
-      foreach my $method (keys %methodhash) {
-        push (@{$METHODS{$method}},
-          { function => $methodhash{$method},
-            labels   => $labelhash{$method},
-            currency_fields => \@currency_fields});
-      }
     }
   }
 }
@@ -424,7 +405,7 @@ sub new {
   foreach my $method (@{$this->{currency_rates}->{order}}) {
     unless (defined($currency_check{$method})) {
       carp "Unknown curreny rates method: $method";
-      return undef;
+      return;
     }
 
     my $method_path = "${class}::CurrencyRates::${method}";
@@ -540,9 +521,7 @@ sub decimal_shiftup {
 # fetch.  It's a nicer interface for when you have a list of stocks with
 # different sources which you wish to deal with.
 sub fetch {
-  my $this = shift if ref ($_[0]);
-
-  $this ||= _dummy();
+  my $this = ref($_[0]) ? shift : _dummy();
 
   my $method = lc(shift);
   my @stocks = @_;
@@ -794,8 +773,7 @@ sub scale_field {
 # undef is returned upon error.
 
 sub currency {
-  my $this = shift if (ref($_[0]));
-  $this ||= _dummy();
+  my $this = ref($_[0]) ? shift : _dummy();
 
   my ($from_code, $to_code) = @_;
   return unless ($from_code and $to_code);
