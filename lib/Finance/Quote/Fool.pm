@@ -27,14 +27,14 @@
 
 package Finance::Quote::Fool;
 
-# VERSION
-
 use strict;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 use HTML::TreeBuilder;
 use Text::Template;
 use Encode qw(decode);
+
+# VERSION
 
 my $URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'http://caps.fool.com/Ticker/{$symbol}.aspx');
 
