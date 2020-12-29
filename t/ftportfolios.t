@@ -3,6 +3,9 @@ use strict;
 use Test::More;
 use Finance::Quote;
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
@@ -18,6 +21,8 @@ my $lastyear = $year - 1;
 my @stocks = ("FKYMRX", "FAEDEX");
 my %quotes = $q->ftportfolios(@stocks, "BOGUS");
 ok(%quotes);
+
+### quotes : %quotes
 
 TODO: {
   local $TODO="To be debugged";

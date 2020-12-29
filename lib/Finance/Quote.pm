@@ -89,7 +89,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Morningstar
     MorningstarAU
     MorningstarCH
-    MorningstarJP
     NSEIndia
     NZX
     OnVista
@@ -1619,7 +1618,6 @@ Finance::Quote::ManInvestments,
 Finance::Quote::Morningstar,
 Finance::Quote::MorningstarAU,
 Finance::Quote::MorningstarCH,
-Finance::Quote::MorningstarJP,
 Finance::Quote::NSEIndia,
 Finance::Quote::NZX,
 Finance::Quote::OnVista,
