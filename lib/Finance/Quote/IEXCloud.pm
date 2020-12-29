@@ -20,13 +20,13 @@ package Finance::Quote::IEXCloud;
 
 require 5.005;
 
-# VERSION
-
 use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
 use Text::Template;
 use DateTime::Format::Strptime qw( strptime strftime );
+
+# VERSION
 
 my $IEX_URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://cloud.iexapis.com/v1/stock/{$symbol}/quote?token={$token}');
 
