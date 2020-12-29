@@ -83,7 +83,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     HU
     IEXCloud
     IndiaMutual
-    LeRevenu
     MStaruk
     MorningstarAU
     NSEIndia
@@ -1609,7 +1608,6 @@ Finance::Quote::HEX,
 Finance::Quote::HU,
 Finance::Quote::IEXCloud,
 Finance::Quote::IndiaMutual,
-Finance::Quote::LeRevenu,
 Finance::Quote::MStaruk,
 Finance::Quote::MorningstarAU,
 Finance::Quote::NSEIndia,
