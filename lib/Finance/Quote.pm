@@ -73,7 +73,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     FTPortfolios
     FTfunds
     Fidelity
-    FidelityFixed
     Finanzpartner
     Fondsweb
     Fool
@@ -1597,7 +1596,6 @@ Finance::Quote::Deka,
 Finance::Quote::FTPortfolios,
 Finance::Quote::FTfunds,
 Finance::Quote::Fidelity,
-Finance::Quote::FidelityFixed,
 Finance::Quote::Finanzpartner,
 Finance::Quote::Fondsweb,
 Finance::Quote::Fool,
