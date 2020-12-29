@@ -86,7 +86,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     LeRevenu
     MStaruk
     ManInvestments
-    Morningstar
     MorningstarAU
     NSEIndia
     NZX
@@ -1614,7 +1613,6 @@ Finance::Quote::IndiaMutual,
 Finance::Quote::LeRevenu,
 Finance::Quote::MStaruk,
 Finance::Quote::ManInvestments,
-Finance::Quote::Morningstar,
 Finance::Quote::MorningstarAU,
 Finance::Quote::NSEIndia,
 Finance::Quote::NZX,
