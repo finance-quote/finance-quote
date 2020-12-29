@@ -37,6 +37,9 @@ use vars qw/$FIDELITY_URL /;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 # VERSION
 
 $FIDELITY_URL = ("https://fundresearch.fidelity.com/mutual-funds/fidelity-funds-daily-pricing-yields/download");
@@ -82,6 +85,8 @@ sub fidelity
     	# Skip symbols we didn't ask for.
     	next unless (defined($symbolhash{$sym}));
 
+        ### q : @q
+
 	 $aa {$sym, "exchange"}	= "Fidelity";  # Fidelity
 	 $aa {$sym, "method"}  	= "fidelity_direct";
 	($aa {$sym, "name"}    	= $q[0]) =~ s/^\s+//;
@@ -96,7 +101,7 @@ sub fidelity
 	 $aa {$sym, "price"}    = $aa{$sym, "nav"} 	if defined($q[2]);
 	 $aa {$sym, "success"}  = 1;
 	 $aa {$sym, "currency"} = "USD";
-	 $quoter->store_date(\%aa, $sym, {usdate => $q[19]});
+	 $quoter->store_date(\%aa, $sym, {usdate => $q[12]});
       }
     }
 

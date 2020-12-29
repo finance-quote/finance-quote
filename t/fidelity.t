@@ -3,6 +3,9 @@ use strict;
 use Test::More;
 use Finance::Quote;
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
@@ -18,6 +21,8 @@ my $lastyear = $year - 1;
 
 my %quotes = $q->fidelity_direct(@funds);
 ok(%quotes);
+
+### quotes : %quotes
 
 # Check that the name and nav are defined for all of the funds.
 foreach my $fund (@funds) {
