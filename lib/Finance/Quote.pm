@@ -69,7 +69,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Currencies
     DWS
     Deka
-    FTPortfolios
     FTfunds
     Fidelity
     Finanzpartner
@@ -1571,7 +1570,6 @@ Finance::Quote::Comdirect,
 Financ::Quote::Currencies,
 Finance::Quote::DWS,
 Finance::Quote::Deka,
-Finance::Quote::FTPortfolios,
 Finance::Quote::FTfunds,
 Finance::Quote::Fidelity,
 Finance::Quote::Finanzpartner,
