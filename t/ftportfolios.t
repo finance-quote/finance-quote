@@ -18,8 +18,8 @@ my $q      = Finance::Quote->new();
 my $year   = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my @stocks = ("FKYMRX", "FAEDEX");
-my %quotes = $q->ftportfolios(@stocks, "BOGUS");
+my @stocks = ("FVGDDX");
+my %quotes = $q->ftportfolios(@stocks);
 ok(%quotes);
 
 ### quotes : %quotes
