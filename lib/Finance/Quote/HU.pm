@@ -10,14 +10,18 @@
 # Kristof Marussy <kris7topher at gmail dot com> 2014
 
 package Finance::Quote::HU;
-require 5.005;
 
 use strict;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 use Encode;
+use JSON;
+use Web::Scraper;
 
 # VERSION
 
@@ -25,7 +29,7 @@ my $BAMOSZ_MAINURL = "http://www.bamosz.hu/";
 my $BAMOSZ_URL = $BAMOSZ_MAINURL . "alapoldal?isin=";
 
 my $BSE_MAINURL = "http://www.bet.hu/";
-my $BSE_URL = $BSE_MAINURL . "topmenu/kereskedesi_adatok/product_search?isinquery=";
+my $BSE_URL = $BSE_MAINURL . '/oldalak/ceg_adatlap/$security/';
 
 sub methods {
     return ( hufund  => \&bamosz,
@@ -81,67 +85,78 @@ sub hu {
 }
 
 sub bse {
-    my $quoter  = shift;
-    my @symbols = @_;
-    my %info;
+  my $quoter  = shift;
+  my @symbols = @_;
+  my %info;
 
-    my $ua = $quoter->user_agent;
+  my $ua = $quoter->user_agent;
 
-    for my $symbol (@symbols) {
-        $info{ $symbol, "method" }  = "bse";
-        $info{ $symbol, "source" }  = $BSE_MAINURL;
-        $info{ $symbol, "success" } = 0;
+  for my $symbol (@symbols) {
+    eval {
+      my $url      = $BSE_URL . $symbol;
+      my $response = $ua->request(GET $url);
 
-        my $url      = $BSE_URL . $symbol;
-        my $response = $ua->request( GET $url);
-        unless ( $response->is_success ) {
-            $info{ $symbol, "errormsg" } = "Request error";
-            next;
-        }
+      ### bse response : $response->content
 
-        my $te =
-            HTML::TableExtract->new( attribs => { class => "InsAdat_table" } );
-        $te->parse( decode_utf8( $response->content ) );
-        unless ( $te->first_table_found ) {
-            $info{ $symbol, "errormsg" } = "No InsAdat_table found";
-            next;
-        }
+      die "Request error" unless $response->is_success;
+      die "Failed to find JSON data" unless $response->content =~ m|window[.]dataSourceResults=({.+})</script>|;
 
-        my @found;
-    TABLE_LOOP: for my $ts ( $te->tables ) {
-            for my $row ( $ts->rows ) {
-                my @trimmed_row = map { trim($_) } @$row;
-                if ( $symbol eq $trimmed_row[1] || $symbol eq $trimmed_row[2] )
-                {
-                    @found = @trimmed_row;
-                    last TABLE_LOOP;
-                }
-            }
-        }
-        unless (@found) {
-            $info{ $symbol, "errormsg" } = "No ticker or ISIN found";
-            next;
-        }
+      my $json = decode_json $1;
 
-        # I don't trade stocks, so I am unsure whether the data
-        # extracted here is sensible. Please do improve this if
-        # needed!
-        $info{ $symbol, "symbol" }   = $found[1];
-        $info{ $symbol, "isin" }     = $found[2];
-        $info{ $symbol, "price" }    = hu_decimal( $found[3] );
-        $info{ $symbol, "open" }     = hu_decimal( $found[8] );
-        $info{ $symbol, "close" }    = hu_decimal( $found[9] );
-        $info{ $symbol, "currency" } = $found[10];
-        $info{ $symbol, "low" }      = hu_decimal( $found[13] );
-        $info{ $symbol, "high" }     = hu_decimal( $found[14] );
-        $info{ $symbol, "p_change" } = hu_decimal( $found[16] );
-        $info{ $symbol, "last" }     = hu_decimal( $found[17] );
-        $quoter->store_date( \%info, $symbol, { isodate => $found[18] } );
+      ### json : $json
 
-        $info{ $symbol, "success" } = 1;
+      ### keys : keys %{$json}
+      my @profile_key = grep {/CompanyProfileDataSource;table=left/} keys %{$json};
+      die "Failed to process JSON" unless @profile_key == 1;
+
+      my $profile = $json->{$profile_key[0]};
+
+      ### profile : $profile
+
+      foreach my $term (@{$profile}) {
+        $info{$symbol, "close"} = hu_decimal($term->{value}) if $term->{title} eq "El\x{151}z\x{151} z\x{e1}r\x{f3}\x{e1}r";
+        $info{$symbol, "high"}  = hu_decimal($term->{value}) if $term->{title} eq "Napi maximum"; 
+        $info{$symbol, "low"}   = hu_decimal($term->{value}) if $term->{title} eq "Napi minimum"; 
+      }
+
+      my @trade_key = grep {/CompanyProfileDataSource;table=trades/} keys %{$json};
+      die "Failed to process JSON" unless @trade_key == 1;
+
+      my $trade = $json->{$trade_key[0]};
+
+      $info{$symbol, "last"} = hu_decimal($trade->[0]->{price});
+
+      my $processor = scraper {
+        process '//*[@id="cp_tab_content_2"]/div[3]/div[3]/table/tbody/tr[1]/td[2]/span', 'ticker'   => 'TEXT';
+        process '//*[@id="cp_tab_content_2"]/div[3]/div[3]/table/tbody/tr[2]/td[2]/span', 'isin'     => 'TEXT';
+        process '//*[@id="cp_tab_content_2"]/div[3]/div[3]/table/tbody/tr[4]/td[2]/span', 'currency' => 'TEXT';
+        process '//*[@id="cp_tab_content_2"]/div[1]/div/div/div[2]/div/div[2]/span[2]', 'date'       => 'TEXT';
+      };
+
+      my $data = $processor->scrape($response);
+
+      ### data : $data
+
+      $info{ $symbol, "symbol" }   = $data->{ticker};
+      $info{ $symbol, "isin" }     = $data->{isin};
+      $info{ $symbol, "currency" } = $data->{currency};
+      
+      $quoter->store_date(\%info, $symbol, {isodate => $data->{date}});
+
+      $info{ $symbol, "method" }  = "bse";
+      $info{ $symbol, "source" }  = $BSE_MAINURL;
+      $info{ $symbol, "success" } = 1;
+    };
+
+    if ($@) {
+      ### bse error : $@
+      $info{ $symbol, "method"}   = "bse";
+      $info{ $symbol, "errormsg"} = $@;
+      $info{ $symbol, "success"}  = 0;
     }
+  }
 
-    return wantarray() ? %info : \%info;
+  return wantarray() ? %info : \%info;
 }
 
 sub bamosz {
@@ -158,6 +173,9 @@ sub bamosz {
 
         my $url      = $BAMOSZ_URL . $symbol;
         my $response = $ua->request( GET $url);
+
+        ### bamosz response : $response
+
         unless ( $response->is_success ) {
             $info{ $symbol, "errormsg" } = "Request error";
             next;
@@ -227,10 +245,9 @@ and www.bamosz.hu
 
 =head1 DESCRIPTION
 
-This module obtains information about Hungarian Securities. Share
-fetched from www.bet.hu, while mutual funds retrieved from
-www.bamosz.hu. Stocks may be searched by either ticker or ISIN, while
-mutual funds may only be search be ISIN.
+This module obtains information about Hungarian Securities. Share fetched from
+www.bet.hu, while mutual funds retrieved from www.bamosz.hu. Stocks are
+searched by ticker while mutual funds may only searched by ISIN.
 
 =head1 LABELS RETURNED
 

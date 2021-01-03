@@ -649,7 +649,7 @@ sub set_timeout {
 #
 # usdate   - A date in mm/dd/yy or mm/dd/yyyy
 # eurodate - A date in dd/mm/yy or dd/mm/yyyy
-# isodate  - A date in yy-mm-dd or yyyy-mm-dd or yyyymmdd
+# isodate  - A date in yy-mm-dd or yyyy-mm-dd, yyyy/mm/dd, yyyy.mm.dd, or yyyymmdd
 # year   - The year in yyyy
 # month  - The month in mm or mmm format (i.e. 07 or Jul)
 # day  - The day
@@ -683,7 +683,7 @@ sub store_date
 
     # Process the inputs
     if ((defined $piecesref->{isodate}) && ($piecesref->{isodate})) {
-      ($year, $month, $day) = ($piecesref->{isodate} =~ m|([0-9]{4})[-/]?([0-9]{2})[-/]?([0-9]{2})|);
+      ($year, $month, $day) = ($piecesref->{isodate} =~ m|([0-9]{4})[-/.]?([0-9]{2})[-/.]?([0-9]{2})|);
       $year += 2000 if $year < 100;
       $year_specified = 1;
 

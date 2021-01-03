@@ -12,6 +12,10 @@
 #  Bruce Schuck <bschuck at asgard hyphen systems dot com>
 
 use strict;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use Test::More;
 use Finance::Quote;
 
@@ -27,18 +31,15 @@ my $q        = Finance::Quote->new("HU");
 my $year     = ( localtime() )[5] + 1900;
 my $lastyear = $year - 1;
 
-#getting quotes for shares by ticker (OTP,ANY,RABA),
-# shares by ISIN (ticker: MTELEKOM: HU0000073507, MOL: HU0000068952)
-# and for funds by ISIN (HU0000702709,HU0000706437)
+# getting quotes for shares by ticker (OTP, MTELEKOM)
+# funds by ISIN (HU0000702709,HU0000706437)
 # and finally an incorrect ticker/isin is ZOL, must fail.
 my %quotes = $q->hu( "OTP", "HU0000705280", "HU0000702709", "ZOL" );
 ok(%quotes);
 
+### quotes : %quotes
+
 # Check that the last and date values are defined.
-TODO: {
-
-local $TODO = "Method bse not working.";
-
 ok( $quotes{ "OTP", "success" } );
 ok( $quotes{ "OTP", "last" } > 0 );
 ok( length( $quotes{ "OTP", "date" } ) > 0 );
@@ -47,8 +48,6 @@ ok(    substr( $quotes{ "OTP", "isodate" }, 0, 4 ) == $year
 ok(    substr( $quotes{ "OTP", "date" }, 6, 4 ) == $year
     || substr( $quotes{ "OTP", "date" }, 6, 4 ) == $lastyear );
 ok( $quotes{ "OTP", "currency" } eq "HUF" );
-
-} # End TODO
 
 # MKB HUF Liquidity Fund: HU0000705280
 ok( $quotes{ "HU0000705280", "success" } );
