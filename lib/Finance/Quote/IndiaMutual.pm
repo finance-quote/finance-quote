@@ -3,9 +3,11 @@
 # Version 0.1 preliminary version using Cdnfundlibrary.pm v0.4 as an example
 
 package Finance::Quote::IndiaMutual;
-require 5.010;
 
 use strict;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
 
 use vars qw( $AMFI_URL $AMFI_NAV_LIST $AMFI_MAIN_URL);
 
@@ -54,6 +56,8 @@ sub amfiindia   {
 
     $url = "$AMFI_URL";
 
+    ### cache : $AMFI_NAV_LIST
+  
     $reply = $ua->mirror($url, $AMFI_NAV_LIST);
 
     # Make sure something is returned
@@ -65,8 +69,8 @@ sub amfiindia   {
     return wantarray ? %fundquote : \%fundquote;
     }
 
-
-    open NAV, $AMFI_NAV_LIST or die "Unexpected error in opening file: $!\n";
+    my $nav_fh;
+    open $nav_fh, '<', $AMFI_NAV_LIST or die "Unexpected error in opening file: $!\n";
 
     # Create a hash of all stocks requested
     my %symbolhash;
@@ -78,7 +82,7 @@ sub amfiindia   {
     my @headhash;
 
     #Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Net Asset Value;Date
-    while (<NAV>) {
+    while (<$nav_fh>) {
     next if !/\;/;
     chomp;
     s/\r//;
@@ -106,7 +110,7 @@ sub amfiindia   {
     $quoter->store_date(\%fundquote, $symbol, {eurodate => $date});
     $fundquote{$symbol, "success"} = 1;
     }
-    close(NAV);
+    close($nav_fh);
 
     foreach my $symbol (@symbols) {
     unless (exists $fundquote{$symbol, 'success'}) {
