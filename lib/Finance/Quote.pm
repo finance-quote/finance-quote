@@ -683,7 +683,7 @@ sub store_date
 
     # Process the inputs
     if ((defined $piecesref->{isodate}) && ($piecesref->{isodate})) {
-      ($year, $month, $day) = ($piecesref->{isodate} =~ m|([0-9]{4})[-/.]?([0-9]{2})[-/.]?([0-9]{2})|);
+      ($year, $month, $day) = ($piecesref->{isodate} =~ m|([0-9]{4})\W+(\w+)\W+(\w+)|);
       $year += 2000 if $year < 100;
       $year_specified = 1;
 
