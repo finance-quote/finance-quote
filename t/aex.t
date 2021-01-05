@@ -20,12 +20,13 @@ my @valid    = ('AD', 'AMG', 'LVMH', 'XS0937858271', 'NL0000009165');
 my @invalid  = ('BOGUS');
 my @symbols  = (@valid, @invalid);
 my $today    = today();
+my $window   = 32;   # XS0937858271 quotes are only updates 1-2 a month
 
 my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_reference)
                 'success' => sub {$_[0]},
                 'last'    => sub {looks_like_number($_[0])},
                 'volume'  => sub {looks_like_number($_[0])},
-                'isodate' => sub {Date::Range->new($today - 7, $today)->includes(Date::Simple::ISO->new($_[0]))},
+                'isodate' => sub {Date::Range->new($today - $window, $today)->includes(Date::Simple::ISO->new($_[0]))},
                 'date'    => sub {my $a = Date::Manip::Date->new(); $a->parse_format('%m/%d/%Y', $_[0]);
                                   my $b = Date::Manip::Date->new(); $b->parse_format('%Y-%m-%d', $_[2]->{$_[1], 'isodate'});
                                   return $a->cmp($b) == 0;},
@@ -41,7 +42,7 @@ ok(%quotes);
 
 foreach my $symbol (@valid) {
   while (my ($key, $lambda) = each %check) {
-    ok($lambda->($quotes{$symbol, $key}, $symbol, \%quotes), "$key -> $quotes{$symbol, $key}");
+    ok($lambda->($quotes{$symbol, $key}, $symbol, \%quotes), "$symbol: $key -> $quotes{$symbol, $key}");
   }
 }
     
