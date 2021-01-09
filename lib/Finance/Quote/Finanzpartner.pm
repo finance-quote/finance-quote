@@ -62,12 +62,12 @@ sub finanzpartner
       my $reply = $ua->get($url, @headers);
 
       my $processor = scraper {
-        process 'div.col-md-5.minus.clearfix > span.kurs-m.pull-left', 'price[]' => 'TEXT';
-        process 'h1 > small', 'isin[]'                                           => 'TEXT';
-        process 'div.col-md-2', 'date[]'                                         => 'TEXT';
-        process 'h1 > span', 'name[]'                                            => 'TEXT';
+        process 'span.kurs-m.pull-left', 'price[]' => 'TEXT';
+        process 'h1 > small', 'isin[]'             => 'TEXT';
+        process 'div.col-md-2', 'date[]'           => 'TEXT';
+        process 'h1 > span', 'name[]'              => 'TEXT';
       };
-      
+ 
       my $data = $processor->scrape(decode_utf8 $reply->content);
 
       ### data: $data
