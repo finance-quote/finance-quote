@@ -31,6 +31,9 @@ use strict;
 
 use vars qw( $SEB_FUNDS_URL);
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use utf8;
@@ -56,6 +59,9 @@ sub seb_funds {
   $url   = $SEB_FUNDS_URL;
   $ua    = $quoter->user_agent;
   $reply = $ua->request(GET $url);
+
+  ### url : $url
+  ### reply : $reply
 
   unless ($reply->is_success) {
     foreach my $symbol (@symbols) {

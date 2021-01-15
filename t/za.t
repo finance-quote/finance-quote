@@ -34,7 +34,7 @@ my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_refer
                 'currency' => sub {$_[0] eq $currency},
                 'name'     => sub {$_[0] eq $valid{$_[1]}},
                 'price'    => sub {looks_like_number($_[0])},
-                'isodate'  => sub {Date::Range->new($today - $window, $today)->includes(Date::Simple::ISO->new($_[0]))},
+                'isodate'  => sub {Date::Range->new($today - $window, $today + 1)->includes(Date::Simple::ISO->new($_[0]))},
                 'date'     => sub {my $a = Date::Manip::Date->new(); $a->parse_format('%m/%d/%Y', $_[0]);
                                    my $b = Date::Manip::Date->new(); $b->parse_format('%Y-%m-%d', $_[2]->{$_[1], 'isodate'});
                                    return $a->cmp($b) == 0;},

@@ -41,20 +41,13 @@ use JSON qw/decode_json/;
 
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
-### ASX.pm  Debugging is switched on for <file>[<line>]
 
 use vars qw/$ASX_URL_PRIMARY $ASX_URL_ALTERNATE/;
 
-##our $VERSION = '1.50'; # VERSION
+# VERSION
 
 $ASX_URL_PRIMARY = 'https://www.asx.com.au/asx/1/share/';
 $ASX_URL_ALTERNATE = 'https://asx.api.markitdigital.com/asx-research/1.0/companies/';
-
-=item methods
-
-# Function that lists the methods available for the Australian Securities Exchange (ASX)
-
-=cut
 
 sub methods {return (australia => \&asx,asx => \&asx)}
 
@@ -77,11 +70,7 @@ sub methods {return (australia => \&asx,asx => \&asx)}
 			type
 			volume/;
 
-=item labels
-
 # Function that lists the data items available from the Australian Securities Exchange (ASX)
-
-=cut
 
 	sub labels { return (australia => \@labels,
 						 asx	   => \@labels); }
@@ -111,11 +100,7 @@ sub methods {return (australia => \&asx,asx => \&asx)}
 #		https://github.com/finance-quote/finance-quote/blob/master/Documentation/Hackers-Guide
 #
 
-=item asx
-
 # Main function to fetch quotes from the Australian Securities Exchange (ASX)
-
-=cut
 
 sub asx {
 
@@ -184,11 +169,7 @@ sub asx {
 
 }
 
-=item asx_primary
-
 # Internal function to handle ASX Alternate data source
-
-=cut
 
 sub asx_primary {
 
@@ -225,11 +206,7 @@ sub asx_primary {
 
 }
 
-=item asx_alternate
-
 # Internal function to handle ASX Alternate data source
-
-=cut
 
 sub asx_alternate {
 
@@ -273,12 +250,8 @@ sub asx_alternate {
 
 }
 
-=item get_asx_data
-
 # Internal function to fetch, validate, and decode data from an ASX URL using LWP User Agent
 # Handle any errors
-
-=cut
 
 sub get_asx_data {
 
@@ -319,11 +292,7 @@ sub get_asx_data {
 
 }
 
-=item process_asx_data
-
 # Internal function to push the ASX data elements into the Finance::Quote structure (%info)
-
-=cut
 
 sub process_asx_data {
 

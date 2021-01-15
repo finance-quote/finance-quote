@@ -542,7 +542,6 @@ Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice,
 Finance::Quote::USFedBonds,
 Finance::Quote::Union,
-Finance::Quote::XETRA,
 Finance::Quote::YahooJSON,
 Finance::Quote::ZA
 
