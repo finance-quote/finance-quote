@@ -49,20 +49,24 @@ sub tmx {
 
   foreach my $symbol (@_) {
     eval {
-      my $url       = 'https://app.quotemedia.com/datatool/getEnhancedQuotes.json?timezone=true&afterhours=true&premarket=true&currencyInd=true&countryInd=true&marketstatus=true&token=a93722d6c03cbab64459d578082f72c38b7c9157b52f056353c3c4f43324f0cb';
-      my $request   = HTTP::Request->new(GET => $url . '&symbols=' . $symbol);
+      my $url     = 'https://app-money.tmx.com/graphql';
+      my $header  = ["accept"           =>           "*/*",
+                     "accept-language"  => "en-US,en;q=0.9",
+                     "authorization"    => "",
+                     "content-type"     => "application/json",
+                     "locale"           => "en",
+                     "sec-ch-ua"        => "\"Google Chrome\";v=\"87\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"87\"",
+                     "sec-ch-ua-mobile" => "?0",
+                     "sec-fetch-dest"   => "empty",
+                     "sec-fetch-mode"   => "cors",
+                     "sec-fetch-site"   => "same-site"];
+      my $body   = "{\"operationName\":\"getQuoteBySymbol\",\"variables\":{\"symbol\":\"$symbol\",\"locale\":\"en\"},\"query\":\"query getQuoteBySymbol(\$symbol: String, \$locale: String) {\\n  getQuoteBySymbol(symbol: \$symbol, locale: \$locale) {\\n    symbol\\n    name\\n    price\\n    priceChange\\n    percentChange\\n    exchangeName\\n    exShortName\\n    exchangeCode\\n    marketPlace\\n    sector\\n    industry\\n    volume\\n    openPrice\\n    dayHigh\\n    dayLow\\n    MarketCap\\n    MarketCapAllClasses\\n    peRatio\\n    prevClose\\n    dividendFrequency\\n    dividendYield\\n    dividendAmount\\n    dividendCurrency\\n    beta\\n    eps\\n    exDividendDate\\n    shortDescription\\n    longDescription\\n    website\\n    email\\n    phoneNumber\\n    fullAddress\\n    employees\\n    shareOutStanding\\n    totalDebtToEquity\\n    totalSharesOutStanding\\n    sharesESCROW\\n    vwap\\n    dividendPayDate\\n    weeks52high\\n    weeks52low\\n    alpha\\n    averageVolume10D\\n    averageVolume30D\\n    averageVolume50D\\n    priceToBook\\n    priceToCashFlow\\n    returnOnEquity\\n    returnOnAssets\\n    day21MovingAvg\\n    day50MovingAvg\\n    day200MovingAvg\\n    dividend3Years\\n    dividend5Years\\n    datatype\\n    __typename\\n  }\\n}\\n\"}";
 
-      $request->header('authority'        => 'app.quotemedia.com');
-      $request->header('sec-ch-ua'        => '"Google Chrome";v="87", " Not;A Brand";v="99", "Chromium";v="87"');
-      $request->header('accept'           => '*/*');
-      $request->header('accept-language'  => 'en');
-      $request->header('sec-ch-ua-mobile' => '?0');
-      $request->header('user-agent'       => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36');
-      $request->header('origin'           => 'https://money.tmx.com');
-      $request->header('sec-fetch-site'   => 'cross-site');
-      $request->header('sec-fetch-mode'   => 'cors');
-      $request->header('sec-fetch-dest'   => 'empty');
-      $request->header('referer'          => 'https://money.tmx.com/');
+      
+      my $request = HTTP::Request->new('POST', $url, $header, $body);
+      $request->header("referrer"       => "https://money.tmx.com/",
+                       "referrerPolicy" => "strict-origin-when-cross-origin",
+                       "mode"           =>  "cors");
 
       my $reply     = $ua->request($request);
       
@@ -71,31 +75,25 @@ sub tmx {
       
       my $data      = decode_json $reply->content;
 
-      die "Unexpected result" unless exists $data->{results}
-                              and    exists $data->{results}->{quote}
-                              and    @{$data->{results}->{quote}} == 1;
-
-      $data = $data->{results}->{quote}->[0];
+      die "Unexpected result" unless exists $data->{data}
+                              and    exists $data->{data}->{getQuoteBySymbol};
       
-      die "Symbol not found" unless $data->{key}->{exchange} ne '';
+      $data = $data->{data}->{getQuoteBySymbol};
+
+      die "Unexpected symbol" unless lc($data->{symbol}) eq lc($symbol);
 
       ### data     : $data
 
-      $info{$symbol, 'name'}       = $data->{equityinfo}->{longname};
-      $info{$symbol, 'cap'}        = $data->{fundamental}->{marketcap};
-      $info{$symbol, 'year_range'} = $data->{fundamental}->{week52low}->{content} . ' - ' . $data->{fundamental}->{week52high}->{content};
-      $info{$symbol, 'currency'}   = $data->{key}->{currency};
-      $info{$symbol, 'exchange'}   = $data->{key}->{exLgName};
-      $info{$symbol, 'symbol'}     = $data->{key}->{symbol};
-      $info{$symbol, 'ask'}        = $data->{pricedata}->{ask};
-      $info{$symbol, 'bid'}        = $data->{pricedata}->{bid};
-      $info{$symbol, 'high'}       = $data->{pricedata}->{high};
-      $info{$symbol, 'last'}       = $data->{pricedata}->{last};
-      $info{$symbol, 'low'}        = $data->{pricedata}->{low};
-      $info{$symbol, 'open'}       = $data->{pricedata}->{open};
-      $info{$symbol, 'close'}      = $data->{pricedata}->{prevclose};
-
-      $quoter->store_date(\%info, $symbol, {isodate => $data->{pricedata}->{lasttradedatetime}});
+      $info{$symbol, 'name'}       = $data->{name};
+      $info{$symbol, 'exchange'}   = $data->{exchangeName};
+      $info{$symbol, 'volume'}     = $data->{volume};
+      $info{$symbol, 'open'}       = $data->{openPrice};
+      $info{$symbol, 'high'}       = $data->{dayHigh};
+      $info{$symbol, 'low'}        = $data->{dayLow};
+      $info{$symbol, 'cap'}        = $data->{MarketCap};
+      $info{$symbol, 'close'}      = $data->{prevClose};
+      $info{$symbol, 'year_range'} = $data->{weeks52low} . ' - ' . $data->{weeks52high};
+      $info{$symbol, 'symbol'}     = $data->{symbol};
 
       $info{$symbol, 'success'} = 1;
     };
@@ -137,9 +135,8 @@ Finance::Quote->new().
 
 =head1 LABELS RETURNED
 
-The following labels are returned by Finance::Quote::TMX: name, cap,
-year_range, currency, exchange, symbol, ask, bid, high, last, low, open,
-close, isodate, date
+The following labels are returned by Finance::Quote::TMX: name,
+exchange, volume, open, high, low, cap, close, year_range, symbol
 
 =head1 TERMS & CONDITIONS
 
