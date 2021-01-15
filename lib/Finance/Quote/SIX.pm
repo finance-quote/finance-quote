@@ -26,6 +26,7 @@ use if DEBUG, 'Smart::Comments';
 use LWP::UserAgent;
 use JSON qw( decode_json );
 use String::Util qw(trim);
+use Scalar::Util qw(looks_like_number);
 
 # VERSION
 
@@ -87,7 +88,7 @@ sub six {
       my %datamap   = map {$datacols[$_] => $_} (0 .. $#datacols);
       my $datarow   = $data->{rowData}->[0];
 
-      $info{$symbol, 'ask'}     = $datarow->[$datamap{AskPrice}]       if $datarow->[$datamap{AskPrice}];
+      $info{$symbol, 'ask'}     = $datarow->[$datamap{AskPrice}]       if $datarow->[$datamap{AskPrice}] and looks_like_number($datarow->[$datamap{AskPrice}]);
       $info{$symbol, 'close'}   = $datarow->[$datamap{ClosingPrice}]   if $datarow->[$datamap{ClosingPrice}];
       $info{$symbol, 'high'}    = $datarow->[$datamap{DailyHighPrice}] if $datarow->[$datamap{DailyHighPrice}];
       $info{$symbol, 'low'}     = $datarow->[$datamap{DailyLowPrice}]  if $datarow->[$datamap{DailyLowPrice}];
