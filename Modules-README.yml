@@ -3,7 +3,7 @@
 # state: working | failing | obsolete | removed
 ---
 - module: AEX.pm
-  state: TBD
+  state: working
   added: TBD
   changed: ~
   removed: ~
@@ -12,39 +12,55 @@
   notes: ~
   testfile: TBD
   testcases:
+    - AH
+    - AMG
 #
 - module: AIAHK.pm
-  state: TBD
+  state: working
   added: TBD
   changed: ~
   removed: ~
   urls:
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: aiahk.t
   testcases:
+    - ABD-AUS.EQ
+    - AIG-EUSC.U
+    - FID-JP.ADV
+    - SCH-HKEQ
 #
 - module: ASEGR.pm
-  state: TBD
+  state: failing
   added: TBD
   changed: ~
   removed: ~
   urls:
   apikey: false
-  notes: ~
-  testfile: TBD
+  notes: >-
+    Broken and recommended for removal. All active securities are tested to be available
+    from YahooJSON (and possibly other sources).
+  testfile: asegr.t
   testcases:
 #
 - module: ASX.pm
-  state: TBD
+  state: working
   added: TBD
-  changed: ~
+  changed: 2020-10-12
   removed: ~
   urls:
   apikey: false
-  notes: ~
-  testfile: TBD
+  notes: >-
+    Most securities are available from YahooJSON (and possibly other sources).
+  testfile: asx.t
   testcases:
+    - WES
+    - BOQ
+    - XRO
+    - IAG
+    - TLS
+    - NABHA
+    - XAO
 #
 - module: AlphaVantage.pm
   state: working
@@ -86,7 +102,7 @@
     - ERIC-B.STO
 #
 - module: BMONesbittBurns.pm
-  state: TBD
+  state: failing
   added: TBD
   changed: ~
   removed: ~
@@ -117,7 +133,7 @@
     - INE062A01020
 #
 - module: BSERO.pm
-  state: TBD
+  state: failing
   added: TBD
   changed: ~
   removed: ~
@@ -128,18 +144,18 @@
   testcases:
 #
 - module: Bloomberg.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
   removed: ~
   urls:
   apikey: false
-  notes: ~
+  notes: Not present in the distro and thus marked as removed
   testfile: TBD
   testcases:
 #
 - module: Bourso.pm
-  state: working
+  state: failing
   added:
   changed: 2020-03~31
   removed:
@@ -160,7 +176,7 @@
     - 1rTBX4
 #
 - module: CSE.pm
-  state: TBD
+  state: failing
   added: TBD
   changed: ~
   removed: ~
@@ -171,7 +187,7 @@
   testcases:
 #
 - module: Cdnfundlibrary.pm
-  state: working
+  state: failing
   added: TBD
   changed: 2019-12-01
   removed: ~
@@ -185,7 +201,7 @@
     - TDB3533
 #
 - module: Citywire.pm
-  state: TBD
+  state: failing
   added: TBD
   changed: ~
   removed: ~
@@ -196,7 +212,7 @@
   testcases:
 #
 - module: Cominvest.pm
-  state: TBD
+  state: failing
   added: TBD
   changed: ~
   removed: ~
@@ -207,7 +223,7 @@
   testcases:
 #
 - module: Currencies.pm
-  state: TBD
+  state: working
   added: TBD
   changed: ~
   removed: ~
@@ -218,7 +234,7 @@
   testcases:
 #
 - module: DWS.pm
-  state: TBD
+  state: failing
   added: TBD
   changed: ~
   removed: ~
@@ -229,18 +245,20 @@
   testcases:
 #
 - module: Deka.pm
-  state: TBD
+  state: working
   added: TBD
   changed: ~
   removed: ~
   urls:
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: deka.t
   testcases:
+    - DE0008474511
+    - LU0051755006
 #
 - module: FTPortfolios.pm
-  state: TBD
+  state: working
   added: TBD
   changed: ~
   removed: ~
