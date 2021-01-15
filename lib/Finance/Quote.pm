@@ -94,7 +94,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Troweprice
     USFedBonds
     Union
-    XETRA
     YahooJSON
     ZA
 /;
@@ -1595,7 +1594,6 @@ Finance::Quote::Tiaacref,
 Finance::Quote::Troweprice,
 Finance::Quote::USFedBonds,
 Finance::Quote::Union,
-Finance::Quote::XETRA,
 Finance::Quote::YahooJSON,
 Finance::Quote::ZA
 
