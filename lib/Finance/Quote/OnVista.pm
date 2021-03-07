@@ -196,7 +196,7 @@ Finance::Quote::OnVista Obtain quotes from OnVista.
 This module fetches information from OnVista, https://www.onvista.de. All stocks are available.
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "onvista" in the argument
+also possible to load it explicitly by placing "onvista" in the argument
 list to Finance::Quote->new().
 
 Information obtained by this module may be covered by www.onvista.de

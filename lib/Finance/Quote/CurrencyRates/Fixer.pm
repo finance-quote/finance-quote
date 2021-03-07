@@ -103,7 +103,7 @@ This module fetches currency rates from https://fixer.io and provides data to
 Finance::Quote to convert the first argument to the equivalent value in the
 currency indicated by the second argument.
 
-Thie module caches the currency rates for the lifetime of the quoter object,
+This module caches the currency rates for the lifetime of the quoter object,
 unless 'cache => 0' is included in the 'fixer' options hash.
 
 =head1 API_KEY

@@ -178,7 +178,7 @@ Finance::Quote::AEX - Obtain quotes from Amsterdam Euronext eXchange
 
 =head1 DESCRIPTION
 
-Thie module fetches information from https://live.euronext.com.  Stocks and bonds
+This module fetches information from https://live.euronext.com.  Stocks and bonds
 are supported.
 
 This module is loaded by default on a Finance::Quote object. It's also possible

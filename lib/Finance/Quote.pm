@@ -1246,7 +1246,7 @@ to new() enables the caller to provide a configuration HASH to the corresponding
 method.
 
 The key 'currency_rates' configures the Finanace::Quote currency rate
-conversion.  By default, to maintain backward compatability,
+conversion.  By default, to maintain backward compatibility,
 Finance::Quote::CurrencyRates::AlphaVantage is used for currency conversion.
 This end point requires an API key, which can either be set in the environment
 or included in the configuration hash. To specify a different primary currency
@@ -1356,7 +1356,7 @@ performance, currency conversion rates are cached and are assumed not to change
 for the duration of the Finance::Quote object.
 
 See the introduction to this page for information on how to configure the
-souce of currency conversion rates.
+source of currency conversion rates.
 
 =head2 get_required_labels
 
@@ -1383,7 +1383,7 @@ web requests.
 
     $q->set_timeout(45);
 
-C<set_timeout> updated teh timeout in seconds for the quoter object.
+C<set_timeout> updated the timeout in seconds for the quoter object.
 
 =head2 store_date
 
@@ -1456,7 +1456,7 @@ constraint.
 
     my @list = Finance::Quote::parse_csv($string);
 
-C<parse_csv> is a utility function for spliting a comma seperated value string
+C<parse_csv> is a utility function for splitting a comma separated value string
 into a list of terms, treating double-quoted strings that contain commas as a
 single value.
 
@@ -1464,7 +1464,7 @@ single value.
 
     my @list = Finance::Quote::parse_csv_semicolon($string);
 
-C<parse_csv> is a utility function for spliting a semicolon seperated value string
+C<parse_csv> is a utility function for splitting a semicolon separated value string
 into a list of terms, treating double-quoted strings that contain semicolons as a
 single value.
 
