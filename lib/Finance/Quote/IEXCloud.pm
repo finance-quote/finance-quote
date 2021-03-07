@@ -127,7 +127,7 @@ Finance::Quote::IEXClound - Obtain quotes from https://iexcloud.io
 This module fetches information from https://iexcloud.io.
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "IEXCloud" in the argument
+also possible to load it explicitly by placing "IEXCloud" in the argument
 list to Finance::Quote->new().
 
 This module provides the "iexcloud" fetch method.
