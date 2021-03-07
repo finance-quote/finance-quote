@@ -181,7 +181,7 @@ sub onvista {
 
 =head1 NAME
 
-Finance::Quote::OnVista Obtain quotes from OnVista.
+Finance::Quote::OnVista - Obtain quotes from OnVista.
 
 =head1 SYNOPSIS
 
