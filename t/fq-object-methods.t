@@ -2,6 +2,10 @@
 use strict;
 use Test::More;
 
+if (not $ENV{'ONLINE_TEST'}) {
+    plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
+}
+
 plan tests => 23;
 
 use Finance::Quote;
