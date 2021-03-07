@@ -326,32 +326,45 @@ sub process_asx_data {
 __END__
 
 =head1 NAME
+
 Finance::Quote::ASX - Obtain quotes from the Australian Stock Exchange.
+
 =head1 SYNOPSIS
+
 	use Finance::Quote;
 	$q = Finance::Quote->new;
 	%stockinfo = $q->fetch("asx","BHP");	   # Only query ASX.
 	%stockinfo = $q->fetch("australia","BHP"); # Failover to other sources OK.
+
 =head1 DESCRIPTION
+
 This module obtains information from the Australian Stock Exchange
 http://www.asx.com.au/.  Data for all Australian listed securities and indices
 is available.  Indexes start with the letter 'X'.  For example, the
 All Ordinaries is "XAO".  But some securities also start with the letter 'X'.
+
 This module is loaded by default on a Finance::Quote object.  It's
 also possible to load it explicitly by placing "ASX" in the argument
 list to Finance::Quote->new().
+
 This module provides both the "asx" and "australia" fetch methods.
 Please use the "australia" fetch method if you wish to have failover
 with other sources for Australian stocks (such as Yahoo).  Using
 the "asx" method will guarantee that your information only comes
 from the Australian Stock Exchange.
+
 Information returned by this module is governed by the Australian
 Stock Exchange's terms and conditions.
+
 =head1 LABELS RETURNED
+
 The following labels may be returned by Finance::Quote::ASX:
 bid, offer, open, high, low, last, net, p_change, volume,
 and price.
+
 =head1 SEE ALSO
+
 Australian Stock Exchange, http://www.asx.com.au/
+
 Finance::Quote::Yahoo::Australia.
 =cut
