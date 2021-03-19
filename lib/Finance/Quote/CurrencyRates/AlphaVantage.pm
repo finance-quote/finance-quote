@@ -39,9 +39,12 @@ sub new
 
   ### AlphaVantage->new args : $args
 
-  return unless (ref $args eq 'HASH') and (exists $args->{API_KEY});
+  # AlphaVantage is the ONLY module permitted to use an environment variable
+  # for API key (for backwards compatibility).  New modules MUST use the
+  # API_KEY from args.
 
-  $this->{API_KEY} = $args->{API_KEY};
+  $this->{API_KEY} = $ENV{'ALPHAVANTAGE_API_KEY'};
+  $this->{API_KEY} = $args->{API_KEY} if (ref $args eq 'HASH') and (exists $args->{API_KEY});
 
   return $this;
 }
