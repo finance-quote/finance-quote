@@ -81,6 +81,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     IndiaMutual
     MStaruk
     MorningstarAU
+    MorningstarJP
     NSEIndia
     NZX
     OnVista
@@ -1587,6 +1588,7 @@ Finance::Quote::IEXCloud,
 Finance::Quote::IndiaMutual,
 Finance::Quote::MStaruk,
 Finance::Quote::MorningstarAU,
+Finance::Quote::MorningstarJP,
 Finance::Quote::NSEIndia,
 Finance::Quote::NZX,
 Finance::Quote::OnVista,
