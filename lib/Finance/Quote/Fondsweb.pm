@@ -34,16 +34,27 @@ sub methods { return ( fondsweb => \&fondsweb ); }
 	sub labels { return (fondsweb => \@labels); }
 }
 
+# 123.456.789,00 -> 123456789.00
+sub decimalPeriod {
+  my $value = shift;
+
+  $value =~ s/[.,]([0-9]+)$/#$1/;  # temporarily replace final seperator with # 
+  $value =~ s/[.,]//g;             # remove all other seperators
+  $value =~ s/#/./;                # replace # with .
+
+  return $value;
+}
+
 sub fondsweb {
 	
 	my $quoter = shift;
 	my @symbols  = @_;
 	my $te = HTML::TableExtract->new( depth => 0, count => 6 );
-	my $tree = HTML::TreeBuilder::XPath->new;
 	my %info;
 	
 	# Iterate over each symbol
 	foreach my $symbol (@symbols) {
+	        my $tree = HTML::TreeBuilder::XPath->new;
 		my $url = $FONDSWEB_URL . $symbol;
 		#~ debug_ua( $quoter->user_agent );	
 		
@@ -80,14 +91,14 @@ sub fondsweb {
 			my $details = $te->table(0, 6);
 			my $lastRowIndex = @{$details->rows} - 1;
 			# extract data with re
-			my @highest = $details->cell($lastRowIndex - 1, 1) =~ m/^(\d+),(\d+)\s.+/;
-			my @lowest = $details->cell($lastRowIndex, 1) =~ m/^(\d+),(\d+)\s.+/;			
-			$info{ $symbol, "year_range" } = join('.', @highest) . " - " . join('.', @lowest);
+                        my $highest = decimalPeriod($details->cell($lastRowIndex - 1, 1));
+                        my $lowest  = decimalPeriod($details->cell($lastRowIndex, 1));
+			$info{ $symbol, "year_range" } = $lowest . ' - ' . $highest;
 			
 			# nav, last, currency
 			my $raw_nav_currency = $tree->findvalue( '//div[@class="fw--fondDetail-price"]' );
-			my @nav_currency = $raw_nav_currency =~ m/^(\d+),(\d+)\s(\w+)/;
-			$info{ $symbol, 'nav' } = join('.', @nav_currency[0,1]);
+			my @nav_currency = $raw_nav_currency =~ m/^([0-9,.]+)\s(\w+)/;
+			$info{ $symbol, 'nav' } = decimalPeriod($nav_currency[0]);
 			$info{ $symbol, 'last' } = $info{ $symbol, 'nav' };
 			$info{ $symbol, 'currency' } = $nav_currency[-1];
 			
