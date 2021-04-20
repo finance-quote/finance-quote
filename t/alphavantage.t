@@ -43,7 +43,7 @@ my @symbols =  qw/
 	MRT-UN.TRT
 /;
 
-plan tests => 11*(1+$#symbols)+10;
+plan tests => 11*(1+$#symbols)+11;
 
 my %quotes = $q->alphavantage( @symbols, "BOGUS" );
 ok(%quotes);
