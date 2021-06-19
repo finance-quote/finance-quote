@@ -99,7 +99,7 @@ sub bse {
       ### bse response : $response->content
 
       die "Request error" unless $response->is_success;
-      die "Failed to find JSON data" unless $response->content =~ m|window[.]dataSourceResults=({.+})</script>|;
+      die "Failed to find JSON data" unless $response->content =~ m|window[.]dataSourceResults=([{].+[}])</script>|;
 
       my $json = decode_json $1;
 
