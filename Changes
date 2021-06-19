@@ -1,4 +1,7 @@
 {{$NEXT}}
+        * New modules: CurrencyRates
+        * Updated modules: ASX, TIAA-CREF, Fool, Currencies
+        * Corrected some POD issues (thanks to the Debian Perl Group)
 
 1.49      2019-06-30 12:20:58+02:00 Europe/Brussels
         * Alphavantage: Removed Time::HiRes dependency due to mswin32
