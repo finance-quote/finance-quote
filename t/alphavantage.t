@@ -40,9 +40,10 @@ my @symbols =  qw/
     F
     AXP
     ERCB.DE
+	MRT-UN.TRT
 /;
 
-plan tests => 11*(1+$#symbols)+10;
+plan tests => 11*(1+$#symbols)+11;
 
 my %quotes = $q->alphavantage( @symbols, "BOGUS" );
 ok(%quotes);
@@ -69,6 +70,7 @@ is( $quotes{ "ERCB.DE", "currency" }, 'EUR' );
 is( $quotes{ "SOLB.BR", "currency" }, 'EUR' );
 is( $quotes{ "SAP.DE", "currency" }, 'EUR' );
 is( $quotes{ "TD.TO", "currency" }, 'CAD' );
+is( $quotes{ "MRT-UN.TRT", "currency" }, 'CAD' );
 is( $quotes{ "LSE.L", "currency" }, 'GBP' );
 is( $quotes{ "DIVO11.SA", "currency" }, 'BRL' );
 

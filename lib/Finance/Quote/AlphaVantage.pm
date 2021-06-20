@@ -59,6 +59,7 @@ my %currencies_by_suffix = (
     '.BR'  => "EUR",    # Belgium		Brussels
     '.TO'  => "CAD",    # Canada		Toronto
     '.V'   => "CAD",    # 		Toronto Venture
+	'.TRT' => "CAD",    # Canada        Toronto
     '.SN'  => "CLP",    # Chile		Santiago
     '.SS'  => "CNY",    # China		Shanghai
     '.SZ'  => "CNY",    # 		Shenzhen
