@@ -16,13 +16,12 @@ my $q        = Finance::Quote->new('AlphaVantage', 'alphavantage' => {'API_KEY' 
 my $year     = ( localtime() )[5] + 1900;
 my $lastyear = $year - 1;
 
-my @symbols =  qw/
+my @symbols = qw/
     IBM
     CSCO
     SOLB.BR
     SAP.DE
     TD.TO
-    LSE.L
     VFIAX
     T
     DIVO11.SA
@@ -40,10 +39,11 @@ my @symbols =  qw/
     F
     AXP
     ERCB.DE
-	MRT-UN.TRT
+    MRT-UN.TRT
+    BP.L
 /;
 
-plan tests => 11*(1+$#symbols)+11;
+plan tests => 1 + 11*(1+$#symbols) + 10;
 
 my %quotes = $q->alphavantage( @symbols, "BOGUS" );
 ok(%quotes);
@@ -71,7 +71,7 @@ is( $quotes{ "SOLB.BR", "currency" }, 'EUR' );
 is( $quotes{ "SAP.DE", "currency" }, 'EUR' );
 is( $quotes{ "TD.TO", "currency" }, 'CAD' );
 is( $quotes{ "MRT-UN.TRT", "currency" }, 'CAD' );
-is( $quotes{ "LSE.L", "currency" }, 'GBP' );
+is( $quotes{ "BP.L", "currency" }, 'GBP' );
 is( $quotes{ "DIVO11.SA", "currency" }, 'BRL' );
 
 ok( !$quotes{ "BOGUS", "success" } );
