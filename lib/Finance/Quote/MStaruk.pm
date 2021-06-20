@@ -157,7 +157,7 @@ sub mstaruk_fund  {
 
 		my ($currency, $date, $price, $pchange);
 		if ($webdoc =~
-		m[<td class="line heading">NAV<span class="heading"><br />([0-9]{2}/[0-9]{2}/[0-9]{4})</span>.*([A-Z]{3}).([0-9\.]+).*>([0-9\.\-]+)] )
+		m[<td class="line heading">NAV<span class="heading"><br />([0-9]{2}/[0-9]{2}/[0-9]{4})</span>.*([A-Z]{3}).([0-9\.]+).*Day Change[^%]*>([0-9\.\-]+)] )
         {
 
             $date = $1;
