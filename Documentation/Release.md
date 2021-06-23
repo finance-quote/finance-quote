@@ -13,15 +13,17 @@
 
 ## RELEASE
 
+In order to upload files to PAUSE/CPAN and Sourceforge, the team member must have accounts with the proper privileges on those services. For PAUSE that is co-maint and for Sourceforge the user must be in the Admin group.
+
 * dzil release - upload to cpan, tweet and mail :)
 * upload module tarball to sourceforge @ https://sourceforge.net/projects/finance-quote/files/finance-quote/
     * Through Web interface
-    * Or sftp <SourceForge ID>@frs.sourceforge.net
+    * Or sftp \<SourceForge ID\>@frs.sourceforge.net
         * cd /home/frs/project/finance-quote/finance-quote
         * put Finance-Quote-N.NN.tar.gz
         * bye
 * Upload index.html for http://finance-quote.sourceforge.net/index.html
-    * sftp <SourceForge ID>,finance-quote@web.sourceforge.net
+    * sftp \<SourceForge ID\>,finance-quote@web.sourceforge.net
         * cd /home/project-web/finance-quote/htdocs
         * put index.html
         * bye
