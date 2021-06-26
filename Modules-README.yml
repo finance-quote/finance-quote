@@ -258,26 +258,33 @@
     - LU0051755006
 #
 - module: FTPortfolios.pm
-  state: working
+  state: failing
   added: TBD
   changed: ~
-  removed: ~
-  urls:
+  removed: 2021-01-03
+  urls: https://www.ftportfolios.com/
   apikey: false
-  notes: ~
-  testfile: TBD
+  notes: Commit 2f0f6bd removed module and testfile. Last commit with module is 75412c0.
+  testfile: ftportfolios.t
   testcases:
 #
 - module: FTfunds.pm
-  state: TBD
-  added: TBD
+  state: working
+  added: 2014-03-02
   changed: ~
   removed: ~
   urls:
+    - https://markets.ft.com/data/funds/tearsheet/summary?s=
+    - http://funds.ft.com/UnlistedTearsheet/Summary?s=
   apikey: false
-  notes: ~
-  testfile: TBD
+  notes:
+    - Added date is an estimate. According to Git log it first appeared in commit fdd204b.
+  testfile: ftfunds.t
   testcases:
+    - GB0031835118
+    - GB0030880255
+    - GB0003865176
+    - GB00B7W6PR65
 #
 - module: Fidelity.pm
   state: working
