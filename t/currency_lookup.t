@@ -48,6 +48,9 @@ cmp_ok( scalar keys %{$currencies}
       , "Empty hashref returned for non-matching lookup"
       );
 
+# Suppress warning message in last test
+local $SIG{__WARN__} = sub {};
+
 # Test that an error returns undef
 $currencies = Finance::Quote::currency_lookup( invalid_param => 1 );
 is( $currencies
