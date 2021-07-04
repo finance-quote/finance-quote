@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.51      2021-07-04 14:41:59-07:00 America/Los_Angeles
         * Fix bugs in t/fq-object-methods.t
         * Add code to hide warning in t/currency_lookup.t
 
