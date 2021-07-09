@@ -84,7 +84,7 @@ sub multipliers
   # For small rates, request the inverse 
   if ($rate < 0.001) {
     ### Rate is too small, requesting inverse : $rate
-    my ($a, $b) = $this->multipliers($ua, $from, $to);
+    my ($a, $b) = $this->multipliers($ua, $to, $from);
     return ($b, $a);
   }
 
