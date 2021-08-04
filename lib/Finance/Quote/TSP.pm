@@ -76,7 +76,7 @@ sub tsp {
   my $enddate   = strftime("%Y%m%d", localtime time);
 
   my $ua = $quoter->user_agent;
-  my $reply = $ua->request(GET "$TSP_URL?startdate=$startdate;enddate=$enddate;Lfunds=1;InvFunds=1");
+  my $reply = $ua->request(GET "$TSP_URL?startdate=$startdate&enddate=$enddate&Lfunds=1&InvFunds=1&download=0");
   return unless ($reply->is_success);
 
   my @line = split(/\n/, $reply->content);
