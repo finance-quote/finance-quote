@@ -712,6 +712,20 @@
     - W464#
     - W719#
 #
+- module: TesouroDireto.pm
+  state: working
+  added: 2022-02-06
+  changed: ~
+  removed: ~
+  urls:
+    - https://www.tesourodireto.com.br/titulos/precos-e-taxas.htm
+  apikey: false
+  notes: ~
+  testfile: tesouro_direto.t
+  testcases:
+    - Tesouro Prefixado 2026
+    - Tesouro IPCA+ 2045
+#
 - module: Troweprice.pm
   state: working
   added: TBD
