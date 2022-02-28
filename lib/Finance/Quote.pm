@@ -92,6 +92,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     TSP
     TMX
     Tiaacref
+    TesouroDireto
     Troweprice
     USFedBonds
     Union
@@ -1599,6 +1600,7 @@ Finance::Quote::Tradeville,
 Finance::Quote::TSP,
 Finance::Quote::TMX,
 Finance::Quote::Tiaacref,
+Finance::Quote::TesouroDireto,
 Finance::Quote::Troweprice,
 Finance::Quote::USFedBonds,
 Finance::Quote::Union,
