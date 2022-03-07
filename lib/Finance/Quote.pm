@@ -92,6 +92,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     TSP
     TMX
     Tiaacref
+    TesouroDireto
     Troweprice
     USFedBonds
     Union
@@ -391,6 +392,10 @@ sub new {
   # Honor FQ_LOAD_QUOTELET if @load_modules is empty
   if ($ENV{FQ_LOAD_QUOTELET} and !@load_modules) {
     @load_modules = split(' ',$ENV{FQ_LOAD_QUOTELET});
+    if ($load_modules[0] eq '-defaults') {
+      shift @load_modules;
+      push(@load_modules, @MODULES);
+    }
   }
   elsif (@load_modules == 0) {
     push(@load_modules, @MODULES);
@@ -1599,6 +1604,7 @@ Finance::Quote::Tradeville,
 Finance::Quote::TSP,
 Finance::Quote::TMX,
 Finance::Quote::Tiaacref,
+Finance::Quote::TesouroDireto,
 Finance::Quote::Troweprice,
 Finance::Quote::USFedBonds,
 Finance::Quote::Union,
