@@ -50,8 +50,8 @@ sub bloomberg {
 
     eval {
       my $tree  = HTML::TreeBuilder->new_from_content(decode_utf8 $reply->content);
-      my $price = $tree->look_down(_tag=>'span', 'class'=>'priceText__1853e8a5')->as_text();
-      my $curr  = $tree->look_down(_tag=>'span', 'class'=>'currency__defc7184')->as_text();
+      my $price = $tree->look_down(_tag=>'span', 'class'=>'priceText__06f600fa3e')->as_text();
+      my $curr  = $tree->look_down(_tag=>'span', 'class'=>'currency__2081d5af46')->as_text();
       my $date  = $tree->look_down(_tag=>'div', sub {defined($_[0]->attr('class')) and $_[0]->attr('class') =~ /time__/})->as_text();
 
       $price =~ s/,//g;
