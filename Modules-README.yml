@@ -144,20 +144,25 @@
   testcases:
 #
 - module: Bloomberg.pm
-  state: removed
-  added: TBD
-  changed: ~
-  removed: ~
-  urls:
+  state: working
+  added: 
+  changed: 2022-04-17
+  removed: 
+  urls: https://www.bloomberg.com/quote/
   apikey: false
-  notes: Not present in the distro and thus marked as removed
-  testfile: TBD
-  testcases:
+  notes: 
+  testfile: bloomberg.t
+  testcases: 
+    - MSFT:US
+    - AMZN:US
+    - AAPL:US
+    - GOOGL:US
+    - FB:US
 #
 - module: Bourso.pm
   state: failing
   added:
-  changed: 2020-03~31
+  changed: 2020-03-31
   removed:
   urls: https://www.boursorama.com/cours/$stock
   apikey: false
