@@ -120,7 +120,7 @@ Finance::Quote->new().
 
 =head1 LABELS RETURNED
 
-The following labels will be returned: success currency name price date isodate symbol.
+The following labels will be returned: success currency name price date isodate symbol last source exchange.
 
 =head1 Terms & Conditions
 
