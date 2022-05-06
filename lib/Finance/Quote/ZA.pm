@@ -59,27 +59,37 @@ sub sharenet {
         my $result = $widget->scrape($reply);
 
         die "Failed to find $symbol" unless exists $result->{name};
-     
+
+        # Sharenet reports in minor denomination. Change this to major denomination
+        my $price = $result->{last};
+        $price =~ s/,//;
+        $price = $price / 100;
+
         ### RESULT : $result
-        
+
         $info{$symbol, 'success'}  = 1;
         $info{$symbol, 'currency'} = 'ZAR';
         $info{$symbol, 'name'}     = $result->{name};
-        $info{$symbol, 'price'}    = $result->{last};
-        $info{$symbol, 'price'}    =~ s/,//;
+        $info{$symbol, 'price'}    = $price;
+        $info{$symbol, 'last'}     = $price;
+
+        # Some applications would like to see the symbol in the returned data
+        $info{$symbol, 'symbol'}   = $symbol;
+        $info{$symbol, 'source'}   = 'sharenet.co.za';
+        $info{$symbol, 'exchange'} = 'JSE';
 
         if ($result->{day} =~ /(\d+)\s+(\w{3})/) {
           $quoter->store_date(\%info, $symbol, {day => $1, month => $2});
         }
       };
-      
+
       if ($@) {
         my $error = "Search failed: $@";
         $info{$symbol, 'success'}  = 0;
         $info{$symbol, 'errormsg'} = trim($error);
       }
     }
-    
+
     ### info : %info
 
     return wantarray() ? %info : \%info;
@@ -110,7 +120,7 @@ Finance::Quote->new().
 
 =head1 LABELS RETURNED
 
-The following labels will be returned: success currency name price date isodate.
+The following labels will be returned: success currency name price date isodate symbol.
 
 =head1 Terms & Conditions
 
