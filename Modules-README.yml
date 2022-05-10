@@ -848,13 +848,14 @@
   testcases:
 #
 - module: ZA.pm
-  state: TBD
-  added: TBD
-  changed: ~
+  state: working
+  added: 
+  changed: 2022-05-10
   removed: ~
-  urls:
+  urls: https://www.sharenet.co.za/jse/$symbol
   apikey: false
-  notes: ~
+  notes: 
+    Module to acquire data from https://www.sharenet.co.za
   testfile: TBD
   testcases:
 #
