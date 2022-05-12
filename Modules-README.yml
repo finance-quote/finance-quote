@@ -514,6 +514,24 @@
   testfile: TBD
   testcases:
 #
+- module: MorningstarCH.pm
+  state: working
+  added: 2019-03-02
+  changed: 2011-05-10
+  removed:
+  urls:
+    - https://www.morningstar.ch/ch/funds/SecuritySearchResults.aspx?search=
+    - https://www.morningstar.ch/ch/funds/snapshot/snapshot.aspx?id=
+  apikey: false
+  notes: |
+    Module to acquire data from https://www.morningstar.ch/.
+  testfile: morningstarCH.t
+  testcases:
+    - CH0012056260
+    - CH0014933193
+    - CH0002788567
+    - BOGUS
+#
 - module: MorningstarJP.pm
   state: TBD
   added: TBD
