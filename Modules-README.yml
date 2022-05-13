@@ -523,8 +523,7 @@
     - https://www.morningstar.ch/ch/funds/SecuritySearchResults.aspx?search=
     - https://www.morningstar.ch/ch/funds/snapshot/snapshot.aspx?id=
   apikey: false
-  notes: |
-    Module to acquire data from https://www.morningstar.ch/.
+  notes: Module to acquire data from https://www.morningstar.ch/.
   testfile: morningstarCH.t
   testcases:
     - CH0012056260
