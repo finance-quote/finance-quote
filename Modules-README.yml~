@@ -517,7 +517,7 @@
 - module: MorningstarCH.pm
   state: working
   added: 2019-03-02
-  changed: 2022-05-10
+  changed: 2011-05-10
   removed:
   urls:
     - https://www.morningstar.ch/ch/funds/SecuritySearchResults.aspx?search=
