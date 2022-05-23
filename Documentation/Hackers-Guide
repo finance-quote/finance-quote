@@ -15,7 +15,7 @@ $Version$
 		3.4. Currency
                 3.5. Development & Debugging Code
                 3.6. Dates
-		3.7. Thngs to avoid
+		3.7. Things to avoid
 		3.8. Using your new module
         4. How to write a Finance::Quote::CurrencyRates module
                 4.1. The package name
