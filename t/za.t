@@ -41,7 +41,7 @@ my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_refer
                );
 my $q        = Finance::Quote->new();
 
-plan tests => 1 + %check*%valid + @invalid;
+plan tests => 1 + (scalar keys %check) * (scalar keys %valid) + scalar @invalid;
 
 my %quotes = $q->fetch($method, @symbols);
 ok(%quotes);
