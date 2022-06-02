@@ -658,10 +658,10 @@
 - module: TSP.pm
   state: working
   added: 2005-03-02
-  changed: 2019-06-09
+  changed: 2022-06-01
   removed:
   urls:
-    - https://www.tsp.gov/InvestmentFunds/FundPerformance/index.html
+    - https://secure.tsp.gov/data/getSharePricesRaw_startdate_20220424_enddate_20220524_Lfunds_1_InvFunds_1_download_0.html
   apikey: false
   notes:
   testfile: tsp.t
