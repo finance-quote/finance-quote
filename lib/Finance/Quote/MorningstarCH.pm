@@ -50,6 +50,8 @@ $MSTARCH_NEXT_URL   =	"https://www.morningstar.ch/ch/funds/snapshot/snapshot.asp
 
 # FIXME -
 
+# VERSION
+
 sub methods { return (morningstarch => \&morningstarch_fund); }
 
 {
