@@ -1,4 +1,14 @@
 {{$NEXT}}
+        * Quote.pm - Fixed logic for FQ_LOAD_QUOTELET starting with "-defaults" reported in issue #197. PR #199.
+        * AlphaVantage currency module: Don't recurse infinitely when exchange rate is less than .001 (PR 193)
+        * Bourso.pm - Fixed data bug reported in issue #174 with PR #194.
+        * TSP.pm - Minor fix for URL used to retrieve data. PR #195. Note: URL was changed after the PR was merged. Module remains in a non-working status.
+        * TesouroDireto.pm - New module for Brazilian's National Treasury public bounds. PR #198.
+        * Bloomberg.pm - Update Bloomberg class names #205. Correct html parsing errors.
+        * MorningstarCH.pm - Re-enabled and fixed in #207.
+        * ZA.pm - Change to return price from sharenet in major denomination. PR #208.
+        * Changes to SourceForge project website HTML files.
+        * Add [Prereqs] to dist.ini. #215
 
 1.51      2021-07-04 14:41:59-07:00 America/Los_Angeles
         * Fix bugs in t/fq-object-methods.t
