@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.52      2022-07-03 15:15:38-07:00 America/Los_Angeles
         * Quote.pm - Fixed logic for FQ_LOAD_QUOTELET starting with "-defaults"
           reported in issue #197. PR #199.
         * AlphaVantage currency module: Don't recurse infinitely when exchange
