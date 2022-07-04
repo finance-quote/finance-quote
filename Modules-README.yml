@@ -833,7 +833,7 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2019-06-16
+  changed: 2022-07-04
   removed:
   urls:
     - https://query1.finance.yahoo.com/v7/finance/quote?symbols=

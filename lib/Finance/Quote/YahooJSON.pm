@@ -62,6 +62,9 @@ sub yahoo_json {
 
     foreach my $stocks (@stocks) {
 
+        # Issue 202 - Fix symbols with Ampersand
+        $stocks =~ s/&/%26/g;
+
         $url   = $YIND_URL_HEAD . $stocks . $YIND_URL_TAIL;
         $reply = $ua->request( GET $url);
 
