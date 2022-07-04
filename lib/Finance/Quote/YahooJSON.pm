@@ -57,15 +57,17 @@ sub yahoo_json {
     my $quoter = shift;
     my @stocks = @_;
     my ( %info, $reply, $url, $te, $ts, $row, @cells, $ce );
-    my ( $my_date );
+    my ( $my_date, $amp_stocks );
     my $ua = $quoter->user_agent();
 
     foreach my $stocks (@stocks) {
 
         # Issue 202 - Fix symbols with Ampersand
-        $stocks =~ s/&/%26/g;
+        # Can also be written as
+				# $amp_stocks = $stocks =~ s/&/%26/gr;
+        ($amp_stocks = $stocks) =~ s/&/%26/g;
 
-        $url   = $YIND_URL_HEAD . $stocks . $YIND_URL_TAIL;
+        $url   = $YIND_URL_HEAD . $amp_stocks . $YIND_URL_TAIL;
         $reply = $ua->request( GET $url);
 
         my $code    = $reply->code;
