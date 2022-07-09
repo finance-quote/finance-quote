@@ -1,4 +1,14 @@
 {{$NEXT}}
+        * Set minimum version for LWP::UserAgent in dist.ini to
+          honor redirects.
+        * CurrencyRates/AlphaVantage.pm - Added logic to account
+          for empty JSON returned from currency exchange fetch.
+        * Bourso.pm - Added Europe and France back as failover
+          methods. These were removed some time ago in commit e26484b.
+        * Tradeville.pm - Changed hostname in URL to tradeville.ro.
+          Added logic to better account for the symbol not being
+          found.
+        * YahooJSON.pm - #202 - Account for symbols with '&'.
 
 1.52      2022-07-03 15:15:38-07:00 America/Los_Angeles
         * Quote.pm - Fixed logic for FQ_LOAD_QUOTELET starting with "-defaults"

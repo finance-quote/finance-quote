@@ -56,6 +56,7 @@ sub multipliers
   my $url = 'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE';
   my $try_cnt = 0;
   my $json_data;
+  my $rate;
   do {
     $try_cnt += 1;
     my $reply = $ua->get($url
@@ -77,7 +78,15 @@ sub multipliers
     sleep (20) if (($try_cnt < 5) && ($json_data->{'Note'}));
   } while (($try_cnt < 5) && ($json_data->{'Note'}));
 
-  my $rate = $json_data->{'Realtime Currency Exchange Rate'}->{'5. Exchange Rate'};
+  if( !$json_data->{'Realtime Currency Exchange Rate'} ) {
+    ### No data in JSON
+	  $rate = 0.0;
+  } else {
+  $rate =
+    $json_data->{'Realtime Currency Exchange Rate'}->{'5. Exchange Rate'};
+  }
+
+  ### Rate from JSON: $rate
 
   return unless $rate + 0;
 

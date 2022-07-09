@@ -160,20 +160,19 @@
     - FB:US
 #
 - module: Bourso.pm
-  state: failing
+  state: working
   added:
-  changed: 2020-03-31
+  changed: 2022-07-08
   removed:
   urls: https://www.boursorama.com/cours/$stock
   apikey: false
-  notes: ~
+  notes: The test file checks for specific values returned and may falsly report errors when the information correctly returned from the URL changes.
   testfile: bourso.t
   testcases:
     - MP-802941
     - 1rPAF
     - MSFT
     - FF11-SOLB
-    - 1rPSOLB
     - 1rPCNP
     - 2rPDE000CX0QLH6
     - 1rPFR0010371401
@@ -319,13 +318,13 @@
   testcases:
 #
 - module: FinanceCanada.pm
-  state: TBD
-  added: TBD
+  state: Not Working
+  added: Unknown
   changed: ~
-  removed: ~
+  removed: 2020-10-10
   urls:
   apikey: false
-  notes: ~
+  notes: Removed in commit b22963e664a6455ef83620cf05f875bf4a65ea3a.
   testfile: TBD
   testcases:
 #
