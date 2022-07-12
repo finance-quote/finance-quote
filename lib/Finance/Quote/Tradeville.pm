@@ -27,7 +27,7 @@ use Web::Scraper;
 
 # VERSION
 
-my $TRADEVILLE_URL = 'https://tradeville.eu/actiuni/actiuni-';
+my $TRADEVILLE_URL = 'https://tradeville.ro/actiuni/actiuni-';
 
 sub methods { 
   return (romania    => \&tradeville,
@@ -64,22 +64,29 @@ sub tradeville {
       my $result = $data->scrape($reply);
       
       ### [<now>] result: $result
-      my %table = @{$result->{data}};
+      if (!$result->{data}) {
+        $info{$stock, 'success'}  = 0;
+        $info{$stock, 'errormsg'} = "Error retreiving $stock";
+      } else {
 
-      $info{$stock, 'success'}   = 1;
-      $info{$stock, 'method'}    = 'tradeville';
-      $info{$stock, 'symbol'}    = $stock;
-      $info{$stock, 'last'}      = $table{'Ultimulpret' . uc($stock)};
-      $info{$stock, 'p_change'}  = $table{'Variatie:'};
-      $info{$stock, 'open'}      = $table{'Deschidere:'};
-      $info{$stock, 'day_range'} = $table{'Maxim/Minim'};
-      $info{$stock, 'volume'}    = $table{'Volum:'};
-      $info{$stock, 'div_yield'} = $table{'Divid.yield:'};
-      $info{$stock, 'currency'}  = $table{'Valuta:'};
-      $info{$stock, 'cap'}       = $table{'MktCap:'};
-      $info{$stock, 'exchange'}  = $table{'Piata:'};
+        my %table = @{$result->{data}};
+
+        $info{$stock, 'success'}   = 1;
+        $info{$stock, 'method'}    = 'tradeville';
+        $info{$stock, 'symbol'}    = $stock;
+        $info{$stock, 'last'}      = $table{'Ultimulpret' . uc($stock)};
+        $info{$stock, 'p_change'}  = $table{'Variatie:'};
+        $info{$stock, 'open'}      = $table{'Deschidere:'};
+        $info{$stock, 'day_range'} = $table{'Maxim/Minim'};
+        $info{$stock, 'volume'}    = $table{'Volum:'};
+        $info{$stock, 'div_yield'} = $table{'Divid.yield:'};
+        $info{$stock, 'currency'}  = $table{'Valuta:'};
+        $info{$stock, 'cap'}       = $table{'MktCap:'};
+        $info{$stock, 'exchange'}  = $table{'Piata:'};
+		  }
 
       $quoter->store_date(\%info, $stock, {eurodate => $result->{date}});
+
     };
     if ($@) {
       $info{$stock, 'success'}  = 0;
