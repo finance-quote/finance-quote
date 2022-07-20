@@ -94,6 +94,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     TMX
     Tiaacref
     TesouroDireto
+    TreasuryDirect
     Troweprice
     USFedBonds
     Union

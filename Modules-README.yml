@@ -747,6 +747,20 @@
     - Tesouro Prefixado 2026
     - Tesouro IPCA+ 2045
 #
+- module: TreasuryDirect.pm
+  state: working
+  added: 2022-07-20
+  changed:
+  removed:
+  urls:
+    - https://www.treasurydirect.gov/GA-FI/FedInvest/todaySecurityPriceDate.htm
+  apikey: false
+  notes: Retrieve Treasury bond quotes by CUSPID from treasurydirect.gov
+  testfile: treasurydirect.t
+  testcases:
+    - 912810QT8
+    - 912810QY7
+#
 - module: Troweprice.pm
   state: working
   added: TBD
