@@ -19,7 +19,7 @@ require 5.004;
 # April, 2018
 #
 
-$VERSION = '1.51';
+# VERSION
 
 use strict;
 use warnings;
