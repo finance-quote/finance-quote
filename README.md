@@ -543,7 +543,6 @@ Finance::Quote::TMX,
 Finance::Quote::Tiaacref,
 Finance::Quote::TesouroDireto,
 Finance::Quote::Troweprice,
-Finance::Quote::USFedBonds,
 Finance::Quote::Union,
 Finance::Quote::YahooJSON,
 Finance::Quote::ZA

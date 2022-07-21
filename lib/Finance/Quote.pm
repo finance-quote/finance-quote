@@ -95,7 +95,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Tiaacref
     TesouroDireto
     Troweprice
-    USFedBonds
     Union
     YahooJSON
     ZA
@@ -1608,7 +1607,6 @@ Finance::Quote::TMX,
 Finance::Quote::Tiaacref,
 Finance::Quote::TesouroDireto,
 Finance::Quote::Troweprice,
-Finance::Quote::USFedBonds,
 Finance::Quote::Union,
 Finance::Quote::YahooJSON,
 Finance::Quote::ZA

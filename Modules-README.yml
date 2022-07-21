@@ -775,15 +775,19 @@
   testcases:
 #
 - module: USFedBonds.pm
-  state: TBD
-  added: TBD
+  state: failing
+  added: ~
   changed: ~
-  removed: ~
-  urls:
+  removed: 2022-07-21
+  urls: https://www.treasurydirect.gov/indiv/tools/tools_savingsbondvalues_historical.htm
   apikey: false
-  notes: ~
-  testfile: TBD
+  notes: URL returns an HTTP 404 status code. Could not find a viable replacement URL.
+  testfile: usfedbonds.t
   testcases:
+    - E197001.200606
+    - E194112.200610
+    - E194105.200610
+    - S196712.202006
 #
 - module: Union.pm
   state: TBD
