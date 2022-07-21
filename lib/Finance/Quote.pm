@@ -94,6 +94,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     TMX
     Tiaacref
     TesouroDireto
+    TreasuryDirect
     Troweprice
     Union
     YahooJSON
@@ -1578,7 +1579,7 @@ Finance::Quote::Bourso,
 Finance::Quote::CSE,
 Finance::Quote::Cdnfundlibrary,
 Finance::Quote::Comdirect,
-Financ::Quote::Currencies,
+Finance::Quote::Currencies,
 Finance::Quote::DWS,
 Finance::Quote::Deka,
 Finance::Quote::FTfunds,
@@ -1606,6 +1607,7 @@ Finance::Quote::TSP,
 Finance::Quote::TMX,
 Finance::Quote::Tiaacref,
 Finance::Quote::TesouroDireto,
+Finance::Quote::TreasuryDirect,
 Finance::Quote::Troweprice,
 Finance::Quote::Union,
 Finance::Quote::YahooJSON,
