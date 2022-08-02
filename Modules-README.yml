@@ -657,10 +657,10 @@
 - module: TSP.pm
   state: working
   added: 2005-03-02
-  changed: 2019-06-09
+  changed: 2022-07-29
   removed:
   urls:
-    - https://www.tsp.gov/InvestmentFunds/FundPerformance/index.html
+    - https://www.tsp.gov/fund-performance/
   apikey: false
   notes:
   testfile: tsp.t
