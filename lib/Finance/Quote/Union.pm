@@ -38,7 +38,8 @@ use strict;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 
-# VERSION
+our $VERSION = '1.52'; # VERSION
+our $UNION_URL = "https://legacy-apps.union-investment.de/handle?generate=true&action=doDownloadSearch&start_time=27.07.2022&end_time=01.08.2022&csvformat=us&choose_indi_fondsnames=";
 
 sub methods { return (unionfunds => \&unionfunds); }
 sub labels { return (unionfunds => [qw/exchange name date isodate price method/]); }
@@ -65,10 +66,10 @@ sub unionfunds
   foreach my $fund (@funds)
   {
     $fundhash{$fund} = 0;
-  }
-
+		my $url = $UNION_URL . $fund;
+		
   # get csv data
-  my $response = $ua->request(GET &unionurl);
+  my $response = $ua->request(GET $url);
   if ($response->is_success)
   {
     # Retrive date.  This comes from the last line of the CSV file.
@@ -90,17 +91,18 @@ sub unionfunds
 
 
         $info{$q[1], "exchange"} = "UNION";
-        $info{$q[1], "name"}     = $q[1];
+        $info{$q[1], "name"}     = $q[0];
         $info{$q[1], "symbol"}   = $q[1];
-        $info{$q[1], "price"}    = $q[3];
-        $info{$q[1], "last"}     = $q[3];
-	$quoter->store_date(\%info, $q[1], {eurodate => $tempdate});
+        $info{$q[1], "price"}    = $q[4];
+        $info{$q[1], "last"}     = $q[4];
+	$quoter->store_date(\%info, $q[1], {eurodate => $q[6]});
         $info{$q[1], "method"}   = "unionfunds";
-        $info{$q[1], "currency"} = "EUR";
+        $info{$q[1], "currency"} = $q[2];
         $info{$q[1], "success"}  = 1;
       }
     }
-
+  }
+  }
     # check to make sure a value was returned for every fund requested
     foreach my $fund (keys %fundhash)
     {
@@ -109,26 +111,28 @@ sub unionfunds
         $info{$fund, "success"}  = 0;
         $info{$fund, "errormsg"} = "No data returned";
       }
-    }
-  }
-  else
-  {
-    foreach my $fund (@funds)
-    {
-      $info{$fund, "success"}  = 0;
-      $info{$fund, "errormsg"} = "HTTP error";
-    }
-  }
+     
+#  else
+#  {
+#    foreach my $fund (@funds)
+#    {
+#      $info{$fund, "success"}  = ß;
+#      $info{$fund, "errormsg"} = "HTTP error";
+#    }
+#  }
 
   return wantarray() ? %info : \%info;
 }
-
+}
 # UNION provides a csv file named preise.csv containing the prices of all
 # their funds for the most recent business day.
 
 sub unionurl
 {
-  return "https://www.union-investment.de/preise.csv";
+  return "file:///D:/Download/NEU/historische-preise.csv";
+#    return "http://nrwbahnarchiv.bplaced.net/historische-preise.csv";
+#   return "http://127.0.0.1/historische-preise.csv";
+#   return "https://www.union-investment.de/preise.csv";
 }
 
 1;
