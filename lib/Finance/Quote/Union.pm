@@ -37,9 +37,12 @@ require 5.005;
 use strict;
 use LWP::UserAgent;
 use HTTP::Request::Common;
+use POSIX qw(strftime);
 
 our $VERSION = '1.52'; # VERSION
-our $UNION_URL = "https://legacy-apps.union-investment.de/handle?generate=true&action=doDownloadSearch&start_time=27.07.2022&end_time=01.08.2022&csvformat=us&choose_indi_fondsnames=";
+our $UNION_URL1 = "https://legacy-apps.union-investment.de/handle?generate=true&action=doDownloadSearch&start_time=";
+# 27.07.2022&end_time=01.08.2022
+our $UNION_URL2 ="&csvformat=us&choose_indi_fondsnames=";
 
 sub methods { return (unionfunds => \&unionfunds); }
 sub labels { return (unionfunds => [qw/exchange name date isodate price method/]); }
@@ -66,7 +69,12 @@ sub unionfunds
   foreach my $fund (@funds)
   {
     $fundhash{$fund} = 0;
-		my $url = $UNION_URL . $fund;
+	    my $endtime = POSIX::strftime ("%d.%m.%Y" , localtime());
+		my $epoc = time();
+        $epoc = $epoc - 7 * 24 * 60 * 60;   # one week before of current date.
+		my $starttime = POSIX::strftime ("%d.%m.%Y" , localtime($epoc));
+		my $url = $UNION_URL1 . $starttime."&end_time=" . $endtime . $UNION_URL2 . $fund;
+
 		
   # get csv data
   my $response = $ua->request(GET $url);
