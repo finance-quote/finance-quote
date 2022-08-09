@@ -7,6 +7,7 @@
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2000, Volker Stuerzl <volker.stuerzl@gmx.de>
 #    Copyright (C) 2002, Rainer Dorsch <rainer.dorsch@informatik.uni-stuttgart.de>
+#    Copyright (C) 2022, Andre Joost <andrejoost@gmx.de>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,7 +42,7 @@ use POSIX qw(strftime);
 
 our $VERSION = '1.52'; # VERSION
 our $UNION_URL1 = "https://legacy-apps.union-investment.de/handle?generate=true&action=doDownloadSearch&start_time=";
-# 27.07.2022&end_time=01.08.2022
+# Date format 27.07.2022&end_time=01.08.2022
 our $UNION_URL2 ="&csvformat=us&choose_indi_fondsnames=";
 
 sub methods { return (unionfunds => \&unionfunds); }
@@ -80,17 +81,10 @@ sub unionfunds
   my $response = $ua->request(GET $url);
   if ($response->is_success)
   {
-    # Retrive date.  This comes from the last line of the CSV file.
-    foreach (split('\015?\012',$response->content))
-    {
-      @q = split(/,/) or next;
-      $tempdate=$q[0];
-    }
-
     # process csv data
     foreach (split('\015?\012',$response->content))
     {
-#      @q = $quoter->parse_csv($_) or next;
+
       @q = split(/,/) or next;
       next unless (defined $q[1]);
       if (exists $fundhash{$q[1]})
@@ -119,35 +113,21 @@ sub unionfunds
         $info{$fund, "success"}  = 0;
         $info{$fund, "errormsg"} = "No data returned";
       }
-     
-#  else
-#  {
-#    foreach my $fund (@funds)
-#    {
-#      $info{$fund, "success"}  = ß;
-#      $info{$fund, "errormsg"} = "HTTP error";
-#    }
-#  }
+	}
 
   return wantarray() ? %info : \%info;
-}
-}
-# UNION provides a csv file named preise.csv containing the prices of all
-# their funds for the most recent business day.
 
-sub unionurl
-{
-  return "file:///D:/Download/NEU/historische-preise.csv";
-#    return "http://nrwbahnarchiv.bplaced.net/historische-preise.csv";
-#   return "http://127.0.0.1/historische-preise.csv";
-#   return "https://www.union-investment.de/preise.csv";
 }
+# UNION provides a csv file named historische-preise.csv on
+# <https://www.union-investment.de/fonds_depot/fonds-finden/preise-berechnen#HistorischeTagespreise>
+# containing the prices of a selction of all their funds for a selected period.
 
-1;
+
+__END__
 
 =head1 NAME
 
-Finance::Quote::Union	- Obtain quotes from UNION (Zurich Financial Services Group).
+Finance::Quote::Union	- Obtain quotes from UNION (Union Investment).
 
 =head1 SYNOPSIS
 
@@ -155,7 +135,7 @@ Finance::Quote::Union	- Obtain quotes from UNION (Zurich Financial Services Grou
 
     $q = Finance::Quote->new;
 
-    %stockinfo = $q->fetch("unionfunds","975788");
+    %stockinfo = $q->fetch("unionfunds","DE0008491002");
 
 =head1 DESCRIPTION
 
@@ -171,6 +151,6 @@ exchange, name, date, price, last.
 
 =head1 SEE ALSO
 
-UNION (Union Invest), http://www.union-invest.de/
+UNION (Union Investment), http://www.union-investment.de/
 
 =cut
