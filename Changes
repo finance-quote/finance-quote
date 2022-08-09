@@ -10,6 +10,7 @@
           found.
         * YahooJSON.pm - #202 - Account for symbols with '&'.
         * Minor change to isoTime function in Quote.pm.
+        * Updated TSP.pm - PR #227 - update URL and handling of dates.
 
 1.52      2022-07-03 15:15:38-07:00 America/Los_Angeles
         * Quote.pm - Fixed logic for FQ_LOAD_QUOTELET starting with "-defaults"

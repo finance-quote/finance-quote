@@ -31,9 +31,12 @@ require 5.005;
 
 use strict;
 
+use constant DEBUG => $ENV{DEBUG}; 
+use if DEBUG, 'Smart::Comments'; 
+
 package Finance::Quote::TSP;
 
-use vars qw( $TSP_URL $TSP_MAIN_URL );
+use vars qw( $TSP_URL $TSP_MAIN_URL @HEADERS );
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
@@ -42,9 +45,9 @@ use POSIX;
 # VERSION
 
 # URLs of where to obtain information
-
-$TSP_URL      = 'https://secure.tsp.gov/components/CORS/getSharePricesRaw.html';
+$TSP_URL      = 'https://www.tsp.gov/data/fund-price-history.csv';
 $TSP_MAIN_URL = 'http://www.tsp.gov';
+@HEADERS      = ('user-agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36');
 
 sub methods { return (tsp => \&tsp) }
 
@@ -72,11 +75,15 @@ sub tsp {
   my %info;
 
   # Ask for the last 7 days
-  my $startdate = strftime("%Y%m%d", localtime (time - 7*24*3600));
-  my $enddate   = strftime("%Y%m%d", localtime time);
+  my $startdate = strftime("%Y-%m-%d", localtime (time - 7*24*3600));
+  my $enddate   = strftime("%Y-%m-%d", localtime time);
 
-  my $ua = $quoter->user_agent;
-  my $reply = $ua->request(GET "$TSP_URL?startdate=$startdate&enddate=$enddate&Lfunds=1&InvFunds=1&download=0");
+  my $ua    = $quoter->user_agent;
+  my $url   = "$TSP_URL?startdate=$startdate&enddate=$enddate&Lfunds=1&InvFunds=1&download=1";
+  my $reply = $ua->get($url, @HEADERS);
+  ### [<now>] url  : $url
+  ### [<now>] reply: $reply
+  
   return unless ($reply->is_success);
 
   my @line = split(/\n/, $reply->content);
@@ -85,14 +92,18 @@ sub tsp {
 
   my @header = split(/,/, $line[0]);
   my %column = map { format_name($header[$_]) => $_ } 0 .. $#header;
-  my @latest = split(/,/, $line[-1]);
+  my @latest = split(/,/, $line[1]);
+
+  ### [<now>]  header: @header 
+  ### [<now>]  column: %column 
+  ### [<now>]  latest: @latest 
 
   foreach (@symbols) {
     my $symbol = lc $_;
 
     if(exists $column{$symbol}) {
       $info{$_, 'success'} = 1;
-      $quoter->store_date(\%info, $_, {usdate => $latest[$column{'date'}]});
+      $quoter->store_date(\%info, $_, {isodate => $latest[$column{'date'}]});
       ($info{$_, 'last'} = $latest[$column{$symbol}]) =~ s/[^0-9]*([0-9.,]+).*/$1/s;
       $info{$_, 'currency'} = 'USD';
       $info{$_, 'method'} = 'tsp';
