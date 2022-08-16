@@ -118,6 +118,9 @@ sub unionfunds
   return wantarray() ? %info : \%info;
 
 }
+
+1;
+
 # UNION provides a csv file named historische-preise.csv on
 # <https://www.union-investment.de/fonds_depot/fonds-finden/preise-berechnen#HistorischeTagespreise>
 # containing the prices of a selction of all their funds for a selected period.
@@ -144,6 +147,9 @@ This module obtains information about UNION managed funds.
 Information returned by this module is governed by UNION's terms
 and conditions.
 
+Note that previous versions of the module required the WKN,
+now the ISIN is needed as symbol value.
+
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::UNION:
@@ -151,6 +157,6 @@ exchange, name, date, price, last.
 
 =head1 SEE ALSO
 
-UNION (Union Investment), http://www.union-investment.de/
+UNION (Union Investment), https://www.union-investment.de/
 
 =cut
