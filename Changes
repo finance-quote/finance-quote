@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Union.pm - #231 - reworked for a different CSV file.
         * Set minimum version for LWP::UserAgent in dist.ini to
           honor redirects.
         * CurrencyRates/AlphaVantage.pm - Added logic to account
