@@ -1,5 +1,8 @@
 {{$NEXT}}
 	* Union.pm - #231 - reworked for a different CSV file.
+        * CurrencyRates/AlphaVantage.pm - API CURRENCY_EXCHANGE_RATE
+          no longer accepts free API keys. Changed to use FX_DAILY API. 
+          Issue #229 PR #230
         * Set minimum version for LWP::UserAgent in dist.ini to
           honor redirects.
         * CurrencyRates/AlphaVantage.pm - Added logic to account
