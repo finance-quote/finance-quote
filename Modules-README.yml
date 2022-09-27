@@ -237,6 +237,19 @@
   testfile: TBD
   testcases:
 #
+- module: CurrencyRates/AlphaVantage.pm
+  state: working
+  Added: TBD
+  changed: 2022-09-27
+  removed: ~
+  urls: https://www.alphavantage.co/query?function=FX_DAILY
+  apikey: true
+  notes: Recently modified for Issue #229 in PR #230
+  testfile: currency.t
+  testcases:
+    - GBP IQD
+    - AUD AUD
+#
 - module: DWS.pm
   state: failing
   added: TBD
