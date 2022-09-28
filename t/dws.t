@@ -19,7 +19,7 @@ if (not $ENV{ONLINE_TEST}) {
 
 my %valid    = ('848646' => 'Albatros Fonds',
                 'DE0008486465' => 'Albatros Fonds',
-                'LU0358627221' => 'Zurich Vorsorge Premium II');
+                'LU0358627221' => 'Zurich Premium Multi Asset Offensiv');
 my @invalid  = ('BOGUS');
 my @symbols  = (keys %valid, @invalid);
 
