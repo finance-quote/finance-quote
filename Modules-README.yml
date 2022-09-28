@@ -817,15 +817,16 @@
     - S196712.202006
 #
 - module: Union.pm
-  state: TBD
+  state: working
   added: TBD
-  changed: ~
+  changed: 2022-07-18
   removed: ~
-  urls:
+  urls: https://legacy-apps.union-investment.de/handle?generate=true&action=doDownloadSearch&start_time=...
   apikey: false
-  notes: ~
-  testfile: TBD
+  notes: symbol has changed from WKN to ISIN
+  testfile: union.t
   testcases:
+    - DE0008491002
 #
 - module: UserAgent.pm
   state: TBD
