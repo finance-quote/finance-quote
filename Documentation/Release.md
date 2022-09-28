@@ -5,7 +5,7 @@
 * finalize dev branch merges
 * check for debug code in modules
 * Modify Changelog
-* Add missing authors to dist.ini (use git shortlog -s -n -e and select everyone with at least 2 commits)
+* Add missing authors to dist.ini (use `git shortlog -s -n -e` and select everyone with at least 2 commits or `git shortlog -s -n -e | awk '$1 >= 2 {printf "author  = %s\n", substr($0,index($0,$2))}' | sort`)
 * Update htdocs/index.html (Sourceforge project home page)
 * push all commits up to github
 * dzil build - build a new release
