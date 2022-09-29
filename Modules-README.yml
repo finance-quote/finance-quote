@@ -251,15 +251,18 @@
     - AUD AUD
 #
 - module: DWS.pm
-  state: failing
+  state: working
   added: TBD
-  changed: ~
+  changed: 2022-09-28
   removed: ~
-  urls:
+  urls: https://www.deami.de/dps/ff/prices.aspx
   apikey: false
-  notes: ~
-  testfile: TBD
+  notes: Test file checks that name returned in JSON matches hard coded value in dws.t
+  testfile: dws.t
   testcases:
+    - 848646
+    - DE0008486465
+    - LU0358627221
 #
 - module: Deka.pm
   state: working
@@ -472,15 +475,21 @@
     - IBKR
 #
 - module: IndiaMutual.pm
-  state: TBD
+  state: working
   added: TBD
   changed: ~
   removed: ~
-  urls:
+  urls: https://www.amfiindia.com/spages/NAVAll.txt
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: indiamutual.t
   testcases:
+    - 102676
+    - 103131
+    - 101599
+    - INF194K01W88
+    - INF090I01FN7
+    - INF082J01127
 #
 - module: LeRevenu.pm
   state: TBD
@@ -544,15 +553,17 @@
     - BOGUS
 #
 - module: MorningstarJP.pm
-  state: TBD
+  state: working
   added: TBD
   changed: ~
   removed: ~
-  urls:
+  urls: https://www.morningstar.co.jp/FundData/DownloadStdYmd.do?fnc=
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: morningstarJP.t
   testcases:
+    - 2009100101
+    - 2002013108
 #
 - module: NSEIndia.pm
   state: working
@@ -851,10 +862,10 @@
   testcases:
 #
 - module: XETRA.pm
-  state: TBD
+  state: failing
   added: TBD
   changed: ~
-  removed: ~
+  removed: 2022-09-28
   urls:
   apikey: false
   notes: ~
