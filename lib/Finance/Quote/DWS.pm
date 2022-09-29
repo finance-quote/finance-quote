@@ -96,6 +96,7 @@ sub dwsfunds {
 
   foreach my $symbol (@_) {
     if (exists $quoter->{DWS_CACHE}->{$symbol}) {
+      $info{$symbol, 'symbol'}   = $symbol;
       $info{$symbol, 'name'}     = $quoter->{DWS_CACHE}->{$symbol}->{name};
       $info{$symbol, 'last'}     = $quoter->{DWS_CACHE}->{$symbol}->{last};
       $info{$symbol, 'wkn'}      = $quoter->{DWS_CACHE}->{$symbol}->{wkn};

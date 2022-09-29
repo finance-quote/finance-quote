@@ -253,7 +253,7 @@
 - module: DWS.pm
   state: working
   added: TBD
-  changed: ~
+  changed: 2022-09-28
   removed: ~
   urls: https://www.deami.de/dps/ff/prices.aspx
   apikey: false
