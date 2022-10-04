@@ -40,7 +40,8 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use POSIX qw(strftime);
 
-our $VERSION = '1.52'; # VERSION
+# VERSION
+
 our $UNION_URL1 = "https://legacy-apps.union-investment.de/handle?generate=true&action=doDownloadSearch&start_time=";
 # Date format 27.07.2022&end_time=01.08.2022
 our $UNION_URL2 ="&csvformat=us&choose_indi_fondsnames=";
