@@ -15,6 +15,7 @@
 
 In order to upload files to PAUSE/CPAN and Sourceforge, the team member must have accounts with the proper privileges on those services. For PAUSE that is co-maint and for Sourceforge the user must be in the Admin group.
 
+* Before executing `dzil release` confirm the git configuration settings `user.name` and `user.email` are set.
 * dzil release - upload to cpan, tweet and mail :)
 * upload module tarball to sourceforge @ https://sourceforge.net/projects/finance-quote/files/finance-quote/
     * Through Web interface
