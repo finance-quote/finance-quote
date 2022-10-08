@@ -1,4 +1,6 @@
 {{$NEXT}}
+	* dist.ini - changed bugtracker.web to
+	  https://github.com/finance-quote/finance-quote/issues
 	* DWS.pm - Set $info{$symbol, 'symbol'} to $symbol.
 	* Union.pm - #231 - reworked for a different CSV file.
         * CurrencyRates/AlphaVantage.pm - API CURRENCY_EXCHANGE_RATE
