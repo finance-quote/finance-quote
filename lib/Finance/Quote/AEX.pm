@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=4 sw=4 noai ic showmode showmatch:  
 
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -50,13 +51,15 @@ sub aex {
   $ua->agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36');
 
   my %info;
+  my $url;
+  my $reply;
 
   foreach my $symbol (@_) {
     my $isin = undef;
 
-    eval {
+#    eval {
       my $search = "https://live.euronext.com/en/search_instruments/$symbol";
-      my $reply  = $ua->get($search);
+      $reply  = $ua->get($search);
 
       ### Search : $search, $reply->code
 
@@ -68,13 +71,33 @@ sub aex {
 
         my $result = $widget->scrape($reply);
 
-        die "Failed to find $symbol" unless exists $result->{link} and @{$result->{link}} > 0;
+        # die "Failed to find $symbol" unless exists $result->{link} and @{$result->{link}} > 0;
+        unless (exists $result->{link} and @{$result->{link}} > 0) {
+            $info{$symbol, 'success'} = 0;
+            $info{$symbol, 'errormsg'} = 'Cannot find symbol ' . $symbol;
+            next;
+        }
 
-        my $url = $result->{link}->[0];
+        # Loop through linkarray. Skip links containing the string
+        # "product/indices"
+        for my $newlink (@{$result->{link}}) {
+            ### NewLink: $newlink
+            if ( $newlink !~ /product\/indices/i ) {
+                $url = $newlink;
+                ### Setting URL: $url
+                last;
+            }
+        }
+
+        # die "Failed to find isin" unless $url->as_string =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)/|;
+        unless (defined($url) && $url->as_string =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)/|) {
+            $info{$symbol, 'success'} = 0;
+            $info{$symbol, 'errormsg'} = 'Cannot find ISIN for ' . $symbol;
+            next;
+        } else {
+            $isin = uc($1);
+        }
         
-        die "Failed to find isin" unless $url->as_string =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)/|;
-        
-        $isin = uc($1);
       }
       else {
         # Redirected
@@ -84,17 +107,37 @@ sub aex {
 
         my $result = $widget->scrape($reply->previous->content);
 
-        die "Failed to find $symbol in redirect" unless exists $result->{redirect};
+        # die "Failed to find $symbol in redirect" unless exists $result->{redirect};
+        unless (exists $result->{redirect}) {
+            $info{$symbol, 'success'} = 0;
+            $info{$symbol, 'errormsg'} =
+                'Cannot find symbol ' . $symbol . ' in redirect';
+            next;
+        }
         
         my $url = $result->{redirect};
         
-        die "Failed to find isin in redirect" unless $url =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)|;
+        # die "Failed to find isin in redirect" unless $url =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)|;
+        unless ($url =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)|) {
+            $info{$symbol, 'success'} = 0;
+            $info{$symbol, 'errormsg'} =
+                'Cannot find ISIN for ' . $symbol . ' in redirect';
+            next;
+        }
         
         $isin = uc($1);
+        ### ISIN: $isin
+
       }
   
-      die "No isin set" unless defined $isin;
-    };
+      # die "No isin set" unless defined $isin;
+      unless (defined $isin) {
+          $info{$symbol, 'success'} = 0;
+          $info{$symbol, 'errormsg'} = 'No ISIN set for ' . $symbol;
+          next;
+      }
+
+#    };	# End eval
     
     if ($@) {
       my $error = "Search failed: $@";
@@ -103,10 +146,10 @@ sub aex {
       next;
     }
 
-    eval {
+#    eval {
       my $url   = "https://live.euronext.com/en/ajax/getDetailedQuote/$isin";
       my %form  = (theme_name => 'euronext_live');
-      my $reply = $ua->post($url, \%form);
+      $reply = $ua->post($url, \%form);
 
       ### Header : $url, $reply->code
 
@@ -129,7 +172,12 @@ sub aex {
 
       my $body = $widget->scrape($reply);
 
-      die "Failed to find detailed quote table" unless exists $body->{data};
+      # die "Failed to find detailed quote table" unless exists $body->{data};
+      unless (exists $body->{data}) {
+          $info{$symbol, 'success'} = 0;
+          $info{$symbol, 'errormsg'} = 'Failed to find detailed quote table';
+          next;
+      }
      
       my %table = @{$body->{data}};
 
@@ -146,7 +194,7 @@ sub aex {
       $info{$symbol, 'last'}     = $header->{last};
 
       $quoter->store_date(\%info, $symbol, {eurodate => $1}) if  $header->{date} =~ m|([0-9]{2}/[0-9]{2}/[0-9]{4})|;
-    };
+#    };	# End eval
 
     if ($@) {
       my $error = "Fetch/Parse failed: $@";
