@@ -46,7 +46,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $TIMEOUT @MODULES %MODULES %METHODS $AUTOLOAD
             @CURRENCY_RATES_MODULES $USE_EXPERIMENTAL_UA/;
 
-# VERSION
+our $VERSION = '1.52'; # VERSION
 
 @CURRENCY_RATES_MODULES = qw/
     AlphaVantage
@@ -88,15 +88,18 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     OnVista
     Oslobors
     SEB
+	Sinvestor	
     SIX
-    Tradeville
-    TSP
     TMX
     Tiaacref
     TesouroDireto
-    TreasuryDirect
+	Tradegate
+	Tradeville
     Troweprice
+    TSP	
+    USFedBonds
     Union
+	XETRA
     YahooJSON
     ZA
 /;
@@ -610,10 +613,10 @@ sub isoTime {
   $timeString =~ tr/ //d ;
   $timeString = uc $timeString ;
   my $retTime = "00:00"; # return zero time if unparsable input
-  if ($timeString=~m/^(\d+)[\.:UH](\d+) *(AM|am|PM|pm)?/) {
+  if ($timeString=~m/^(\d+)[\.:UH](\d+)(AM|PM)?/) {
     my ($hours,$mins)= ($1-0,$2-0) ;
-    $hours-=12 if ($hours==12 && $3 && ($3 =~ /AM/i));
-    $hours+=12 if ($3 && ($3 =~ /PM/i) && ($hours != 12));
+    $hours-=12 if ($hours==12);
+    $hours+=12 if ($3 && ($3 eq "PM")) ;
     if ($hours>=0 && $hours<=23 && $mins>=0 && $mins<=59 ) {
       $retTime = sprintf ("%02d:%02d", $hours, $mins) ;
     }
@@ -1579,7 +1582,7 @@ Finance::Quote::Bourso,
 Finance::Quote::CSE,
 Finance::Quote::Cdnfundlibrary,
 Finance::Quote::Comdirect,
-Finance::Quote::Currencies,
+Financ::Quote::Currencies,
 Finance::Quote::DWS,
 Finance::Quote::Deka,
 Finance::Quote::FTfunds,
@@ -1607,8 +1610,8 @@ Finance::Quote::TSP,
 Finance::Quote::TMX,
 Finance::Quote::Tiaacref,
 Finance::Quote::TesouroDireto,
-Finance::Quote::TreasuryDirect,
 Finance::Quote::Troweprice,
+Finance::Quote::USFedBonds,
 Finance::Quote::Union,
 Finance::Quote::YahooJSON,
 Finance::Quote::ZA
