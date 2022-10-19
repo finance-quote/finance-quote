@@ -5,15 +5,21 @@
 - module: AEX.pm
   state: working
   added: TBD
-  changed: ~
+  changed: 2022-10-18
   removed: ~
   urls:
+    - https://live.euronext.com/en/search_instruments/
+    - https://live.euronext.com/en/ajax/getDetailedQuote/
+    - https://live.euronext.com/en/intraday_chart/getDetailedQuoteAjax/
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: aex.t
   testcases:
-    - AH
+    - AD
     - AMG
+    - LVMH
+    - XS0937858271
+    - NL0000009165
 #
 - module: AIAHK.pm
   state: working
