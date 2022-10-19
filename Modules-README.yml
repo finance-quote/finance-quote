@@ -640,6 +640,18 @@
   testfile: TBD
   testcases:
 #
+- module: Sinvestor.pm
+  state: working
+  added: 2022-10-19
+  changed: ~
+  removed: ~
+  urls: https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+  apikey: false
+  notes: shares and funds from various sources
+  testfile: sinvestor.t
+  testcases:
+    - DE0008404005
+#
 - module: SIXfunds.pm
   state: TBD
   added: TBD
@@ -683,6 +695,18 @@
   notes: ~
   testfile: TBD
   testcases:
+#
+- module: Tradegate.pm
+  state: working
+  added: 2022-10-19
+  changed: ~
+  removed: ~
+  urls: https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+  apikey: false
+  notes: share quotes from the Tradegate platform
+  testfile: sinvestor.t
+  testcases:
+    - DE0008404005 
 #
 - module: TSP.pm
   state: working
@@ -868,15 +892,16 @@
   testcases:
 #
 - module: XETRA.pm
-  state: failing
-  added: TBD
-  changed: ~
-  removed: 2022-09-28
-  urls:
+  state: working
+  added: ~
+  changed: 2022-10-19
+  removed: ~
+  urls: https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
   apikey: false
-  notes: ~
-  testfile: TBD
+  notes: share quotes from the XETRA platform
+  testfile: sinvestor.t
   testcases:
+    - DE0008404005 
 #
 - module: YahooJSON.pm
   state: working
