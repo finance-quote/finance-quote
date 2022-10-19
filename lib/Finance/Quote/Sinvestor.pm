@@ -26,7 +26,7 @@ use if DEBUG, 'Smart::Comments';
 use LWP::UserAgent;
 use Web::Scraper;
 
-our $VERSION = '1.52'; # VERSION
+# VERSION
 
 my $SINVESTOR_URL = 'https://web.s-investor.de/app/detail.htm?INST_ID=0000057&isin=';
 
