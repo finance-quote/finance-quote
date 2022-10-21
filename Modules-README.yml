@@ -651,6 +651,8 @@
   testfile: sinvestor.t
   testcases:
     - DE0008404005
+	- NL0011540547
+	- FR0000120628
 #
 - module: SIXfunds.pm
   state: TBD
@@ -706,7 +708,9 @@
   notes: share quotes from the Tradegate platform
   testfile: sinvestor.t
   testcases:
-    - DE0008404005 
+    - DE0008404005
+	- NL0011540547
+	- FR0000120628
 #
 - module: TSP.pm
   state: working
@@ -901,7 +905,9 @@
   notes: share quotes from the XETRA platform
   testfile: sinvestor.t
   testcases:
-    - DE0008404005 
+    - DE0008404005
+	- NL0011540547
+	- FR0000120628
 #
 - module: YahooJSON.pm
   state: working
