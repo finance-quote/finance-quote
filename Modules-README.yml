@@ -651,8 +651,8 @@
   testfile: sinvestor.t
   testcases:
     - DE0008404005
-	- NL0011540547
-	- FR0000120628
+    - NL0011540547
+    - FR0000120628
 #
 - module: SIXfunds.pm
   state: TBD
@@ -709,8 +709,8 @@
   testfile: sinvestor.t
   testcases:
     - DE0008404005
-	- NL0011540547
-	- FR0000120628
+    - NL0011540547
+    - FR0000120628
 #
 - module: TSP.pm
   state: working
@@ -906,8 +906,8 @@
   testfile: sinvestor.t
   testcases:
     - DE0008404005
-	- NL0011540547
-	- FR0000120628
+    - NL0011540547
+    - FR0000120628
 #
 - module: YahooJSON.pm
   state: working
