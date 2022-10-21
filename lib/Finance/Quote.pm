@@ -89,14 +89,17 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Oslobors
     SEB
     SIX
-    Tradeville
-    TSP
-    TMX
-    Tiaacref
+    Sinvestor
     TesouroDireto
+    Tiaacref
+    TMX
+    Tradegate
+    Tradeville
     TreasuryDirect
     Troweprice
+    TSP
     Union
+    XETRA
     YahooJSON
     ZA
 /;
