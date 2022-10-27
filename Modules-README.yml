@@ -643,7 +643,7 @@
 - module: Sinvestor.pm
   state: working
   added: 2022-10-19
-  changed: ~
+  changed: 2022-10-27
   removed: ~
   urls: https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
   apikey: false
@@ -653,6 +653,8 @@
     - DE0008404005
     - NL0011540547
     - FR0000120628
+    - DE0009809566
+    - DE0008491002
 #
 - module: SIXfunds.pm
   state: TBD
@@ -701,16 +703,18 @@
 - module: Tradegate.pm
   state: working
   added: 2022-10-19
-  changed: ~
+  changed: 2022-10-27
   removed: ~
   urls: https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
   apikey: false
   notes: share quotes from the Tradegate platform
-  testfile: sinvestor.t
+  testfile: tradegate.t
   testcases:
     - DE0008404005
     - NL0011540547
     - FR0000120628
+    - XS0937858271
+    - NL0000009165
 #
 - module: TSP.pm
   state: working
@@ -898,16 +902,18 @@
 - module: XETRA.pm
   state: working
   added: ~
-  changed: 2022-10-19
+  changed: 2022-10-27
   removed: ~
   urls: https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
   apikey: false
   notes: share quotes from the XETRA platform
-  testfile: sinvestor.t
+  testfile: xetra.t
   testcases:
     - DE0008404005
     - NL0011540547
     - FR0000120628
+    - XS0937858271
+    - NL0000009165
 #
 - module: YahooJSON.pm
   state: working
