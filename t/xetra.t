@@ -1,62 +1,52 @@
 #!/usr/bin/perl -w
+
 use strict;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use Test::More;
 use Finance::Quote;
+use Date::Simple qw(today);
+use Scalar::Util qw(looks_like_number);
+use Date::Range;
+use Date::Manip;
 
 if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 20;
+my @valid    = ('DE0008404005', 'NL0011540547', 'FR0000120628', 'XS0937858271', 'NL0000009165');
+my @invalid  = ('BOGUS');
+my @symbols  = (@valid, @invalid);
+my $today    = today();
+my $window   = 32;   # XS0937858271 quotes are only updates 1-2 a month
 
-# Test xetra functions.
+my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_reference)
+                'success' => sub {$_[0]},
+                'last'    => sub {looks_like_number($_[0])},
+                'volume'  => sub {looks_like_number($_[0])},
+                'isodate' => sub {Date::Range->new($today - $window, $today)->includes(Date::Simple::ISO->new($_[0]))},
+                'date'    => sub {my $a = Date::Manip::Date->new(); $a->parse_format('%m/%d/%Y', $_[0]);
+                                  my $b = Date::Manip::Date->new(); $b->parse_format('%Y-%m-%d', $_[2]->{$_[1], 'isodate'});
+                                  return $a->cmp($b) == 0;},
+               );
+my $q        = Finance::Quote->new();
 
-my $q      = Finance::Quote->new();
+plan tests => 1 + %check*@valid + @invalid;
 
-my %quotes = $q->xetra("DE0008404005");
+my %quotes = $q->fetch('xetra', @symbols);
 ok(%quotes);
 
-# Check the last values are defined.  These are the most
-#  used and most reliable indicators of success.
-ok($quotes{"DE0008404005","last"} > 0);
-ok($quotes{"DE0008404005","success"});
-ok($quotes{"DE0008404005", "currency"} eq "EUR");
+### [<now>] quotes: %quotes
 
-my $year = (localtime())[5] + 1900;
-my $lastyear = $year - 1;
-ok(substr($quotes{"DE0008404005","isodate"},0,4) eq $year ||
-   substr($quotes{"DE0008404005","isodate"},0,4) eq $lastyear);
-ok(substr($quotes{"DE0008404005","date"},6,4) eq $year ||
-   substr($quotes{"DE0008404005","date"},6,4) eq $lastyear);
+foreach my $symbol (@valid) {
+  while (my ($key, $lambda) = each %check) {
+    ok($lambda->($quotes{$symbol, $key}, $symbol, \%quotes), "$symbol: $key -> $quotes{$symbol, $key}");
+  }
+}
+    
+foreach my $symbol (@invalid) {
+  ok((not $quotes{'BOGUS', 'success'}), 'failed as expected');
+}
 
-%quotes = $q->xetra("NL0011540547");
-ok(%quotes);
-
-ok($quotes{"NL0011540547","last"} > 0);
-ok($quotes{"NL0011540547","success"});
-ok($quotes{"NL0011540547", "currency"} eq "EUR");
-
-ok(substr($quotes{"NL0011540547","isodate"},0,4) eq $year ||
-   substr($quotes{"NL0011540547","isodate"},0,4) eq $lastyear);
-ok(substr($quotes{"NL0011540547","date"},6,4) eq $year ||
-   substr($quotes{"NL0011540547","date"},6,4) eq $lastyear);
-
-%quotes = $q->xetra("FR0000120628");
-ok(%quotes);
-
-ok($quotes{"FR0000120628","last"} > 0);
-ok($quotes{"FR0000120628","success"});
-ok($quotes{"FR0000120628", "currency"} eq "EUR");
-
-
-
-
-ok(substr($quotes{"FR0000120628","isodate"},0,4) eq $year ||
-   substr($quotes{"FR0000120628","isodate"},0,4) eq $lastyear);
-ok(substr($quotes{"FR0000120628","date"},6,4) eq $year ||
-   substr($quotes{"FR0000120628","date"},6,4) eq $lastyear);   
-
-# Check that bogus stocks return failure:
-%quotes = $q->xetra("NL0011540547");
-ok(%quotes);
-ok(! $quotes{"12345","success"});
