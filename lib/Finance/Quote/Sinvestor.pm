@@ -28,14 +28,14 @@ use Web::Scraper;
 
 # VERSION
 
-my $SINVESTOR_URL = 'https://web.s-investor.de/app/detail.htm?INST_ID=0000057&isin=';
+my $Sinvestor_URL = 'https://web.s-investor.de/app/detail.htm?INST_ID=0000057&isin=';
 
 sub methods { 
   return (sinvestor => \&sinvestor,
           europe     => \&sinvestor); 
 }
 
-our @labels = qw/symbol last close p_change volume open price/;
+our @labels = qw/symbol last close exchange volume open price/;
 
 sub labels { 
   return (sinvestor => \@labels,
@@ -44,23 +44,20 @@ sub labels {
 
 sub sinvestor {
   my $quoter = shift;
-  my @stocks = @_;
+  my $ua     = $quoter->user_agent();
+  my $agent  = $ua->agent;
+  $ua->agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36');
+  
   my %info;
-  my $ua = $quoter->user_agent();
- {
-  foreach my $stock (@stocks) {
-    eval {
-		my $url = $SINVESTOR_URL.join('', $stock);
-	    my $symlen = length($stock);
-	
-	  if ($symlen > 12) {
+  my $url;
+  my $reply;
 
-# split boerse from isin
-	      my @temparray = split (/\./,$stock);
-		  my $isin = $temparray[0];
-	      my $boerse = $temparray[1];
-		  $url = $SINVESTOR_URL . $isin . '&boerse=' . $boerse; 
-	  }
+  foreach my $symbol (@_) {
+    eval {
+		
+	
+	  my $url = $Sinvestor_URL.join('', $symbol);
+	  my $symlen = length($symbol);
 	  
       my $tree = HTML::TreeBuilder->new_from_url($url);
 	  	  
@@ -94,33 +91,41 @@ sub sinvestor {
 	  @child = $td1->content_list;
       my $currency = $child[0];
       $currency =~ s/Euro/EUR/;	  
+	  
+	  $td1 = ($lastvalue->look_down('_tag'=>'td'))[13];	
+      @child = $td1->content_list;
+      my $volume = $child[0];	  	  
 
 	        
-      $info{$stock, 'success'}   = 1;
-      $info{$stock, 'method'}    = 'sinvestor';
-      $info{$stock, 'symbol'}    = $isin;
-	  $info{$stock, 'name'}      = $sharename;
-	  $info{$stock, 'exchange'}  = $exchange;	  
-      $info{$stock, 'last'}      = $price;
-      $info{$stock, 'price'}     = $price;
-      $info{$stock, 'currency'}  = $currency;
-#      $info{$stock, 'date'}      = $date;
-      $quoter->store_date(\%info, $stock, {eurodate => $date});
+      $info{$symbol, 'success'}   = 1;
+      $info{$symbol, 'method'}    = 'Sinvestor';
+      $info{$symbol, 'symbol'}    = $isin;
+	  $info{$symbol, 'name'}      = $sharename;
+	  $info{$symbol, 'exchange'}  = $exchange;	  
+      $info{$symbol, 'last'}      = $price;
+      $info{$symbol, 'price'}     = $price;
+      $info{$symbol, 'volume'}     = $volume;	  
+      $info{$symbol, 'currency'}  = $currency;
+#      $info{$symbol, 'date'}      = $date;
+      $quoter->store_date(\%info, $symbol, {eurodate => $date});
     };
     if ($@) {
-      $info{$stock, 'success'}  = 0;
-      $info{$stock, 'errormsg'} = "Error retreiving $stock: $@";
+      $info{$symbol, 'success'}  = 0;
+      $info{$symbol, 'errormsg'} = "Error retreiving $symbol: $@";
     }
+
+
+}
+  $ua->agent($agent);
 
   return wantarray() ? %info : \%info;
 }
-}
-}
+
 1;
 
 =head1 NAME
 
-Finance::Quote::SInvestor - Obtain quotes from S-Investor platform.
+Finance::Quote::Sinvestor - Obtain quotes from S-Investor platform.
 
 =head1 SYNOPSIS
 
@@ -128,21 +133,25 @@ Finance::Quote::SInvestor - Obtain quotes from S-Investor platform.
 
     $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("sinvestor", "DE000ENAG999");  # Only query sinvestor
+    %info = Finance::Quote->fetch("Sinvestor", "DE000ENAG999");  # Only query Sinvestor
     %info = Finance::Quote->fetch("europe", "brd");     # Failover to other sources OK.
 
 =head1 DESCRIPTION
 
 This module fetches information from https://s-investor.de/, the investment platform
-of the German Sparkasse banking group.
+of the German Sparkasse banking group. It fetches share prices from various online
+and physical exchanges, and fund prices from the investment companies. The source
+is returned in the "exchange" field.
+
+Suitable for shares, ETFs and funds that are traded in Germany.
 
 This module is loaded by default on a Finance::Quote object. It's also possible
-to load it explicitly by placing "sinvestor" in the argument list to
+to load it explicitly by placing "Sinvestor" in the argument list to
 Finance::Quote->new().
 
-This module provides "sinvestor" and "europe" fetch methods.
+This module provides "Sinvestor" and "europe" fetch methods.
 
-Information obtained by this module may be covered by sinvestor.eu terms and
+Information obtained by this module may be covered by s-investor.de terms and
 conditions.
 
 =head1 LABELS RETURNED
@@ -154,5 +163,6 @@ last
 method
 success
 symbol
+volume
 
 

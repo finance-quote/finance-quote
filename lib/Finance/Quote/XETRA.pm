@@ -35,7 +35,7 @@ sub methods {
           europe     => \&xetra); 
 }
 
-our @labels = qw/symbol last close p_change volume open price/;
+our @labels = qw/symbol last close exchange volume open price/;
 
 sub labels { 
   return (xetra => \@labels,
@@ -44,14 +44,20 @@ sub labels {
 
 sub xetra {
   my $quoter = shift;
-  my @stocks = @_;
+  my $ua     = $quoter->user_agent();
+  my $agent  = $ua->agent;
+  $ua->agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36');
+  
   my %info;
-  my $ua = $quoter->user_agent();
- {
-  foreach my $stock (@stocks) {
+  my $url;
+  my $reply;
+
+  foreach my $symbol (@_) {
     eval {
-	  my $url = $xetra_URL.join('', $stock);
-	  my $symlen = length($stock);
+		
+	
+	  my $url = $xetra_URL.join('', $symbol);
+	  my $symlen = length($symbol);
 	  
       my $tree = HTML::TreeBuilder->new_from_url($url);
 	  	  
@@ -85,28 +91,36 @@ sub xetra {
 	  @child = $td1->content_list;
       my $currency = $child[0];
       $currency =~ s/Euro/EUR/;	  
+	  
+	  $td1 = ($lastvalue->look_down('_tag'=>'td'))[13];	
+      @child = $td1->content_list;
+      my $volume = $child[0];	  	  
 
 	        
-      $info{$stock, 'success'}   = 1;
-      $info{$stock, 'method'}    = 'xetra';
-      $info{$stock, 'symbol'}    = $isin;
-	  $info{$stock, 'name'}      = $sharename;
-	  $info{$stock, 'exchange'}  = $exchange;	  
-      $info{$stock, 'last'}      = $price;
-      $info{$stock, 'price'}     = $price;
-      $info{$stock, 'currency'}  = $currency;
-#      $info{$stock, 'date'}      = $date;
-      $quoter->store_date(\%info, $stock, {eurodate => $date});
+      $info{$symbol, 'success'}   = 1;
+      $info{$symbol, 'method'}    = 'xetra';
+      $info{$symbol, 'symbol'}    = $isin;
+	  $info{$symbol, 'name'}      = $sharename;
+	  $info{$symbol, 'exchange'}  = $exchange;	  
+      $info{$symbol, 'last'}      = $price;
+      $info{$symbol, 'price'}     = $price;
+      $info{$symbol, 'volume'}     = $volume;	  
+      $info{$symbol, 'currency'}  = $currency;
+#      $info{$symbol, 'date'}      = $date;
+      $quoter->store_date(\%info, $symbol, {eurodate => $date});
     };
     if ($@) {
-      $info{$stock, 'success'}  = 0;
-      $info{$stock, 'errormsg'} = "Error retreiving $stock: $@";
+      $info{$symbol, 'success'}  = 0;
+      $info{$symbol, 'errormsg'} = "Error retreiving $symbol: $@";
     }
+
+
+}
+  $ua->agent($agent);
 
   return wantarray() ? %info : \%info;
 }
-}
-}
+
 1;
 
 =head1 NAME
@@ -125,7 +139,11 @@ Finance::Quote::xetra - Obtain quotes from S-Investor platform.
 =head1 DESCRIPTION
 
 This module fetches information from https://s-investor.de/, the investment platform
-of the German Sparkasse banking group.
+of the German Sparkasse banking group. It fetches share prices from XETRA,
+a major German trading platform. The prices on XETRA serve as the basis for calculating
+the DAX and other stock market indices.
+
+Suitable for shares and ETFs that are traded in Germany.
 
 This module is loaded by default on a Finance::Quote object. It's also possible
 to load it explicitly by placing "xetra" in the argument list to
@@ -145,5 +163,6 @@ last
 method
 success
 symbol
+volume
 
 
