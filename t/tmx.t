@@ -16,7 +16,8 @@ if (not $ENV{ONLINE_TEST}) {
 
 my %valid    = ('STN' => 'Stantec Inc.',
                 'BCE' => 'BCE Inc.',
-                'BMO' => 'Bank of Montreal'
+                'BMO' => 'Bank of Montreal',
+                'HBI:US' => 'Hanesbrands Inc.'
                );
 my @invalid  = ('BOGUS');
 my @symbols  = (keys %valid, @invalid);
@@ -24,15 +25,16 @@ my @symbols  = (keys %valid, @invalid);
 my $method   = 'tmx';    # Name of the target method for testing
 
 my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_reference)
-                'success'  => sub {$_[0] == 1},
-                'name'     => sub {$_[0] eq $valid{$_[1]}},
-                'year_range' => sub {$_[0] =~ /[0-9.]+ - [0-9.]+/},
-                'exchange' => sub {$_[0] eq 'Toronto Stock Exchange'},
-                'symbol'   => sub {$_[0] =~ /^$_[1](:CA)?$/},
-                'high'   => sub {looks_like_number($_[0])},
-                'low'   => sub {looks_like_number($_[0])},
-                'open'   => sub {looks_like_number($_[0])},
-                'close'   => sub {looks_like_number($_[0])},
+    'success'    => sub {$_[0] == 1},
+    'name'       => sub {$_[0] eq $valid{$_[1]}},
+    'year_range' => sub {$_[0] =~ /[0-9.]+ - [0-9.]+/},
+    'exchange'   => sub {$_[0] eq 'Toronto Stock Exchange' || $_[0] eq 'New York Stock Exchange'},
+    'symbol'     => sub {$_[0] =~ /^$_[1](:CA)?$/},
+    'high'       => sub {looks_like_number($_[0])},
+    'low'        => sub {looks_like_number($_[0])},
+    'open'       => sub {looks_like_number($_[0])},
+    'close'      => sub {looks_like_number($_[0])},
+    'currency'   => sub {$_[0] eq 'CAD' || $_[0] eq 'USD'},
                );
 my $q        = Finance::Quote->new();
 

@@ -19,9 +19,9 @@ package Finance::Quote::TMX;
 
 use strict;
 use warnings;
-
-use constant DEBUG => $ENV{DEBUG};
-use if DEBUG, 'Smart::Comments';
+use Readonly;
+Readonly my $DEBUG => $ENV{DEBUG};
+use if $DEBUG, 'Smart::Comments';
 
 use HTTP::Request;
 use LWP::UserAgent;
@@ -47,7 +47,7 @@ sub tmx {
   my $ua      = $quoter->user_agent();
   my %info;
 
-  foreach my $symbol (@_) {
+  foreach my $symbol (@symbols) {
     eval {
       my $url     = 'https://app-money.tmx.com/graphql';
       my $header  = ["accept"           =>           "*/*",
@@ -83,7 +83,7 @@ sub tmx {
       die "Unexpected symbol" unless lc($data->{symbol}) eq lc($symbol);
 
       ### data     : $data
-      if ( $symbol =~ /(:us)/i ) {
+      if ( $symbol =~ /:us/ix ) {
             $info{$symbol, 'currency'} = 'USD'; }
       else {$info{$symbol, 'currency'} = 'CAD'}
 
