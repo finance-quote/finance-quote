@@ -60,7 +60,7 @@ sub tmx {
                      "sec-fetch-dest"   => "empty",
                      "sec-fetch-mode"   => "cors",
                      "sec-fetch-site"   => "same-site"];
-      my $body   = "{\"operationName\":\"getQuoteBySymbol\",\"variables\":{\"symbol\":\"$symbol\",\"locale\":\"en\"},\"query\":\"query getQuoteBySymbol(\$symbol: String, \$locale: String) {\\n  getQuoteBySymbol(symbol: \$symbol, locale: \$locale) {\\n symbol\\n    name\\n    price\\n    priceChange\\n    percentChange\\n    exchangeName\\n    exShortName\\n    exchangeCode\\n    marketPlace\\n    sector\\n    industry\\n    volume\\n    openPrice\\n    dayHigh\\n    dayLow\\n    MarketCap\\n    MarketCapAllClasses\\n    peRatio\\n    prevClose\\n    dividendFrequency\\n    dividendYield\\n    dividendAmount\\n    dividendCurrency\\n    beta\\n    eps\\n    exDividendDate\\n    shortDescription\\n    longDescription\\n    website\\n    email\\n    phoneNumber\\n    fullAddress\\n    employees\\n    shareOutStanding\\n    totalDebtToEquity\\n    totalSharesOutStanding\\n    sharesESCROW\\n    vwap\\n    dividendPayDate\\n    weeks52high\\n    weeks52low\\n    alpha\\n    averageVolume10D\\n    averageVolume30D\\n    averageVolume50D\\n    priceToBook\\n    priceToCashFlow\\n    returnOnEquity\\n    returnOnAssets\\n    day21MovingAvg\\n    day50MovingAvg\\n    day200MovingAvg\\n    dividend3Years\\n    dividend5Years\\n    datatype\\n    __typename\\n  }\\n}\\n\"}";
+      my $body   = "{\"operationName\":\"getQuoteBySymbol\",\"variables\":{\"symbol\":\"$symbol\",\"locale\":\"en\"},\"query\":\"query getQuoteBySymbol(\$symbol: String, \$locale: String) {\\n getQuoteBySymbol(symbol: \$symbol, locale: \$locale) {\\n symbol\\n name\\n price\\n percentChange\\n exchangeName\\n volume\\n openPrice\\n dayHigh\\n dayLow\\n MarketCap\\n prevClose\\n weeks52high\\n weeks52low\\n }\\n}\\n\"}";
 
       
       my $request = HTTP::Request->new('POST', $url, $header, $body);
@@ -83,6 +83,9 @@ sub tmx {
       die "Unexpected symbol" unless lc($data->{symbol}) eq lc($symbol);
 
       ### data     : $data
+      if ( $symbol =~ /(:us)/i ) {
+            $info{$symbol, 'currency'} = 'USD'; }
+      else {$info{$symbol, 'currency'} = 'CAD'}
 
       $info{$symbol, 'name'}       = $data->{name};
       $info{$symbol, 'exchange'}   = $data->{exchangeName};
@@ -93,7 +96,6 @@ sub tmx {
       $info{$symbol, 'cap'}        = $data->{MarketCap};
       $info{$symbol, 'close'}      = $data->{prevClose};
       $info{$symbol, 'year_range'} = $data->{weeks52low} . ' - ' . $data->{weeks52high};
-      $info{$symbol, 'currency'}   = 'CAD';
       $info{$symbol, 'last'}       = $data->{price};
       $info{$symbol, 'symbol'}     = $data->{symbol};
       $info{$symbol, 'p_change'}   = $data->{percentChange};
