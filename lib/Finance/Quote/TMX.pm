@@ -30,7 +30,7 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/name cap year_range currency exchange symbol ask bid high last low open close isodate date/;
+our @labels = qw/currency name exchange volume open high low cap close year_range last p_change symbol isodate date/;
 
 sub labels {
   return ( tmx => \@labels );
@@ -69,20 +69,28 @@ sub tmx {
                        "mode"           =>  "cors");
 
       my $reply     = $ua->request($request);
-      
+      if (! $reply->is_success) {
+        $info{$symbol, 'errormsg'} = 'Failed to connect with TMX website';
+        $info{$symbol, 'success'}  = 0;
+        return;
+      }
       ### Search   : $url, $reply->code
       ### reply    : $reply->content
       
       my $data      = decode_json $reply->content;
+      if (exists $data->{errors}) {
+            $info{$symbol, 'errormsg'} = $data->{errors}[0]->{message};
+            $info{$symbol, 'success'}  = 0;
+            return;
+      }
 
-      die "Unexpected result" unless exists $data->{data}
-                              and    exists $data->{data}->{getQuoteBySymbol};
-      
       $data = $data->{data}->{getQuoteBySymbol};
+      if (lc($data->{symbol}) ne lc($symbol)) {
+            $info{$symbol, 'errormsg'} = "returned symbol was not correct for $symbol";
+            $info{$symbol, 'success'}  = 0;
+            return
+      }
 
-      die "Unexpected symbol" unless lc($data->{symbol}) eq lc($symbol);
-
-      ### data     : $data
       if ( $symbol =~ /:us/ix ) {
             $info{$symbol, 'currency'} = 'USD'; }
       else {$info{$symbol, 'currency'} = 'CAD'}
@@ -103,7 +111,6 @@ sub tmx {
 
       $info{$symbol, 'success'} = 1;
     };
-    
     if ($@) {
       my $error = "TMX failed: $@";
       $info{$symbol, 'success'}  = 0;
