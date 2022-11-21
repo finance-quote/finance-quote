@@ -12,7 +12,7 @@ if (not $ENV{ONLINE_TEST}) {
 }
 
 my $q        = Finance::Quote->new();
-my @valid    = ('LU0804734787');
+my @valid    = ('LU0804734787','DE0008491002','DE0008474503','DE0008491051','DE0009805507');
 my @invalid  = qw/BOGUS/;
 my @symbols  = (@valid, @invalid);
 my $year     = (localtime())[5] + 1900;
@@ -27,7 +27,6 @@ my %check    = (
                 'nav'        => sub { $_[0] =~ /^[0-9.]+$/ },
                 'success'    => sub { $_[0] },
                 'type'       => sub { $_[0] eq 'fund' },
-                'year_range' => sub { $_[0] =~ /^[0-9.]+\s*-\s*[0-9.]+$/ },
                 );
 
 plan tests => 1 + %check*@valid + @invalid;
