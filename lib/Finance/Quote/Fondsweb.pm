@@ -30,7 +30,7 @@ our $FONDSWEB_URL = "https://www.fondsweb.com/de/";
 sub methods { return ( fondsweb => \&fondsweb ); }
 
 {
-	my @labels = qw/name isin date isodate year_range nav last currency source method type/;
+	my @labels = qw/name symbol isin date isodate year_range nav last price currency source method type/;
 	sub labels { return (fondsweb => \@labels); }
 }
 
@@ -78,7 +78,8 @@ sub fondsweb {
 			# isin
 			my $isin_raw = $tree->findvalue( '//span[@class="text_bold"]');
 			my @isin = $isin_raw =~ m/^(\w\w\d+)\w./;
-			$info{ $symbol, 'isin' } = $isin[0];			
+			$info{ $symbol, 'isin' } = substr($isin[0], 0, 12);	
+			$info{ $symbol, 'symbol' } = substr($isin[0], 0, 12);	
 			
 			# date, isodate
 			my $raw_date = $tree->findvalue( '//i[@data-key="nav"]/..' );
@@ -158,7 +159,7 @@ The following labels are returned by Finance::Quote::Fondsweb:
 - name
 - nav
 - type
-- year_range
+
 
 =head1 REQUIREMENTS
 
