@@ -78,8 +78,13 @@ sub fondsweb {
 			# isin
 			my $isin_raw = $tree->findvalue( '//span[@class="text_bold"]');
 			my @isin = $isin_raw =~ m/^(\w\w\d+)\w./;
-			$info{ $symbol, 'isin' } = substr($isin[0], 0, 12);	
-			$info{ $symbol, 'symbol' } = substr($isin[0], 0, 12);	
+			my $sym=$isin[0];
+			my $symlen = length($sym);
+			if($symlen>12) {
+				$sym = substr($isin[0], 0, 12);
+			}
+			$info{ $symbol, 'isin' } = $sym;	
+			$info{ $symbol, 'symbol' } = $sym;	
 			
 			# date, isodate
 			my $raw_date = $tree->findvalue( '//i[@data-key="nav"]/..' );
