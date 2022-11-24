@@ -19,9 +19,9 @@ package Finance::Quote::TMX;
 
 use strict;
 use warnings;
-
-use constant DEBUG => $ENV{DEBUG};
-use if DEBUG, 'Smart::Comments';
+use Readonly;
+Readonly my $DEBUG => $ENV{DEBUG};
+use if $DEBUG, 'Smart::Comments';
 
 use HTTP::Request;
 use LWP::UserAgent;
@@ -30,7 +30,7 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/name cap year_range currency exchange symbol ask bid high last low open close isodate date/;
+our @labels = qw/currency name exchange volume open high low cap close year_range last p_change symbol isodate date/;
 
 sub labels {
   return ( tmx => \@labels );
@@ -47,7 +47,7 @@ sub tmx {
   my $ua      = $quoter->user_agent();
   my %info;
 
-  foreach my $symbol (@_) {
+  foreach my $symbol (@symbols) {
     eval {
       my $url     = 'https://app-money.tmx.com/graphql';
       my $header  = ["accept"           =>           "*/*",
@@ -60,7 +60,7 @@ sub tmx {
                      "sec-fetch-dest"   => "empty",
                      "sec-fetch-mode"   => "cors",
                      "sec-fetch-site"   => "same-site"];
-      my $body   = "{\"operationName\":\"getQuoteBySymbol\",\"variables\":{\"symbol\":\"$symbol\",\"locale\":\"en\"},\"query\":\"query getQuoteBySymbol(\$symbol: String, \$locale: String) {\\n  getQuoteBySymbol(symbol: \$symbol, locale: \$locale) {\\n    symbol\\n    name\\n    price\\n    priceChange\\n    percentChange\\n    exchangeName\\n    exShortName\\n    exchangeCode\\n    marketPlace\\n    sector\\n    industry\\n    volume\\n    openPrice\\n    dayHigh\\n    dayLow\\n    MarketCap\\n    MarketCapAllClasses\\n    peRatio\\n    prevClose\\n    dividendFrequency\\n    dividendYield\\n    dividendAmount\\n    dividendCurrency\\n    beta\\n    eps\\n    exDividendDate\\n    shortDescription\\n    longDescription\\n    website\\n    email\\n    phoneNumber\\n    fullAddress\\n    employees\\n    shareOutStanding\\n    totalDebtToEquity\\n    totalSharesOutStanding\\n    sharesESCROW\\n    vwap\\n    dividendPayDate\\n    weeks52high\\n    weeks52low\\n    alpha\\n    averageVolume10D\\n    averageVolume30D\\n    averageVolume50D\\n    priceToBook\\n    priceToCashFlow\\n    returnOnEquity\\n    returnOnAssets\\n    day21MovingAvg\\n    day50MovingAvg\\n    day200MovingAvg\\n    dividend3Years\\n    dividend5Years\\n    datatype\\n    __typename\\n  }\\n}\\n\"}";
+      my $body   = "{\"operationName\":\"getQuoteBySymbol\",\"variables\":{\"symbol\":\"$symbol\",\"locale\":\"en\"},\"query\":\"query getQuoteBySymbol(\$symbol: String, \$locale: String) {\\n getQuoteBySymbol(symbol: \$symbol, locale: \$locale) {\\n symbol\\n name\\n price\\n percentChange\\n exchangeName\\n volume\\n openPrice\\n dayHigh\\n dayLow\\n MarketCap\\n prevClose\\n weeks52high\\n weeks52low\\n }\\n}\\n\"}";
 
       
       my $request = HTTP::Request->new('POST', $url, $header, $body);
@@ -69,20 +69,31 @@ sub tmx {
                        "mode"           =>  "cors");
 
       my $reply     = $ua->request($request);
-      
+      if (! $reply->is_success) {
+        $info{$symbol, 'errormsg'} = 'Failed to connect with TMX website';
+        $info{$symbol, 'success'}  = 0;
+        return;
+      }
       ### Search   : $url, $reply->code
       ### reply    : $reply->content
       
       my $data      = decode_json $reply->content;
+      if (exists $data->{errors}) {
+            $info{$symbol, 'errormsg'} = $data->{errors}[0]->{message};
+            $info{$symbol, 'success'}  = 0;
+            return;
+      }
 
-      die "Unexpected result" unless exists $data->{data}
-                              and    exists $data->{data}->{getQuoteBySymbol};
-      
       $data = $data->{data}->{getQuoteBySymbol};
+      if (lc($data->{symbol}) ne lc($symbol)) {
+            $info{$symbol, 'errormsg'} = "returned symbol was not correct for $symbol";
+            $info{$symbol, 'success'}  = 0;
+            return
+      }
 
-      die "Unexpected symbol" unless lc($data->{symbol}) eq lc($symbol);
-
-      ### data     : $data
+      if ( $symbol =~ /:us/ix ) {
+            $info{$symbol, 'currency'} = 'USD'; }
+      else {$info{$symbol, 'currency'} = 'CAD'}
 
       $info{$symbol, 'name'}       = $data->{name};
       $info{$symbol, 'exchange'}   = $data->{exchangeName};
@@ -93,11 +104,13 @@ sub tmx {
       $info{$symbol, 'cap'}        = $data->{MarketCap};
       $info{$symbol, 'close'}      = $data->{prevClose};
       $info{$symbol, 'year_range'} = $data->{weeks52low} . ' - ' . $data->{weeks52high};
+      $info{$symbol, 'last'}       = $data->{price};
       $info{$symbol, 'symbol'}     = $data->{symbol};
+      $info{$symbol, 'p_change'}   = $data->{percentChange};
+      $quoter->store_date(\%info, $symbol, {today => 1});
 
       $info{$symbol, 'success'} = 1;
     };
-    
     if ($@) {
       my $error = "TMX failed: $@";
       $info{$symbol, 'success'}  = 0;
@@ -136,7 +149,7 @@ Finance::Quote->new().
 =head1 LABELS RETURNED
 
 The following labels are returned by Finance::Quote::TMX: name,
-exchange, volume, open, high, low, cap, close, year_range, symbol
+exchange, volume, open, high, low, cap, close, year_range, symbol, last, p_change
 
 =head1 TERMS & CONDITIONS
 
