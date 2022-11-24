@@ -288,7 +288,7 @@
   added: TBD
   changed: 2022-11-21
   removed: ~
-  urls:
+  urls: https://www.fondsweb.com/de/
   apikey: false
   notes: ~
   testfile: fondsweb.t
