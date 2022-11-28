@@ -246,11 +246,14 @@
 - module: CurrencyRates/AlphaVantage.pm
   state: working
   Added: TBD
-  changed: 2022-09-27
+  changed: 2022-11-23
   removed: ~
-  urls: https://www.alphavantage.co/query?function=FX_DAILY
+  urls: https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE
   apikey: true
-  notes: Recently modified for Issue #229 in PR #230
+  notes: |
+    Recently modified for Issue #229 in PR #230
+    The commit/PR was reverted 2022-11-23 (PR #249), AlphaVantage changed
+    the CURRENCY_EXCHANGE_RATE to no longer require a premium API Key.
   testfile: currency.t
   testcases:
     - GBP IQD
@@ -689,6 +692,21 @@
   testfile: TBD
   testcases:
 #
+- module: TMX.pm
+  state: working
+  added: TBD
+  changed: 2022-11-23
+  removed: ~
+  urls: https://app-money.tmx.com/graphql
+  apikey: false
+  notes: ~
+  testfile: tmx.t
+  testcases:
+    - STN
+    - BCE
+    - BMO
+    - HBI:US
+#
 - module: TNetuk.pm
   state: TBD
   added: TBD
@@ -741,17 +759,6 @@
     - L2060
     - L2065
     - LINCOME
-#
-- module: TSX.pm
-  state: TBD
-  added: TBD
-  changed: ~
-  removed: ~
-  urls:
-  apikey: false
-  notes: ~
-  testfile: TBD
-  testcases:
 #
 - module: Tdefunds.pm
   state: TBD
