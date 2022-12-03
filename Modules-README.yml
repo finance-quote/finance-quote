@@ -283,6 +283,22 @@
     - DE0008474511
     - LU0051755006
 #
+- module: Fondsweb.pm
+  state: working
+  added: TBD
+  changed: 2022-11-21
+  removed: ~
+  urls: https://www.fondsweb.com/de/
+  apikey: false
+  notes: ~
+  testfile: fondsweb.t
+  testcases:
+    - LU0804734787
+    - DE0008491002
+    - DE0008474503
+    - DE0008491051
+    - DE0009805507
+#
 - module: FTPortfolios.pm
   state: failing
   added: TBD
