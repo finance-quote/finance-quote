@@ -38,6 +38,7 @@ sub labels {
 
 sub methods {
   return ( tmx    => \&tmx,
+           tsx => \&tmx,
            canada => \&tmx );
 }
 
