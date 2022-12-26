@@ -1,7 +1,7 @@
 {{$NEXT}}
 	* Fix to AEX.pm - Issue #235 - PR #244
 	* New modules Sinvestor.pm Tradegate.pm and XETRA.pm PR #243
-	* Updates to TMX.pm (Toronto Stock Exchange) PR #248
+	* Updates to TMX.pm (Toronto Stock Exchange) PR #248 and #253
 	* Reverted API change (PR #230) in
 	  CurrencyRates/AlphaVantage.pm PR #249
 	* Fix to Fondsweb.pm PR #250
