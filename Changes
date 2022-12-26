@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.54      2022-12-26 15:25:02-08:00 America/Los_Angeles
 	* Fix to AEX.pm - Issue #235 - PR #244
 	* New modules Sinvestor.pm Tradegate.pm and XETRA.pm PR #243
 	* Updates to TMX.pm (Toronto Stock Exchange) PR #248 and #253
