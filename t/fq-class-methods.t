@@ -1,8 +1,12 @@
 #!/usr/bin/perl -w
 use strict;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use Test::More;
 
-plan tests => 7;
+plan tests => 8;
 
 use Finance::Quote;
 ok(1, "Finance::Quote loaded");
@@ -26,3 +30,13 @@ ok( Finance::Quote::get_default_timeout() == 4, "check set/get default timeout")
 
 my $t4 = Finance::Quote->new();
 ok( $t4->get_timeout() == 4, "check default timeout was used");
+
+
+my %features = Finance::Quote::get_features();
+### [<now>] features: %features
+ok(exists $features{'quote_methods'}
+   and exists $features{'quote_modules'}
+   and exists $features{'currency_modules'}
+   and exists $features{'parameters'}, "features keys");
+
+

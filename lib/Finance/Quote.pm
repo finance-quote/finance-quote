@@ -251,7 +251,9 @@ sub _load_modules {
 
         foreach my $method (keys %methodhash) {
           push (@{$METHODS{$method}},
-              { function => $methodhash{$method},
+              { name => $module,
+              modpath => $modpath,
+              function => $methodhash{$method},
               labels   => $labelhash{$method},
               currency_fields => \@currency_fields});
         }
@@ -313,6 +315,48 @@ sub get_methods {
   # Create a dummy object to ensure METHODS is populated
   my $t = Finance::Quote->new();
   return(wantarray ? keys %METHODS : [keys %METHODS]);
+}
+
+# return hash:
+#
+#  quote_methods => hash of
+#      method_name => array of module names
+#  quote_modules => hash of
+#      module_name => array of parameters
+#  currency_modules => hash of
+#      module_name =>  array of parameters
+#
+# { 
+#    'quote_methods' => {'group' => ['module', 'module'], ...},
+#    'quote_modules' => {'abc' => ['API_KEY'], ...},
+#    'currency_modules' => {'xyz' => [], 'lmn' => ['USER_NAME', 'API_KEY']},
+# } 
+
+sub get_features {
+  # Create a dummy object to ensure METHODS is populated
+  my $t = Finance::Quote->new(currency_rates => {order => \@CURRENCY_RATES_MODULES});
+  my $baseclass = ref $t;
+
+  my %feature = (
+    'quote_methods' => {map {$_, [map {$_->{name}} @{$METHODS{$_}}]} keys %METHODS},
+    'quote_modules' => {map {$_, []} @MODULES},
+    'currency_modules' => {map {$_, []} @CURRENCY_RATES_MODULES},
+  );
+
+  my %mods = ('quote_modules' => $baseclass,
+              'currency_modules' => "${baseclass}::CurrencyRates");
+
+  while (my ($field, $base) = each %mods) {
+    foreach my $name (keys %{$feature{$field}}) {
+      my $modpath = "${base}::${name}";
+
+      if ($modpath->can("parameters")) {
+        push (@{$feature{$field}->{$name}}, $modpath->parameters());
+      }
+    }
+  }
+
+  return %feature;
 }
 
 # =======================================================================
