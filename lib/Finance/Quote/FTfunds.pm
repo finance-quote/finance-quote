@@ -182,7 +182,7 @@ DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 		my $currency;
 		my $price;
 		if ($webdoc->content =~
-		m[<span class="mod-ui-data-list__label">Price [(]([A-Z]{3})[)]</span><span class="mod-ui-data-list__value">([\.\,0-9]*)</span>]  )
+		m[<span class="mod-ui-data-list__label"[^>]*>Price [(]([A-Z]{3})[)]</span><span class="mod-ui-data-list__value">([\.\,0-9]*)</span>]  )
         {
 			$currency = $1;
 			$price    = $2;
