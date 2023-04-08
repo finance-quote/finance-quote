@@ -32,7 +32,7 @@ our @EXPORT_OK = qw(morningstarjp methods labels);
 
 # NAV information (basis price)
 $MORNINGSTAR_JP_URL =
-  ('https://www.morningstar.co.jp/FundData/DownloadStdYmd.do?fnc=');
+  ('https://www.wealthadvisor.co.jp/FundData/DownloadStdYmd.do?fnc=');
 
 sub methods { return ( morningstarjp => \&morningstarjp ); }
 sub labels  { return ( morningstarjp => [qw/symbol date nav/] ); }
@@ -147,7 +147,7 @@ This documentation describes version 1.00 of MorningstarJP.pm, October 13, 2012.
 =head1 DESCRIPTION
 
 This module obtains information from Morningstar (Japan),
-L<http://www.morningstar.co.jp/>.
+L<http://www.wealthadvisor.co.jp/>.
 
 Information returned by this module is governed by Morningstar
 (Japan)'s terms and conditions.
@@ -157,7 +157,7 @@ Information returned by this module is governed by Morningstar
 Use the numeric symbol shown in the URL on the "SnapShot" page
 of the security of interest.
 
-e.g. For L<http://www.morningstar.co.jp/FundData/SnapShot.do?fnc=2009100101>,
+e.g. For L<http://www.wealthadvisor.co.jp/FundData/SnapShot.do?fnc=2009100101>,
 one would supply 2009100101 as the symbol argument on the fetch API call.
 
 =head1 LABELS RETURNED
@@ -197,6 +197,6 @@ GNU General Public License for more details.
 
 =head1 SEE ALSO
 
-Morningstar (Japan), L<http://www.morningstar.co.jp/>
+Morningstar (Japan), L<http://www.wealthadvisor.co.jp/>
 
 =cut
