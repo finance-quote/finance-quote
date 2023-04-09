@@ -218,15 +218,21 @@
   testcases:
 #
 - module: FTfunds.pm
-  state: TBD
+  state: working
   added: TBD
-  changed: ~
+  changed: 2023-04-09
   removed: ~
   urls:
+    - https://markets.ft.com/data/funds/tearsheet/summary?s=
+    - http://funds.ft.com/UnlistedTearsheet/Summary?s=
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: ftfunds.t
   testcases:
+    - GB0031834814
+    - GB0030881337
+    - GB0003865176
+    - GB00B7W6PR65
 #
 - module: Fidelity.pm
   state: TBD
