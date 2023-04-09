@@ -1,5 +1,6 @@
 {{$NEXT}}
 	* URL Change for MorningstarJP. Issue #261
+	* Regex fix in FTfunds.pm and changed test cases ftfunds.t. PR #262
 
 1.54      2022-12-26 15:25:02-08:00 America/Los_Angeles
 	* Fix to AEX.pm - Issue #235 - PR #244
