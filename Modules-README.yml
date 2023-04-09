@@ -322,7 +322,7 @@
     - https://markets.ft.com/data/funds/tearsheet/summary?s=
     - http://funds.ft.com/UnlistedTearsheet/Summary?s=
   apikey: false
-  notes:
+  notes: 
     - Added date is an estimate. According to Git log it first appeared in commit fdd204b.
   testfile: ftfunds.t
   testcases:
