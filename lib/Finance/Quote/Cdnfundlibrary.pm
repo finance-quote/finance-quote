@@ -20,13 +20,17 @@ use vars qw( $FUNDLIB_URL $FUNDLIB_MAIN_URL);
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
+use JSON;
 
-# VERSION
+use warnings;
+use Time::Piece;
+
+#VERSION
 
 # URLs of where to obtain information.
 
 $FUNDLIB_URL =
-("http://www.fundlibrary.com/funds/db/_fundcard.asp?t=2&id=");
+("https://www.fundlibrary.com/MutualFunds/GetFundSearchResults?cifscCategoryId=0&fundCompanyId=0&fundTypeId=0&isGradeA=true&isGradeB=true&isGradeC=true&isGradeD=true&isGradeE=true&sortBy=Default&page=0&searchText=");
 $FUNDLIB_MAIN_URL=("http://www.fundlibrary.com");
 
 sub methods { return (canadamutual => \&fundlibrary,
@@ -34,10 +38,12 @@ sub methods { return (canadamutual => \&fundlibrary,
 
 {
     my @labels = qw/method source link name currency last date isodate nav yield
-		    price net p_change/;
+        price net p_change/;
     sub labels { return (canadamutual => \@labels,
                           fundlibrary => \@labels); }
 }
+
+sub  trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
 
 #
 # =======================================================================
@@ -60,58 +66,71 @@ sub fundlibrary   {
     foreach (@symbols) {
 
       $mutual = $_;
+
       $url = "$FUNDLIB_URL$mutual";
       $reply = $ua->request(GET $url);
-      $te = HTML::TableExtract->new(headers => ["Date", "NAVPS"],
-				   slice_columns => 0);
+
+      $te = new HTML::TableExtract(headers => ["NAVPS"],
+           slice_columns => 0);
 
       # Make sure something is returned  ##CAN exit more gracefully - add later##
       return unless ($reply->is_success);
 
-      $te->parse($reply->content);
+      my $json = JSON->new;
+      my $data = decode_json($reply->decoded_content);
+
+#     If the fund is not found, "PriceAsOfDateString" is "0001-01-01T00:00"
+      if ( $$data{'PriceAsOfDateString'} eq "0001-01-01T00:00" )
+      {
+          $fundquote {$mutual,"success"} = 0;
+          $fundquote {$mutual,"errormsg"} = "Fund name $mutual not found";
+          next;
+      }
+
+      my $t = Time::Piece->strptime($$data{'PriceAsOfDateString'}, "%Y-%m-%dT%T");
+
+      $te->parse($$data{'SearchFundResultView'});
 
       # Check for a page without tables
       # This gets returned when a bad symbol name is given
       unless ( $te->tables > 0 )
       {
-	$fundquote {$mutual,"success"} = 0;
-	$fundquote {$mutual,"errormsg"} = "Fund name $mutual not found";
-	next;
+        $fundquote {$mutual,"success"} = 0;
+        $fundquote {$mutual,"errormsg"} = "Fund name $mutual not found";
+        next;
       }
-
-      # Fund name
-      $reply->content =~ m#<div\s+class="tSmallTitle">([^<]+)</div>#;
-      $fundquote {$mutual, "name"} = $1;
 
       @rows = $te->rows;
       if(@rows) {
-          $fundquote {$mutual, "symbol"} = $mutual;
-          $fundquote {$mutual, "currency"} = "CAD";
-          $fundquote {$mutual, "source"} = $FUNDLIB_MAIN_URL;
-          $fundquote {$mutual, "link"} = $url;
-          $fundquote {$mutual, "method"} = "fundlibrary";
+        $row = $rows[1];
 
-          # Fund price and date
-	  $row = $rows[1];
-          $fundquote {$mutual, "price"} =  $$row[2];
-          $fundquote {$mutual, "nav"} = $$row[2];
-          $fundquote {$mutual, "last"} = $$row[2];
-          $fundquote {$mutual, "net"} = $$row[3];
-          $fundquote {$mutual, "p_change"} = $$row[4];
+        $fundquote {$mutual, "name"} = trim($$row[0]);
+        $fundquote {$mutual, "symbol"} = $mutual;
+        $fundquote {$mutual, "currency"} = "CAD";
+        $fundquote {$mutual, "source"} = $FUNDLIB_MAIN_URL;
+        $fundquote {$mutual, "link"} = $url;
+        $fundquote {$mutual, "method"} = "fundlibrary";
 
-	  $quoter->store_date(\%fundquote, $mutual, {usdate => $$row[0]});
+        # Fund price and date
 
-          # Assume things are fine here.
-          $fundquote {$mutual, "success"} = 1;
+        $fundquote {$mutual, "price"} =  trim($$row[2]);
+        $fundquote {$mutual, "nav"} = trim($$row[2]);
+        $fundquote {$mutual, "last"} = trim($$row[2]);
+        $fundquote {$mutual, "net"} = trim($$row[3]);
+        $fundquote {$mutual, "p_change"} = trim($$row[4]);
 
-          # Performance yield
-          $fundquote {$mutual, "yield"} = $$row[5] if ($$row[5] ne "--");
+        $quoter->store_date(\%fundquote, $mutual, {usdate => $t->strftime("%m-%d-%Y")});
+
+        # Assume things are fine here.
+        $fundquote {$mutual, "success"} = 1;
+
+        # Performance yield
+        $fundquote {$mutual, "yield"} = trim($$row[5]) if ($$row[5] ne "--");
       }
       else {
-          $fundquote {$mutual, "success"} = 0;
-          $fundquote {$mutual, "errormsg"} = "Fund Not Found";
+        $fundquote {$mutual, "success"} = 0;
+        $fundquote {$mutual, "errormsg"} = "Fund Not Found";
       }
-
 
    } #end symbols
 

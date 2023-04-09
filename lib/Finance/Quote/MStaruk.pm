@@ -157,7 +157,7 @@ sub mstaruk_fund  {
 
 		my ($currency, $date, $price, $pchange);
 		if ($webdoc =~
-		m[<td class="line heading">NAV<span class="heading"><br />([0-9]{2}/[0-9]{2}/[0-9]{4})</span>.*([A-Z]{3}).([0-9\.]+).*>([0-9\.\-]+)] )
+		m[<td class="line heading">NAV<span class="heading"><br />([0-9]{2}/[0-9]{2}/[0-9]{4})</span>.*([A-Z]{3}).([0-9\.]+).*Day Change[^%]*>([0-9\.\-]+)] )
         {
 
             $date = $1;
@@ -266,7 +266,7 @@ process.
 Funds are identified by their ISIN code.
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "mstaruk" in the argument
+also possible to load it explicitly by placing "mstaruk" in the argument
 list to Finance::Quote->new().
 
 Information obtained by this module may be covered by funds.ft.com

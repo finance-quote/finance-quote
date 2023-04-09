@@ -9,15 +9,21 @@ $Version$
 	1. Introduction
         2. Setup a Development Environment
 	3. How to write a Finance::Quote module
-		3.1. The package name.
-		3.2. The methods() subroutine.
-		3.3. The functions specified by methods().
-		3.4. Currency.
-		3.5. Thngs to avoid.
-		3.6. Using your new module.
-	4. How to contribute your module to the world
-	5. How to find out more
-	6. How to join the mailing lists
+		3.1. The package name
+		3.2. The methods() subroutine
+		3.3. The functions specified by methods()
+		3.4. Currency
+                3.5. Development & Debugging Code
+                3.6. Dates
+		3.7. Things to avoid
+		3.8. Using your new module
+        4. How to write a Finance::Quote::CurrencyRates module
+                4.1. The package name
+                4.2. The new() constructor
+                4.3. The multipliers() function
+	5. How to contribute your module to the world
+	6. How to find out more
+	7. How to join the mailing lists
 
 
 1. Introduction
@@ -51,10 +57,13 @@ following steps provide a recipe for setup.
     $ perlbrew install-cpanm
     $ cpanm install Dist::Zilla
     
-    # inside the finance-quote directory
+    # inside the finance-quote directory 
+    # remove --missing to install missing & upgrade existing required package
   
     $ dzil authordeps --missing | cpanm --notest
     $ dzil listdeps --missing | cpanm --notest
+
+    $ cpanm install Data::Dumper::Perltidy Smart::Comments
   
   C. Test out finance-quote
   
@@ -77,6 +86,11 @@ following steps provide a recipe for setup.
     # To do an online test for one module 
 
     $ ONLINE_TEST=1 dzil run prove -lv t/iexcloud.t
+
+
+    # Use prove to during test development - it is fast
+
+    $ prove -lv t/fq-class-methods.t
 
 
 3. How to write a Finance::Quote module
@@ -265,9 +279,40 @@ to use the defaults, but also add some of your own:
 In the example above, the default fields would be available for currency
 conversion, but the "commission" field would also be converted.
 
-3.5. Dates
-----------
+3.5 Development & Debugging Code
+--------------------------------
+There are multiple ways to include extra code in Perl modules to facilitate
+development and debugging. For Finance::Quote modules, please use the following
+strategy that uses a combination of a DEBUG constant and the Smart::Comments
+module. If DEBUG is in the environment and set to a value that Perl evaluates
+to true, then Smart::Comments is active and code blocks wrapped with if(DEBUG)
+are also active. Otherwise, all the debugging code disappears during
+compilation.
 
+  use strict;                          # use strict & warnings FIRST
+  use warnings;
+
+  use constant DEBUG => $ENV{DEBUG};   # create a constant from the environment
+  
+  use if DEBUG, 'Smart::Comments';     # conditionally use Smart::Comments
+  use if DEBUG, 'Another::Module';     # example module only needed for debugging
+ 
+  use LWP::UserAgent;                  # and finally production module dependencies
+  
+  my %h = ('a' => 1);                  # just an example variable
+  
+  # These first two lines are always a comment.  The third line
+  # prints a debugging string if DEBUG is in the environment.
+  ### [<now>] h: \%h
+  
+  # For more complicated debugging, the following if-block
+  # will disappear during compilation because of constant folding.
+  if (DEBUG) {
+    print "More complex debugging code\n";
+  }
+
+3.6. Dates
+----------
 Do not parse dates directly in your module.  Instead you should use
 the function $q->store_date(), which handles a variety of date
 formats.  In its simplest form, you simply tell the function what
@@ -283,8 +328,7 @@ function this way:
 
 See the documentation in Quote.pm for more information.
 
-
-3.6. Things to avoid
+3.7. Things to avoid
 --------------------
 Some sources of information will provide more stock information than
 requested.  Some code may rely upon your code only returning information
@@ -292,7 +336,7 @@ about the stocks that the caller requested.  As such, you should
 never return information about stocks that were not requested, even
 if you fetch and/or process that information.
 
-3.7. Using your new module
+3.8. Using your new module
 --------------------------
 Using your new module is easy.  Normally when using Finance::Quote you'd
 do something like the following:
@@ -322,8 +366,107 @@ This mainly exists to maintain compatibility with previous versions of
 Finance::Quote.
 
 
-4. How to contribute your module to the world
+4. How to write a Finance::Quote::CurrencyRates module
+======================================================
+
+Currency Rate modules carryout a single task: Given two currencies, return
+multipliers that describe the relative value of the currencies. In the
+simplest case, one multiplier is "1.0" and the other multiplier is the exchange
+rate between the two currencies. In the other case, the multipliers reflect the
+relative value of each currency to a third base currency.
+
+For example, on 2020-10-30, the European Central Bank reported that 1.1698 USD
+(United States Dollar) was equivalent to 1.00 EUR (Euro). It also reported that
+0.90208 GBP (Pound Sterling) was equivalent to 1.00 EUR. To convert from USD to
+GBP, the following from/to multipliers are equivalent:
+
+  from       to         Base Currency
+  --------   --------   -------------
+  1.16980    0.90208    EUR
+  1.00000    0.77114    USD
+  1.29678    1.00000    GBP
+
+Depending on the source of the currency rates, it may be more convenient for a
+currency rate module to return multipliers that are relative to a third
+currency (first row), the conversion rate (the second row), or the inverse
+conversion rate (the third row).
+
+Currency rate modules should avoid carrying out arithmetic and leave it to
+Finance::Quote to use the multipliers to compute the final conversion value.
+
+4.1. The package name
+---------------------
+
+Currency rate modules belong in the Finance::Quote::CurrencyRates namespace and
+the name of the module should be descriptive. Use PascalCase (upper CamelCase)
+for the module name.
+
+4.2. The new() constructor
+--------------------------
+
+Currency rate modules are called from a Finance::Quote quoter object when
+currency conversion is either explicitly requested from a caller or to convert
+a fetched security price to a user specified currency. When instantiating a
+quoter object, the caller may pass module specific parameters. Suppose the
+currency rate module ExampleRates requires an API key and also optionally
+supports caching rates during the lifetime of the quoter object. Then the
+code
+
+    my $q = Finance::Quote->new('currency_rates' => 
+                                {order        => ['ExampleRates', 'ECB'],
+                                 examplerates => {API_KEY => 'x01234566', 
+                                                  cache   => True}});
+
+instantiates a quoter that uses ExampleRates first and falls back the ECB
+for currency rates. When ExampleRates is used, the API_KEY can cache options
+are configured through a module specific hash.
+
+Finance::Quote passes just the hash containing the API_KEY and cache key/value
+pairs to ExampleRates->new() as a hash reference. If the caller does not
+specify an ExampleRates key in the currency_rates hash, then ExampleRates->new()
+is called with no arguments. ExamplesRates may, but is not required, to 
+alternately read the API key from an environment variable.
+
+Clearly document all currency rate module options in the POD documentation for
+the module.
+
+4.3. The multipliers() function
+-------------------------------
+
+Finance::Quote calls the currency rate object method multipliers() with the
+arguments (object, user_agent, from, to), where
+
+    object was previously instantiated with a call to new()
+    user_agent is a LWP::UserAgent
+    from is an ISO currency code
+    to is an ISO currency code
+
+multipliers() must a pair of multipliers (from_multiplier, to_multiplier),
+where
+
+    from_multiplier is a floating point value 
+    to_multiplier is a floating point value
+
+and to_multiplier/from_multiplier will convert a value in currency "from"
+into currency "to".
+
+On error, multipliers() must either return undef or throw and exception
+with die().
+
+
+5. How to contribute your module to the world
 =============================================
+
+Check list:
+
+  o Created a well-named module file in the Finance directory tree
+  o Included POD documentation at the bottom of module file
+  o Included a VERSION comment just *after* the use module statements
+  o Added the module name in alphabetical order to the @MODULES or @CURRENCY_MODULES variable in Quote.pm
+  o Added the module name in alphabetical order in the SEE ALSO section of the Quote.pm POD
+  o Created a well-named test file in the t/ directory, including a test that succeeds and a test that fails
+  o Ensure tests 00-store-date.t, 01-pod.t, 02-pod-coverage.t, 03-kwalitee.t, 04-critic.t, 05-data-dumper.t pass
+  o Added module information in alphabetical order to the Modules-README.yml file
 
 Contributions to Finance-Quote are best presented as pull requests on GitHub.com.  
 
@@ -335,12 +478,11 @@ Contributions to Finance-Quote are best presented as pull requests on GitHub.com
   F. Click "Compare Across Forks"
   G. Select the appropriate commits and create the merge request
 
-
 Contact developers at finance-quote-devel@sourceforge.net to discuss
 new modules, ask questions, or get help opening a merge request.
 
 
-5. How to find out more
+6. How to find out more
 =======================
 The Finance::Quote GitHub page is located at
 
@@ -349,7 +491,8 @@ The Finance::Quote GitHub page is located at
 and contains information about the project and links to older SourceForge
 documentation.
 
-6. How to join the mailing lists
+
+7. How to join the mailing lists
 ================================
 
 There are two mailing lists for Finance::Quote.  These can both be accessed

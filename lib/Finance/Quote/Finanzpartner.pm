@@ -18,69 +18,79 @@
 package Finance::Quote::Finanzpartner;
 
 use strict;
-use HTML::TableExtract;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
+use Web::Scraper;
+use Encode;
 
 # VERSION
 
-my $FINANZPARTNER_URL = "http://www.finanzpartner.de/fi/";
+my $FINANZPARTNER_URL = "https://www.finanzpartner.de/fi/";
 
 sub methods {return (finanzpartner        => \&finanzpartner);}
 sub labels { return (finanzpartner=>[qw/name date price last method/]); } # TODO
 
-# Trim leading and tailing whitespaces (also non-breakable whitespaces)
-sub trim
-{
-	$_ = shift();
-	s/^\s*//;
-	s/\s*$//;
-	s/&nbsp;//g;
-	return $_;
-}
-
-# Convert number separators to US values
-sub convert_price {
-	$_ = shift;
-        tr/.,/,./ ;
-	return $_;
-}
-
 sub finanzpartner
 {
-	my $quoter = shift;     # The Finance::Quote object.
-	my @stocks = @_;
-	my $ua = $quoter->user_agent();
-	my %info;
+  my $quoter = shift;     # The Finance::Quote object.
+  my @stocks = @_;
+  my $ua = $quoter->user_agent();
+  my %info;
 
-	foreach my $stock (@stocks) {
-		$ua->agent('Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)');
-		my $response = $ua->get($FINANZPARTNER_URL . $stock . '/');
-		$info{$stock,"success"} = 0;
-		if (!$response -> is_success()) {
-			$info{$stock,"errormsg"} = "HTTP failure";
-		} else {
-			my $te = HTML::TableExtract->new(depth => 0, count => 2);
-			$te->parse($response->content);
-			my $table = $te->first_table_found;
+  foreach my $stock (@stocks) {
+    eval {
+      my @headers = (
+          "authority"                 => "www.finanzpartner.de",
+          "sec-ch-ua"                 => '"Google Chrome";v="87", " Not;A Brand";v="99", "Chromium";v="87"',
+          "sec-ch-ua-mobile"          => "?0",
+          "upgrade-insecure-requests" => "1",
+          "user-agent"                => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
+          "accept"                    => "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+          "accept-language"           => "en-US,en;q=0.9",
+          "sec-ch-ua"                 => "\"Google Chrome\";v=\"87\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"87\"",
+          "sec-fetch-dest"            => "document",
+          "sec-fetch-mode"            => "navigate",
+          "sec-fetch-site"            => "none",
+          );
 
-			if (trim($table->cell(1,0)) ne 'Fondsname:') {
-				$info{$stock,"errormsg"} = "Couldn't parse website";
-			} else {
-				$info{$stock,"name"} = $table->cell(1,1);
-				my $quote = $table->cell(6,1);
-				my @part = split(/\s/, $quote);
-				$info{$stock,"currency"} = $part[1];
-				$part[2] =~ s/\(//g;
-				$part[2] =~ s/\)//g;
-				$quoter->store_date(\%info, $stock, {eurodate => $part[2]});
-				$info{$stock,"price"} = convert_price(trim($part[0]));
-				$info{$stock,"last"} = $info{$stock,"price"};
-				$info{$stock,"success"} = 1;
-				$info{$stock,"method"} = "finanzpartner";
-				$info{$stock,"symbol"} = $stock;
-			}
-		}
-	}
-	return wantarray ? %info : \%info;
+      my $url = $FINANZPARTNER_URL . $stock . '/';
+
+      ### url : $url
+
+      my $reply = $ua->get($url, @headers);
+
+      my $processor = scraper {
+        process 'span.kurs-m.pull-left', 'price[]' => 'TEXT';
+        process 'h1 > small', 'isin[]'             => 'TEXT';
+        process 'div.col-md-2', 'date[]'           => 'TEXT';
+        process 'h1 > span', 'name[]'              => 'TEXT';
+      };
+ 
+      my $data = $processor->scrape(decode_utf8 $reply->content);
+
+      ### data: $data
+      
+      die "Unexpected price format" unless exists $data->{price} and $data->{price}->[0] =~ /^([0-9.]+) ([A-Z]+)$/;
+      $info{$stock, "last"}     = $1;
+      $info{$stock, "currency"} = $2;
+      
+      die "Unexpected date format" unless exists $data->{date} and $data->{date}->[0] =~ /([0-9]{2}[.][0-9]{2}[.][0-9]{4})$/;
+      $quoter->store_date(\%info, $stock, {eurodate => $1});
+        
+      $info{$stock,"method"}  = "finanzpartner";
+      $info{$stock,"symbol"}  = $stock;
+      $info{$stock,"success"} = 1;
+    };
+
+    if ($@) {
+      $info{$stock,"errormsg"} = $@;
+      $info{$stock,"success"}  = 0;
+    }
+  }
+  
+  return wantarray ? %info : \%info;
 }
 
 1;
@@ -91,11 +101,11 @@ Finance::Quote::Finanzpartner - Obtain quotes from Finanzpartner.de.
 
 =head1 SYNOPSIS
 
-    use Finance::Quote;
+use Finance::Quote;
 
-    $q = Finance::Quote->new("Finanzpartner");
+$q = Finance::Quote->new("Finanzpartner");
 
-    %info = $q->fetch("finanzpartner","LU0055732977");
+%info = $q->fetch("finanzpartner","LU0055732977");
 
 =head1 DESCRIPTION
 

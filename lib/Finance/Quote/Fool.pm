@@ -27,14 +27,14 @@
 
 package Finance::Quote::Fool;
 
-# VERSION
-
 use strict;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 use HTML::TreeBuilder;
 use Text::Template;
 use Encode qw(decode);
+
+# VERSION
 
 my $URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'http://caps.fool.com/Ticker/{$symbol}.aspx');
 
@@ -132,9 +132,9 @@ Finance::Quote::Fool - Obtain quotes from the Motley Fool web site.
 This module obtains information from the Motley Fool website
 (http://caps.fool.com). The site provides date from NASDAQ, NYSE and AMEX.
 
-This module is loaded by default on a Finance::Quote object.  It's also
-possible to load it explicity by placing "Fool" in the argument list to
-Finance::Quote->new().
+This module is loaded by default on a Finance::Quote object.  It's
+also possible to load it explicitly by placing "Fool" in the argument
+list to Finance::Quote->new().
 
 Information returned by this module is governed by the Motley Fool's terms and
 conditions.

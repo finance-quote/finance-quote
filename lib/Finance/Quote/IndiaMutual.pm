@@ -3,9 +3,11 @@
 # Version 0.1 preliminary version using Cdnfundlibrary.pm v0.4 as an example
 
 package Finance::Quote::IndiaMutual;
-require 5.010;
 
 use strict;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
 
 use vars qw( $AMFI_URL $AMFI_NAV_LIST $AMFI_MAIN_URL);
 
@@ -26,12 +28,12 @@ my $cachedir = $ENV{TMPDIR} // $ENV{TEMP} // '/tmp/';
 $AMFI_NAV_LIST = $cachedir."amfinavlist.txt";
 
 sub methods { return (indiamutual => \&amfiindia,
-		      amfiindia => \&amfiindia); }
+                      amfiindia => \&amfiindia); }
 
 {
     my @labels = qw/method source link name currency date isodate nav rprice sprice/;
     sub labels { return (indiamutual => \@labels,
-			 amfiindia => \@labels); }
+                         amfiindia => \@labels); }
 }
 
 #
@@ -47,60 +49,74 @@ sub amfiindia   {
     return unless @symbols;
 
     # Local Variables
-    my(%fundquote, %allquotes);
+    my %fundquote;
     my($ua, $url, $reply);
 
     $ua = $quoter->user_agent;
 
     $url = "$AMFI_URL";
 
+    ### cache : $AMFI_NAV_LIST
+  
     $reply = $ua->mirror($url, $AMFI_NAV_LIST);
 
     # Make sure something is returned
     unless ($reply->is_success or $reply->code == RC_NOT_MODIFIED) {
-	foreach my $symbol (@symbols) {
-	    $fundquote{$symbol,"success"} = 0;
-	    $fundquote{$symbol,"errormsg"} = "HTTP failure";
-	}
-	return wantarray ? %fundquote : \%fundquote;
+    foreach my $symbol (@symbols) {
+        $fundquote{$symbol,"success"} = 0;
+        $fundquote{$symbol,"errormsg"} = "HTTP failure";
+    }
+    return wantarray ? %fundquote : \%fundquote;
     }
 
+    my $nav_fh;
+    open $nav_fh, '<', $AMFI_NAV_LIST or die "Unexpected error in opening file: $!\n";
 
-    open NAV, $AMFI_NAV_LIST or die "Unexpected error in opening file: $!\n";
+    # Create a hash of all stocks requested
+    my %symbolhash;
+    foreach my $symbol (@symbols)
+    {
+        $symbolhash{$symbol} = 0;
+    }
+    my $csvhead;
+    my @headhash;
 
     #Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Net Asset Value;Date
-    while (<NAV>) {
-	next if !/\;/;
-	chomp;
-	s/\r//;
-        my ($symbol1, $symbol2, $symbol3, @data) = split /\s*\;\s*/;
-	$allquotes{$symbol1} = \@data;
-	if ($symbol2 ne "-") {
-	    $allquotes{$symbol2} = \@data;
-	}
-	if ($symbol3 ne "-") {
-	    $allquotes{$symbol3} = \@data;
-	}
+    while (<$nav_fh>) {
+    next if !/\;/;
+    chomp;
+    s/\r//;
+        my ($symbol1, $symbol2, $symbol3, $name, $nav, $date) = split /\s*\;\s*/;
+    my $symbol;
+    if (exists $symbolhash{$symbol1}) {
+        $symbol = $symbol1;
     }
-    close(NAV);
+    elsif(exists $symbolhash{$symbol2}) {
+        $symbol = $symbol2;
+    }
+    elsif(exists $symbolhash{$symbol3}) {
+        $symbol = $symbol3;
+    }
+    else {
+        next;
+    }
+    $fundquote{$symbol, "symbol"} = $symbol;
+    $fundquote{$symbol, "currency"} = "INR";
+    $fundquote{$symbol, "source"} = $AMFI_MAIN_URL;
+    $fundquote{$symbol, "link"} = $url;
+    $fundquote{$symbol, "method"} = "amfiindia";
+    $fundquote{$symbol, "name"} = $name;
+    $fundquote{$symbol, "nav"} = $nav;
+    $quoter->store_date(\%fundquote, $symbol, {eurodate => $date});
+    $fundquote{$symbol, "success"} = 1;
+    }
+    close($nav_fh);
 
     foreach my $symbol (@symbols) {
-        $fundquote{$symbol, "symbol"} = $symbol;
-        $fundquote{$symbol, "currency"} = "INR";
-	$fundquote{$symbol, "source"} = $AMFI_MAIN_URL;
-	$fundquote{$symbol, "link"} = $url;
-	$fundquote{$symbol, "method"} = "amfitable";
-
-	my $data = $allquotes{$symbol};
-	if ($data) {
-            $fundquote{$symbol, "name"} = $data->[0];
-            $fundquote{$symbol, "nav"} = $data->[1];
-            $quoter->store_date(\%fundquote, $symbol, {eurodate => $data->[2]});
-            $fundquote{$symbol, "success"} = 1;
-	} else {
-	    $fundquote{$symbol, "success"} = 0;
-	    $fundquote{$symbol, "errormsg"} = "Fund not found";
-	}
+    unless (exists $fundquote{$symbol, 'success'}) {
+            $fundquote{$symbol, 'success'} = 0;
+            $fundquote{$symbol, 'errormsg'} = 'Fund not found.';
+        }
     }
 
     return wantarray ? %fundquote : \%fundquote;

@@ -20,16 +20,15 @@ package Finance::Quote::IEXCloud;
 
 require 5.005;
 
-# VERSION
-
 use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
 use Text::Template;
 use DateTime::Format::Strptime qw( strptime strftime );
 
-my $IEX_URL     = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://cloud.iexapis.com/v1/stock/{$symbol}/quote?token={$token}');
-my $IEX_API_KEY = $ENV{"IEXCLOUD_API_KEY"};
+# VERSION
+
+my $IEX_URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://cloud.iexapis.com/v1/stock/{$symbol}/quote?token={$token}');
 
 sub methods { 
   return ( iexcloud => \&iexcloud,
@@ -39,7 +38,8 @@ sub methods {
 }
 
 {
-    our @labels = qw/date isodate open high low close volume last/;
+    our @labels = qw/symbol open close high low last volume method isodate currency/;
+
     sub labels {
         return ( iexcloud => \@labels, );
     }
@@ -48,13 +48,19 @@ sub methods {
 sub iexcloud {
     my $quoter = shift;
 
+    my $token = exists $quoter->{module_specific_data}->{iexcloud}->{API_KEY} ? 
+                $quoter->{module_specific_data}->{iexcloud}->{API_KEY}        :
+                $ENV{"IEXCLOUD_API_KEY"};
+
     my @stocks = @_;
     my $quantity = @stocks;
     my ( %info, $reply, $url, $code, $desc, $body );
     my $ua = $quoter->user_agent();
 
+    die "IEXCloud API_KEY not defined.  See documentation." unless defined $token;
+
     foreach my $symbol (@stocks) {
-        $url = $IEX_URL->fill_in(HASH => { symbol => $symbol, token => $IEX_API_KEY});
+        $url = $IEX_URL->fill_in(HASH => { symbol => $symbol, token => $token});
 
         $reply = $ua->request( GET $url);
         $code  = $reply->code;
@@ -83,17 +89,16 @@ sub iexcloud {
 
         $info{ $symbol, 'success' } = 1;
         $info{ $symbol, 'symbol' }  = $symbol;
-        $info{ $symbol, 'open' }    = $quote->{'open'}; 
-        $info{ $symbol, 'close' }   = $quote->{'close'};
-        $info{ $symbol, 'high' }    = $quote->{'high'};
-        $info{ $symbol, 'low' }     = $quote->{'low'};
-        $info{ $symbol, 'last' }    = $quote->{'close'};
-        $info{ $symbol, 'volume' }  = $quote->{'latestVolume'};
+        $info{ $symbol, 'open' }    = $quote->{'open'} if $quote->{'open'}; 
+        $info{ $symbol, 'close' }   = $quote->{'close'} if $quote->{'close'};
+        $info{ $symbol, 'high' }    = $quote->{'high'} if $quote->{'high'};
+        $info{ $symbol, 'low' }     = $quote->{'low'} if $quote->{'low'};
+        $info{ $symbol, 'last' }    = $quote->{'latestPrice'} if $quote->{'latestPrice'};
+        $info{ $symbol, 'volume' }  = $quote->{'latestVolume'} if $quote->{'latestVolume'};
         $info{ $symbol, 'method' }  = 'iexcloud';
        
-        my $iex_date = $quote->{'latestTime'};  # eg. June 20, 2019
-        my $time     = strptime('%b %d, %Y', $iex_date);
-        
+        my $iex_date = $quote->{'latestUpdate'};  # milliseconds since midnight Jan 1, 1970
+        my $time     = strptime('%s', int($iex_date/1000.0));
         my $isodate  = strftime('%F', $time);
         $quoter->store_date( \%info, $symbol, { isodate => $isodate } );
         
@@ -103,4 +108,43 @@ sub iexcloud {
 
     return wantarray() ? %info : \%info;
 }
+1;
 
+=head1 NAME
+
+Finance::Quote::IEXClound - Obtain quotes from https://iexcloud.io
+
+=head1 SYNOPSIS
+
+    use Finance::Quote;
+    
+    $q = Finance::Quote->new('IEXCloud', iexcloud => {API_KEY => 'your-iexcloud-api-key'});
+
+    %info = Finance::Quote->fetch("IBM", "AAPL");
+
+=head1 DESCRIPTION
+
+This module fetches information from https://iexcloud.io.
+
+This module is loaded by default on a Finance::Quote object. It's
+also possible to load it explicitly by placing "IEXCloud" in the argument
+list to Finance::Quote->new().
+
+This module provides the "iexcloud" fetch method.
+
+=head1 API_KEY
+
+https://iexcloud.io requires users to register and obtain an API key, which
+is also called a token.  The token may contain a prefix string, such as 'pk_'
+and then a sequence of random digits.
+
+The API key may be set by either providing a module specific hash to
+Finance::Quote->new as in the above example, or by setting the environment
+variable IEXCLOUD_API_KEY.
+
+=head1 LABELS RETURNED
+
+The following labels may be returned by Finance::Quote::IEXClound :
+symbol, open, close, high, low, last, volume, method, isodate, currency.
+
+=cut

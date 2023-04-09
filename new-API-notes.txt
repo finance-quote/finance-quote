@@ -1,0 +1,96 @@
+Goals
+-----
+
+- backwards compatible
+
+- consistent API with get/set functions for 
+  - failover
+  - fetch_currency
+  - required_labels
+  - timeout
+
+- extend new to be backwards compatible while allowing for named parameters for
+  failover, fetch_currency, required_labels, and timeout, as well as module specific
+  hash references.
+
+
+Example
+-------
+
+$q = Finance::Quote->new(timeout => 30, iex_cloud => {API_KEY => '...'});
+ - or -
+$q = Finance::Quote->new('YahooJSON');
+ - or -
+$q = Finance::Quote->new('IEXCloud', iex_cloud => {API_KEY => '...'}, timeout => 30);
+
+@symbols =  qw/MSFT AMZN AAPL GOOGL GOOG FB CSCO INTC CMCSA PEP BRK.A SEB NVR BKNG IBKR/;
+%quotes  = $q->iexcloud(@symbols);
+
+See 'perldoc lib/Finance/Quote/IEXCloud.pm' for example documentation and t/iexcloud.t for code example.
+
+
+
+Private Class Methods
+---------------------
+Finance::Quote::AUTOLOAD
+Finance::Quote::DESTROY
+Finance::Quote::_convert                     # does currency conversion
+Finance::Quote::_dummy                       # return dummy quoter
+Finance::Quote::_load_modules                # Load all the modules
+Finance::Quote::_smart_compare               # compare where methods depends on type of parameter
+Finance::Quote::store_date                   # normalize date
+
+Public Class Methods
+--------------------
+Finance::Quote::get_default_currency_fields  # [new] fields converted during currency change
+Finance::Quote::get_default_timeout          # [new] get (if set) default timeout for new quote objects
+Finance::Quote::get_methods                  # [new] returns a list of valid methods for fetch
+Finance::Quote::new                          # [new] add option to set module-specific instance variables
+Finance::Quote::set_default_timeout          # [new] set default timeout for new quote objects
+
+
+Private Object Methods
+----------------------
+Finance::Quote::_require_test                # checks arrayref for required labels
+
+Public Object Methods
+---------------------
+Finance::Quote::B_to_billions                # expand B suffix on number
+Finance::Quote::decimal_shiftup              # decimal arithmetic
+Finance::Quote::fetch                        # generic fetcher
+Finance::Quote::get_failover                 # [new] Get failover control value for this quoter object
+Finance::Quote::get_fetch_currency           # [new] Get target currency for results from fetch
+Finance::Quote::get_required_labels          # [new] Get required labels for this object
+Finance::Quote::get_timeout                  # [new] Get timeout for this quoter object
+Finance::Quote::get_user_agent               # [new] returns LWP::UserAgent with timeouts
+Finance::Quote::isoTime                      # normalize time
+Finance::Quote::set_failover                 # [new] Set failover control to true or false
+Finance::Quote::set_fetch_currency           # [new] Set target currency for results from fetch
+Finance::Quote::set_required_labels          # [new] Set required labels for lookup
+Finance::Quote::set_timeout                  # [new] Set timeout for this quoter object
+
+Public Class or Object Methods
+------------------------------
+Finance::Quote::scale_field                  # helper function to manipulate decimals
+Finance::Quote::currency                     # convert between currencies
+Finance::Quote::currency_lookup              # search for currencies codes
+Finance::Quote::parse_csv                    # parse csv
+Finance::Quote::parse_csv_semicolon          # parse csv
+
+
+Legacy Class Methods
+--------------------
+Finance::Quote::sources                      # returns a list of valid sources for fetch
+Finance::Quote::default_currency_fields      # fields converted during currency change
+
+Legacy Class or Object Methods
+------------------------------
+Finance::Quote::set_currency                 # poorly named, depending on call may return a value
+Finance::Quote::timeout                      # on object, set timeout; on class, sets default
+
+Legacy Object Methods
+---------------------
+Finance::Quote::failover                     # sets/gets if acceptable to use failover??
+Finance::Quote::require_labels               # sets required labels for lookup
+Finance::Quote::user_agent                   # returns LWP::UserAgent with timeouts
+

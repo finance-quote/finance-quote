@@ -1,43 +1,63 @@
 #!/usr/bin/perl -w
+
 use strict;
+use warnings;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use Test::More;
 use Finance::Quote;
+use Date::Simple qw(today);
+use Scalar::Util qw(looks_like_number);
+use Date::Range;
+use Date::Manip;
 
-if ( not $ENV{"ONLINE_TEST"} ) {
+if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-if ( not $ENV{"IEXCLOUD_API_KEY"} ) {
-    plan skip_all => 'Set $ENV{"IEXCLOUD_API_KEY"} to run this test';
+if ( not $ENV{"TEST_IEXCLOUD_API_KEY"} ) {
+    plan skip_all => 'Set $ENV{"TEST_IEXCLOUD_API_KEY"} to run this test';
 }
 
-my $q        = Finance::Quote->new();
-my $year     = (localtime())[5] + 1900;
-my $lastyear = $year - 1;
+my @valid    = qw/MSFT AMZN AAPL GOOGL GOOG FB CSCO INTC CMCSA PEP BRK.A SEB NVR BKNG IBKR/;
+my @invalid  = ('BOGUS');
+my @symbols  = (@valid, @invalid);
 
-# 10 NASDAQ stocks
-#  4 NYSE stocks
-#  1 IEX stock
-my @symbols =  qw/MSFT AMZN AAPL GOOGL GOOG FB CSCO INTC CMCSA PEP BRK.A SEB NVR BKNG IBKR/;
+my $q        = Finance::Quote->new('IEXCloud', timeout => 120, iexcloud => {API_KEY => $ENV{"TEST_IEXCLOUD_API_KEY"}} );
+my $today    = today();
+my $window   = 7;
 
-plan tests => 10*(1+$#symbols)+2;
+my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_reference)
+                'success'  => sub {$_[0] == 1},
+                'symbol'   => sub {$_[0] eq $_[1]},
+                'last'     => sub {looks_like_number($_[0])},
+                'open'     => sub {not defined $_[0] or looks_like_number($_[0])},
+                'close'    => sub {not defined $_[0] or looks_like_number($_[0])},
+                'high'     => sub {not defined $_[0] or looks_like_number($_[0])},
+                'low'      => sub {not defined $_[0] or looks_like_number($_[0])},
+                'volume'   => sub {not defined $_[0] or looks_like_number($_[0])},
+                'isodate'  => sub {Date::Range->new($today - $window, $today)->includes(Date::Simple::ISO->new($_[0]))},
+                'date'     => sub {my $a = Date::Manip::Date->new(); $a->parse_format('%m/%d/%Y', $_[0]);
+                                   my $b = Date::Manip::Date->new(); $b->parse_format('%Y-%m-%d', $_[2]->{$_[1], 'isodate'});
+                                   return $a->cmp($b) == 0;}
+               );
 
-my %quotes = $q->iexcloud( @symbols, "BOGUS" );
+plan tests => 1 + %check*@valid + @invalid;
+
+my %quotes = $q->iexcloud(@symbols);
 ok(%quotes);
 
-foreach my $symbol (@symbols) {
-    ok( $quotes{ $symbol, "success" }, "$symbol success" );
-    ok( $quotes{ $symbol, "symbol" } eq $symbol , "$symbol defined" );
-    ok( $quotes{ $symbol, "open" } > 0, "$symbol returned open" );
-    ok( $quotes{ $symbol, "close" } > 0, "$symbol returned close" );
-    ok( $quotes{ $symbol, "last" } > 0, "$symbol returned last" );
-    ok( $quotes{ $symbol, "high" } > 0, "$symbol returned high" );
-    ok( $quotes{ $symbol, "low" } > 0, "$symbol returned low" );
-    ok( $quotes{ $symbol, "volume" } >= 0, "$symbol returned volume" );
-    ok( substr( $quotes{ $symbol, "isodate" }, 0, 4 ) == $year
-        || substr( $quotes{ $symbol, "isodate" }, 0, 4 ) == $lastyear );
-    ok( substr( $quotes{ $symbol, "date" }, 6, 4 ) == $year
-        || substr( $quotes{ $symbol, "date" }, 6, 4 ) == $lastyear );
+### [<now>] quotes: %quotes
+
+foreach my $symbol (@valid) {
+  while (my ($key, $lambda) = each %check) {
+    ok($lambda->($quotes{$symbol, $key}, $symbol, \%quotes), "$key -> " . (defined $quotes{$symbol, $key} ? $quotes{$symbol, $key} : '<undefined>'));
+  }
+}
+    
+foreach my $symbol (@invalid) {
+  ok((not $quotes{'BOGUS', 'success'}), 'failed as expected');
 }
 
-ok( !$quotes{ "BOGUS", "success" } );

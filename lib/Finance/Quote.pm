@@ -28,29 +28,81 @@
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 
 package Finance::Quote;
-require 5.005;
 
 use strict;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments', '###';
+
+use Module::Load;
 use Exporter ();
 use Carp;
 use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
 use Encode;
 use JSON qw( decode_json );
-# use Data::Dumper;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
-            $TIMEOUT %MODULES %METHODS $AUTOLOAD
-            $ALPHAVANTAGE_CURRENCY_URL $USE_EXPERIMENTAL_UA/;
+            $TIMEOUT @MODULES %MODULES %METHODS $AUTOLOAD
+            @CURRENCY_RATES_MODULES $USE_EXPERIMENTAL_UA/;
 
-# Call on the Yahoo API:
-#  - "f=l1" should return a single value - the "Last Trade (Price Only)"
-#  - "s=" the value of s should be "<FROM><TO>=X"
-#         where <FROM> and <TO> are currencies
-# Excample: http://finance.yahoo.com/d/quotes.csv?f=l1&s=AUDGBP=X
-# Documentation can be found here:
-#     http://code.google.com/p/yahoo-finance-managed/wiki/csvQuotesDownload
-$ALPHAVANTAGE_CURRENCY_URL = "https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE";
+# VERSION
+
+@CURRENCY_RATES_MODULES = qw/
+    AlphaVantage
+    ECB
+    Fixer
+    OpenExchange
+/;
+
+@MODULES = qw/
+    AEX
+    ASEGR
+    ASX
+    AlphaVantage
+    BSEIndia
+    Bloomberg
+    Bourso
+    CSE
+    Cdnfundlibrary
+    Comdirect
+    Currencies
+    DWS
+    Deka
+    FTfunds
+    Fidelity
+    Finanzpartner
+    Fondsweb
+    Fool
+    Fundata
+    GoldMoney
+    HU
+    IEXCloud
+    IndiaMutual
+    MStaruk
+    MorningstarAU
+    MorningstarCH
+    MorningstarJP
+    NSEIndia
+    NZX
+    OnVista
+    Oslobors
+    SEB
+    SIX
+    Sinvestor
+    TesouroDireto
+    Tiaacref
+    TMX
+    Tradegate
+    Tradeville
+    TreasuryDirect
+    Troweprice
+    TSP
+    Union
+    XETRA
+    YahooJSON
+    ZA
+/;
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
@@ -58,365 +110,39 @@ $ALPHAVANTAGE_CURRENCY_URL = "https://www.alphavantage.co/query?function=CURRENC
                 currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
-# VERSION
-
 $USE_EXPERIMENTAL_UA = 0;
 
+################################################################################
+#
+# Private Class Methods
+#
+################################################################################
 # Autoload method for obsolete methods.  This also allows people to
 # call methods that objects export without having to go through fetch.
 
 sub AUTOLOAD {
   my $method = $AUTOLOAD;
-  $method =~ s/.*:://;
+  (my $name = $method) =~ s/.*:://;
 
   # Force the dummy object (and hence default methods) to be loaded.
   _dummy();
 
-  # If the method we want is in %METHODS, then set up an appropriate
-  # subroutine for it next time.
+  if (exists($METHODS{$name})) {
+    no strict 'refs'; ## no critic
+    
+    *$method = sub { 
+      my $this = ref($_[0]) ? shift : _dummy();
+      $this->fetch($name, @_);
+    };
 
-  if (exists($METHODS{$method})) {
-    eval qq[sub $method {
-      my \$this;
-      if (ref \$_[0]) {
-        \$this = shift;
-      }
-      \$this ||= _dummy();
-      \$this->fetch("$method",\@_);
-     }];
-    carp $@ if $@;
-    no strict 'refs'; # So we can use &$method
-    return &$method(@_);
+    return &$method;
   }
 
   carp "$AUTOLOAD does not refer to a known method.";
 }
 
-# _load_module (private class method)
-# _load_module loads a module(s) and registers its various methods for
-# use.
-
-sub _load_modules {
-  my $class = shift;
-  my $baseclass = ref $class || $class;
-
-  my @modules = @_;
-
-  # Go to each module and use them.  Also record what methods
-  # they support and enter them into the %METHODS hash.
-
-  foreach my $module (@modules) {
-    my $modpath = "${baseclass}::${module}";
-    unless (defined($MODULES{$modpath})) {
-
-      # Have to use an eval here because perl doesn't
-      # like to use strings.
-      eval "use $modpath;";
-      carp $@ if $@;
-      $MODULES{$modpath} = 1;
-
-      # Methodhash will continue method-name, function ref
-      # pairs.
-      my %methodhash = $modpath->methods;
-      my %labelhash = $modpath->labels;
-
-      # Find the labels that we can do currency conversion
-      # on.
-
-      my $curr_fields_func = $modpath->can("currency_fields")
-            || \&default_currency_fields;
-
-      my @currency_fields = &$curr_fields_func;
-
-      # @currency_fields may contain duplicates.
-      # This following chunk of code removes them.
-
-      my %seen;
-      @currency_fields=grep {!$seen{$_}++} @currency_fields;
-
-      foreach my $method (keys %methodhash) {
-        push (@{$METHODS{$method}},
-          { function => $methodhash{$method},
-            labels   => $labelhash{$method},
-            currency_fields => \@currency_fields});
-      }
-    }
-  }
-}
-
-# =======================================================================
-# new (public class method)
-#
-# Returns a new Finance::Quote object.  If methods are asked for, then
-# it will load the relevant modules.  With no arguments, this function
-# loads a default set of methods.
-
-sub new {
-  my $self = shift;
-  my $class = ref($self) || $self;
-
-  my $this = {};
-  bless $this, $class;
-
-  my @modules = ();
-  my @reqmodules = ();  # Requested modules.
-
-  # If there's no argument list, but we have the appropriate
-  # environment variable set, we'll use that instead.
-  if ($ENV{FQ_LOAD_QUOTELET} and !@_) {
-    @reqmodules = split(' ',$ENV{FQ_LOAD_QUOTELET});
-  } else {
-    @reqmodules = @_;
-  }
-
-  # If we get an empty new(), or one starting with -defaults,
-  # then load up the default methods.
-
-  if ( !@reqmodules or $reqmodules[0] eq "-defaults" ) {
-    shift(@reqmodules) if (@reqmodules);
-
-    # Default modules
-
-    @modules = qw/AEX AIAHK AlphaVantage ASEGR ASX BMONesbittBurns
-        BSERO Bourso Cdnfundlibrary Citywire CSE Currencies Deka
-        DWS FTPortfolios Fidelity FidelityFixed FinanceCanada Fool
-        FTfunds HU GoldMoney HEX IEXCloud IndiaMutual LeRevenu
-        ManInvestments Morningstar MorningstarAU MorningstarCH
-        MorningstarJP MStaruk NZX Platinum SEB SIXfunds SIXshares
-        StockHouseCanada TSP TSX Tdefunds Tdwaterhouse Tiaacref
-        TNetuk Troweprice Trustnet Union USFedBonds VWD ZA
-        Cominvest Finanzpartner YahooJSON YahooYQL ZA_UnitTrusts/;
-  }
-
-  $this->_load_modules(@modules,@reqmodules);
-
-  $this->{TIMEOUT} = $TIMEOUT if defined($TIMEOUT);
-  $this->{FAILOVER} = 1;
-  $this->{REQUIRED} = [];
-
-  return $this;
-}
-
-# =======================================================================
-# _dummy (private function)
-#
-# _dummy returns a Finance::Quote object.  I'd really rather not have
-# this, but to maintain backwards compatibility we hold on to it.
-{
-  my $dummy_obj;
-  sub _dummy {
-    return $dummy_obj ||= Finance::Quote->new;
-  }
-}
-
-# =======================================================================
-# sources (public object method)
-#
-# sources returns a list of sources which can be passed to fetch to
-# obtain information.
-#
-# Usage: @sources   = $quoter->sources();
-#        $sourceref = $quoter->sources();
-
-sub sources {
-  return(wantarray ? keys %METHODS : [keys %METHODS]);
-}
-
-
-# =======================================================================
-# currency (public object method)
-#
-# currency allows the conversion of one currency to another.
-#
-# Usage: $quoter->currency("USD","AUD");
-#  $quoter->currency("15.95 USD","AUD");
-#
-# undef is returned upon error.
-
-sub currency {
-  my $this = shift if (ref($_[0]));
-  $this ||= _dummy();
-
-  my ($from, $to) = @_;
-  return undef unless ($from and $to);
-
-  $from =~ s/^\s*(\d*\.?\d*)\s*//;
-  my $amount = $1 || 1;
-
-  # Don't know if these have to be in upper case, but it's
-  # better to be safe than sorry.
-  $to = uc($to);
-  $from = uc($from);
-
-  return $amount if ($from eq $to); # Trivial case.
-
-  my $ua = $this->user_agent;
-
-  my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
-  return undef unless ( defined $ALPHAVANTAGE_API_KEY );
-
-  my $try_cnt = 0;
-  my $json_data;
-  do {
-    $try_cnt += 1;
-    my $reply = $ua->request(GET "${ALPHAVANTAGE_CURRENCY_URL}"
-      . "&from_currency=" . ${from}
-      . "&to_currency=" . ${to}
-      . "&apikey=" . ${ALPHAVANTAGE_API_KEY} );
-
-    my $code = $reply->code;
-    my $desc = HTTP::Status::status_message($code);
-    return undef unless ($code == 200);
-
-    my $body = $reply->content;
-
-    $json_data = JSON::decode_json $body;
-    if ( !$json_data || $json_data->{'Error Message'} ) {
-      return undef;
-    }
-#     print "Failed: " . $json_data->{'Information'} . "\n" if (($try_cnt < 5) && ($json_data->{'Information'}));
-    sleep (20) if (($try_cnt < 5) && ($json_data->{'Information'}));
-  } while (($try_cnt < 5) && ($json_data->{'Information'}));
-
-  my $exchange_rate = $json_data->{'Realtime Currency Exchange Rate'}->{'5. Exchange Rate'};
-
-  {
-    local $^W = 0;  # Avoid undef warnings.
-
-    # We force this to a number to avoid situations where
-    # we may have extra cruft, or no amount.
-    return undef unless ($exchange_rate+0);
-  }
-
-if ( $exchange_rate < 0.001 ) {
-    # exchange_rate is too little. we'll get more accuracy by using
-    # the inverse rate and inverse it
-    my $inverse_rate = $this->currency( $to, $from );
-    {
-        local $^W = 0;
-        return undef unless ( $exchange_rate + 0 );
-    }
-    $exchange_rate = int( 100000000 / $inverse_rate + .5 ) / 100000000;
-}
-
-  return ($exchange_rate * $amount);
-}
-
-# =======================================================================
-# currency_lookup (public object method)
-#
-# search for available currency codes
-#
-# Usage: $quoter->currency_lookup({ name => qr/australia/i });
-#  $quoter->currency_lookup( code => 'EU' );
-#  $quoter->currency_lookup( name => 'Euro', code => qr/eu/i );
-#  $quoter->currency_lookup();
-#
-# If more than one lookup parameter is given all must match for
-# a currency to match.
-#
-# undef is returned upon error.
-
-sub currency_lookup {
-  my $this = shift if (ref $_[0]);
-  $this ||= _dummy();
-
-  # Validate parameters
-  my %valid_params = map { $_ => 1 } qw( name code );
-  my %params = @_;
-  my $param_errors = 0;
-  for my $key ( keys %params ) {
-    if ( ! exists $valid_params{$key} ) {
-      warn "Invalid parameter: $key";
-      $param_errors++;
-    }
-  }
-  return undef if $param_errors > 0;
-
-  # Retrieve known currencies
-  my $known_currencies = Finance::Quote::Currencies::known_currencies();
-
-  # Return currencies based on parameters
-  my $returned_currencies = {};
-  if ( scalar keys %params == 0 ) {
-    $returned_currencies = $known_currencies;
-  }
-  else {
-    for my $code ( keys %{$known_currencies} ) {
-      # Make sure all parameters match
-      my $matched = 0;
-      if ( exists $params{name}
-           &&
-           _smart_compare( $known_currencies->{$code}->{name}, $params{name} )
-         ) {
-        $matched++;
-      }
-      if ( exists $params{code}
-           &&
-           _smart_compare( $code, $params{code} )
-         ) {
-        $matched++;
-      }
-      if ( $matched == scalar keys %params ) {
-        $returned_currencies->{$code} = $known_currencies->{$code}
-      }
-    }
-  }
-  return $returned_currencies;
-}
-
-# _smart_compare (private method function)
-#
-# This function compares values where the method depends on the
-# type of the second parameter.
-#  regex  : compare as regex
-#  scalar : test for substring match
-sub _smart_compare {
-  my ($val1, $val2) = @_;
-
-  if ( ref $val2 eq 'Regexp' ) {
-    return $val1 =~ $val2;
-  }
-  else {
-    return index($val1, $val2) > -1
-  }
-}
-
-# =======================================================================
-# set_currency (public object method)
-#
-# set_currency allows information to be requested in the specified
-# currency.  If called with no arguments then information is returned
-# in the default currency.
-#
-# Requesting stocks in a particular currency increases the time taken,
-# and the likelyhood of failure, as additional operations are required
-# to fetch the currency conversion information.
-#
-# This method should only be called from the quote object unless you
-# know what you are doing.
-
-sub set_currency {
-  my $this = shift if (ref $_[0]);
-  $this ||= _dummy();
-
-  unless (defined($_[0])) {
-    delete $this->{"currency"};
-  } else {
-    $this->{"currency"} = $_[0];
-  }
-}
-
-# default_currency_fields (public method)
-#
-# This is a list of fields that will be automatically converted during
-# currency conversion.  If a module provides a currency_fields()
-# function then that list will be used instead.
-
-sub default_currency_fields {
-  return qw/last high low net bid ask close open day_range year_range
-            eps div cap nav price/;
-}
+# Dummy destroy function to avoid AUTOLOAD catching it.
+sub DESTROY { return; }
 
 # _convert (private object method)
 #
@@ -484,73 +210,239 @@ sub default_currency_fields {
 }
 
 # =======================================================================
-# Helper function that can scale a field.  This is useful because it
-# handles things like ranges "105.4 - 108.3", and not just straight fields.
+# _dummy (private function)
 #
-# The function takes a string or number to scale, and the factor to scale
-# it by.  For example, scale_field("1023","0.01") would return "10.23".
-
-sub scale_field {
-  shift if ref $_[0]; # Shift off the object, if there is one.
-
-  my ($field, $scale) = @_;
-  my @chunks = split(/([^0-9.])/,$field);
-
-  for (my $i=0; $i < @chunks; $i++) {
-    next unless $chunks[$i] =~ /\d/;
-    $chunks[$i] *= $scale;
+# _dummy returns a Finance::Quote object.  I'd really rather not have
+# this, but to maintain backwards compatibility we hold on to it.
+{
+  my $dummy_obj;
+  sub _dummy {
+    return $dummy_obj ||= Finance::Quote->new;
   }
-  return join("",@chunks);
 }
 
+# _load_module (private class method)
+# _load_module loads a module(s) and registers its various methods for
+# use.
+
+sub _load_modules {
+  my $class = shift;
+  my $baseclass = ref $class || $class;
+
+  my @modules = @_;
+
+  # Go to each module and use them.  Also record what methods
+  # they support and enter them into the %METHODS hash.
+
+  foreach my $module (@modules) {
+    my $modpath = "${baseclass}::${module}";
+    unless (defined($MODULES{$modpath})) {
+
+      eval {
+        load $modpath;
+        $MODULES{$modpath}   = 1;
+
+        my %methodhash       = $modpath->methods;
+        my %labelhash        = $modpath->labels;
+        my $curr_fields_func = $modpath->can("currency_fields") || \&default_currency_fields;
+        my @currency_fields  = &$curr_fields_func;
+        my %seen;
+        @currency_fields     = grep {!$seen{$_}++} @currency_fields;
+
+        foreach my $method (keys %methodhash) {
+          push (@{$METHODS{$method}},
+              { function => $methodhash{$method},
+              labels   => $labelhash{$method},
+              currency_fields => \@currency_fields});
+        }
+      };
+      carp $@ if $@;
+    }
+  }
+}
+
+# _smart_compare (private method function)
+#
+# This function compares values where the method depends on the
+# type of the parameters.
+#  val1, val2
+#  scalar,scaler - test for substring match
+#  scalar,regex  - test val1 against val2 regex
+#  array,scalar  - return true if any element of array substring matches scalar
+#  array,regex   - return true if any element of array matches regex
+sub _smart_compare {
+  my ($val1, $val2) = @_;
+ 
+  if ( ref $val1 eq 'ARRAY' ) {
+    if ( ref $val2 eq 'Regexp' ) {
+      my @r = grep {$_ =~ $val2} @$val1;
+      return @r > 0;
+    }
+    else {
+      my @r = grep {$_ =~ /$val2/} @$val1;
+      return @r > 0;
+    }
+  }
+  else {
+    if ( ref $val2 eq 'Regexp' ) {
+      return $val1 =~ $val2;
+    }
+    else {
+      return index($val1, $val2) > -1
+    }
+  }
+}
+
+# This is a list of fields that will be automatically converted during
+# currency conversion.  If a module provides a currency_fields()
+# function then that list will be used instead.
+
+sub get_default_currency_fields {
+  return qw/last high low net bid ask close open day_range year_range
+            eps div cap nav price/;
+}
+
+sub get_default_timeout {
+  return $TIMEOUT;
+}
+
+# get_methods returns a list of sources which can be passed to fetch to
+# obtain information.
+
+sub get_methods {
+  # Create a dummy object to ensure METHODS is populated
+  my $t = Finance::Quote->new();
+  return(wantarray ? keys %METHODS : [keys %METHODS]);
+}
 
 # =======================================================================
-# Timeout code.  If called on a particular object, then it sets
-# the timout for that object only.  If called as a class method
-# (or as Finance::Quote::timeout) then it sets the default timeout
-# for all new objects that will be created.
+# new (public class method)
+#
+# Returns a new Finance::Quote object.
+#
+# Arguments ::
+#    - zero or more module names from the Finance::Quote::get_sources list
+#    - zero or more named parameters, passes as name => value
+#
+# Named Parameters ::
+#    - timeout           # timeout in seconds for web requests
+#    - failover          # boolean value indicating if failover is acceptable
+#    - fetch_currency    # currency code for fetch results
+#    - required_labels   # array of required labels in fetch results
+#    - <module-name>     # hash specific to various Finance::Quote modules
+#
+# new()                               # default constructor
+# new('a', 'b')                       # load only modules a and b
+# new(timeout => 30)                  # load all default modules, set timeout
+# new('a', fetch_currency => 'X')     # load only module a, use currency X for results
+# new('z' => {API_KEY => 'K'})        # load all modules, pass hash to module z constructor
+# new('z', 'z' => {API_KEY => 'K'})   # load only module z and pass hash to its constructor
+#
+# Enivornment Variables ::
+#    - FQ_LOAD_QUOTELET  # if no modules named in argument list, use ones in this variable
+#
+# Return Value ::
+#    - Finanace::Quote object
 
-sub timeout {
-  if (@_ == 1 or !ref($_[0])) { # Direct or class call.
-    return $TIMEOUT = $_[0];
+sub new {
+  # Create and bless object
+  my $self = shift;
+  my $class = ref($self) || $self;
+
+  my $this = {};
+  bless $this, $class;
+
+  # To add a named parameter:
+  # 0. Document it in the POD for new
+  # 1. Add a default value for $this->{object-name}
+  # 2. Add the 'user-visible-name' => [type, object-name] to %named_parameter
+
+  # Default values
+  $this->{FAILOVER}       = 1;
+  $this->{REQUIRED}       = [];
+  $this->{TIMEOUT}        = $TIMEOUT if defined($TIMEOUT);
+  $this->{currency_rates} = {order => ['AlphaVantage']};
+
+  # Sort out arguments
+  my %named_parameter = (timeout         => ['', 'TIMEOUT'],
+                         failover        => ['', 'FAILOVER'],
+                         fetch_currency  => ['', 'currency'],
+                         required_labels => ['ARRAY', 'REQUIRED'],
+                         currency_rates  => ['HASH', 'currency_rates']);
+
+  $this->{module_specific_data} = {};
+  my @load_modules = ();
+
+  for (my $i = 0; $i < @_; $i++) {
+    if (exists $named_parameter{$_[$i]}) {
+      die "missing value for named parameter $_[$i]" if $i + 1 == @_;
+      die "unexpect type for value of named parameter $_[$i]" if ref $_[$i+1] ne $named_parameter{$_[$i]}[0];
+
+      $this->{$named_parameter{$_[$i]}[1]} = $_[$i+1];
+      $i += 1;
+    }
+    elsif ($i + 1 < @_ and ref $_[$i+1] eq 'HASH') {
+      $this->{module_specific_data}->{$_[$i]} = $_[$i+1];
+      $i += 1;
+    }
+    elsif ($_[$i] eq '-defaults') {
+      push (@load_modules, @MODULES);
+    }
+    else {
+      push (@load_modules, $_[$i]);
+    }
   }
 
-  # Otherwise we were called through an object.  Yay.
-  # Set the timeout in this object only.
-  my $this = shift;
-  return $this->{TIMEOUT} = shift;
+  # Honor FQ_LOAD_QUOTELET if @load_modules is empty
+  if ($ENV{FQ_LOAD_QUOTELET} and !@load_modules) {
+    @load_modules = split(' ',$ENV{FQ_LOAD_QUOTELET});
+    if ($load_modules[0] eq '-defaults') {
+      shift @load_modules;
+      push(@load_modules, @MODULES);
+    }
+  }
+  elsif (@load_modules == 0) {
+    push(@load_modules, @MODULES);
+  }
+
+  $this->_load_modules(@load_modules);
+
+  # Load the currency rate methods
+  my %currency_check = map { $_ => 1 } @CURRENCY_RATES_MODULES;
+  $this->{currency_rate_method} = [];
+  foreach my $method (@{$this->{currency_rates}->{order}}) {
+    unless (defined($currency_check{$method})) {
+      carp "Unknown curreny rates method: $method";
+      return;
+    }
+
+    my $method_path = "${class}::CurrencyRates::${method}";
+    eval {
+      autoload $method_path;
+      my $args = exists $this->{currency_rates}->{lc($method)} ? $this->{currency_rates}->{lc($method)} : {};
+      my $rate = $method_path->new($args);
+      die unless defined $rate;
+      
+      push(@{$this->{currency_rate_method}}, $rate);
+    };
+
+    if ($@) {
+      next;
+    }
+  }
+
+  return $this;
 }
 
-# =======================================================================
-# failover (public object method)
-#
-# This sets/gets whether or not it's acceptable to use failover techniques.
-
-sub failover {
-  my $this = shift;
-  my $value = shift;
-        return $this->{FAILOVER} = $value if (defined($value));
-  return $this->{FAILOVER};
+sub set_default_timeout {
+  $TIMEOUT  = shift;
 }
 
-# =======================================================================
-# require_labels (public object method)
+################################################################################
 #
-# Require_labels indicates which labels are required for lookups.  Only methods
-# that have registered all the labels specified in the list passed to
-# require_labels() will be called.
+# Private Object Methods
 #
-# require_labels takes a list of required labels.  When called with no
-# arguments, the require list is cleared.
-#
-# This method always succeeds.
-
-sub require_labels {
-  my $this = shift;
-  my @labels = @_;
-  $this->{REQUIRED} = \@labels;
-  return;
-}
+################################################################################
 
 # _require_test (private object method)
 #
@@ -571,6 +463,65 @@ sub _require_test {
   return 1;
 }
 
+################################################################################
+#
+# Public Object Methods
+#
+################################################################################
+
+# If $str ends with a B like "20B" or "1.6B" then expand it as billions like
+# "20000000000" or "1600000000".
+#
+# This is done with string manipulations so floating-point rounding doesn't
+# produce spurious digits for values like "1.6" which aren't exactly
+# representable in binary.
+#
+# Is "B" for billions the only abbreviation from Yahoo?
+# Could extend and rename this if there's also millions or thousands.
+#
+# For reference, if the value was just for use within perl then simply
+# substituting to exponential "1.5e9" might work.  But expanding to full
+# digits seems a better idea as the value is likely to be printed directly
+# as a string.
+sub B_to_billions {
+  my ($self,$str) = @_;
+
+  # B_to_billions() $str
+  if ($str =~ s/B$//i) {
+    $str = $self->decimal_shiftup ($str, 9);
+  }
+  return $str;
+}
+
+# $str is a number like "123" or "123.45"
+# return it with the decimal point moved $shift places to the right
+# must have $shift>=1
+# eg. decimal_shiftup("123",3)    -> "123000"
+#     decimal_shiftup("123.45",1) -> "1234.5"
+#     decimal_shiftup("0.25",1)   -> "2.5"
+#
+sub decimal_shiftup {
+  my ($self, $str, $shift) = @_;
+
+  # delete decimal point and set $after to count of chars after decimal.
+  # Leading "0" as in "0.25" is deleted too giving "25" so as not to end up
+  # with something that might look like leading 0 for octal.
+  my $after = ($str =~ s/(?:^0)?\.(.*)/$1/ ? length($1) : 0);
+
+  $shift -= $after;
+  # now $str is an integer and $shift is relative to the end of $str
+
+  if ($shift >= 0) {
+    # moving right, eg. "1234" becomes "12334000"
+    return $str . ('0' x $shift);  # extra zeros appended
+  } else {
+    # negative means left, eg. "12345" becomes "12.345"
+    # no need to prepend zeros since demanding initial $shift>=1
+    substr ($str, $shift,0, '.');  # new '.' at shifted spot from end
+    return $str;
+  }
+}
+
 # =======================================================================
 # fetch (public object method)
 #
@@ -578,9 +529,7 @@ sub _require_test {
 # fetch.  It's a nicer interface for when you have a list of stocks with
 # different sources which you wish to deal with.
 sub fetch {
-  my $this = shift if ref ($_[0]);
-
-  $this ||= _dummy();
+  my $this = ref($_[0]) ? shift : _dummy();
 
   my $method = lc(shift);
   my @stocks = @_;
@@ -591,10 +540,9 @@ sub fetch {
     return;
   }
 
-  # Failover code.  This steps through all availabe methods while
+  # Failover code.  This steps through all available methods while
   # we still have failed stocks to look-up.  This loop only
   # runs a single time unless FAILOVER is defined.
-
   my %returnhash = ();
 
   foreach my $methodinfo (@{$METHODS{$method}}) {
@@ -619,17 +567,27 @@ sub fetch {
   return wantarray() ? %returnhash : \%returnhash;
 }
 
-# =======================================================================
-# user_agent (public object method)
-#
-# Returns a LWP::UserAgent which conforms to the relevant timeouts,
-# proxies, and other settings on the particular Finance::Quote object.
-#
-# This function is mainly intended to be used by the modules that we load,
-# but it can be used by the application to directly play with the
-# user-agent settings.
+sub get_failover {
+  my $self = shift;
+  return $self->{FAILOVER};
+}
 
-sub user_agent {
+sub get_fetch_currency {
+  my $self = shift;
+  return $self->{currency};
+}
+
+sub get_required_labels {
+  my $self = shift;
+  return $self->{REQUIRED};
+}
+
+sub get_timeout {
+  my $self = shift;
+  return $self->{TIMEOUT};
+}
+
+sub get_user_agent {
   my $this = shift;
 
   return $this->{UserAgent} if $this->{UserAgent};
@@ -648,6 +606,279 @@ sub user_agent {
   $this->{UserAgent} = $ua;
 
   return $ua;
+}
+
+sub isoTime {
+  my ($self,$timeString) = @_ ;
+  $timeString =~ tr/ //d ;
+  $timeString = uc $timeString ;
+  my $retTime = "00:00"; # return zero time if unparsable input
+  if ($timeString=~m/^(\d+)[\.:UH](\d+) *(AM|am|PM|pm)?/) {
+    my ($hours,$mins)= ($1-0,$2-0) ;
+    $hours-=12 if ($hours==12 && $3 && ($3 =~ /AM/i));
+    $hours+=12 if ($3 && ($3 =~ /PM/i) && ($hours != 12));
+    if ($hours>=0 && $hours<=23 && $mins>=0 && $mins<=59 ) {
+      $retTime = sprintf ("%02d:%02d", $hours, $mins) ;
+    }
+  }
+  return $retTime;
+}
+
+sub set_failover {
+  my $self          = shift;
+  $self->{FAILOVER} = shift;
+}
+
+sub set_fetch_currency {
+  my $self          = shift;
+  $self->{currency} = shift;
+}
+
+sub set_required_labels {
+  my $self          = shift;
+  $self->{REQUIRED} = shift;
+}
+
+sub set_timeout {
+  my $self         = shift;
+  $self->{TIMEOUT} = shift;
+}
+
+# =======================================================================
+# store_date (public object method)
+#
+# Given the various pieces of a date, this functions figure out how to
+# store them in both the pre-existing US date format (mm/dd/yyyy), and
+# also in the ISO date format (yyyy-mm-dd).  This function expects to
+# be called with the arguments:
+#
+# (inforef, symbol_name, data_hash)
+#
+# The components of date hash can be any of:
+#
+# usdate   - A date in mm/dd/yy or mm/dd/yyyy
+# eurodate - A date in dd/mm/yy or dd/mm/yyyy
+# isodate  - A date in yy-mm-dd or yyyy-mm-dd, yyyy/mm/dd, yyyy.mm.dd, or yyyymmdd
+# year   - The year in yyyy
+# month  - The month in mm or mmm format (i.e. 07 or Jul)
+# day  - The day
+# today  - A flag to indicate todays date should be used.
+#
+# The separator for the *date forms is ignored.  It can be any
+# non-alphanumeric character.  Any combination of year, month, and day
+# values can be provided.  Missing fields are filled in based upon
+# today's date.
+#
+sub store_date
+{
+    my $this = shift;
+    my $inforef = shift;
+    my $symbol = shift;
+    my $piecesref = shift;
+
+    my ($year, $month, $day, $this_month, $year_specified);
+    my %mnames = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
+      jul => 7, aug => 8, sep => 9, oct =>10, nov =>11, dec =>12);
+
+    ### store_date symbol: $symbol
+    ### store_date pieces: $piecesref
+
+    # Default to today's date.
+    ($month, $day, $year) = (localtime())[4,3,5];
+    $month++;
+    $year += 1900;
+    $this_month = $month;
+    $year_specified = 0;
+
+    # Process the inputs
+    if ((defined $piecesref->{isodate}) && ($piecesref->{isodate})) {
+      if ($piecesref->{isodate} =~ /^([0-9]{4})([0-9]{2})([0-9]{2})$/) {
+        ($year, $month, $day) = ($1, $2, $3);
+      }
+      else {
+        ($year, $month, $day) = ($piecesref->{isodate} =~ m|([0-9]{4})\W+(\w+)\W+(\w+)|);
+      }
+
+      $year += 2000 if $year < 100;
+      $year_specified = 1;
+
+      ### format: printf "isodate %s -> Day %d, Month %s, Year %d\n", $piecesref->{isodate}, $day, $month, $year
+    }
+
+    if ((defined $piecesref->{usdate}) && ($piecesref->{usdate})) {
+      ($month, $day, $year) = ($piecesref->{usdate} =~ /(\w+)\W+(\d+)\W+(\d+)/);
+      $year += 2000 if $year < 100;
+      $year_specified = 1;
+
+      ### format: printf "usdate %s -> Day %d, Month %s, Year %d\n", $piecesref->{usdate}, $day, $month, $year
+    }
+
+    if ((defined $piecesref->{eurodate}) && ($piecesref->{eurodate})) {
+        ($day, $month, $year) = ($piecesref->{eurodate} =~ /(\d+)\W+(\w+)\W+(\d+)/);
+      $year += 2000 if $year < 100;
+      $year_specified = 1;
+
+      ### format: printf "eurodate %s -> Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year
+    }
+
+    if (defined ($piecesref->{year})) {
+      $year = $piecesref->{year};
+      $year += 2000 if $year < 100;
+      $year_specified = 1;
+
+      ### format: printf "year %s -> Year %d\n", $piecesref->{year}, $year
+    }
+
+    if (defined ($piecesref->{month})) {
+      $month = $piecesref->{month};
+
+      ### format: printf "month %s -> Month %s\n", $piecesref->{month}, $month
+    }
+
+    if (defined ($piecesref->{day})) {
+      $day = $piecesref->{day};
+
+      ### format: printf "day %s -> Day %d\n", $piecesref->{day}, $day
+    }
+
+    $month = $mnames{lc(substr($month,0,3))} if ($month =~ /\D/);
+    $year-- if (($year_specified == 0) && ($this_month < $month));
+
+    ### format: printf "Final Year-Month-Day -> %04d-%02d-%02d\n", $year, $month, $day
+
+    $inforef->{$symbol, "date"} =  sprintf "%02d/%02d/%04d", $month, $day, $year;
+    $inforef->{$symbol, "isodate"} = sprintf "%04d-%02d-%02d", $year, $month, $day;
+}
+
+################################################################################
+#
+# Public Class or Object Methods
+#
+################################################################################
+
+# =======================================================================
+# Helper function that can scale a field.  This is useful because it
+# handles things like ranges "105.4 - 108.3", and not just straight fields.
+#
+# The function takes a string or number to scale, and the factor to scale
+# it by.  For example, scale_field("1023","0.01") would return "10.23".
+
+sub scale_field {
+  shift if ref $_[0]; # Shift off the object, if there is one.
+
+  my ($field, $scale) = @_;
+  my @chunks = split(/([^0-9.])/,$field);
+
+  for (my $i=0; $i < @chunks; $i++) {
+    next unless $chunks[$i] =~ /\d/;
+    $chunks[$i] *= $scale;
+  }
+  return join("",@chunks);
+}
+
+# =======================================================================
+# currency (public object method)
+#
+# currency allows the conversion of one currency to another.
+#
+# Usage: $quoter->currency("USD","AUD");
+#  $quoter->currency("15.95 USD","AUD");
+#
+# undef is returned upon error.
+
+sub currency {
+  my $this = ref($_[0]) ? shift : _dummy();
+
+  my ($from_code, $to_code) = @_;
+  return unless ($from_code and $to_code);
+
+  $from_code =~ s/^\s*(\d*\.?\d*)\s*//;
+  my $amount = $1 || 1;
+
+  $to_code   = uc($to_code);
+  $from_code = uc($from_code);
+
+  return $amount if ($from_code eq $to_code); # Trivial case.
+
+  my $ua = $this->get_user_agent;
+  
+  foreach my $rate (@{$this->{currency_rate_method}}) {
+    ### rate: ref($rate)
+    my $final = eval {
+      my ($from, $to) = $rate->multipliers($ua, $from_code, $to_code);
+
+      die("Failed to find currency rates for $from_code or $to_code") unless defined $from and defined $to;
+
+      ### to weight  : $to
+      ### from weight: $from
+      ### amount     : $amount
+
+      # Is from closest to (amount, to, amount * to)?
+      # (amount * to) / from
+      my $delta  = abs($amount - $from);
+      my $result = ($amount/$from) * $to;
+      ### amount/from -> delta/result : ($delta, $result)
+      if ($delta > abs($to - $from)) {
+        $delta = abs($to - $from);
+        $result = ($to/$from) * $amount;
+        ### to/from -> delta/result : ($delta, $result)
+      }
+      if ($delta > abs($amount*$to - $from)) {
+        $delta = abs($amount*$to - $from);
+        $result = ($amount * $to)/$from;
+        ### (amount * to)/from -> delta/result : ($delta, $result)
+      }
+
+      return $result;
+    };
+
+    if ($@) {
+      ### Rate Error: chomp($@), $@
+      next;
+    }
+
+    return $final;
+  }
+
+  return;
+}
+
+# =======================================================================
+# currency_lookup (public object method)
+#
+# search for available currency codes
+#
+# Usage: 
+#   $currency = $quoter->currency_lookup();
+#   $currency = $quoter->currency_lookup( name => "Dollar");
+#   $currency = $quoter->currency_loopup( country => qw/denmark/i );
+#   $currency = $q->currency_lookup(country => qr/united states/i, number => 840);
+#
+# If more than one lookup parameter is given all must match for
+# a currency to match.
+#
+# undef is returned upon error.
+
+sub currency_lookup {
+  my $this = ref $_[0] ? shift : _dummy();
+
+  my %params = @_;
+  my $currencies = Finance::Quote::Currencies::known_currencies();
+
+  my %attributes = map {$_ => 1} map {keys %$_} values %$currencies;
+
+  for my $key (keys %params ) {
+    if ( ! exists $attributes{$key}) {
+      warn "Invalid parameter: $key";
+      return;
+    }
+  }
+  
+  while (my ($tag, $check) = each(%params)) {
+    $currencies = {map {$_ => $currencies->{$_}} grep {_smart_compare($currencies->{$_}->{$tag}, $check)} keys %$currencies};
+  }
+  
+  return $currencies;
 }
 
 # =======================================================================
@@ -696,166 +927,126 @@ sub parse_csv_semicolon
        return @new;      # list of values that were comma-separated
 }
 
+###############################################################################
+#
+# Legacy Class Methods
+#
+###############################################################################
+
+sub sources {
+  return get_methods();
+}
+
+sub default_currency_fields {
+  return get_default_currency_fields();
+}
+
+###############################################################################
+#
+# Legacy Class or Object Methods
+#
+###############################################################################
+
 # =======================================================================
-# store_date (public object method)
+# set_currency (public object method)
 #
-
-# Given the various pieces of a date, this functions figure out how to
-# store them in both the pre-existing US date format (mm/dd/yyyy), and
-# also in the ISO date format (yyyy-mm-dd).  This function expects to
-# be called with the arguments:
+# set_currency allows information to be requested in the specified
+# currency.  If called with no arguments then information is returned
+# in the default currency.
 #
-# (inforef, symbol_name, data_hash)
+# Requesting stocks in a particular currency increases the time taken,
+# and the likelyhood of failure, as additional operations are required
+# to fetch the currency conversion information.
 #
-# The components of date hash can be any of:
-#
-# usdate   - A date in mm/dd/yy or mm/dd/yyyy
-# eurodate - A date in dd/mm/yy or dd/mm/yyyy
-# isodate  - A date in yy-mm-dd or yyyy-mm-dd
-# year   - The year in yyyy
-# month  - The month in mm or mmm format (i.e. 07 or Jul)
-# day  - The day
-# today  - A flag to indicate todays date should be used.
-#
-# The separator for the *date forms is ignored.  It can be any
-# non-alphanumeric character.  Any combination of year, month, and day
-# values can be provided.  Missing fields are filled in based upon
-# today's date.
-#
-sub store_date
-{
-    my $this = shift;
-    my $inforef = shift;
-    my $symbol = shift;
-    my $piecesref = shift;
+# This method should only be called from the quote object unless you
+# know what you are doing.
 
-    my ($year, $month, $day, $this_month, $year_specified);
-    my %mnames = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
-      jul => 7, aug => 8, sep => 9, oct =>10, nov =>11, dec =>12);
-
-#    printf "In store_date\n";
-#    print "inforef $inforef\n";
-#    print "piecesref $piecesref\n";
-#    foreach my $key (keys %$piecesref) {
-#      printf ("  %s: %s\n", $key, $piecesref->{$key});
-#    }
-
-    # Default to today's date.
-    ($month, $day, $year) = (localtime())[4,3,5];
-    $month++;
-    $year += 1900;
-    $this_month = $month;
-    $year_specified = 0;
-
-    # Process the inputs
-    if ((defined $piecesref->{isodate}) && ($piecesref->{isodate})) {
-      ($year, $month, $day) = ($piecesref->{isodate} =~ m/(\d+)\W+(\w+)\W+(\d+)/);
-      $year += 2000 if $year < 100;
-      $year_specified = 1;
-#      printf "ISO Date %s: Year %d, Month %s, Day %d\n", $piecesref->{isodate}, $year, $month, $day;
-    }
-
-    if ((defined $piecesref->{usdate}) && ($piecesref->{usdate})) {
-      ($month, $day, $year) = ($piecesref->{usdate} =~ /(\w+)\W+(\d+)\W+(\d+)/);
-      $year += 2000 if $year < 100;
-      $year_specified = 1;
-#      printf "US Date %s: Month %s, Day %d, Year %d\n", $piecesref->{usdate}, $month, $day, $year;
-    }
-
-    if ((defined $piecesref->{eurodate}) && ($piecesref->{eurodate})) {
-        ($day, $month, $year) = ($piecesref->{eurodate} =~ /(\d+)\W+(\w+)\W+(\d+)/);
-      $year += 2000 if $year < 100;
-      $year_specified = 1;
-#      printf "Euro Date %s: Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year;
-    }
-
-    if (defined ($piecesref->{year})) {
-      $year = $piecesref->{year};
-      $year += 2000 if $year < 100;
-      $year_specified = 1;
-    }
-    $month = $piecesref->{month} if defined ($piecesref->{month});
-    $month = $mnames{lc(substr($month,0,3))} if ($month =~ /\D/);
-    $day  = $piecesref->{day} if defined ($piecesref->{day});
-
-    $year-- if (($year_specified == 0) && ($this_month < $month));
-
-    $inforef->{$symbol, "date"} =  sprintf "%02d/%02d/%04d", $month, $day, $year;
-    $inforef->{$symbol, "isodate"} = sprintf "%04d-%02d-%02d", $year, $month, $day;
-}
-
-sub isoTime {
-  my ($self,$timeString) = @_ ;
-  $timeString =~ tr/ //d ;
-  $timeString = uc $timeString ;
-  my $retTime = "00:00"; # return zero time if unparsable input
-  if ($timeString=~m/^(\d+)[\.:UH](\d+)(AM|PM)?/) {
-    my ($hours,$mins)= ($1-0,$2-0) ;
-    $hours-=12 if ($hours==12);
-    $hours+=12 if ($3 && ($3 eq "PM")) ;
-    if ($hours>=0 && $hours<=23 && $mins>=0 && $mins<=59 ) {
-      $retTime = sprintf ("%02d:%02d", $hours, $mins) ;
-    }
+sub set_currency {
+  if (@_ == 1 or !ref($_[0])) {
+    # Direct or class call - there is no class default currency
+    return;
   }
-  return $retTime;
-}
 
-
-# If $str ends with a B like "20B" or "1.6B" then expand it as billions like
-# "20000000000" or "1600000000".
-#
-# This is done with string manipulations so floating-point rounding doesn't
-# produce spurious digits for values like "1.6" which aren't exactly
-# representable in binary.
-#
-# Is "B" for billions the only abbreviation from Yahoo?
-# Could extend and rename this if there's also millions or thousands.
-#
-# For reference, if the value was just for use within perl then simply
-# substituting to exponential "1.5e9" might work.  But expanding to full
-# digits seems a better idea as the value is likely to be printed directly
-# as a string.
-sub B_to_billions {
-
-  my ($self,$str) = @_;
-  ### B_to_billions(): $str
-  if ($str =~ s/B$//i) {
-    $str = $self->decimal_shiftup ($str, 9);
+  my $this = shift;
+  if (defined($_[0])) {
+    $this->set_fetch_currency($_[0]);
   }
-  return $str;
+
+  return $this->get_fetch_currency();
 }
 
-# $str is a number like "123" or "123.45"
-# return it with the decimal point moved $shift places to the right
-# must have $shift>=1
-# eg. decimal_shiftup("123",3)    -> "123000"
-#     decimal_shiftup("123.45",1) -> "1234.5"
-#     decimal_shiftup("0.25",1)   -> "2.5"
-#
-sub decimal_shiftup {
-  my ($self, $str, $shift) = @_;
+# =======================================================================
+# Timeout code.  If called on a particular object, then it sets
+# the timout for that object only.  If called as a class method
+# (or as Finance::Quote::timeout) then it sets the default timeout
+# for all new objects that will be created.
 
-  # delete decimal point and set $after to count of chars after decimal.
-  # Leading "0" as in "0.25" is deleted too giving "25" so as not to end up
-  # with something that might look like leading 0 for octal.
-  my $after = ($str =~ s/(?:^0)?\.(.*)/$1/ ? length($1) : 0);
-
-  $shift -= $after;
-  # now $str is an integer and $shift is relative to the end of $str
-
-  if ($shift >= 0) {
-    # moving right, eg. "1234" becomes "12334000"
-    return $str . ('0' x $shift);  # extra zeros appended
-  } else {
-    # negative means left, eg. "12345" becomes "12.345"
-    # no need to prepend zeros since demanding initial $shift>=1
-    substr ($str, $shift,0, '.');  # new '.' at shifted spot from end
-    return $str;
+sub timeout {
+  if (@_ == 1 or !ref($_[0])) {
+    # Direct or class call
+    Finance::Quote::set_default_timeout(shift);
+    return Finance::Quote::get_default_timeout();
   }
+
+  # Otherwise we were called through an object.  Yay.
+  # Set the timeout in this object only.
+  my $this = shift;
+  $this->set_timeout(shift);
+  return $this->get_timeout();
 }
 
-# Dummy destroy function to avoid AUTOLOAD catching it.
-sub DESTROY { return; }
+###############################################################################
+#
+# Legacy Object Methods
+#
+###############################################################################
+
+# =======================================================================
+# failover (public object method)
+#
+# This sets/gets whether or not it's acceptable to use failover techniques.
+
+sub failover {
+  my $this = shift;
+  my $value = shift;
+
+  $this->set_failover($value) if defined $value;
+  return $this->get_failover();
+}
+
+# =======================================================================
+# require_labels (public object method)
+#
+# Require_labels indicates which labels are required for lookups.  Only methods
+# that have registered all the labels specified in the list passed to
+# require_labels() will be called.
+#
+# require_labels takes a list of required labels.  When called with no
+# arguments, the require list is cleared.
+#
+# This method always succeeds.
+
+sub require_labels {
+  my $this = shift;
+  my @labels = @_;
+  $this->set_required_labels(\@labels);
+  return;
+}
+
+# =======================================================================
+# user_agent (public object method)
+#
+# Returns a LWP::UserAgent which conforms to the relevant timeouts,
+# proxies, and other settings on the particular Finance::Quote object.
+#
+# This function is mainly intended to be used by the modules that we load,
+# but it can be used by the application to directly play with the
+# user-agent settings.
+
+sub user_agent {
+  my $this = shift;
+  return $this->get_user_agent();
+}
 
 1;
 
@@ -868,90 +1059,94 @@ Finance::Quote - Get stock and mutual fund quotes from various exchanges
 =head1 SYNOPSIS
 
    use Finance::Quote;
+
    $q = Finance::Quote->new;
-
-   $q->timeout(60);
-
-   $conversion_rate = $q->currency("AUD","USD");
-   $q->set_currency("EUR");  # Return all info in Euros.
-
-   $q->require_labels(qw/price date high low volume/);
-
-   $q->failover(1); # Set failover support (on by default).
-
-   %quotes  = $q->fetch("nasdaq",@stocks);
-   $hashref = $q->fetch("nyse",@stocks);
+   %quotes  = $q->fetch("nasdaq", @stocks);
 
 =head1 DESCRIPTION
 
-This module gets stock quotes from various internet sources, including
-Yahoo! Finance, Fidelity Investments, and the Australian Stock Exchange.
-There are two methods of using this module -- a functional interface
-that is deprecated, and an object-orientated method that provides
-greater flexibility and stability.
+This module gets stock quotes from various internet sources all over the world.
+Quotes are obtained by constructing a quoter object and using the fetch method
+to gather data, which is returned as a two-dimensional hash (or a reference to
+such a hash, if called in a scalar context).  For example:
 
-With the exception of straight currency exchange rates, all information
-is returned as a two-dimensional hash (or a reference to such a hash,
-if called in a scalar context).  For example:
-
-    %info = $q->fetch("australia","CML");
-    print "The price of CML is ".$info{"CML","price"};
+    $q = Finance::Quote->new;
+    %info = $q->fetch("australia", "CML");
+    print "The price of CML is ".$info{"CML", "price"};
 
 The first part of the hash (eg, "CML") is referred to as the stock.
 The second part (in this case, "price") is referred to as the label.
 
 =head2 LABELS
 
-When information about a stock is returned, the following standard labels
-may be used.  Some custom-written modules may use labels not mentioned
-here.  If you wish to be certain that you obtain a certain set of labels
-for a given stock, you can specify that using require_labels().
+When information about a stock is returned, the following standard labels may
+be used.  Some custom-written modules may use labels not mentioned here.  If
+you wish to be certain that you obtain a certain set of labels for a given
+stock, you can specify that using require_labels().
 
-    name         Company or Mutual Fund Name
-    last         Last Price
-    high         Highest trade today
-    low          Lowest trade today
-    date         Last Trade Date  (MM/DD/YY format)
-    time         Last Trade Time
-    net          Net Change
-    p_change     Percent Change from previous day's close
-    volume       Volume
+    ask          Ask
     avg_vol      Average Daily Vol
     bid          Bid
-    ask          Ask
-    close        Previous Close
-    open         Today's Open
-    day_range    Day's Range
-    year_range   52-Week Range
-    eps          Earnings per Share
-    pe           P/E Ratio
-    div_date     Dividend Pay Date
-    div          Dividend per Share
-    div_yield    Dividend Yield
     cap          Market Capitalization
-    ex_div       Ex-Dividend Date.
-    nav          Net Asset Value
-    yield        Yield (usually 30 day avg)
-    exchange     The exchange the information was obtained from.
-    success      Did the stock successfully return information? (true/false)
+    close        Previous Close
+    currency     Currency code for the returned data
+    date         Last Trade Date  (MM/DD/YY format)
+    day_range    Day's Range
+    div          Dividend per Share
+    div_date     Dividend Pay Date
+    div_yield    Dividend Yield
+    eps          Earnings per Share
     errormsg     If success is false, this field may contain the reason why.
-    method       The module (as could be passed to fetch) which found this
-                 information.
+    ex_div       Ex-Dividend Date.
+    exchange     The exchange the information was obtained from.
+    high         Highest trade today
+    isin         International Securities Identification Number
+    isodate      ISO 8601 formatted date 
+    last         Last Price
+    low          Lowest trade today
+    method       The module (as could be passed to fetch) which found this information.
+    name         Company or Mutual Fund Name
+    nav          Net Asset Value
+    net          Net Change
+    open         Today's Open
+    p_change     Percent Change from previous day's close
+    pe           P/E Ratio
+    success      Did the stock successfully return information? (true/false)
+    time         Last Trade Time
     type         The type of equity returned
+    volume       Volume
+    year_range   52-Week Range
+    yield        Yield (usually 30 day avg)
 
-If all stock lookups fail (possibly because of a failed connection) then
-the empty list may be returned, or undef in a scalar context.
+If all stock lookups fail (possibly because of a failed connection) then the
+empty list may be returned, or undef in a scalar context.
 
 =head1 INSTALLATION
 
-To install this module, run the following commands:
+Please note that the Github repository is not meant for general users
+of Finance::Quote for installation.
 
+If you downloaded the Finance-Quote-N.NN.tar.gz tarball from CPAN
+(N.NN is the version number, ex: Finance-Quote-1.50.tar.gz),
+run the following commands:
+
+    tar xzf Finance-Quote-1.50.tar.gz
+    cd Finance-Quote-1.50.tar.gz
     perl Makefile.PL
     make
     make test
     make install
 
-For more detailed instructions, please see the INSTALL file.
+If you have the CPAN module installed:
+Using cpanm (Requires App::cpanminus)
+
+    cpanm Finance::Quote
+
+or
+Using CPAN shell
+
+    perl -MCPAN -e shell
+    install Finance::Quote
 
 =head1 SUPPORT AND DOCUMENTATION
 
@@ -964,17 +1159,9 @@ You can also look for information at:
 
 =over
 
-=item RT, CPAN's request tracker
+=item Finance::Quote GitHub project
 
-http://rt.cpan.org/NoAuth/Bugs.html?Dist=Finance-Quote
-
-=item AnnoCPAN, Annotated CPAN documentation
-
-http://annocpan.org/dist/Finance-Quote
-
-=item CPAN Ratings
-
-http://cpanratings.perl.org/d/Finance-Quote
+https://github.com/finance-quote/finance-quote
 
 =item Search CPAN
 
@@ -994,223 +1181,366 @@ http://www.gnucash.org/
 
 =back
 
-=head1 AVAILABLE METHODS
+=head1 PUBLIC CLASS METHODS
 
-=head2 NEW
+Finance::Quote implements public class methods for constructing a quoter
+object, getting or setting default class values, and for listing available
+methods.
 
-    my $q = Finance::Quote->new;
-    my $q = Finance::Quote->new("ASX");
-    my $q = Finance::Quote->new("-defaults", "CustomModule");
+=head2 new
 
-With no arguents, this creates a new Finance::Quote object
-with the default methods.  If the environment variable
-FQ_LOAD_QUOTELET is set, then the contents of FQ_LOAD_QUOTELET
-(split on whitespace) will be used as the argument list.  This allows
-users to load their own custom modules without having to change
-existing code.  If you do not want users to be able to load their own
-modules at run-time, pass an explicit argumetn to ->new() (usually
-"-defaults").
+    my $q = Finance::Quote->new()
+    my $q = Finance::Quote->new('-defaults')
+    my $q = Finance::Quote->new('AEX', 'Fool')
+    my $q = Finance::Quote->new(timeout => 30)
+    my $q = Finance::Quote->new('YahooJSON', fetch_currency => 'EUR')
+    my $q = Finance::Quote->new('alphavantage' => {API_KEY => '...'})
+    my $q = Finance::Quote->new('IEXCloud', 'iexcloud' => {API_KEY => '...'});
+    my $q = Finance::Quote->new(currency_rates => {order => ['ECB', 'Fixer'], 'fixer' => {API_KEY => '...'}});
 
-When new() is passed one or more arguments, an object is created with
-only the specified modules loaded.  If the first argument is
-"-defaults", then the default modules will be loaded first, followed
-by any other specified modules.
+Finance::Quote modules access a wide range of sources to provide quotes.  A
+module provides one or more methods to fetch quotes. One method is usually the
+name of the module in lower case. Other methods, if provided, are descriptive
+names, such as 'canada', 'nasdaq', or 'nyse'.
 
-Note that the FQ_LOAD_QUOTELET environment variable must begin
-with "-defaults" if you wish the default modules to be loaded.
+A Finance::Quote object uses one or more methods to fetch quotes for
+securities. 
 
-Any modules specified will automatically be looked for in the
-Finance::Quote:: module-space.  Hence,
-Finance::Quote->new("ASX") will load the module Finance::Quote::ASX.
+C<new> constructs a Finance::Quote object and enables the caller to load only
+specific modules, set parameters that control the behavior of the fetch method,
+and pass method specific parameters.
 
-Please read the Finance::Quote hacker's guide for information
-on how to create new modules for Finance::Quote.
+=over
 
-=head2 FETCH
+=item C<timeout => T> sets the web request timeout to C<T> seconds
 
-    my %stocks  = $q->fetch("usa","IBM","MSFT","LNUX");
-    my $hashref = $q->fetch("usa","IBM","MSFT","LNUX");
+=item C<failover => B> where C<B> is a boolean value indicating if failover in
+fetch is permitted
 
-Fetch takes an exchange as its first argument.  The second and remaining
-arguments are treated as stock-names.  In the standard Finance::Quote
-distribution, the following exchanges are recognised:
+=item C<fetch_currency => C> sets the desired currency code to C<C> for fetch
+results
 
-    australia   Australan Stock Exchange
-    dwsfunds    Deutsche Bank Gruppe funds
-    fidelity    Fidelity Investments
-    tiaacref    TIAA-CREF
-    troweprice    T. Rowe Price
-    europe    European Markets
-    canada    Canadian Markets
-    usa     USA Markets
-    nyse    New York Stock Exchange
-    nasdaq    NASDAQ
-    uk_unit_trusts  UK Unit Trusts
-    vanguard    Vanguard Investments
-    vwd     Vereinigte Wirtschaftsdienste GmbH
+=item C<currency_rates => H> configures the order currency rate modules are
+consulted for exchange rates and currency rate module options
 
-When called in an array context, a hash is returned.  In a scalar
-context, a reference to a hash will be returned.  The structure
-of this hash is described earlier in this document.
+=item C<required_labels => A> sets the required labels for fetch results to
+array C<A>
 
-The fetch method automatically arranges for failover support and
-currency conversion if requested.
+=item C<<ModuleName>> as a string is the name of a specific
+Finance::Quote::Module to load
 
-If you wish to fetch information from only one particular source,
-then consult the documentation of that sub-module for further
-information.
+=item C<<methodname> => H> passes hash C<H> to methodname during fetch to 
+configure the method
 
-=head2 SOURCES
+=back
 
-    my @sources = $q->sources;
-    my $listref = $q->sources;
+With no arguments, C<new> creates a Finance::Quote object with the default
+methods.  If the environment variable FQ_LOAD_QUOTELET is set, then the
+contents of FQ_LOAD_QUOTELET (split on whitespace) will be used as the argument
+list.  This allows users to load their own custom modules without having to
+change existing code. If any method names are passed to C<new> or the flag
+'-defaults' is included in the argument list, then FQ_LOAD_QUOTELET is ignored.
 
-The sources method returns a list of sources that have currently been loaded and
-can be passed to the fetch method.  If you're providing a user with a list of
-sources to choose from, then it is recommended that you use this method.
+When new() is passed one or more class name arguments, an object is created with
+only the specified modules loaded.  If the first argument is '-defaults', then
+the default modules will be loaded first, followed by any other specified
+modules. Note that the FQ_LOAD_QUOTELET environment variable must begin with
+'-defaults' if you wish the default modules to be loaded.
 
-=head2 CURRENCY_LOOKUP
+Method names correspond to the Perl module in the Finance::Quote module space.
+For example, C<Finance::Quote->new('ASX')> will load the module
+Finance::Quote::ASX, which provides the method "asx".
 
-    $currencies_by_name = $q->currency_lookup( name => 'Australian' );
-    $currencies_by_code = $q->currency_lookup( code => qr/^b/i      );
-    $currencies_by_both = $q->currency_lookup( name => qr/pound/i
-                                             , code => 'GB'         );
+Some methods require API keys or have unique options. Passing 'method => HASH'
+to new() enables the caller to provide a configuration HASH to the corresponding
+method.
 
-The currency_lookup method provides a search against the known currencies. The
-list of currencies is based on the available currencies in the Yahoo Currency
-Converter (the list is stored within the module as the list should be fairly
-static).
+The key 'currency_rates' configures the Finanace::Quote currency rate
+conversion.  By default, to maintain backward compatibility,
+Finance::Quote::CurrencyRates::AlphaVantage is used for currency conversion.
+This end point requires an API key, which can either be set in the environment
+or included in the configuration hash. To specify a different primary currency
+conversion method or configure fallback methods, include the 'order' key, which
+points to an array of Finance::Quote::CurrencyRates module names. See the
+documentation for the individual Finance::Quote::CurrencyRates to learn more. 
 
-The lookup can be done by currency name (ie "Australian Dollar"), by
-code (ie "AUD") or both. You can pass either a scalar or regular expression
-as a search value - scalar values are matched by substring while regular
-expressions are matched as-is (no changes are made to the expression).
+=head2 get_default_currency_fields
 
-See L<Finance::Quote::Currencies::fetch_live_currencies> (and the
-C<t/currencies.t> test file) for a way to make sure that the stored
-currency list is up to date.
+    my @fields = Finance::Quote::get_default_currency_fields();
 
-=head2 CURRENCY
+C<get_default_currency_fields> returns the standard list of fields in a quote
+that are automatically converted during currency conversion. Individual modules
+may override this list.
 
-    $conversion_rate = $q->currency("USD","AUD");
+=head2 get_default_timeout
+  
+    my $value = Finance::Quote::get_default_timeout();
 
-The currency method takes two arguments, and returns a conversion rate
-that can be used to convert from the first currency into the second.
-In the example above, we've requested the factor that would convert
-US dollars into Australian dollars.
+C<get_default_timeout> returns the current Finance::Quote default timeout in
+seconds for web requests. Finance::Quote does not specify a default timeout,
+deferring to the underlying user agent for web requests. So this function
+will return undef unless C<set_default_timeout> was previously called.
 
-The currency method will return a false value if a given currency
-conversion cannot be fetched.
+=head2 set_default_timeout
 
-At the moment, currency rates are fetched from Yahoo!, and the
-information returned is governed by Yahoo!'s terms and conditions.
-See Finance::Quote::Yahoo for more information.
+    Finance::Quote::set_default_timeout(45);
 
-=head2 SET_CURRENCY
+C<set_default_timeout> sets the Finance::Quote default timeout to a new value.
 
-    $q->set_currency("FRF");  # Get results in French Francs.
+=head2 get_methods
 
-The set_currency method can be used to request that all information be
-returned in the specified currency.  Note that this increases the
-chance stock-lookup failure, as remote requests must be made to fetch
-both the stock information and the currency rates.  In order to
-improve reliability and speed performance, currency conversion rates
-are cached and are assumed not to change for the duration of the
-Finance::Quote object.
+    my @methods = Finance::Quote::get_methods();
 
-At this time, currency conversions are only looked up using Yahoo!'s
-services, and hence information obtained with automatic currency
-conversion is bound by Yahoo!'s terms and conditions.
+C<get_methods> returns the list of methods that can be passed to C<new> when
+creating a quoter object and as the first argument to C<fetch>.
 
-=head2 FAILOVER
+=head1 PUBLIC OBJECT METHODS
 
-    $q->failover(1);  # Set automatic failover support.
-    $q->failover(0);  # Disable failover support.
+=head2 B_to_billions
 
-The failover method takes a single argument which either sets (if
-true) or unsets (if false) automatic failover support.  If automatic
-failover support is enabled (default) then multiple information
-sources will be tried if one or more sources fail to return the
-requested information.  Failover support will significantly increase
-the time spent looking for a non-existant stock.
+    my $value = $q->B_to_billions("20B");
 
-If the failover method is called with no arguments, or with an
-undefined argument, it will return the current failover state
-(true/false).
+C<B_to_billions> is a utility function that expands a numeric string with a "B"
+suffix to the corresponding multiple of 1000000000.
 
-=head2 USER_AGENT
+=head2 decimal_shiftup
 
-    my $ua = $q->user_agent;
+    my $value = $q->decimal_shiftup("123.45", 1);  # returns 1234.5
+    my $value = $q->decimal_shiftup("0.25", 1);    # returns 2.5
 
-The user_agent method returns the LWP::UserAgent object that
-Finance::Quote and its helpers use.  Normally this would not
-be useful to an application, however it is possible to modify
-the user-agent directly using this method:
+C<decimal_shiftup> moves a the decimal point in a numeric string the specified
+number of places to the right.
 
-    $q->user_agent->timeout(10);  # Set the timeout directly.
+=head2 fetch
 
+    my %stocks  = $q->fetch("alphavantage", "IBM", "MSFT", "LNUX");
+    my $hashref = $q->fetch("nasdaq", "IBM", "MSFT", "LNUX");
 
-=head2 SCALE_FIELD
+C<fetch> takes a method as its first argument and the remaining arguments are
+treated as securities.  If the quoter C<$q> was constructed with a specific
+method or methods, then only those methods are available.
 
-    my $pounds = $q->scale_field($item_in_pence,0.01);
+When called in an array context, a hash is returned.  In a scalar context, a
+reference to a hash will be returned. The keys for the returned hash are
+C<{SECURITY,LABEL}>.  For the above example call, C<$stocks{"IBM","high"}> is
+the high value for IBM.
 
-The scale_field() function is a helper that can scale complex fields such
-as ranges (eg, "102.5 - 103.8") and other fields where the numbers should
-be scaled but any surrounding text preserved.  It's most useful in writing
-new Finance::Quote modules where you may retrieve information in a
-non-ISO4217 unit (such as cents) and would like to scale it to a more
-useful unit (like dollars).
+$q->get_methods() returns the list of valid methods for quoter object $q. Some
+methods specify a specific Finance::Quote module, such as 'alphavantage'. Other
+methods are available from multiple Finance::Quote modules, such as 'nasdaq'.
+The quoter failover over option determines if multiple modules are consulted
+for methods such as 'nasdaq' that more than one implementation.
 
-=head2 ISOTIME
+=head2 get_failover
+
+    my $failover = $q->get_failover();
+
+Failover is when the C<fetch> method attempts to retrieve quote information for
+a security from alternate sources when the requested method fails.
+C<get_failover> returns a boolean value indicating if the quoter object will
+use failover or not.
+
+=head2 set_failover
+
+    $q->set_failover(False);
+
+C<set_failover> sets the failover flag on the quoter object. 
+
+=head2 get_fetch_currency
+
+    my $currency = $q->get_fetch_currency();
+
+C<get_fetch_currency> returns either the desired currency code for the quoter
+object or undef if no target currency was set during construction or with the
+C<set_fetch_currency> function.
+
+=head2 set_fetch_currency
+
+    $q->set_fetch_currency("FRF");  # Get results in French Francs.
+
+C<set_fetch_currency> method is used to request that all information be
+returned in the specified currency.  Note that this increases the chance
+stock-lookup failure, as remote requests must be made to fetch both the stock
+information and the currency rates.  In order to improve reliability and speed
+performance, currency conversion rates are cached and are assumed not to change
+for the duration of the Finance::Quote object.
+
+See the introduction to this page for information on how to configure the
+source of currency conversion rates.
+
+=head2 get_required_labels
+
+    my @labels = $q->get_required_labels();
+
+C<get_required_labels> returns the list of labels that must be populated for a
+security quote to be considered valid and returned by C<fetch>.
+
+=head2 set_required_labels
+
+    my $labels = ['close', 'isodate', 'last'];
+    $q->set_required_labels($labels);
+
+C<set_required_labels> updates the list of required labels for the quoter object.
+
+=head2 get_timeout
+
+    my $timeout = $q->get_timeout();
+
+C<get_timeout> returns the timeout in seconds the quoter object is using for
+web requests.
+
+=head2 set_timeout
+
+    $q->set_timeout(45);
+
+C<set_timeout> updated the timeout in seconds for the quoter object.
+
+=head2 store_date
+
+    $quoter->store_date(\%info, $stocks, {eurodate => '06/11/2020'});
+
+C<store_date> is used by modules to consistent store date information about 
+securities. Given the various pieces of a date, this function figures out how to
+construct a ISO date (yyyy-mm-dd) and US date (mm/dd/yyyy) and stores those
+values in C<%info> for security C<$stock>.
+
+=head2 get_user_agent
+
+    my $ua = $q->get_user_agent();
+
+C<get_user_agent> returns the LWP::UserAgent the quoter object is using for web
+requests.
+
+=head2 isoTime
 
     $q->isoTime("11:39PM");    # returns "23:39"
     $q->isoTime("9:10 AM");    # returns "09:10"
 
-This function will return a isoformatted time
+C<isoTime> returns an ISO formatted time.
+
+=head1 PUBLIC CLASS OR OBJECT METHODS
+
+The following methods are available as class methods, but can also be called
+from Finance::Quote objects.
+
+=head2 scale_field
+
+    my $value = Finance::Quote->scale_field('1023', '0.01')
+
+C<scale_field> is a utility function that scales the first argument by the
+second argument.  In the above example, C<value> is C<'10.23'>.
+
+=head2 currency
+
+    my $value = $q->currency('15.95 USD', 'AUD');
+    my $value = Finance::Quote->currency('23.45 EUR', 'RUB');
+
+C<currency> converts a value with a currency code suffix to another currency
+using the current exchange rate as determined by the
+Finance::Quote::CurrencyRates method or methods configured for the quoter $q.
+When called as a class method, only Finance::Quote::AlphaVantage is used, which
+requires an API key. See the introduction for information on configuring
+currency rate conversions and see Finance::Quote::CurrencyRates::AlphaVantage
+for information about the API key.
+
+=head2 currency_lookup
+
+    my $currency = $quoter->currency_lookup();
+    my $currency = $quoter->currency_lookup( name => "Caribbean");
+    my $currency = $quoter->currency_loopup( country => qw/denmark/i );
+    my $currency = $q->currency_lookup(country => qr/united states/i, number => 840);
+
+C<currency_lookup> takes zero or more constraints and filters the list of
+currencies known to Finance::Quote. It returns a hash reference where the keys
+are ISO currency codes and the values are hash references containing metadata
+about the currency. 
+
+A constraint is a key name and either  a scalar or regular expression.  A
+currency satisfies the constraint if its metadata hash contains the constraint
+key and the value of that metadata field matches the regular expression or
+contains the constraint value as a substring.  If the metadata field is an
+array, then it satisfies the constraint if any value in the array satisfies the
+constraint.
+
+=head2 parse_csv
+
+    my @list = Finance::Quote::parse_csv($string);
+
+C<parse_csv> is a utility function for splitting a comma separated value string
+into a list of terms, treating double-quoted strings that contain commas as a
+single value.
+
+=head2 parse_csv_semicolon
+
+    my @list = Finance::Quote::parse_csv_semicolon($string);
+
+C<parse_csv> is a utility function for splitting a semicolon separated value string
+into a list of terms, treating double-quoted strings that contain semicolons as a
+single value.
+
+=head1 LEGACY METHODS
+
+=head2 default_currency_fields
+
+Replaced with get_default_currency_fields().
+
+=head2 sources
+
+Replaced with get_methods().
+
+=head2 failover
+
+Replaced with get_failover() and set_failover().
+
+=head2 require_labels
+
+Replaced with get_required_labels() and set_required_labels().
+
+=head2 user_agent
+
+Replaced with get_user_agent().
+
+=head2 set_currency
+
+Replaced with get_fetch_currency() and set_fetch_currency().
 
 =head1 ENVIRONMENT
 
-Finance::Quote respects all environment that your installed
-version of LWP::UserAgent respects.  Most importantly, it
-respects the http_proxy environment variable.
+Finance::Quote respects all environment that your installed version of
+LWP::UserAgent respects.  Most importantly, it respects the http_proxy
+environment variable.
 
 =head1 BUGS
 
-There are no ways for a user to define a failover list.
+The caller cannot control the fetch failover order.
 
-The two-dimensional hash is a somewhat unwieldly method of passing
-around information when compared to references.  A future release
-is planned that will allow for information to be returned in a
-more flexible $hash{$stock}{$label} style format.
-
-There is no way to override the default behaviour to cache currency
-conversion rates.
+The two-dimensional hash is a somewhat unwieldly method of passing around
+information when compared to references
 
 =head1 COPYRIGHT & LICENSE
 
  Copyright 1998, Dj Padzensky
  Copyright 1998, 1999 Linas Vepstas
  Copyright 2000, Yannick LE NY (update for Yahoo Europe and YahooQuote)
- Copyright 2000-2001, Paul Fenwick (updates for ASX, maintainence and release)
+ Copyright 2000-2001, Paul Fenwick (updates for ASX, maintenance and release)
  Copyright 2000-2001, Brent Neal (update for TIAA-CREF)
- Copyright 2000 Volker Stuerzl (DWS and VWD support)
- Copyright 2000 Keith Refson (Trustnet support)
+ Copyright 2000 Volker Stuerzl (DWS)
  Copyright 2001 Rob Sessink (AEX support)
  Copyright 2001 Leigh Wedding (ASX updates)
  Copyright 2001 Tobias Vancura (Fool support)
  Copyright 2001 James Treacy (TD Waterhouse support)
  Copyright 2008 Erik Colson (isoTime)
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or (at
-your option) any later version.
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later
+version.
 
-Currency information fetched through this module is bound by
-Yahoo!'s terms and conditons.
+Currency information fetched through this module is bound by the terms and
+conditons of the data source.
 
-Other copyrights and conditions may apply to data fetched through this
-module.  Please refer to the sub-modules for further information.
+Other copyrights and conditions may apply to data fetched through this module.
+Please refer to the sub-modules for further information.
 
 =head1 AUTHORS
 
@@ -1239,19 +1569,56 @@ http://www.gnucash.org/
 
 =head1 SEE ALSO
 
-Finance::Quote::AEX, Finance::Quote::ASX, Finance::Quote::Cdnfundlibrary,
-Finance::Quote::DWS, Finance::Quote::Fidelity, Finance::Quote::FinanceCanada,
+Finance::Quote::CurrencyRates::AlphaVantage,
+Finance::Quote::CurrencyRates::ECB,
+Finance::Quote::CurrencyRates::Fixer,
+Finance::Quote::CurrencyRates::OpenExchange,
+Finance::Quote::AEX,
+Finance::Quote::ASEGR,
+Finance::Quote::ASX,
+Finance::Quote::Bloomberg,
+Finance::Quote::BSEIndia,
+Finance::Quote::Bourso,
+Finance::Quote::CSE,
+Finance::Quote::Cdnfundlibrary,
+Finance::Quote::Comdirect,
+Finance::Quote::Currencies,
+Finance::Quote::DWS,
+Finance::Quote::Deka,
+Finance::Quote::FTfunds,
+Finance::Quote::Fidelity,
+Finance::Quote::Finanzpartner,
+Finance::Quote::Fondsweb,
 Finance::Quote::Fool,
-Finance::Quote::FTPortfolios, Finance::Quote::Tdefunds,
-Finance::Quote::Tdwaterhouse, Finance::Quote::Tiaacref,
-Finance::Quote::Troweprice, Finance::Quote::Trustnet,
-Finance::Quote::VWD, Finance::Quote::Yahoo::Australia,
-Finance::Quote::Yahoo::Europe, Finance::Quote::Yahoo::USA,
-LWP::UserAgent
+Finance::Quote::Fundata
+Finance::Quote::GoldMoney,
+Finance::Quote::HU,
+Finance::Quote::IEXCloud,
+Finance::Quote::IndiaMutual,
+Finance::Quote::MStaruk,
+Finance::Quote::MorningstarAU,
+Finance::Quote::MorningstarCH,
+Finance::Quote::MorningstarJP,
+Finance::Quote::NSEIndia,
+Finance::Quote::NZX,
+Finance::Quote::OnVista,
+Finance::Quote::Oslobors,
+Finance::Quote::SEB,
+Finance::Quote::SIX,
+Finance::Quote::Tradeville,
+Finance::Quote::TSP,
+Finance::Quote::TMX,
+Finance::Quote::Tiaacref,
+Finance::Quote::TesouroDireto,
+Finance::Quote::TreasuryDirect,
+Finance::Quote::Troweprice,
+Finance::Quote::Union,
+Finance::Quote::YahooJSON,
+Finance::Quote::ZA
 
-You should have also received the Finance::Quote hacker's guide with
-this package.  Please read it if you are interested in adding extra
-methods to this package.  The hacker's guide can also be found
-on the Finance::Quote website, http://finance-quote.sourceforge.net/
+You should have received the Finance::Quote hacker's guide with this package.
+Please read it if you are interested in adding extra methods to this package.
+The latest hacker's guide can also be found on GitHub at
+https://github.com/finance-quote/finance-quote/blob/master/Documentation/Hackers-Guide
 
 =cut

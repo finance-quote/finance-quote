@@ -1,14 +1,5 @@
 #!/usr/bin/perl -w
-#
-#    Copyright (C) 2004, Michael Curtis
-#    Modified from DWS.pm - its copyrights
-#    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
-#    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
-#    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
-#    Copyright (C) 2000, Paul Fenwick <pjf@cpan.org>
-#    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
-#    Copyright (C) 2000, Volker Stuerzl <volker.stuerzl@gmx.de>
-#
+
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -23,105 +14,82 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #    02110-1301, USA
-#
-#
-# This code derived from Padzensky's work on package Finance::YahooQuote,
-# but extends its capabilites to encompas a greater number of data sources.
-#
-#
 
 package Finance::Quote::NZX;
-require 5.005;
 
 use strict;
+use warnings;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use LWP::UserAgent;
-use HTTP::Request::Common;
+use Web::Scraper;
+use String::Util qw(trim);
 
 # VERSION
 
-sub methods { return (nz => \&nzx, nzx => \&nzx); }
+our @labels = qw/last isin name currency date isodate/;
+
 sub labels {
-	my @labels = qw/exchange name price last date isodate method/;
-
-	return (nz => \@labels, nzx => \@labels);
+  return ( nzx => \@labels );
 }
 
-
-
-sub nzx
-{
-  my $nzxurl = "http://www.nzx.com/scripts/portal_pages/p_csv_by_market.csv?code=ALL&board_type=S";
-  my $quoter = shift;
-  my @symbols = @_;
-  return unless @symbols;
-  my $isLineOne = 1;
-  my $ua = $quoter->user_agent;
-  my $sDate;
-  my (%symbolhash, @q, %info);
-
-  # create hash of all stocks requested
-  foreach my $symbol (@symbols)
-  {
-    $symbolhash{$symbol} = 0;
-  }
-
-  # get csv data
-  my $response = $ua->request(GET $nzxurl);
-  if ($response->is_success)
-  {
-    # process csv data
-    foreach (split('\015?\012',$response->content))
-    {
-      if ($isLineOne == 1)
-      {
-       $isLineOne = 0;
-       ($sDate) =  ($_ =~ /([0-9]{4}\/[0-9]{2}\/[0-9]{2})/g);
-      }
-      @q = $quoter->parse_csv($_) or next;
-      if (exists $symbolhash{$q[0]})
-      {
-        $symbolhash{$q[0]} = 1;
-
-        $info{$q[0], "exchange"} = "NZX";
-        $info{$q[0], "name"}     = $q[0];
-        $info{$q[0], "symbol"}   = $q[0];
-        $info{$q[0], "price"}    = $q[1];
-        $info{$q[0], "last"}     = $q[7];
-	$quoter->store_date(\%info, $q[0], {isodate => $sDate});
-        $info{$q[0], "method"}   = "nzx";
-        $info{$q[0], "currency"} = "NZD";
-        $info{$q[0], "success"}  = 1;
-      }
-    }
-
-    # check to make sure a value was returned for every stock requested
-    foreach my $symbol (keys %symbolhash)
-    {
-      if ($symbolhash{$symbol} == 0)
-      {
-        $info{$symbol, "success"}  = 0;
-        $info{$symbol, "errormsg"} = "No data returned";
-      }
-    }
-  }
-  else
-  {
-    foreach my $symbol (@symbols)
-    {
-      $info{$symbol, "success"}  = 0;
-      $info{$symbol, "errormsg"} = "HTTP error";
-    }
-  }
-
-  return wantarray() ? %info : \%info;
+sub methods {
+  return ( nzx => \&nzx );
 }
 
+sub nzx {
+    my $quoter  = shift;
+    my @symbols = @_;
+    my $ua      = $quoter->user_agent();
+    my %info;
+
+    foreach my $symbol (@_) {
+      eval {
+        my $url   = "https://www.nzx.com/instruments/$symbol";
+        my $reply = $ua->get($url);
+
+        my $widget = scraper {
+          process '/html/body/section/div[2]/div/section[1]/div/div[1]/h1', 'last' => ['TEXT', sub{trim($_)}];
+          process '/html/body/section/div[2]/div/section[1]/div/div[2]/table/tbody/tr[5]/td[2]', 'isin' => ['TEXT', sub{trim($_)}];
+          process '/html/body/section/div[2]/div/section[1]/div/div[2]/table/tbody/tr[1]/td[2]', 'name' => ['TEXT', sub{trim($_)}]; 
+          process '/html/body/section/div[2]/div/div[2]/span', 'when' => ['TEXT', sub{trim($_)}]; 
+        };
+
+        my $result = $widget->scrape($reply);
+        ### RESULT : $result
+
+        die "Failed to find $symbol" unless exists $result->{last};
+     
+        
+        $info{$symbol, 'success'}  = 1;
+        $info{$symbol, 'currency'} = 'NZD';
+        $info{$symbol, 'last'}    = $1 if $result->{last} =~ /([0-9.]+)/;
+        $info{$symbol, 'isin'}    = $result->{isin};
+        $info{$symbol, 'name'}    = $result->{name};
+      
+        $quoter->store_date(\%info, $symbol, {eurodate => $1}) if $result->{when} =~ m|([0-9]{1,2}/[0-9]{1,2}/[0-9]{4})|;
+      };
+      
+      if ($@) {
+        my $error = "Search failed: $@";
+        $info{$symbol, 'success'}  = 0;
+        $info{$symbol, 'errormsg'} = trim($error);
+      }
+    }
+    
+    ### info : %info
+
+    return wantarray() ? %info : \%info;
+}
 
 1;
 
 =head1 NAME
 
-Finance::Quote::NZX	- Obtain quotes from NZX (New Zealand stock exchange.)
+Finance::Quote::NZX - Obtain quotes from New Zealand's
+Exchange www.nzx.com
 
 =head1 SYNOPSIS
 
@@ -129,19 +97,22 @@ Finance::Quote::NZX	- Obtain quotes from NZX (New Zealand stock exchange.)
 
     $q = Finance::Quote->new;
 
-    %stockinfo = $q->fetch("nzx","TPW");
+    %stockinfo = $q->fetch('nzx','TPW');
 
 =head1 DESCRIPTION
 
-This module obtains information about NZX companies.
+This module obtains information fromwww.nzx.com.
 
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::NZX:
-exchange, name, date, price, last.
+last, isin, name, currency, date, isodate
 
-=head1 SEE ALSO
+=head1 Terms & Conditions
 
-NZX (New Zealand stock exchange), http://www.nzx.com/
+Use of nzx.com is governed by any terms & conditions of that site.
+
+Finance::Quote is released under the GNU General Public License, version 2,
+which explicitly carries a "No Warranty" clause.
 
 =cut

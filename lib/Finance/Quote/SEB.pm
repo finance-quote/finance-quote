@@ -31,12 +31,15 @@ use strict;
 
 use vars qw( $SEB_FUNDS_URL);
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use utf8;
 
 # VERSION
-$SEB_FUNDS_URL = 'http://seb.se/pow/fmk/2100/Senaste_fondkurserna.TXT';
+$SEB_FUNDS_URL = 'https://seb.se/pow/fmk/2100/Senaste_fondkurserna.TXT';
 
 sub methods { return (seb_funds => \&seb_funds); }
 
@@ -56,6 +59,10 @@ sub seb_funds {
   $url   = $SEB_FUNDS_URL;
   $ua    = $quoter->user_agent;
   $reply = $ua->request(GET $url);
+
+  ### url : $url
+  ### reply : $reply
+
   unless ($reply->is_success) {
     foreach my $symbol (@symbols) {
       $funds{$symbol, "success"}  = 0;
@@ -121,7 +128,7 @@ Unfortunately there is no unique identifier for the fund names.
 Therefore the complete fund name must be given, including spaces, case
 is important.
 
-Consult http://taz.vv.sebank.se/cgi-bin/pts3/pow/Fonder/kurser/kurslista_body.asp
+Consult https://seb.se/bors-och-finans/fonder/fondkurslista
 for all available funds.
 
 Example "SEB Aktiesparfond"

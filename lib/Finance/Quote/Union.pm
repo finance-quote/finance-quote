@@ -7,6 +7,7 @@
 #    Copyright (C) 2000, Brent Neal <brentn@users.sourceforge.net>
 #    Copyright (C) 2000, Volker Stuerzl <volker.stuerzl@gmx.de>
 #    Copyright (C) 2002, Rainer Dorsch <rainer.dorsch@informatik.uni-stuttgart.de>
+#    Copyright (C) 2022, Andre Joost <andrejoost@gmx.de>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,8 +38,13 @@ require 5.005;
 use strict;
 use LWP::UserAgent;
 use HTTP::Request::Common;
+use POSIX qw(strftime);
 
 # VERSION
+
+our $UNION_URL1 = "https://legacy-apps.union-investment.de/handle?generate=true&action=doDownloadSearch&start_time=";
+# Date format 27.07.2022&end_time=01.08.2022
+our $UNION_URL2 ="&csvformat=us&choose_indi_fondsnames=";
 
 sub methods { return (unionfunds => \&unionfunds); }
 sub labels { return (unionfunds => [qw/exchange name date isodate price method/]); }
@@ -65,23 +71,21 @@ sub unionfunds
   foreach my $fund (@funds)
   {
     $fundhash{$fund} = 0;
-  }
+	    my $endtime = POSIX::strftime ("%d.%m.%Y" , localtime());
+		my $epoc = time();
+        $epoc = $epoc - 7 * 24 * 60 * 60;   # one week before of current date.
+		my $starttime = POSIX::strftime ("%d.%m.%Y" , localtime($epoc));
+		my $url = $UNION_URL1 . $starttime."&end_time=" . $endtime . $UNION_URL2 . $fund;
 
+		
   # get csv data
-  my $response = $ua->request(GET &unionurl);
+  my $response = $ua->request(GET $url);
   if ($response->is_success)
   {
-    # Retrive date.  This comes from the last line of the CSV file.
-    foreach (split('\015?\012',$response->content))
-    {
-      @q = split(/,/) or next;
-      $tempdate=$q[0];
-    }
-
     # process csv data
     foreach (split('\015?\012',$response->content))
     {
-#      @q = $quoter->parse_csv($_) or next;
+
       @q = split(/,/) or next;
       next unless (defined $q[1]);
       if (exists $fundhash{$q[1]})
@@ -90,17 +94,18 @@ sub unionfunds
 
 
         $info{$q[1], "exchange"} = "UNION";
-        $info{$q[1], "name"}     = $q[1];
+        $info{$q[1], "name"}     = $q[0];
         $info{$q[1], "symbol"}   = $q[1];
-        $info{$q[1], "price"}    = $q[3];
-        $info{$q[1], "last"}     = $q[3];
-	$quoter->store_date(\%info, $q[1], {eurodate => $tempdate});
+        $info{$q[1], "price"}    = $q[4];
+        $info{$q[1], "last"}     = $q[4];
+	$quoter->store_date(\%info, $q[1], {eurodate => $q[6]});
         $info{$q[1], "method"}   = "unionfunds";
-        $info{$q[1], "currency"} = "EUR";
+        $info{$q[1], "currency"} = $q[2];
         $info{$q[1], "success"}  = 1;
       }
     }
-
+  }
+  }
     # check to make sure a value was returned for every fund requested
     foreach my $fund (keys %fundhash)
     {
@@ -109,33 +114,24 @@ sub unionfunds
         $info{$fund, "success"}  = 0;
         $info{$fund, "errormsg"} = "No data returned";
       }
-    }
-  }
-  else
-  {
-    foreach my $fund (@funds)
-    {
-      $info{$fund, "success"}  = 0;
-      $info{$fund, "errormsg"} = "HTTP error";
-    }
-  }
+	}
 
   return wantarray() ? %info : \%info;
-}
 
-# UNION provides a csv file named preise.csv containing the prices of all
-# their funds for the most recent business day.
-
-sub unionurl
-{
-  return "http://privatkunden.union-investment.de/preise.csv";
 }
 
 1;
 
+# UNION provides a csv file named historische-preise.csv on
+# <https://www.union-investment.de/fonds_depot/fonds-finden/preise-berechnen#HistorischeTagespreise>
+# containing the prices of a selction of all their funds for a selected period.
+
+
+__END__
+
 =head1 NAME
 
-Finance::Quote::Union	- Obtain quotes from UNION (Zurich Financial Services Group).
+Finance::Quote::Union	- Obtain quotes from UNION (Union Investment).
 
 =head1 SYNOPSIS
 
@@ -143,7 +139,7 @@ Finance::Quote::Union	- Obtain quotes from UNION (Zurich Financial Services Grou
 
     $q = Finance::Quote->new;
 
-    %stockinfo = $q->fetch("unionfunds","975788");
+    %stockinfo = $q->fetch("unionfunds","DE0008491002");
 
 =head1 DESCRIPTION
 
@@ -152,6 +148,9 @@ This module obtains information about UNION managed funds.
 Information returned by this module is governed by UNION's terms
 and conditions.
 
+Note that previous versions of the module required the WKN,
+now the ISIN is needed as symbol value.
+
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::UNION:
@@ -159,6 +158,6 @@ exchange, name, date, price, last.
 
 =head1 SEE ALSO
 
-UNION (Union Invest), http://www.union-invest.de/
+UNION (Union Investment), https://www.union-investment.de/
 
 =cut

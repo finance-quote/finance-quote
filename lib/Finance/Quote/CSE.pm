@@ -1,10 +1,5 @@
 #!/usr/bin/perl -w
-#
-#    This modules is based on the AEX module. The code has been modified by
-#    Hiranya Samarasekera <hiranyas@gmail.com> to be able to retrieve stock
-#    information from the Colombo Stock Exchange (CSE) in Sri Lanka.
-#    ----------------------------------------------------------------------
-#
+
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -19,154 +14,104 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #    02110-1301, USA
-#
-
-require 5.005;
-
-use strict;
 
 package Finance::Quote::CSE;
 
-use vars qw($CSE_URL);
+use strict;
+use warnings;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
 
 use LWP::UserAgent;
-use HTTP::Request::Common qw(POST);
-use HTML::TableExtract;
-use CGI;
+use JSON qw( decode_json );
+use String::Util qw(trim);
 
 # VERSION
 
-my $CSE_URL = "http://www.cse.lk/trade_summary_report.do?reportType=CSV";
+our @labels = qw/last date isodate/;
 
-sub methods { return (cse       => \&cse) }
-
-{
-  my @labels = qw/ID SYMBOL NAME LAST_TRADE_QUANTITY TRADE_DATE PRICE SHAREVOLUME TRADEVOLUME TURNOVER HI_TRADE LO_TRADE CHANGE CHANGE_PERCENTAGE ISSUE_DATE CLOSING_PRICE PREVIOUS_CLOSE MARKET_CAP MARKET_CAP_PERCENTAGE OPEN currency method exchange/;
-
-  sub labels { return (cse       => \@labels) }
+sub labels {
+  return ( cse => \@labels );
 }
 
-# Colombo Stock Exchange (CSE), Sri Lanka
+sub methods {
+  return ( cse => \&cse );
+}
 
 sub cse {
-  my $quoter = shift;
+  my $quoter  = shift;
   my @symbols = @_;
-  return unless @symbols;
+  my $ua      = $quoter->user_agent();
+  my %info;
 
-  my (%info,$url,$reply,$te);
-  my ($row, $datarow, $matches);
-  my ($time);
+  foreach my $symbol (@_) {
+    eval {
+      my $url      = 'https://www.cse.lk/api/companyInfoSummery';
+      my $form     = {'symbol' => $symbol};
+      my $reply    = $ua->post($url, $form);
+      my $search   = JSON::decode_json $reply->content;
 
-  $url = $CSE_URL;    		# base url
+      ### Search   : $url, $form, $reply->code
+      ### Search   : $search
 
-  # Create a user agent object and HTTP headers
-  my $ua = LWP::UserAgent->new(agent => 'Mozilla/4.0 (compatible; MSIE 5.5; Windows 98)');
+      my $data = $search->{reqSymbolInfo} or die('query did not return expected data');
 
-  # Compose POST request
-  my $request = HTTP::Request->new("GET", $url);
-
-  $reply = $ua->request( $request );
-
-  #print Dumper $reply;
-  if ($reply->is_success) {
-
-    # Write retreived data to temp file for debugging
-    use POSIX;
-    my $filename = tmpnam();
-    open my $fw, ">", $filename or die "$filename: $!";
-    print $fw $reply->content;
-    close $fw;
-
-    # Open reply to read lines
-    open FP, "<", \$reply->content or die "Unable to read data: $!";
-
-    # Open temp file instead while debugging
-    #open FP, "<", $filename or die "Unable to read data: $!";
-
-    while (my $line = <FP>) {
-      my @row_data = $quoter->parse_csv($line);
-      #print Dumper \@row_data;
-      my $row = \@row_data;
-      #print Dumper $row;
-      next unless @row_data;
-
-      foreach my $symbol (@symbols) {
-
-        my $found = 0;
-
-        # Match stock symbol (e.g. JKH.N0000, HNB.X0000)
-        if ( @$row[1] eq uc($symbol) ) {
-          $info {$symbol, "exchange"} = "Colombo Stock Exchange, Sri Lanka";
-          $info {$symbol, "method"} = "cse";
-          $info {$symbol, "symbol"} = @$row[1];
-          $info {$symbol, "name"} = @$row[2];
-          ($info {$symbol, "last"} = @$row[5]) =~ s/\s*//g;
-          $info {$symbol, "bid"} = undef;
-          $info {$symbol, "offer"} = undef;
-          $info {$symbol, "open"} = @$row[18];
-          $info {$symbol, "nav"} = undef;
-          $info {$symbol, "price"} = @$row[5];
-          $info {$symbol, "low"} = @$row[10];
-          $info {$symbol, "close"} = @$row[15];
-          $info {$symbol, "p_change"} = @$row[12];
-          ($info {$symbol, "high"} = @$row[9]) =~ s/\s*//g;
-          ($info {$symbol, "volume"} = @$row[6]) =~ s/,//g;;
-
-          $quoter->store_date(\%info, $symbol, {today => 1});
-
-          $info {$symbol, "currency"} = "LKR";
-          $info {$symbol, "success"} = 1;
-        }
-      }
+      $info{$symbol, 'isin'}     = $data->{isin};
+      $info{$symbol, 'close'}    = $data->{closingPrice};
+      $info{$symbol, 'last'}     = $data->{lastTradedPrice};
+      $info{$symbol, 'high'}     = $data->{hiTrade};
+      $info{$symbol, 'low'}      = $data->{lowTrade};
+      $info{$symbol, 'cap'}      = $data->{marketCap};
+      $info{$symbol, 'name'}     = $data->{name};
+      $info{$symbol, 'currency'} = 'LKR';
+      $info{$symbol, 'success'} = 1;
+    };
+    
+    if ($@) {
+      my $error = "CSE failed: $@";
+      $info{$symbol, 'success'}  = 0;
+      $info{$symbol, 'errormsg'} = trim($error);
     }
   }
 
-  foreach my $symbol (@symbols) {
-    unless ( !defined($info {$symbol, "success"}) || $info {$symbol, "success"} == 1 )
-      {
-        $info {$symbol,"success"} = 0;
-        $info {$symbol,"errormsg"} = "Fund name $symbol not found";
-        next;
-      }
-  }
-
-  #print Dumper \%info;
-  return %info if wantarray;
-  return \%info;
+  return wantarray() ? %info : \%info;
 }
-
 
 1;
 
 =head1 NAME
 
-Finance::Quote::CSE Obtain quotes from Colombo Stock Exchange in Sri Lanka
+Finance::Quote::CSE - Obtain quotes from Colombo Stock Exchange in Sri Lanka
 
 =head1 SYNOPSIS
 
     use Finance::Quote;
 
     $q = Finance::Quote->new;
-	@stocks = ("JKH.N0000", "HPWR.N0000", "HNB.X0000");
-    %info = Finance::Quote->fetch("cse", @stocks);
+
+    %info = Finance::Quote->fetch('cse', 'YORK.N0000');
 
 =head1 DESCRIPTION
 
-This module retrieves information from the Colombo Stock Exchange (CSE)
+This module fetches information from the Colombo Stock Exchange (CSE)
 in Sri Lanka http://www.cse.lk.
 
-This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "cse" in the argument
-list to Finance::Quote->new().
+This module is loaded by default on a Finance::Quote object. It's also possible
+to load it explicitly by placing 'CSE' in the argument list to
+Finance::Quote->new().
 
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::CSE :
-symbol, name, last, open, price, low, close, p_change,
-high, volume, exchange, method
+isin name currency date isodate ask close high low open volume success
 
-=head1 SEE ALSO
+=head1 TERMS & CONDITIONS
 
-Colombo Stock Exchange (CSE), Sri Lanka, http://www.cse.lk
+Use of www.cse.lk is governed by any terms & conditions of that site.
+
+Finance::Quote is released under the GNU General Public License, version 2,
+which explicitly carries a "No Warranty" clause.
 
 =cut
+

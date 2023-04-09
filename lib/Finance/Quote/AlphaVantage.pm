@@ -16,15 +16,17 @@
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #    02110-1301, USA
 
+# 2019-12-01: Added additional labels for net and p_change. Set
+#             close to previous close as returned in the JSON.
+#             Bruce Schuck (bschuck at asgard hyphen systems dot com)
+
 package Finance::Quote::AlphaVantage;
-
-require 5.005;
-
-# VERSION
 
 use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
+
+# VERSION
 
 # Alpha Vantage recommends that API call frequency does not extend far
 # beyond ~1 call per second so that they can continue to deliver
@@ -37,8 +39,7 @@ my $maxQueries = { quantity =>5 , seconds => 60}; # no more than x
                                                   # https://www.alphavantage.co/support/#support
 
 my $ALPHAVANTAGE_URL =
-    'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&datatype=json';
-my $ALPHAVANTAGE_API_KEY = $ENV{'ALPHAVANTAGE_API_KEY'};
+    'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&datatype=json';
 
 my %currencies_by_suffix = (
 
@@ -58,6 +59,7 @@ my %currencies_by_suffix = (
     '.BR'  => "EUR",    # Belgium		Brussels
     '.TO'  => "CAD",    # Canada		Toronto
     '.V'   => "CAD",    # 		Toronto Venture
+    '.TRT' => "CAD",    # Canada        Toronto
     '.SN'  => "CLP",    # Chile		Santiago
     '.SS'  => "CNY",    # China		Shanghai
     '.SZ'  => "CNY",    # 		Shenzhen
@@ -67,9 +69,11 @@ my %currencies_by_suffix = (
     '.BM'  => "EUR",    # 		Bremen
     '.D'   => "EUR",    # 		Dusseldorf
     '.F'   => "EUR",    # 		Frankfurt
+    '.FRK' => "EUR",    # 		Frankfurt
     '.H'   => "EUR",    # 		Hamburg
     '.HA'  => "EUR",    # 		Hanover
     '.MU'  => "EUR",    # 		Munich
+    '.DEX' => "EUR",    # 		Xetra
     '.ME'  => "RUB",    # Russia	Moscow
     '.SG'  => "EUR",    # 		Stuttgart
     '.DE'  => "EUR",    # 		XETRA
@@ -87,6 +91,7 @@ my %currencies_by_suffix = (
     '.MX'  => "MXP",    # Mexico
     '.NZ'  => "NZD",    # New Zealand
     '.AS'  => "EUR",    # Netherlands	Amsterdam
+    '.AMS' => "EUR",    # Netherlands	Amsterdam
     '.OL'  => "NOK",    # Norway		Oslo
     '.LM'  => "PEN",    # Peru		Lima
     '.IN'  => "EUR",    # Portugal	Lisbon
@@ -118,12 +123,11 @@ sub methods {
              usa          => \&alphavantage,
              nyse         => \&alphavantage,
              nasdaq       => \&alphavantage,
-             vanguard     => \&alphavantage,
     );
 }
 
 {
-    my @labels = qw/date isodate open high low close volume last/;
+    my @labels = qw/date isodate open high low close volume last net p_change/;
 
     sub labels {
         return ( alphavantage => \@labels, );
@@ -157,19 +161,23 @@ sub alphavantage {
     my $ua = $quoter->user_agent();
     my $launch_time = time();
 
+    my $token = exists $quoter->{module_specific_data}->{alphavantage}->{API_KEY} ? 
+                $quoter->{module_specific_data}->{alphavantage}->{API_KEY}        :
+                $ENV{"ALPHAVANTAGE_API_KEY"};
+
     foreach my $stock (@stocks) {
 
-        if ( !defined $ALPHAVANTAGE_API_KEY ) {
+        if ( !defined $token ) {
             $info{ $stock, 'success' } = 0;
             $info{ $stock, 'errormsg' } =
-                'Expected ALPHAVANTAGE_API_KEY to be set; get an API key at https://www.alphavantage.co';
+                'An AlphaVantage API is required. Get an API key at https://www.alphavantage.co';
             next;
         }
 
         $url =
               $ALPHAVANTAGE_URL
             . '&apikey='
-            . $ALPHAVANTAGE_API_KEY
+            . $token
             . '&symbol='
             . $stock;
 
@@ -182,6 +190,7 @@ sub alphavantage {
             $code = $reply->code;
             $desc = HTTP::Status::status_message($code);
             $body = $reply->content;
+            # print STDERR "AlphaVantage returned: $body\n";
         };
 
         &$get_content();
@@ -201,7 +210,7 @@ sub alphavantage {
 
         my $try_cnt = 0;
         while (($try_cnt < 5) && ($json_data->{'Note'})) {
-            # print STDERR "INFORMATION:".$json_data->{'Note'}."\n";
+            # print STDERR "NOTE:".$json_data->{'Note'}."\n";
             # print STDERR "ADDITIONAL SLEEPING HERE !";
             sleep (20);
             &$get_content();
@@ -216,57 +225,45 @@ sub alphavantage {
             next;
         }
 
-        if (!$json_data->{'Meta Data'}) {
+        my $quote = $json_data->{'Global Quote'};
+        if ( ! %{$quote} ) {
             $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } = ( $json_data->{'Information'} || "No useable data returned" ) ;
-            next;
-        }
-
-        my $last_refresh = $json_data->{'Meta Data'}->{'3. Last Refreshed'}; # when market is open this returns an isodate + time, otherwise only the isodate
-        $last_refresh = substr($last_refresh,0,10);  # remove time if returned
-        if ( !$last_refresh ) {
-            $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } = "json_data doesn't contain Last Refreshed";
-            next;
-        }
-        my $isodate = substr( $last_refresh, 0, 10 );
-        if ( !$json_data->{'Time Series (Daily)'} ) {
-            $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } = "json_data doesn't contain Time Series hash";
-            next;
-        }
-        if ( !$json_data->{'Time Series (Daily)'}->{$last_refresh} ) {
-            $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } = "json_data doesn't contain latest refresh data in Time Series hash";
-            next;
-        }
-
-        my %ts = %{ $json_data->{'Time Series (Daily)'}->{$last_refresh} };
-        if ( !%ts ) {
-            $info{ $stock, 'success' }  = 0;
-            $info{ $stock, 'errormsg' } = 'Could not extract Time Series data';
+            $info{ $stock, 'errormsg' } = "json_data doesn't contain Global Quote";
             next;
         }
 
         # %ts holds data as
         #  {
-        #     '1. open'     151.5400,
-        #     '2. high'     151.5900,
-        #     '3. low'      151.5300,
-        #     '4. close'    151.5900,
-        #     '5. volume'   57620
+        #     "Global Quote": {
+        #         "01. symbol": "SOLB.BR",
+        #         "02. open": "104.2000",
+        #         "03. high": "104.9500",
+        #         "04. low": "103.4000",
+        #         "05. price": "104.0000",
+        #         "06. volume": "203059",
+        #         "07. latest trading day": "2019-11-29",
+        #         "08. previous close": "105.1500",
+        #         "09. change": "-1.1500",
+        #         "10. change percent": "-1.0937%"
+        #     }
         # }
 
+        # remove trailing percent sign, if present
+        $quote->{'10. change percent'} =~ s/\%$//;
+
         $info{ $stock, 'success' } = 1;
-        $info{ $stock, 'symbol' }  = $json_data->{'Meta Data'}->{'2. Symbol'};
-        $info{ $stock, 'open' }    = $ts{'1. open'};
-        $info{ $stock, 'close' }   = $ts{'4. close'};
-        $info{ $stock, 'last' }    = $ts{'4. close'};
-        $info{ $stock, 'high' }    = $ts{'2. high'};
-        $info{ $stock, 'low' }     = $ts{'3. low'};
-        $info{ $stock, 'volume' }  = $ts{'5. volume'};
+        $info{ $stock, 'success' }  = 1;
+        $info{ $stock, 'symbol' }   = $quote->{'01. symbol'};
+        $info{ $stock, 'open' }     = $quote->{'02. open'};
+        $info{ $stock, 'high' }     = $quote->{'03. high'};
+        $info{ $stock, 'low' }      = $quote->{'04. low'};
+        $info{ $stock, 'last' }     = $quote->{'05. price'};
+        $info{ $stock, 'volume' }   = $quote->{'06. volume'};
+        $info{ $stock, 'close' }    = $quote->{'08. previous close'};
+        $info{ $stock, 'net' }      = $quote->{'09. change'};
+        $info{ $stock, 'p_change' } = $quote->{'10. change percent'};
         $info{ $stock, 'method' }  = 'alphavantage';
-        $quoter->store_date( \%info, $stock, { isodate => $isodate } );
+        $quoter->store_date( \%info, $stock, { isodate => $quote->{'07. latest trading day'} } );
 
         # deduce currency
         if ( $stock =~ /(\..*)/ ) {
@@ -304,3 +301,42 @@ sub alphavantage {
 
     return wantarray() ? %info : \%info;
 }
+1;
+
+=head1 NAME
+
+Finance::Quote::AlphaVantage - Obtain quotes from https://iexcloud.io
+
+=head1 SYNOPSIS
+
+    use Finance::Quote;
+    
+    $q = Finance::Quote->new('AlphaVantage', alphavantage => {API_KEY => 'your-alphavantage-api-key'});
+
+    %info = Finance::Quote->fetch("IBM", "AAPL");
+
+=head1 DESCRIPTION
+
+This module fetches information from https://www.alphavantage.co.
+
+This module is loaded by default on a Finance::Quote object. It's also possible
+to load it explicitly by placing "AlphaVantage" in the argument list to
+Finance::Quote->new().
+
+This module provides the "alphavantage" fetch method.
+
+=head1 API_KEY
+
+https://www.alphavantage.co requires users to register and obtain an API key, which
+is also called a token.  The token is a sequence of random characters.
+
+The API key may be set by either providing a module specific hash to
+Finance::Quote->new as in the above example, or by setting the environment
+variable ALPHAVANTAGE_API_KEY.
+
+=head1 LABELS RETURNED
+
+The following labels may be returned by Finance::Quote::AlphaVantage :
+symbol, open, close, high, low, last, volume, method, isodate, currency.
+
+=cut

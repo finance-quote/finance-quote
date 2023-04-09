@@ -30,7 +30,7 @@
 
 
 package Finance::Quote::MorningstarCH;
-require 5.005;
+require 5.006;
 
 use strict;
 use warnings;
@@ -43,13 +43,14 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTTP::Cookies;
 
-# VERSION
 
-$MSTARCH_MAIN_URL   =	"http://www.morningstar.ch";
-$MSTARCH_LOOK_UP    =	"http://www.morningstar.ch/ch/funds/SecuritySearchResults.aspx?search=";
-$MSTARCH_NEXT_URL   =	"http://www.morningstar.ch/ch/funds/snapshot/snapshot.aspx?id=";
+$MSTARCH_MAIN_URL   =	"https://www.morningstar.ch";
+$MSTARCH_LOOK_UP    =	"https://www.morningstar.ch/ch/funds/SecuritySearchResults.aspx?search=";
+$MSTARCH_NEXT_URL   =	"https://www.morningstar.ch/ch/funds/snapshot/snapshot.aspx?id=";
 
 # FIXME -
+
+# VERSION
 
 sub methods { return (morningstarch => \&morningstarch_fund); }
 
@@ -251,16 +252,16 @@ Finance::Quote::morningstarch - Obtain CH Unit Trust quotes from morningstar.ch.
 =head1 DESCRIPTION
 
 This module fetches information from the MorningStar Funds service,
-http://morningstar.com/ch/.
+https://morningstar.com/ch/.
 
 Funds are identified by their ISIN code.
 
 This module is loaded by default on a Finance::Quote object. It's
-also possible to load it explicity by placing "morningstarch" in the argument
+also possible to load it explicitly by placing "morningstarch" in the argument
 list to Finance::Quote->new().
 
 Information obtained by this module may be covered by Morningstar
-terms and conditions See http://morningstar.ch/ for details.
+terms and conditions See https://morningstar.ch/ for details.
 
 =head2 Stocks And Indices
 
@@ -277,7 +278,7 @@ The following labels may be returned by Finance::Quote::morningstarch :
 
 =head1 SEE ALSO
 
-Morning Star websites, http://morningstar.ch
+Morning Star websites, https://morningstar.ch
 
 
 =head1 AUTHOR
@@ -297,3 +298,4 @@ at your option, any later version of Perl 5 you may have available.
 =cut
 
 __END__
+

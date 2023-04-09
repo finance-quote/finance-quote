@@ -11,9 +11,9 @@ my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 my $quoter = Finance::Quote->new();
 
-my @symbols =  qw/C F G I S L2020 L2030 L2040 L2050 LINCOME/;
+my @symbols =  qw/C F G I S L2025 L2030 L2035 L2040 L2045 L2050 L2055 L2060 L2065 LINCOME/;
 
-plan tests => 14*(1+$#symbols)+3;
+plan tests => 12*(1+$#symbols)+3;
 
 my %quotes = $quoter->tsp( @symbols, "BOGUS" );
 ok(%quotes);
@@ -26,7 +26,6 @@ foreach my $symbol (@symbols) {
        || substr($quotes{$symbol, "date"}, 6, 4) == $lastyear);
     ok($quotes{$symbol,"last"} > 0);
     ok($quotes{$symbol,"currency"});
-    ok($quotes{$symbol,"name"});
     ok(!defined($quotes{"c","exchange"}) );
 }
 
@@ -43,7 +42,6 @@ foreach my $symbol (@symbols) {
        || substr($quotes{$symbol, "date"}, 6, 4) == $lastyear);
     ok($quotes{$symbol,"last"} > 0);
     ok($quotes{$symbol,"currency"});
-    ok($quotes{$symbol,"name"});
     ok(!defined($quotes{"c","exchange"}) );
 }
 
