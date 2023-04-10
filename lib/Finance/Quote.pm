@@ -358,11 +358,20 @@ sub new {
   # 1. Add a default value for $this->{object-name}
   # 2. Add the 'user-visible-name' => [type, object-name] to %named_parameter
 
+  # Check for FQ_CURRENCY - preferred currency module
+  # Set to AlphaVantage if not set.
+  my $CURRENCY_MODULE;
+  if (!$ENV{FQ_CURRENCY}) {
+    $CURRENCY_MODULE='AlphaVantage';
+  } else {
+    $CURRENCY_MODULE=$ENV{FQ_CURRENCY}
+  }
+
   # Default values
   $this->{FAILOVER}       = 1;
   $this->{REQUIRED}       = [];
   $this->{TIMEOUT}        = $TIMEOUT if defined($TIMEOUT);
-  $this->{currency_rates} = {order => ['AlphaVantage']};
+  $this->{currency_rates} = {order => [$CURRENCY_MODULE]};
 
   # Sort out arguments
   my %named_parameter = (timeout         => ['', 'TIMEOUT'],
