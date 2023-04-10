@@ -259,6 +259,23 @@
     - GBP IQD
     - AUD AUD
 #
+- module: CurrencyRates/YahooJSON.pm
+  state: working
+  Added: 2023-04-09
+  changed: ~
+  removed: ~
+  urls: https://query1.finance.yahoo.com/v7/finance/quote?symbols=
+  apikey: false
+  notes: |
+    URL is constructed by adding "$from$to%3DX" to Yahoo URL.
+    Can be used for crypto by adding "$from-$to" to the URL.
+  testfile: currency.t
+  testcases:
+    - USD EUR
+    - GBP IDR
+    - IDR CAD
+    - AUD AUD
+#
 - module: DWS.pm
   state: working
   added: TBD
