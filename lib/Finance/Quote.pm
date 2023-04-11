@@ -359,12 +359,16 @@ sub new {
   # 2. Add the 'user-visible-name' => [type, object-name] to %named_parameter
 
   # Check for FQ_CURRENCY - preferred currency module
-  # Set to AlphaVantage if not set.
+  # Set to AlphaVantage if not set or not in @CURRENCY_RATES_MODULES
   my $CURRENCY_MODULE;
   if (!$ENV{FQ_CURRENCY}) {
     $CURRENCY_MODULE='AlphaVantage';
   } else {
-    $CURRENCY_MODULE=$ENV{FQ_CURRENCY}
+    if ( grep( /^$ENV{FQ_CURRENCY}$/, @CURRENCY_RATES_MODULES ) ) {
+      $CURRENCY_MODULE=$ENV{FQ_CURRENCY}
+    } else {
+      $CURRENCY_MODULE='AlphaVantage';
+    }
   }
 
   # Default values
