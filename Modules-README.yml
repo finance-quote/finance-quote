@@ -316,7 +316,7 @@
 - module: FTfunds.pm
   state: working
   added: 2014-03-02
-  changed: ~
+  changed: 2023-04-09
   removed: ~
   urls:
     - https://markets.ft.com/data/funds/tearsheet/summary?s=
@@ -326,8 +326,8 @@
     - Added date is an estimate. According to Git log it first appeared in commit fdd204b.
   testfile: ftfunds.t
   testcases:
-    - GB0031835118
-    - GB0030880255
+    - GB0031834814
+    - GB0030881337
     - GB0003865176
     - GB00B7W6PR65
 #
