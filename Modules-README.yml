@@ -958,13 +958,16 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2022-07-04
+  changed: 2023-05-07
   removed:
   urls:
-    - https://query1.finance.yahoo.com/v7/finance/quote?symbols=
+    - https://query1.finance.yahoo.com/v6/finance/quote?symbols=
   apikey: false
   notes: |
     Module to get data from Yahoo's API
+    See issue https://github.com/finance-quote/finance-quote/issues/264
+    Dependability of Yahoo REST API has been
+    spotty.
   testfile: yahoojson.t
   testcases:
     - SUZLON.BO
@@ -997,7 +1000,7 @@
   urls: https://www.sharenet.co.za/jse/$symbol
   apikey: false
   notes: 
-    Module to acquire data from https://www.sharenet.co.za, PR #208
+    - Module to acquire data from https://www.sharenet.co.za, PR #208
   testfile: za.t
   testcases:
     - AGL
