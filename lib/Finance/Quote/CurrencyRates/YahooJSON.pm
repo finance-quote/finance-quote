@@ -47,7 +47,7 @@ sub multipliers
 {
   my ($this, $ua, $from, $to) = @_;
 
-  my $url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=';
+  my $url = 'https://query1.finance.yahoo.com/v6/finance/quote?symbols=';
   my $json_data;
   my $rate;
   my $reply = $ua->get($url
