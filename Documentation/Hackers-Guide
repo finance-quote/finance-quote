@@ -12,11 +12,12 @@ $Version$
 		3.1. The package name
 		3.2. The methods() subroutine
 		3.3. The functions specified by methods()
-		3.4. Currency
-                3.5. Development & Debugging Code
-                3.6. Dates
-		3.7. Things to avoid
-		3.8. Using your new module
+		3.4. The parameters() subroutine - Modules requiring API Keys
+		3.5. Currency
+                3.6. Development & Debugging Code
+                3.7. Dates
+		3.8. Things to avoid
+		3.9. Using your new module
         4. How to write a Finance::Quote::CurrencyRates module
                 4.1. The package name
                 4.2. The new() constructor
@@ -232,7 +233,21 @@ It is also very very strongly recommended that you place your module's
 name in the {$stock,"source"} field.  This allows others to check where
 information was obtained, and to use it appropriately.
 
-3.4. Currency
+3.4 The parameters() subroutine - Modules requiring API Keys
+------------------------------------------------------------
+Some data sources require an API Key (sometimes called a token) in
+order to access the securities or exchange data. AlphaVantage.pm
+is one example.
+
+In order to assist programs using Finance::Quote to identify those
+modules that require an API Key please include this function if
+your module is using a data source that requires a key/token.
+
+	sub parameters {
+		return ('API_KEY');
+	}
+
+3.5 Currency
 -------------
 Finance::Quote has support for multiple currencies and for currency
 conversion.  As long as you provide a little bit of information about
@@ -279,7 +294,7 @@ to use the defaults, but also add some of your own:
 In the example above, the default fields would be available for currency
 conversion, but the "commission" field would also be converted.
 
-3.5 Development & Debugging Code
+3.6 Development & Debugging Code
 --------------------------------
 There are multiple ways to include extra code in Perl modules to facilitate
 development and debugging. For Finance::Quote modules, please use the following
@@ -311,7 +326,7 @@ compilation.
     print "More complex debugging code\n";
   }
 
-3.6. Dates
+3.7 Dates
 ----------
 Do not parse dates directly in your module.  Instead you should use
 the function $q->store_date(), which handles a variety of date
@@ -328,7 +343,7 @@ function this way:
 
 See the documentation in Quote.pm for more information.
 
-3.7. Things to avoid
+3.8 Things to avoid
 --------------------
 Some sources of information will provide more stock information than
 requested.  Some code may rely upon your code only returning information
@@ -336,7 +351,7 @@ about the stocks that the caller requested.  As such, you should
 never return information about stocks that were not requested, even
 if you fetch and/or process that information.
 
-3.8. Using your new module
+3.9 Using your new module
 --------------------------
 Using your new module is easy.  Normally when using Finance::Quote you'd
 do something like the following:
