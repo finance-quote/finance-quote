@@ -53,6 +53,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     ECB
     Fixer
     OpenExchange
+    YahooJSON
 /;
 
 @MODULES = qw/
@@ -401,11 +402,24 @@ sub new {
   # 1. Add a default value for $this->{object-name}
   # 2. Add the 'user-visible-name' => [type, object-name] to %named_parameter
 
+  # Check for FQ_CURRENCY - preferred currency module
+  # Set to AlphaVantage if not set or not in @CURRENCY_RATES_MODULES
+  my $CURRENCY_MODULE;
+  if (!$ENV{FQ_CURRENCY}) {
+    $CURRENCY_MODULE='AlphaVantage';
+  } else {
+    if ( grep( /^$ENV{FQ_CURRENCY}$/, @CURRENCY_RATES_MODULES ) ) {
+      $CURRENCY_MODULE=$ENV{FQ_CURRENCY}
+    } else {
+      $CURRENCY_MODULE='AlphaVantage';
+    }
+  }
+
   # Default values
   $this->{FAILOVER}       = 1;
   $this->{REQUIRED}       = [];
   $this->{TIMEOUT}        = $TIMEOUT if defined($TIMEOUT);
-  $this->{currency_rates} = {order => ['AlphaVantage']};
+  $this->{currency_rates} = {order => [$CURRENCY_MODULE]};
 
   # Sort out arguments
   my %named_parameter = (timeout         => ['', 'TIMEOUT'],
@@ -1641,52 +1655,53 @@ http://www.gnucash.org/
 
 =head1 SEE ALSO
 
-Finance::Quote::CurrencyRates::AlphaVantage,
-Finance::Quote::CurrencyRates::ECB,
-Finance::Quote::CurrencyRates::Fixer,
-Finance::Quote::CurrencyRates::OpenExchange,
-Finance::Quote::AEX,
-Finance::Quote::ASEGR,
-Finance::Quote::ASX,
-Finance::Quote::Bloomberg,
-Finance::Quote::BSEIndia,
-Finance::Quote::Bourso,
-Finance::Quote::CSE,
-Finance::Quote::Cdnfundlibrary,
-Finance::Quote::Comdirect,
-Finance::Quote::Currencies,
-Finance::Quote::DWS,
-Finance::Quote::Deka,
-Finance::Quote::FTfunds,
-Finance::Quote::Fidelity,
-Finance::Quote::Finanzpartner,
-Finance::Quote::Fondsweb,
-Finance::Quote::Fool,
-Finance::Quote::Fundata
-Finance::Quote::GoldMoney,
-Finance::Quote::HU,
-Finance::Quote::IEXCloud,
-Finance::Quote::IndiaMutual,
-Finance::Quote::MStaruk,
-Finance::Quote::MorningstarAU,
-Finance::Quote::MorningstarCH,
-Finance::Quote::MorningstarJP,
-Finance::Quote::NSEIndia,
-Finance::Quote::NZX,
-Finance::Quote::OnVista,
-Finance::Quote::Oslobors,
-Finance::Quote::SEB,
-Finance::Quote::SIX,
-Finance::Quote::Tradeville,
-Finance::Quote::TSP,
-Finance::Quote::TMX,
-Finance::Quote::Tiaacref,
-Finance::Quote::TesouroDireto,
-Finance::Quote::TreasuryDirect,
-Finance::Quote::Troweprice,
-Finance::Quote::Union,
-Finance::Quote::YahooJSON,
-Finance::Quote::ZA
+  Finance::Quote::CurrencyRates::AlphaVantage,
+  Finance::Quote::CurrencyRates::ECB,
+  Finance::Quote::CurrencyRates::Fixer,
+  Finance::Quote::CurrencyRates::OpenExchange,
+  Finance::Quote::CurrencyRates::YahooJSON,
+  Finance::Quote::AEX,
+  Finance::Quote::ASEGR,
+  Finance::Quote::ASX,
+  Finance::Quote::Bloomberg,
+  Finance::Quote::BSEIndia,
+  Finance::Quote::Bourso,
+  Finance::Quote::CSE,
+  Finance::Quote::Cdnfundlibrary,
+  Finance::Quote::Comdirect,
+  Finance::Quote::Currencies,
+  Finance::Quote::DWS,
+  Finance::Quote::Deka,
+  Finance::Quote::FTfunds,
+  Finance::Quote::Fidelity,
+  Finance::Quote::Finanzpartner,
+  Finance::Quote::Fondsweb,
+  Finance::Quote::Fool,
+  Finance::Quote::Fundata
+  Finance::Quote::GoldMoney,
+  Finance::Quote::HU,
+  Finance::Quote::IEXCloud,
+  Finance::Quote::IndiaMutual,
+  Finance::Quote::MStaruk,
+  Finance::Quote::MorningstarAU,
+  Finance::Quote::MorningstarCH,
+  Finance::Quote::MorningstarJP,
+  Finance::Quote::NSEIndia,
+  Finance::Quote::NZX,
+  Finance::Quote::OnVista,
+  Finance::Quote::Oslobors,
+  Finance::Quote::SEB,
+  Finance::Quote::SIX,
+  Finance::Quote::Tradeville,
+  Finance::Quote::TSP,
+  Finance::Quote::TMX,
+  Finance::Quote::Tiaacref,
+  Finance::Quote::TesouroDireto,
+  Finance::Quote::TreasuryDirect,
+  Finance::Quote::Troweprice,
+  Finance::Quote::Union,
+  Finance::Quote::YahooJSON,
+  Finance::Quote::ZA
 
 You should have received the Finance::Quote hacker's guide with this package.
 Please read it if you are interested in adding extra methods to this package.

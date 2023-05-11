@@ -1,4 +1,7 @@
 {{$NEXT}}
+	* Added YahooJSON currency rate module PR #270
+	* Added TRV => CAD in AlphaVantage.pm. Issue #265 - PR #267
+	* Quick fix for YahooJSON.pm API
 	* URL Change for MorningstarJP. Issue #261
 	* Regex fix in FTfunds.pm and changed test cases ftfunds.t. PR #262
 

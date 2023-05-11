@@ -35,7 +35,7 @@ use Time::Piece;
 
 # VERSION
 
-my $YIND_URL_HEAD = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=';
+my $YIND_URL_HEAD = 'https://query1.finance.yahoo.com/v6/finance/quote?symbols=';
 my $YIND_URL_TAIL = '';
 
 sub methods {
