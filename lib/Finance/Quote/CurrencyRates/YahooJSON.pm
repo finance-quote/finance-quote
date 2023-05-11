@@ -91,7 +91,7 @@ sub multipliers
 =head1 NAME
 
 Finance::Quote::CurrencyRates::YahooJSON - Obtain currency rates from
-https://query1.finance.yahoo.com/v7/finance/quote?symbols=
+https://query1.finance.yahoo.com/v6/finance/quote?symbols=
 
 =head1 SYNOPSIS
 
@@ -104,7 +104,7 @@ https://query1.finance.yahoo.com/v7/finance/quote?symbols=
 =head1 DESCRIPTION
 
 This module fetches currency rates from
-https://query1.finance.yahoo.com/v7/finance/quote?symbols= and
+https://query1.finance.yahoo.com/v6/finance/quote?symbols= and
 provides data to Finance::Quote to convert the first argument to the equivalent
 value in the currency indicated by the second argument.
 
@@ -113,7 +113,7 @@ object.
 
 =head1 Terms & Conditions
 
-Use of https://query1.finance.yahoo.com/v7/finance/quote?symbols= is
+Use of https://query1.finance.yahoo.com/v6/finance/quote?symbols= is
 governed by any terms & conditions of that site.
 
 Finance::Quote is released under the GNU General Public License, version 2,
