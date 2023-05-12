@@ -264,7 +264,7 @@
   Added: 2023-04-09
   changed: ~
   removed: ~
-  urls: https://query1.finance.yahoo.com/v7/finance/quote?symbols=
+  urls: https://query1.finance.yahoo.com/v6/finance/quote?symbols=
   apikey: false
   notes: |
     URL is constructed by adding "$from$to%3DX" to Yahoo URL.
