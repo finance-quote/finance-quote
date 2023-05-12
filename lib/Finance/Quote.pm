@@ -1319,8 +1319,11 @@ Finance::Quote::CurrencyRates::AlphaVantage is used for currency conversion.
 This end point requires an API key, which can either be set in the environment
 or included in the configuration hash. To specify a different primary currency
 conversion method or configure fallback methods, include the 'order' key, which
-points to an array of Finance::Quote::CurrencyRates module names. See the
-documentation for the individual Finance::Quote::CurrencyRates to learn more. 
+points to an array of Finance::Quote::CurrencyRates module names.
+Setting the environment variable FQ_CURRENCY will change the default 
+endpoint used for currency conversion.
+See the documentation for the individual Finance::Quote::CurrencyRates to
+learn more. 
 
 =head2 get_default_currency_fields
 
