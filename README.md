@@ -193,8 +193,11 @@ Finance::Quote::CurrencyRates::AlphaVantage is used for currency conversion.
 This end point requires an API key, which can either be set in the environment
 or included in the configuration hash. To specify a different primary currency
 conversion method or configure fallback methods, include the 'order' key, which
-points to an array of Finance::Quote::CurrencyRates module names. See the
-documentation for the individual Finance::Quote::CurrencyRates to learn more. 
+points to an array of Finance::Quote::CurrencyRates module names.
+Setting the environment variable FQ\_CURRENCY will change the default 
+endpoint used for currency conversion.
+See the documentation for the individual Finance::Quote::CurrencyRates to
+learn more. 
 
 ## get\_default\_currency\_fields
 
@@ -501,55 +504,53 @@ http://www.gnucash.org/
 
 # SEE ALSO
 
-Finance::Quote::CurrencyRates::AlphaVantage,<br>
-Finance::Quote::CurrencyRates::ECB,<br>
-Finance::Quote::CurrencyRates::Fixer,<br>
-Finance::Quote::CurrencyRates::OpenExchange,<br>
-Finance::Quote::AEX,<br>
-Finance::Quote::ASEGR,<br>
-Finance::Quote::ASX,<br>
-Finance::Quote::Bloomberg,<br>
-Finance::Quote::BSEIndia,<br>
-Finance::Quote::Bourso,<br>
-Finance::Quote::CSE,<br>
-Finance::Quote::Cdnfundlibrary,<br>
-Finance::Quote::Comdirect,<br>
-Finance::Quote::Currencies,<br>
-Finance::Quote::DWS,<br>
-Finance::Quote::Deka,<br>
-Finance::Quote::FTfunds,<br>
-Finance::Quote::Fidelity,<br>
-Finance::Quote::Finanzpartner,<br>
-Finance::Quote::Fondsweb,<br>
-Finance::Quote::Fool,<br>
-Finance::Quote::Fundata<br>
-Finance::Quote::GoldMoney,<br>
-Finance::Quote::HU,<br>
-Finance::Quote::IEXCloud,<br>
-Finance::Quote::IndiaMutual,<br>
-Finance::Quote::MStaruk,<br>
-Finance::Quote::MorningstarAU,<br>
-Finance::Quote::MorningstarCH,<br>
-Finance::Quote::MorningstarJP,<br>
-Finance::Quote::NSEIndia,<br>
-Finance::Quote::NZX,<br>
-Finance::Quote::OnVista,<br>
-Finance::Quote::Oslobors,<br>
-Finance::Quote::SEB,<br>
-Finance::Quote::Sinvestor,<br>
-Finance::Quote::SIX,<br>
-Finance::Quote::Tradegate,<br>
-Finance::Quote::Tradeville,<br>
-Finance::Quote::TSP,<br>
-Finance::Quote::TMX,<br>
-Finance::Quote::Tiaacref,<br>
-Finance::Quote::TesouroDireto,<br>
-Finance::Quote::TreasuryDirect,<br>
-Finance::Quote::Troweprice,<br>
-Finance::Quote::Union,<br>
-Finance::Quote::XETRA,<br>
-Finance::Quote::YahooJSON,<br>
-Finance::Quote::ZA<br>
+    Finance::Quote::CurrencyRates::AlphaVantage,
+    Finance::Quote::CurrencyRates::ECB,
+    Finance::Quote::CurrencyRates::Fixer,
+    Finance::Quote::CurrencyRates::OpenExchange,
+    Finance::Quote::CurrencyRates::YahooJSON,
+    Finance::Quote::AEX,
+    Finance::Quote::ASEGR,
+    Finance::Quote::ASX,
+    Finance::Quote::Bloomberg,
+    Finance::Quote::BSEIndia,
+    Finance::Quote::Bourso,
+    Finance::Quote::CSE,
+    Finance::Quote::Cdnfundlibrary,
+    Finance::Quote::Comdirect,
+    Finance::Quote::Currencies,
+    Finance::Quote::DWS,
+    Finance::Quote::Deka,
+    Finance::Quote::FTfunds,
+    Finance::Quote::Fidelity,
+    Finance::Quote::Finanzpartner,
+    Finance::Quote::Fondsweb,
+    Finance::Quote::Fool,
+    Finance::Quote::Fundata
+    Finance::Quote::GoldMoney,
+    Finance::Quote::HU,
+    Finance::Quote::IEXCloud,
+    Finance::Quote::IndiaMutual,
+    Finance::Quote::MStaruk,
+    Finance::Quote::MorningstarAU,
+    Finance::Quote::MorningstarCH,
+    Finance::Quote::MorningstarJP,
+    Finance::Quote::NSEIndia,
+    Finance::Quote::NZX,
+    Finance::Quote::OnVista,
+    Finance::Quote::Oslobors,
+    Finance::Quote::SEB,
+    Finance::Quote::SIX,
+    Finance::Quote::Tradeville,
+    Finance::Quote::TSP,
+    Finance::Quote::TMX,
+    Finance::Quote::Tiaacref,
+    Finance::Quote::TesouroDireto,
+    Finance::Quote::TreasuryDirect,
+    Finance::Quote::Troweprice,
+    Finance::Quote::Union,
+    Finance::Quote::YahooJSON,
+    Finance::Quote::ZA
 
 You should have received the Finance::Quote hacker's guide with this package.
 Please read it if you are interested in adding extra methods to this package.
