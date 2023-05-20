@@ -27,6 +27,10 @@ use JSON;
 
 # VERSION
 
+sub parameters {
+  return ('API_KEY');
+}
+
 sub new
 {
   my $self = shift;

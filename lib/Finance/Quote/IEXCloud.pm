@@ -37,6 +37,10 @@ sub methods {
            nyse     => \&iexcloud );
 }
 
+sub parameters {
+  return ('API_KEY');
+}
+
 {
     our @labels = qw/symbol open close high low last volume method isodate currency/;
 

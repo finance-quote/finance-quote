@@ -127,6 +127,10 @@ sub methods {
     );
 }
 
+sub parameters {
+  return ('API_KEY');
+}
+
 {
     my @labels = qw/date isodate open high low close volume last net p_change/;
 

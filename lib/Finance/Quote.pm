@@ -252,7 +252,9 @@ sub _load_modules {
 
         foreach my $method (keys %methodhash) {
           push (@{$METHODS{$method}},
-              { function => $methodhash{$method},
+              { name => $module,
+              modpath => $modpath,
+              function => $methodhash{$method},
               labels   => $labelhash{$method},
               currency_fields => \@currency_fields});
         }
@@ -314,6 +316,48 @@ sub get_methods {
   # Create a dummy object to ensure METHODS is populated
   my $t = Finance::Quote->new();
   return(wantarray ? keys %METHODS : [keys %METHODS]);
+}
+
+# return hash:
+#
+#  quote_methods => hash of
+#      method_name => array of module names
+#  quote_modules => hash of
+#      module_name => array of parameters
+#  currency_modules => hash of
+#      module_name =>  array of parameters
+#
+# { 
+#    'quote_methods' => {'group' => ['module', 'module'], ...},
+#    'quote_modules' => {'abc' => ['API_KEY'], ...},
+#    'currency_modules' => {'xyz' => [], 'lmn' => ['USER_NAME', 'API_KEY']},
+# } 
+
+sub get_features {
+  # Create a dummy object to ensure METHODS is populated
+  my $t = Finance::Quote->new(currency_rates => {order => \@CURRENCY_RATES_MODULES});
+  my $baseclass = ref $t;
+
+  my %feature = (
+    'quote_methods' => {map {$_, [map {$_->{name}} @{$METHODS{$_}}]} keys %METHODS},
+    'quote_modules' => {map {$_, []} @MODULES},
+    'currency_modules' => {map {$_, []} @CURRENCY_RATES_MODULES},
+  );
+
+  my %mods = ('quote_modules' => $baseclass,
+              'currency_modules' => "${baseclass}::CurrencyRates");
+
+  while (my ($field, $base) = each %mods) {
+    foreach my $name (keys %{$feature{$field}}) {
+      my $modpath = "${base}::${name}";
+
+      if ($modpath->can("parameters")) {
+        push (@{$feature{$field}->{$name}}, $modpath->parameters());
+      }
+    }
+  }
+
+  return %feature;
 }
 
 # =======================================================================
@@ -1310,6 +1354,34 @@ C<set_default_timeout> sets the Finance::Quote default timeout to a new value.
 
 C<get_methods> returns the list of methods that can be passed to C<new> when
 creating a quoter object and as the first argument to C<fetch>.
+
+=head2 get_features
+
+    my %features = Finance::Quote::get_features();
+
+C<get_features> returns a hash with three keys: quote_methods, quote_modules, and currency_modules.
+
+    $features{quote_methods} is a hash with key/value pairs of method_name => [array of module names]
+    $features{quote_modules} is a hash with key/value pairs of module_name => [array of parameter names]
+    $features{currency_modules} is a hash with key/value pairs of currency_module_name => [array of paramater names]
+
+Parameter names are values that the module needs to function, such as API_KEY. Most
+modules will have an empty list.  Modules with a parameter are configured when creating
+the Finance::Quote by passing the argument
+
+   'module_name_in_lower_case' => {paramter => value}
+
+to Finance::Quote->new().
+
+The keys of the $features{currency_modules} hash are the names of currency
+modules that can be used for currency conversion and the order in which the
+modules are used is controlled by the argument
+
+    currency_rates => {order => [subset of $features{currency_modules}]} 
+
+to Finance::Quote->new().  By default, only AlphaVantage in used for 
+currency conversion, so "order" must be set to use other currency modules.
+
 
 =head1 PUBLIC OBJECT METHODS
 
