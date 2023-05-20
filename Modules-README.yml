@@ -767,6 +767,24 @@
     - XS0937858271
     - NL0000009165
 #
+- module: Tradeville.pm
+  state: failing
+  added: ~
+  changed: ~
+  removed: ~
+  urls: https://tradeville.ro/actiuni/actiuni-
+  apikey: false
+  notes: |
+    Issue #269 indicates the URL no longer works.
+    Suggested https://bvb.ro/FinancialInstruments/Details/FinancialInstrumentsDetails.aspx?s=
+    If we change to the bvb.ro URL, should the module be renamed to BVB.pm?
+    We probably should manually validate the test cases are still valid.
+  testfile: tradeville.t
+  testcases:
+    - TLV
+    - BRD
+    - SNP
+#
 - module: TSP.pm
   state: working
   added: 2005-03-02

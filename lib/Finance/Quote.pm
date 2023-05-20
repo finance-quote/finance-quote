@@ -1110,6 +1110,8 @@ sub user_agent {
 
 __END__
 
+=for comment README.md generated from lib/Finance/Quote.pm
+
 =head1 NAME
 
 Finance::Quote - Get stock and mutual fund quotes from various exchanges
