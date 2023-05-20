@@ -16,7 +16,7 @@ my $q      = Finance::Quote->new();
 my $year   = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my %quotes = $q->mstaruk("GB0031835118","GB0030880032","BOGUS");
+my %quotes = $q->morningstaruk("GB0031835118","GB0030880032","BOGUS");
 ok(%quotes);
 
 ### quotes : %quotes

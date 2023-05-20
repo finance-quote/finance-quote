@@ -544,17 +544,6 @@
   testfile: TBD
   testcases:
 #
-- module: MStaruk.pm
-  state: TBD
-  added: TBD
-  changed: ~
-  removed: ~
-  urls:
-  apikey: false
-  notes: ~
-  testfile: TBD
-  testcases:
-#
 - module: ManInvestments.pm
   state: TBD
   added: TBD
@@ -606,6 +595,17 @@
   testcases:
     - 2009100101
     - 2002013108
+#
+- module: MorningstarUK.pm
+  state: TBD
+  added: TBD
+  changed: 2023-05-20
+  removed: ~
+  urls:
+  apikey: false
+  notes: Renamed from MStaruk.pm
+  testfile: morningstarUK.t
+  testcases:
 #
 - module: NSEIndia.pm
   state: working

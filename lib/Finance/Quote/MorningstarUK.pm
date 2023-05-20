@@ -48,14 +48,16 @@ $MSTARUK_NEXT_URL	=	"http://www.morningstar.co.uk/uk/funds/snapshot/snapshot.asp
 
 # FIXME -
 
-sub methods { return (mstaruk => \&mstaruk_fund,
-		      			ukfunds => \&mstaruk_fund); }
+sub methods { return (morningstaruk => \&mstaruk_fund,
+                      mstaruk => \&mstaruk_fund,
+                      ukfunds => \&mstaruk_fund); }
 
 {
     my @labels = qw/name currency last date time price nav source iso_date method net p_change success errormsg/;
 
-    sub labels { return (mstaruk => \@labels,
-			 				ukfunds => \@labels); }
+    sub labels { return (morningstaruk => \@labels,
+                         mstaruk => \@labels,
+                         ukfunds => \@labels); }
 }
 
 #
