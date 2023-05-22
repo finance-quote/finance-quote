@@ -128,7 +128,7 @@ sub bourso {
           my $query = $Bourso_URL . $stock;
           my $reply = $ua->request(GET $query);
 
-          ### Search: $query, $reply->code, $reply->message, $reply->content
+          ### Search: $query, $reply->code
 
           my $body  = decode('UTF-8', $reply->content);
           my $root  = HTML::TreeBuilder->new_from_content($body);
@@ -164,16 +164,16 @@ sub bourso {
               $symbol  = $stock;
           }
 
-          $info{$stock, 'symbol'}   = $symbol;
-          $info{$stock, 'name'}     = $name;
-          $info{$stock, 'currency'} = $currency;
-          $info{$stock, 'last'}     = $last;
-          $info{$stock, 'high'}     = $high if $high;
-          $info{$stock, 'low'}      = $low if $low;
-          $info{$stock, 'close'}    = $close if $close;
-          $info{$stock, 'exchange'} = $exchange if $exchange;
-          $info{$stock, 'volume'}   = $volume if $volume;
-          $info{$stock, 'net'}      = $net if $net;
+          $info{$stock, 'symbol'}    = $symbol;
+          $info{$stock, 'name'}      = $name;
+          $info{$stock, 'currency'}  = $currency;
+          ($info{$stock, 'last'}     = $last) =~ s/[^0-9.]//g;
+          ($info{$stock, 'high'}     = $high) =~ s/[^0-9.]//g if $high;
+          ($info{$stock, 'low'}      = $low) =~ s/[^0-9.]//g if $low;
+          ($info{$stock, 'close'}    = $close) =~ s/[^0-9.]//g if $close;
+          $info{$stock, 'exchange'}  = $exchange if $exchange;
+          ($info{$stock, 'volume'}   = $volume) =~ s/[^0-9.]//g if $volume;
+          ($info{$stock, 'net'}      = $net) =~ s/[^0-9.]//g if $net;
 
           # 2020-07-17 17:03:45
           $quoter->store_date(\%info, $stock, {isodate => $1}) if $date =~ m|([0-9]{4}-[0-9]{2}-[0-9]{2})|;
