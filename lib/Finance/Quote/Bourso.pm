@@ -75,6 +75,9 @@ package Finance::Quote::Bourso;
 
 use vars qw( $Bourso_URL );
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use HTTP::Request::Common;
 use HTML::TreeBuilder;
 use Encode qw(decode);
@@ -118,10 +121,15 @@ sub bourso {
     my $ua = $quoter->user_agent();
     my %info;
 
+    ### UA max_redirect: $ua->max_redirect
+
     foreach my $stock (@stocks) {
         eval {
           my $query = $Bourso_URL . $stock;
           my $reply = $ua->request(GET $query);
+
+          ### Search: $query, $reply->code, $reply->message, $reply->content
+
           my $body  = decode('UTF-8', $reply->content);
           my $root  = HTML::TreeBuilder->new_from_content($body);
 
