@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-#  MStaruk.pm
+#  MorningstarUK.pm
 #
 #  Obtains quotes for UK Unit Trusts from http://morningstar.co.uk/ - please
 #  refer to the end of this file for further information.
@@ -26,7 +26,7 @@
 #
 
 
-package Finance::Quote::MStaruk;
+package Finance::Quote::MorningstarUK;
 require 5.005;
 
 use strict;
@@ -248,7 +248,7 @@ sub mstaruk_fund  {
 
 =head1 NAME
 
-Finance::Quote::mstaruk - Obtain UK Unit Trust quotes from morningstar.co.uk.
+Finance::Quote::MorningstarUK - Obtain UK Unit Trust quotes from morningstar.co.uk.
 
 =head1 SYNOPSIS
 
@@ -286,7 +286,7 @@ that your information only comes from the morningstar.co.uk website.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::mstaruk :
+The following labels may be returned by Finance::Quote::MorningstarUK :
 
     name, currency, last, date, time, price, nav, source, method,
     iso_date, net, p_change, success, errormsg.

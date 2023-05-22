@@ -555,17 +555,6 @@
   testfile: TBD
   testcases:
 #
-- module: Morningstar.pm
-  state: TBD
-  added: TBD
-  changed: ~
-  removed: ~
-  urls:
-  apikey: false
-  notes: ~
-  testfile: TBD
-  testcases:
-#
 - module: MorningstarCH.pm
   state: working
   added: 2019-03-02
@@ -597,13 +586,13 @@
     - 2002013108
 #
 - module: MorningstarUK.pm
-  state: TBD
+  state: working
   added: TBD
   changed: 2023-05-20
   removed: ~
   urls:
   apikey: false
-  notes: Renamed from MStaruk.pm
+  notes: Renamed from MStaruk.pm 2023-05-20
   testfile: morningstarUK.t
   testcases:
 #
