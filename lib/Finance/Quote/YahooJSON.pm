@@ -35,8 +35,8 @@ use Time::Piece;
 
 # VERSION
 
-my $YIND_URL_HEAD = 'https://query1.finance.yahoo.com/v6/finance/quote?symbols=';
-my $YIND_URL_TAIL = '';
+my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/';
+my $YIND_URL_TAIL = '?modules=price,summaryDetail,defaultKeyStatistics';
 
 sub methods {
     return ( yahoo_json => \&yahoo_json,
@@ -91,7 +91,7 @@ sub yahoo_json {
             # Requests for invalid symbols sometimes return 200 with an empty
             # JSON result array
             my $json_data_count
-                = scalar @{ $json_data->{'quoteResponse'}{'result'} };
+                = scalar @{ $json_data->{'quoteSummary'}{'result'} };
 
             if ( $json_data_count < 1 ) {
                 $info{ $stocks, "success" } = 0;
@@ -101,19 +101,21 @@ sub yahoo_json {
             }
             else {
 
-                my $json_resources = $json_data->{'quoteResponse'}{'result'}[0];
+		my $json_resources_price = $json_data->{'quoteSummary'}{'result'}[0]{'price'};
+		my $json_resources_summaryDetail = $json_data->{'quoteSummary'}{'result'}[0]{'summaryDetail'};
+		my $json_resources_defaultKeyStatistics = $json_data->{'quoteSummary'}{'result'}[0]{'defaultKeyStatistics'};
 
                 # TODO: Check if $json_response_type is "Quote"
                 # before attempting anything else
-                my $json_symbol = $json_resources->{'symbol'};
+                my $json_symbol = $json_resources_price->{'symbol'};
                 #    || $json_resources->{'resource'}{'fields'}{'symbol'};
-                my $json_volume = $json_resources->{'regularMarketVolume'};
+                my $json_volume = $json_resources_price->{'regularMarketVolume'}{'raw'};
                 my $json_timestamp =
-                    $json_resources->{'regularMarketTime'};
-                my $json_name = $json_resources->{'shortName'};
-                my $json_type = $json_resources->{'quoteType'};
+                    $json_resources_price->{'regularMarketTime'};
+                my $json_name = $json_resources_price->{'shortName'};
+                my $json_type = $json_resources_price->{'quoteType'};
                 my $json_price =
-                    $json_resources->{'regularMarketPrice'};
+                    $json_resources_price->{'regularMarketPrice'}{'raw'};
 
                 $info{ $stocks, "success" } = 1;
                 $info{ $stocks, "exchange" } =
@@ -122,7 +124,7 @@ sub yahoo_json {
                 $info{ $stocks, "name" }   = $stocks . ' (' . $json_name . ')';
                 $info{ $stocks, "type" }   = $json_type;
                 $info{ $stocks, "last" }   = $json_price;
-                $info{ $stocks, "currency"} = $json_resources->{'currency'};
+                $info{ $stocks, "currency"} = $json_resources_price->{'currency'};
                 $info{ $stocks, "volume" }   = $json_volume;
 
                 # The Yahoo JSON interface returns London prices in GBp (pence) instead of GBP (pounds)
@@ -157,23 +159,24 @@ sub yahoo_json {
                   # in Strawberry perl 5.18.2 in Windows
                   local $^W = 0;
                   $info{ $stocks, "div_yield" } =
-                    $json_resources->{'trailingAnnualDividendYield'} * 100;
+                    $json_resources_summaryDetail->{'trailingAnnualDividendYield'}{'raw'} * 100;
                 }
                 $info{ $stocks, "eps"} =
-                    $json_resources->{'epsTrailingTwelveMonths'};
-                $info{ $stocks, "pe"} = $json_resources->{'trailingPE'};
+                    $json_resources_defaultKeyStatistics->{'trailingEps'}{'raw'};
+		#    $json_resources_summaryDetail->{'epsTrailingTwelveMonths'};
+                $info{ $stocks, "pe"} = $json_resources_summaryDetail->{'trailingPE'}{'raw'};
                 $info{ $stocks, "year_range"} =
                     sprintf("%12s - %s",
-                        $json_resources->{"fiftyTwoWeekLow"},
-                        $json_resources->{'fiftyTwoWeekHigh'});
+                        $json_resources_summaryDetail->{"fiftyTwoWeekLow"}{'raw'},
+                        $json_resources_summaryDetail->{'fiftyTwoWeekHigh'}{'raw'});
                 $info{ $stocks, "open"} =
-                    $json_resources->{'regularMarketOpen'};
+                    $json_resources_price->{'regularMarketOpen'}{'raw'};
                 $info{ $stocks, "high"} =
-                    $json_resources->{'regularMarketDayHigh'};
+                    $json_resources_price->{'regularMarketDayHigh'}{'raw'};
                 $info{ $stocks, "low"} =
-                    $json_resources->{'regularMarketDayLow'};
+                    $json_resources_price->{'regularMarketDayLow'}{'raw'};
                 $info{ $stocks, "close"} =
-                    $json_resources->{'regularMarketPreviousClose'};
+                    $json_resources_summaryDetail->{'regularMarketPreviousClose'}{'raw'};
 
                 # MS Windows strftime() does not support %T so use %H:%M:%S
                 #  instead.
