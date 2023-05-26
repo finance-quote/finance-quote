@@ -908,6 +908,25 @@
   testfile: TBD
   testcases:
 #
+- module: TwelveData.pm
+  state: working
+  added: 2023-05-26
+  changed:
+  removed:
+  urls:
+    - https://api.twelvedata.com/quote?symbol={$symbol}&apikey={$token}
+  apikey: true
+  notes: |
+    API Required.  Register at https://twelvedata.com.
+  testfile: twelvedata.t
+  testcases:
+    - MSFT
+    - AMZN
+    - AAPL
+    - GOOGL
+    - META
+    - BRK.A
+#
 - module: USFedBonds.pm
   state: failing
   added: ~
