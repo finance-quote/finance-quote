@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Bourso.pm - Squash anything but numbers and period in quote values.
   * Renamed MStarUK.pm to MorningstarUK.pm
   * Added get_features method - PR #260
 

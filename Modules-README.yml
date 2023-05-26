@@ -168,7 +168,7 @@
 - module: Bourso.pm
   state: working
   added:
-  changed: 2022-07-08
+  changed: 2023-05-22
   removed:
   urls: https://www.boursorama.com/cours/$stock
   apikey: false
@@ -179,11 +179,11 @@
     - 1rPAF
     - MSFT
     - FF11-SOLB
-    - 1rPCNP
     - 2rPDE000CX0QLH6
     - 1rPFR0010371401
     - 1rPCAC
     - 1rTBX4
+    - FR0010037341
 #
 - module: CSE.pm
   state: failing
