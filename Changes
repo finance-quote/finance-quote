@@ -1,5 +1,6 @@
 {{$NEXT}}
-  * Added get_features method - PR #260
+	* Added get_features method - PR #260
+	* Bourso.pm - Squash anything but numbers and period in quote values.
 
 1.55      2023-05-13 12:22:00-07:00 America/Los_Angeles
 	* Added YahooJSON currency rate module PR #270
