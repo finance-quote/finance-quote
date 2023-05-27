@@ -1,6 +1,10 @@
 {{$NEXT}}
-    * Added get_features method - PR #260
-    * Added new TwelveData module
+	* Added new TwelveData module
+	* Updated YahooJSON.pm to use https://query2.finance.yahoo.com/v11 - PR #284
+	* Updated CurrencyRates/YahooJSON.pm to use https://query2.finance.yahoo.com/v11 - PR #284
+	* Bourso.pm - Squash anything but numbers and period in quote values.
+	* Renamed MStarUK.pm to MorningstarUK.pm
+	* Added get_features method - PR #260
 
 1.55      2023-05-13 12:22:00-07:00 America/Los_Angeles
 	* Added YahooJSON currency rate module PR #270

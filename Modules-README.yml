@@ -168,7 +168,7 @@
 - module: Bourso.pm
   state: working
   added:
-  changed: 2022-07-08
+  changed: 2023-05-22
   removed:
   urls: https://www.boursorama.com/cours/$stock
   apikey: false
@@ -179,11 +179,11 @@
     - 1rPAF
     - MSFT
     - FF11-SOLB
-    - 1rPCNP
     - 2rPDE000CX0QLH6
     - 1rPFR0010371401
     - 1rPCAC
     - 1rTBX4
+    - FR0010037341
 #
 - module: CSE.pm
   state: failing
@@ -262,9 +262,9 @@
 - module: CurrencyRates/YahooJSON.pm
   state: working
   Added: 2023-04-09
-  changed: ~
+  changed: 2023-05-26
   removed: ~
-  urls: https://query1.finance.yahoo.com/v6/finance/quote?symbols=
+  urls: https://query2.finance.yahoo.com/v11/finance/quoteSummary/...?modules=price
   apikey: false
   notes: |
     URL is constructed by adding "$from$to%3DX" to Yahoo URL.
@@ -544,29 +544,7 @@
   testfile: TBD
   testcases:
 #
-- module: MStaruk.pm
-  state: TBD
-  added: TBD
-  changed: ~
-  removed: ~
-  urls:
-  apikey: false
-  notes: ~
-  testfile: TBD
-  testcases:
-#
 - module: ManInvestments.pm
-  state: TBD
-  added: TBD
-  changed: ~
-  removed: ~
-  urls:
-  apikey: false
-  notes: ~
-  testfile: TBD
-  testcases:
-#
-- module: Morningstar.pm
   state: TBD
   added: TBD
   changed: ~
@@ -606,6 +584,17 @@
   testcases:
     - 2009100101
     - 2002013108
+#
+- module: MorningstarUK.pm
+  state: working
+  added: TBD
+  changed: 2023-05-20
+  removed: ~
+  urls:
+  apikey: false
+  notes: Renamed from MStaruk.pm 2023-05-20
+  testfile: morningstarUK.t
+  testcases:
 #
 - module: NSEIndia.pm
   state: working
@@ -995,10 +984,10 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2023-05-07
+  changed: 2023-05-25
   removed:
   urls:
-    - https://query1.finance.yahoo.com/v6/finance/quote?symbols=
+    - https://query2.finance.yahoo.com/v11/finance/quoteSummary/...?modules=price,summaryDetail,defaultKeyStatistics
   apikey: false
   notes: |
     Module to get data from Yahoo's API

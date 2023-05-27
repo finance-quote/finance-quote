@@ -57,7 +57,12 @@ sub twelvedata {
                 $quoter->{module_specific_data}->{twelvedata}->{API_KEY}        :
                 $ENV{"TWELVEDATA_API_KEY"};
 
-    die "TwelveData API_KEY not defined.  See documentation." unless defined $token;
+    if ( !defined $token ) {
+        $info{ $stock, 'success' } = 0;
+        $info{ $stock, 'errormsg' } =
+            'TwelveData API_KEY not defined. Get an API key at https://twelvedata.com';
+        next;
+    }
     
     my @stocks = @_;
     my $quantity = @stocks;
@@ -162,6 +167,18 @@ is a secret value written in hexidecimal.
 The API key may be set by either providing a module specific hash to
 Finance::Quote->new as in the above example, or by setting the environment
 variable TWELVEDATA_API_KEY.
+
+=head2 FREE KEY LIMITS
+
+The TwelveData free key limits usage to:
+
+=over
+
+=item 800 queries per day
+
+=item 8 queries per minute
+
+=back
 
 =head1 LABELS RETURNED
 

@@ -80,10 +80,10 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     HU
     IEXCloud
     IndiaMutual
-    MStaruk
     MorningstarAU
     MorningstarCH
     MorningstarJP
+    MorningstarUK
     NSEIndia
     NZX
     OnVista
@@ -1688,10 +1688,10 @@ http://www.gnucash.org/
   Finance::Quote::HU,
   Finance::Quote::IEXCloud,
   Finance::Quote::IndiaMutual,
-  Finance::Quote::MStaruk,
   Finance::Quote::MorningstarAU,
   Finance::Quote::MorningstarCH,
   Finance::Quote::MorningstarJP,
+  Finance::Quote::MorningstarUK,
   Finance::Quote::NSEIndia,
   Finance::Quote::NZX,
   Finance::Quote::OnVista,
