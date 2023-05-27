@@ -28,6 +28,9 @@ use JSON;
 
 # VERSION
 
+my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/';
+my $YIND_URL_TAIL = '?modules=price';
+
 sub new
 {
   my $self = shift;
@@ -47,13 +50,13 @@ sub multipliers
 {
   my ($this, $ua, $from, $to) = @_;
 
-  my $url = 'https://query1.finance.yahoo.com/v6/finance/quote?symbols=';
   my $json_data;
   my $rate;
-  my $reply = $ua->get($url
+  my $reply = $ua->get($YIND_URL_HEAD
       . ${from}
       . ${to}
-      . '%3DX');
+      . '%3DX'
+      . $YIND_URL_TAIL);
 
   ### HTTP Status: $reply->code
   return unless ($reply->code == 200);
@@ -64,12 +67,12 @@ sub multipliers
 
   ### JSON: $json_data
 
-  if ( !$json_data || !$json_data->{'quoteResponse'}->{'result'}->[0]->{'regularMarketPrice'} ) {
+  if ( !$json_data || !$json_data->{'quoteSummary'}->{'result'}->[0]->{'price'}->{'regularMarketPrice'}{'raw'} ) {
     return;
   }
 
   $rate =
-    $json_data->{'quoteResponse'}->{'result'}->[0]->{'regularMarketPrice'};
+    $json_data->{'quoteSummary'}->{'result'}->[0]->{'price'}->{'regularMarketPrice'}{'raw'};
 
   ### Rate from JSON: $rate
 
@@ -91,7 +94,7 @@ sub multipliers
 =head1 NAME
 
 Finance::Quote::CurrencyRates::YahooJSON - Obtain currency rates from
-https://query1.finance.yahoo.com/v6/finance/quote?symbols=
+https://query2.finance.yahoo.com/v11/finance/quoteSummary/...?modules=price
 
 =head1 SYNOPSIS
 
@@ -104,7 +107,7 @@ https://query1.finance.yahoo.com/v6/finance/quote?symbols=
 =head1 DESCRIPTION
 
 This module fetches currency rates from
-https://query1.finance.yahoo.com/v6/finance/quote?symbols= and
+https://query2.finance.yahoo.com/v11/finance/quoteSummary/...?modules=price
 provides data to Finance::Quote to convert the first argument to the equivalent
 value in the currency indicated by the second argument.
 
@@ -113,7 +116,7 @@ object.
 
 =head1 Terms & Conditions
 
-Use of https://query1.finance.yahoo.com/v6/finance/quote?symbols= is
+Use of https://query2.finance.yahoo.com/v11/finance/quoteSummary/...?modules=price is
 governed by any terms & conditions of that site.
 
 Finance::Quote is released under the GNU General Public License, version 2,
