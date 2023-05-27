@@ -16,18 +16,19 @@ my $q      = Finance::Quote->new();
 my $year   = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my %quotes = $q->mstaruk("GB0031835118","GB0030880032","BOGUS");
+# my %quotes = $q->morningstaruk("GB0031835118","GB0030880032","BOGUS");
+my %quotes = $q->morningstaruk("GB00B61M9437","GB00B8H99P30","BOGUS");
 ok(%quotes);
 
 ### quotes : %quotes
 
 # Check the last values are defined.  These are the most
 #  used and most reliable indicators of success.
-ok($quotes{"GB0031835118","last"} > 0);
-ok($quotes{"GB0031835118","success"});
+ok($quotes{"GB00B61M9437","last"} > 0);
+ok($quotes{"GB00B61M9437","success"});
 
-ok($quotes{"GB0030880032","last"} > 0);
-ok($quotes{"GB0030880032","success"});
+ok($quotes{"GB00B8H99P30","last"} > 0);
+ok($quotes{"GB00B8H99P30","success"});
 
 # Check that bogus stocks return failure:
 
