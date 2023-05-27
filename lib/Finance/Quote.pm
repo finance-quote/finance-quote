@@ -99,6 +99,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     TreasuryDirect
     Troweprice
     TSP
+    TwelveData
     Union
     XETRA
     YahooJSON
@@ -1704,6 +1705,7 @@ http://www.gnucash.org/
   Finance::Quote::TesouroDireto,
   Finance::Quote::TreasuryDirect,
   Finance::Quote::Troweprice,
+  Finance::Quote::TwelveData,
   Finance::Quote::Union,
   Finance::Quote::YahooJSON,
   Finance::Quote::ZA
