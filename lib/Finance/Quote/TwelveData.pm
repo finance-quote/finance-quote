@@ -53,17 +53,6 @@ sub parameters {
 sub twelvedata {
     my $quoter = shift;
 
-    my $token = exists $quoter->{module_specific_data}->{twelvedata}->{API_KEY} ? 
-                $quoter->{module_specific_data}->{twelvedata}->{API_KEY}        :
-                $ENV{"TWELVEDATA_API_KEY"};
-
-    if ( !defined $token ) {
-        $info{ $stock, 'success' } = 0;
-        $info{ $stock, 'errormsg' } =
-            'TwelveData API_KEY not defined. Get an API key at https://twelvedata.com';
-        next;
-    }
-    
     my @stocks = @_;
     my $quantity = @stocks;
     my ( %info, $reply, $url, $code, $desc, $body, $mark );
@@ -71,7 +60,19 @@ sub twelvedata {
     my $agent = $ua->agent();
     $ua->agent($AGENT);
 
+    my $token = exists $quoter->{module_specific_data}->{twelvedata}->{API_KEY} ? 
+                $quoter->{module_specific_data}->{twelvedata}->{API_KEY}        :
+                $ENV{"TWELVEDATA_API_KEY"};
+
     foreach my $symbol (@stocks) {
+
+        if ( !defined $token ) {
+            $info{ $symbol, 'success' } = 0;
+            $info{ $symbol, 'errormsg' } =
+                'TwelveData API_KEY not defined. Get an API key at https://twelvedata.com';
+            next;
+        }
+
         # Rate limit - first time through loop, mark is negative
         $mark -= time();
         ### TwelveData Mark: $mark
