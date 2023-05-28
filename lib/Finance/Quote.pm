@@ -64,6 +64,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     BSEIndia
     Bloomberg
     Bourso
+    BVB
     CSE
     Cdnfundlibrary
     Comdirect
@@ -1672,6 +1673,7 @@ http://www.gnucash.org/
   Finance::Quote::Bloomberg,
   Finance::Quote::BSEIndia,
   Finance::Quote::Bourso,
+  Finance::Quote::BVB,
   Finance::Quote::CSE,
   Finance::Quote::Cdnfundlibrary,
   Finance::Quote::Comdirect,

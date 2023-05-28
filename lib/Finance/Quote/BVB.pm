@@ -20,11 +20,13 @@
 #
 #    Written as a replacement for Tradeville.pm.
 
-package Finance::Quote::BVB
+package Finance::Quote::BVB;
 
 use strict;
 use warnings;
 
+use Encode qw(decode);
+use HTTP::Request::Common;
 use HTML::TreeBuilder;
 use HTML::TableExtract;
 
@@ -42,7 +44,7 @@ sub methods {
           europe     => \&bvb);
 }
 
-our @labels = qw/symbol name open high low price bid ask date currency/;
+our @labels = qw/symbol name open high low last bid ask date currency method/;
 
 sub labels { 
   return (bvb        => \@labels,
@@ -58,7 +60,7 @@ sub bvb {
   my (%info, $tree, $table, $pricetable, $url, $reply);
   my $ua = $quoter->user_agent();
 
-  for each my $stock (@stocks) {
+  foreach my $stock (@stocks) {
 
     $url   = $BVB_URL . $stock;
     $reply = $ua->request( GET $url);
@@ -66,7 +68,11 @@ sub bvb {
     my $code    = $reply->code;
     my $desc    = HTTP::Status::status_message($code);
     my $headers = $reply->headers_as_string;
-    my $body    = $reply->content;
+    my $body    = decode('UTF-8', $reply->content);
+
+    ### Body: $body
+
+    my ($name, $bid, $ask, $last, $open, $high, $low, $date);
 
     $info{ $stock, "symbol" } = $stock;
 
@@ -75,8 +81,44 @@ sub bvb {
       # Use HTML::TreeBuilder to parse HTML in $body
       $tree = HTML::TreeBuilder->new;
       if ($tree->parse($body)) {
+
         $tree->eof;
         $name = $tree->look_down(_tag => 'h2', class => qr/^mBot0 large textStyled/)->as_text;
+        $info{ $stock, 'success' } = 1;
+        $info{ $stock, 'name' } = $name;
+        $info{ $stock, 'currency' } = 'RON';
+        $info{ $stock, 'method' } = 'bvb';
+        $table = $tree->look_down(_tag => 'table', id => qr/^ctl00_body_ctl02_PricesControl_dvCPrices/)->as_HTML;
+        $pricetable = HTML::TableExtract->new();
+        $pricetable->parse($table);
+        foreach my $row ($pricetable->rows) {
+          if ( @$row[0] =~ m/Ask$/ ) {
+            ($bid, $ask) = @$row[1] =~ m|^\s+([\d\.]+)\s+\/\s+([\d\.]+)|;
+            $info{ $stock, 'bid' } = $bid;
+            $info{ $stock, 'ask' } = $ask;
+          }
+          elsif ( @$row[0] =~ m|^Date/time| ) {
+            ($date) = @$row[1] =~ m|^([\d/]+)\s|;
+            $quoter->store_date(\%info, $stock, {usdate => $1}) if $date =~ m|([0-9]{1,2}/[0-9]{2}/[0-9]{4})|;
+          }
+          elsif ( @$row[0] =~ m|^Last price| ) {
+            ($last) = @$row[1] =~ m|^([\d\.]+)|;
+            $info{ $stock, 'last' } = $last;
+          }
+          elsif ( @$row[0] =~ m|^Open price| ) {
+            ($open) = @$row[1] =~ m|^([\d\.]+)|;
+            $info{ $stock, 'open' } = $open;
+          }
+          elsif ( @$row[0] =~ m|^High price| ) {
+            ($high) = @$row[1] =~ m|^([\d\.]+)|;
+            $info{ $stock, 'high' } = $high;
+          }
+          elsif ( @$row[0] =~ m|^Low price| ) {
+            ($low) = @$row[1] =~ m|^([\d\.]+)|;
+            $info{ $stock, 'low' } = $low;
+          }
+        }
+
       } else {
         $tree->eof;
         $info{ $stock, "success" } = 0;
