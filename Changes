@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.56      2023-05-29 14:56:23-07:00 America/Los_Angeles
   * Replaced Tradeville.pm with BVB.pm - Issue #269
 	* Added new TwelveData module
 	* Updated YahooJSON.pm and CurrencyRates/YahooJSON.pm to use https://query2.finance.yahoo.com/v11 - PR #284
