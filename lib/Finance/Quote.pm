@@ -96,7 +96,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Tiaacref
     TMX
     Tradegate
-    Tradeville
     TreasuryDirect
     Troweprice
     TSP
@@ -1700,7 +1699,6 @@ http://www.gnucash.org/
   Finance::Quote::Oslobors,
   Finance::Quote::SEB,
   Finance::Quote::SIX,
-  Finance::Quote::Tradeville,
   Finance::Quote::TSP,
   Finance::Quote::TMX,
   Finance::Quote::Tiaacref,
