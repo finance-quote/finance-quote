@@ -91,7 +91,7 @@ sub bvb {
         }
         $name = $tree->look_down(_tag => 'h2', class => qr/^mBot0 large textStyled/)->as_text;
         $info{ $stock, 'success' } = 1;
-        $info{ $stock, 'name' } = $name;
+        ($info{ $stock, 'name' } = $name) =~ s/^\s+|\s+$//g ;
         $info{ $stock, 'currency' } = 'RON';
         $info{ $stock, 'method' } = 'bvb';
         $table = $tree->look_down(_tag => 'table', id => qr/^ctl00_body_ctl02_PricesControl_dvCPrices/)->as_HTML;
