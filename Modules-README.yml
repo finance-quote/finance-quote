@@ -185,6 +185,21 @@
     - 1rTBX4
     - FR0010037341
 #
+- module: BVB.pm
+  state: working
+  added: 2023-05-28
+  changed: ~
+  removed: ~
+  urls: https://bvb.ro/FinancialInstruments/Details/FinancialInstrumentsDetails.aspx?s=
+  apikey: false
+  notes: |
+    Issue #269 indicates the URL in Tradeville no longer works. BVB.pm written to replace it. Returns tradeville in methods hash.
+  testfile: bvb.t
+  testcases:
+    - TLV
+    - BRD
+    - SNP
+#
 - module: CSE.pm
   state: failing
   added: TBD
@@ -760,7 +775,7 @@
   state: failing
   added: ~
   changed: ~
-  removed: ~
+  removed: 2023-05-28
   urls: https://tradeville.ro/actiuni/actiuni-
   apikey: false
   notes: |
