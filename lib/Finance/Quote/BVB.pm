@@ -83,6 +83,12 @@ sub bvb {
       if ($tree->parse($body)) {
 
         $tree->eof;
+        if ( $tree->look_down(_tag => 'div', id => 'ctl00_body_divNoData') ) {
+          $info{ $stock, "success" } = 0;
+          $info{ $stock, "errormsg" } =
+            "Error retrieving quote for $stock. No data returned";
+          next;
+        }
         $name = $tree->look_down(_tag => 'h2', class => qr/^mBot0 large textStyled/)->as_text;
         $info{ $stock, 'success' } = 1;
         $info{ $stock, 'name' } = $name;
