@@ -19,25 +19,19 @@ my @symbols  = (@valid, @invalid);
 my $year     = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 my %check    = (
-                'cap'       => sub { $_[0] =~ /^[0-9,]+$/ },
                 'currency'  => sub { $_[0] =~ /^[A-Z]+$/ },
                 'date'      => sub { $_[0] =~ m{^[0-9]{2}/[0-9]{2}/[0-9]{4}$} },
-                'day_range' => sub { $_[0] =~ m{^[0-9.]+/[0-9.]+$} },
-                'div_yield' => sub { $_[0] =~ m{^(-?[0-9.]+%)|(n/a)$} },
-                'exchange'  => sub { $_[0] =~ /^[A-Za-z]+$/ },
                 'isodate'   => sub { $_[0] =~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ },
                 'last'      => sub { $_[0] =~ /^[0-9.]+$/ },
-                'method'    => sub { $_[0] =~ /^tradeville$/ },
+                'method'    => sub { $_[0] =~ /^bvb$/ },
                 'open'      => sub { $_[0] =~ /^[0-9.]+$/ },
-                'p_change'  => sub { $_[0] =~ /^-?[0-9.]+%$/ },
                 'success'   => sub { $_[0] },
                 'symbol'    => sub { $_[0] eq $_[1] },
-                'volume'    => sub { $_[0] =~ /^[0-9,]+$/ },
                );
 
 plan tests => 1 + %check*@valid + @invalid;
 
-my %quotes = $q->fetch('tradeville', @symbols);
+my %quotes = $q->fetch('bvb', @symbols);
 ok(%quotes);
 
 ### [<now>] quotes: %quotes
