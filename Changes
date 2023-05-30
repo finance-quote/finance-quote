@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+    * move use strict to be the first statement
+    * remove old perl version requirement statements.
+    * removed Data::Dumper that caused another test to fail
+
 1.56      2023-05-29 14:56:23-07:00 America/Los_Angeles
   * Replaced Tradeville.pm with BVB.pm - Issue #269
 	* Added new TwelveData module
