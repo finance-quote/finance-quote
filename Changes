@@ -1,4 +1,5 @@
 {{$NEXT}}
+        * Fixed Fool.pm and fool.t
 
 1.56      2023-05-29 14:56:23-07:00 America/Los_Angeles
   * Replaced Tradeville.pm with BVB.pm - Issue #269

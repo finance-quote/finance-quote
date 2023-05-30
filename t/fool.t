@@ -7,11 +7,11 @@ if ( not $ENV{"ONLINE_TEST"} ) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-my $q        = Finance::Quote->new();
+my $q        = Finance::Quote->new('Fool');
 my $year     = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my @symbols =  qw/MSFT AMZN AAPL GOOGL GOOG FB CSCO INTC PEP BRK-A SEB NVR BKNG IBKR/;
+my @symbols =  qw/MSFT AMZN AAPL GOOGL GOOG CSCO INTC PEP BRK-A SEB NVR BKNG IBKR/;
 
 plan tests => 11*(1+$#symbols)+2;
 
@@ -34,5 +34,5 @@ foreach my $symbol (@symbols) {
       ||substr($quotes{$symbol, "date"}, 6, 4) == $lastyear);
 }
 
-ok(!$quotes{"BOGUS", "success"});
+ok((!$quotes{"BOGUS", "success"}),'BOGUS failed as expected');
 
