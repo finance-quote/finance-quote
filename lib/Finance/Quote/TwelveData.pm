@@ -15,13 +15,12 @@
 #    02110-1301, USA
 
 package Finance::Quote::TwelveData;
+use strict;
 
-require 5.005;
 
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
 
-use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
 use Text::Template;

@@ -10,7 +10,9 @@ perl -MData::Dumper -MFinance::Quote -le '$q = Finance::Quote->new(); print Dump
 =cut
 
 package Finance::Quote::TreasuryDirect;
-require 5.004;
+use strict;
+use warnings;
+
 
 #
 # Modification of Rolf Endres' Finance::Quote::ZA
@@ -21,16 +23,12 @@ require 5.004;
 
 # VERSION
 
-use strict;
-use warnings;
-
 use vars qw /$VERSION/ ;
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 use HTTP::Request;
-use Data::Dumper;
 
 my $TREASURY_DIRECT_URL = 'https://www.treasurydirect.gov/GA-FI/FedInvest/todaySecurityPriceDate.htm';
 
