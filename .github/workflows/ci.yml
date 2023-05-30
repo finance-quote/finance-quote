@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+#  schedule:
+#    - cron: '42 5 * * *'
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest]
+        perl: [ '5.36' ]
+        #runner: [ubuntu-latest, macos-latest, windows-latest]
+        #perl: [ '5.30', '5.36' ]
+        exclude:
+          - runner: windows-latest
+            perl: '5.36'
+
+    runs-on: ${{matrix.runner}}
+    name: OS ${{matrix.runner}} Perl ${{matrix.perl}}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up perl
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+          perl-version: ${{ matrix.perl }}
+          distribution: ${{ ( startsWith( matrix.runner, 'windows-' ) && 'strawberry' ) || 'default' }}
+
+    - name: Show Perl Version
+      run: |
+        perl -v
+
+    - name: Install Dist::Zilla
+      run: |
+        cpanm -v
+        cpanm --notest --skip-satisfied Dist::Zilla
+
+    - name: Install Modules
+      run: |
+        dzil authordeps         | cpanm --notest --skip-satisfied
+        dzil listdeps --author  | cpanm --notest --skip-satisfied
+
+    - name: Run tests
+      #env:
+        #TEST_AUTHOR: 1
+        #ONLINE_TEST: 1
+        #ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
+      run: |
+        dzil test --all
+
