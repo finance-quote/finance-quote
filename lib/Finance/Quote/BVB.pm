@@ -159,8 +159,9 @@ Finance::Quote::BVB - Obtain quotes from Bucharest Stock Exchange.
 
     $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("bvb", "tlv");  # Only query bvb
-    %info = Finance::Quote->fetch("romania", "brd");     # Failover to other sources OK.
+    %info = $q->fetch("bvb", "tlv");  # Only query bvb
+
+    %info = $q->fetch("romania", "brd");     # Failover to other sources OK.
 
 =head1 DESCRIPTION
 

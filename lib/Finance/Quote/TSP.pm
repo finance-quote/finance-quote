@@ -131,9 +131,9 @@ Finance::Quote::TSP - Obtain fund prices for US Federal Government Thrift Saving
 
     $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("tsp","c");       #get value of C - Common Stock Index Investment Fund
-    %info = Finance::Quote->fetch("tsp","l2040");   #get value of the L2040 Lifecycle Fund
-    %info = Finance::Quote->fetch("tsp","lincome"); #get value of the LINCOME Lifecycle Fund
+    %info = $q->fetch('tsp','c');       #get value of C - Common Stock Index Investment Fund
+    %info = $q->fetch('tsp','l2040');   #get value of the L2040 Lifecycle Fund
+    %info = $q->fetch('tsp','lincome'); #get value of the LINCOME Lifecycle Fund
 
 =head1 DESCRIPTION
 

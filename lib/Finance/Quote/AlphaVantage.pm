@@ -318,7 +318,7 @@ Finance::Quote::AlphaVantage - Obtain quotes from https://iexcloud.io
     
     $q = Finance::Quote->new('AlphaVantage', alphavantage => {API_KEY => 'your-alphavantage-api-key'});
 
-    %info = Finance::Quote->fetch("IBM", "AAPL");
+    %info = $q->fetch('alphavantage', 'IBM', 'AAPL');
 
 =head1 DESCRIPTION
 

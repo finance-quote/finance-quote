@@ -137,7 +137,7 @@ Finance::Quote::Fool - Obtain quotes from the Motley Fool web site.
 
     $q = Finance::Quote->new;
 
-    %stockinfo = $q->fetch("fool","GE", "INTC");
+    %stockinfo = $q->fetch('fool','GE', 'INTC');
 
 =head1 DESCRIPTION
 

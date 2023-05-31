@@ -214,7 +214,7 @@ Finance::Quote::YahooJSON - Obtain quotes from Yahoo Finance through JSON call
 
     $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("yahoo_json","SBIIN.NS");
+    %info = $q->fetch('yahoo_json','SBIN.NS');
 
 =head1 DESCRIPTION
 
