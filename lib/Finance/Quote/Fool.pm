@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set noai ts=2 sw=2 ic showmode showmatch: 
 #    This module was rewritten in June 2019 based on the 
 #    Finance::Quote::IEXCloud.pm module and prior versions of Fool.pm
 #    that carried the following copyrights:
@@ -34,9 +35,12 @@ use HTML::TreeBuilder;
 use Text::Template;
 use Encode qw(decode);
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 # VERSION
 
-my $URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'http://caps.fool.com/Ticker/{$symbol}.aspx');
+my $URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://caps.fool.com/Ticker/{$symbol}.aspx');
 
 sub methods { 
   return ( fool   => \&fool,
@@ -56,22 +60,30 @@ sub fool {
     
     my (%info, $symbol, $url, $reply, $code, $desc, $body);
     my $ua = $quoter->user_agent();
+    $ua->agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36');
     
     my $quantity = @stocks;
+
+    ### Stocks: @stocks
 
     foreach my $symbol (@stocks) {
         # Get the web page
         $url   = $URL->fill_in(HASH => {symbol => $symbol});
+        ### url: $url
         $reply = $ua->request( GET $url);
         $code  = $reply->code;
         $desc  = HTTP::Status::status_message($code);
         $body  = decode('UTF-8', $reply->content);
+
+       ### Reply: $reply
   
         if ($code != 200) {
             $info{ $symbol, 'success' } = 0;
             $info{ $symbol, 'errormsg' } = $desc;
             next;
         }
+
+				### Body: $body
 
         # Parse the web page
         my $root      = HTML::TreeBuilder->new_from_content($body);
