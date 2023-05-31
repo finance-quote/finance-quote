@@ -874,7 +874,7 @@
 - module: TreasuryDirect.pm
   state: working
   added: 2022-07-20
-  changed:
+  changed: 2023-05-31
   removed:
   urls:
     - https://www.treasurydirect.gov/GA-FI/FedInvest/todaySecurityPriceDate.htm
@@ -915,7 +915,7 @@
 - module: TwelveData.pm
   state: working
   added: 2023-05-26
-  changed:
+  changed: 2023-05-31
   removed:
   urls:
     - https://api.twelvedata.com/quote?symbol={$symbol}&apikey={$token}
