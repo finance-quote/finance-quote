@@ -7,6 +7,8 @@
 
 perl -MData::Dumper -MFinance::Quote -le '$q = Finance::Quote->new(); print Dumper { $q->fetch("treasurydirect", @ARGV) };' 912810QT8 912810QY7
 
+=end comment
+
 =cut
 
 package Finance::Quote::TreasuryDirect;
@@ -164,6 +166,8 @@ sub treasurydirect_ymd {
 
   print "\n \n \n \n[debug]: ++++ ==== ++++ ==== ++++ ==== ++++ ==== END OF TABLE DUMP ++++ ==== ++++ ==== ++++ ==== ++++ ==== \n \n \n \n";
 
+=end comment
+
 =cut
 
   my %bonds;
@@ -212,9 +216,11 @@ sub treasurydirect_ymd {
 
 1;
 
+__END__
+
 =head1 NAME
 
-Finance::Quote::TreasuryDirect - Obtain individual bond quotes from Treasury Direct
+Finance::Quote::TreasuryDirect - Obtain bond quotes from Treasury Direct
 
 =head1 SYNOPSIS
 
@@ -222,7 +228,7 @@ Finance::Quote::TreasuryDirect - Obtain individual bond quotes from Treasury Dir
 
     $q = Finance::Quote->new;
 
-    # Don't know anything about failover yet...
+    %info = $q->fetch('treasurydirect', '912810QT8');
 
 =head1 DESCRIPTION
 

@@ -147,7 +147,7 @@ Finance::Quote::TwelveData - Obtain quotes from https://twelvedata.com
     
     $q = Finance::Quote->new('TwelveData', twelvedata => {API_KEY => 'your-twelvedata-api-key'});
 
-    %info = Finance::Quote->fetch("IBM", "AAPL");
+    %info = $q->fetch('twelvedata', 'IBM', 'AAPL');
 
 =head1 DESCRIPTION
 

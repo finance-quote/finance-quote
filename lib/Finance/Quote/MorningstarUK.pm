@@ -254,8 +254,8 @@ Finance::Quote::MorningstarUK - Obtain UK Unit Trust quotes from morningstar.co.
 
     $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("mstaruk","<isin> ...");  # Only query morningstar.co.uk using ISINs
-    %info = Finance::Quote->fetch("ukfunds","<isin> ...");  # Failover to other sources
+    %info = $q->fetch("mstaruk","<isin> ...");  # Only query morningstar.co.uk using ISINs
+    %info = $q->fetch("ukfunds","<isin> ...");  # Failover to other sources
 
 =head1 DESCRIPTION
 
