@@ -45,7 +45,7 @@ sub parameters {
     our @labels = qw/symbol name exchange currency isodate currency open high low close/;
 
     sub labels {
-        return ( iexcloud => \@labels );
+        return ( twelvedata => \@labels );
     }
 }
 
