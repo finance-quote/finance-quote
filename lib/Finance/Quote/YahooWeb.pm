@@ -106,7 +106,7 @@ Finance::Quote::YahooWeb - Obtain quotes from https://finance.yahoo.com/quote
 
     use Finance::Quote;
     $q = Finance::Quote->new('YahooWeb');
-    %info = Finance::Quote->fetch('yahooweb', "IBM", "AAPL");
+    %info = $q->fetch('yahooweb', "IBM", "AAPL");
 
 =head1 DESCRIPTION
 
