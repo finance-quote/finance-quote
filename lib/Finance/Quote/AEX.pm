@@ -8,7 +8,7 @@
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
@@ -61,7 +61,7 @@ sub aex {
       my $search = "https://live.euronext.com/en/search_instruments/$symbol";
       $reply  = $ua->get($search);
 
-      ### Search : $search, $reply->code
+      ### Search: $search, $reply->code
 
       if (not defined $reply->previous) {
         # Got a search page
@@ -152,14 +152,18 @@ sub aex {
       $reply = $ua->post($url, \%form);
 
       ### Header : $url, $reply->code
+      ### Content: $reply->content
 
       my $widget = scraper {
         process 'h1#header-instrument-name strong', 'name' => ['TEXT', sub {trim($_)}];
         process 'span#header-instrument-price', 'last' => ['TEXT', sub {trim($_)}];
-        process 'div.head_detail_bottom div.col span, div.head_detail > div > div:last-child', 'date' => ['TEXT', sub {trim($_)}];
+        # process 'div.head_detail_bottom div.col span, div.head_detail > div > div:last-child', 'date' => ['TEXT', sub {trim($_)}];
+        # process 'div.ml-2 last-price-date-time', 'date' => ['TEXT', sub {trim($_)}];
+        process 'div.ml-2.last-price-date-time', 'date' => ['TEXT', sub {trim($_)}];
       };
 
       my $header = $widget->scrape($reply);
+      ### Header getDetailedQuote: $header
 
       $url = "https://live.euronext.com/en/intraday_chart/getDetailedQuoteAjax/$isin/full";
 
@@ -221,12 +225,12 @@ Finance::Quote::AEX - Obtain quotes from Amsterdam Euronext eXchange
 
     $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("aex", "AMG");   # Only query AEX
-    %info = Finance::Quote->fetch("dutch", "AMG"); # Failover to other sources OK
+    %info = $q->fetch("aex", "AMG");   # Only query AEX
+    %info = $q->fetch("dutch", "AMG"); # Failover to other sources OK
 
 =head1 DESCRIPTION
 
-This module fetches information from https://live.euronext.com.  Stocks and bonds
+This module fetches information from https://live.euronext.com. Stocks and bonds
 are supported.
 
 This module is loaded by default on a Finance::Quote object. It's also possible

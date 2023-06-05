@@ -5,14 +5,16 @@
 - module: AEX.pm
   state: working
   added: TBD
-  changed: 2022-10-18
+  changed: 2023-06-05
   removed: ~
   urls:
     - https://live.euronext.com/en/search_instruments/
     - https://live.euronext.com/en/ajax/getDetailedQuote/
     - https://live.euronext.com/en/intraday_chart/getDetailedQuoteAjax/
   apikey: false
-  notes: ~
+  notes: |
+    The module uses all three URLs listed. Cookies and other header data
+    retrieved are needed to get data from subsequent HTTP requests.
   testfile: aex.t
   testcases:
     - AD
