@@ -61,7 +61,7 @@ sub aex {
       my $search = "https://live.euronext.com/en/search_instruments/$symbol";
       $reply  = $ua->get($search);
 
-      ### Search : $search, $reply->code
+      ### Search: $search, $reply->code
 
       if (not defined $reply->previous) {
         # Got a search page
@@ -152,14 +152,18 @@ sub aex {
       $reply = $ua->post($url, \%form);
 
       ### Header : $url, $reply->code
+      ### Content: $reply->content
 
       my $widget = scraper {
         process 'h1#header-instrument-name strong', 'name' => ['TEXT', sub {trim($_)}];
         process 'span#header-instrument-price', 'last' => ['TEXT', sub {trim($_)}];
-        process 'div.head_detail_bottom div.col span, div.head_detail > div > div:last-child', 'date' => ['TEXT', sub {trim($_)}];
+        # process 'div.head_detail_bottom div.col span, div.head_detail > div > div:last-child', 'date' => ['TEXT', sub {trim($_)}];
+        # process 'div.ml-2 last-price-date-time', 'date' => ['TEXT', sub {trim($_)}];
+        process 'div.ml-2.last-price-date-time', 'date' => ['TEXT', sub {trim($_)}];
       };
 
       my $header = $widget->scrape($reply);
+      ### Header getDetailedQuote: $header
 
       $url = "https://live.euronext.com/en/intraday_chart/getDetailedQuoteAjax/$isin/full";
 

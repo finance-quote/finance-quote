@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Fixed missing date in AEX.pm - Issue #298
 	* Fixed Examples in POD Documentation in a few modules - PR #295
 	* move use strict to be the first statement in TreasuryDirect.pm and TwelveData.pm #290
 	* remove old perl version requirement statements from TreasuryDirect.pm and TwelveData.pm #290
