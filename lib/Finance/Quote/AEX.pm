@@ -8,7 +8,7 @@
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
@@ -225,12 +225,12 @@ Finance::Quote::AEX - Obtain quotes from Amsterdam Euronext eXchange
 
     $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("aex", "AMG");   # Only query AEX
-    %info = Finance::Quote->fetch("dutch", "AMG"); # Failover to other sources OK
+    %info = $q->fetch("aex", "AMG");   # Only query AEX
+    %info = $q->fetch("dutch", "AMG"); # Failover to other sources OK
 
 =head1 DESCRIPTION
 
-This module fetches information from https://live.euronext.com.  Stocks and bonds
+This module fetches information from https://live.euronext.com. Stocks and bonds
 are supported.
 
 This module is loaded by default on a Finance::Quote object. It's also possible
