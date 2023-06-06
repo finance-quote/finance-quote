@@ -24,8 +24,8 @@ $AMFI_MAIN_URL = ("http://www.amfiindia.com/");
 $AMFI_URL = ("https://www.amfiindia.com/spages/NAVAll.txt");
 
 # amfinavlist.txt is a cache-file. keep it until updated on the website since this is a 1meg file.
-my $cachedir = $ENV{TMPDIR} // $ENV{TEMP} // '/tmp/';
-$AMFI_NAV_LIST = $cachedir."amfinavlist.txt";
+my $cachedir = $ENV{TMPDIR} // $ENV{TEMP} // '/tmp';
+$AMFI_NAV_LIST = $cachedir."/amfinavlist.txt";
 
 sub methods { return (indiamutual => \&amfiindia,
                       amfiindia => \&amfiindia); }
