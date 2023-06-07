@@ -43,7 +43,7 @@ sub methods { return (indiamutual => \&amfiindia,
                       amfiindia => \&amfiindia); }
 
 {
-    my @labels = qw/method source link name currency date isodate nav rprice sprice/;
+    my @labels = qw/method source link name currency date isodate nav/;
     sub labels { return (indiamutual => \@labels,
                          amfiindia => \@labels); }
 }
@@ -144,10 +144,11 @@ Finance::Quote::IndiaMutual  - Obtain Indian mutual fund prices from amfiindia.c
 
     $q = Finance::Quote->new;
 
-    %stockinfo = $q->fetch("indiamutual", "amfiindia-code"); # Can
-failover to other methods
-    %stockinfo = $q->fetch("amfiindia", "amfiindia-code"); # Use this
-module only.
+    # Can failover to other methods
+    %stockinfo = $q->fetch("indiamutual", "amfiindia-code");
+
+    # Use this module only
+    %stockinfo = $q->fetch("amfiindia", "amfiindia-code");
 
     # NOTE: currently no failover methods exist for indiamutual
 
@@ -169,14 +170,29 @@ http://www.amfiindia.com/nav-history-download
 
 Information available from amfiindia may include the following labels:
 
-method link source name currency nav rprice sprice.  The link
-label will be a url location for the NAV list table for all funds.
+=over
+
+=item method
+
+=item link
+
+=item source
+
+=item name
+
+=item currency
+
+=item nav
+
+=back
+
+The link label will be a url location for the NAV list table for all funds.
 
 =head1 NOTES
 
 AMFI provides a link to download a text file containing all the
-NAVs. This file is mirrored in a local file /tmp/amfinavlist.txt. The local
-mirror serves only as a cache and can be safely removed.
+L<NAVs|https://www.amfiindia.com/spages/NAVAll.txt>. It is processed
+in memory using the L<IO::String> Perl module.
 
 =head1 SEE ALSO
 
