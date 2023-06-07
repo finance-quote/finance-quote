@@ -579,7 +579,7 @@
   urls: https://www.marketwatch.com/investing/stock/aapl
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: marketwatch.t
   testcases:
     - AAPL
     - NXPI

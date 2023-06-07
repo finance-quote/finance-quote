@@ -81,16 +81,19 @@ sub marketwatch {
 
         $tree->eof;
 
-        $info{ $stock, 'success' } = 1;
-
-        $metatag = $tree->look_down(_tag => 'meta', name => 'name');
-        $info{ $stock, 'name' } = $metatag->attr('content');
+        if ($metatag = $tree->look_down(_tag => 'meta', name => 'name')) {
+           $info{ $stock, 'name' } = $metatag->attr('content');
+        } else {
+           $info{ $stock, 'success'} = 0;
+           $info{ $stock, 'errormsg' } = 'Error retrieving quote for $stock.';
+           next;
+        }
 
         $metatag = $tree->look_down(_tag => 'meta', name => 'tickerSymbol');
         $info{ $stock, 'symbol' } = $metatag->attr('content');
 
         $metatag = $tree->look_down(_tag => 'meta', name => 'price');
-        $info{ $stock, 'last' } = $metatag->attr('content');
+        ($info{ $stock, 'last' } = $metatag->attr('content')) =~ s/[^0-9.]//g;
 
         $metatag = $tree->look_down(_tag => 'meta', name => 'priceCurrency');
         $info{ $stock, 'currency' } = $metatag->attr('content');
@@ -105,6 +108,10 @@ sub marketwatch {
           day   => $timearray[1] );
         ($timestring = $timearray[4]) =~ s|\.||g;
         $quoter->store_date(\%info, $stock, \%datehash);
+
+        $info{ $stock, 'success' } = 1;
+
+        $info{ $stock, 'method' } = 'marketwatch';
 
       } else {
         $tree->eof;
