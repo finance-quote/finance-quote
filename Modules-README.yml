@@ -571,6 +571,20 @@
   testfile: TBD
   testcases:
 #
+- module: MarketWatch.pm
+  state: TBD
+  added: 2023-06-06
+  changed: ~
+  removed: ~
+  urls: https://www.marketwatch.com/investing/stock/aapl
+  apikey: false
+  notes: ~
+  testfile: marketwatch.t
+  testcases:
+    - AAPL
+    - NXPI
+    - PCAR
+#
 - module: MorningstarCH.pm
   state: working
   added: 2019-03-02

@@ -81,6 +81,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     HU
     IEXCloud
     IndiaMutual
+    MarketWatch
     MorningstarAU
     MorningstarCH
     MorningstarJP

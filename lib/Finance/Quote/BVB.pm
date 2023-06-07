@@ -105,7 +105,7 @@ sub bvb {
           }
           elsif ( @$row[0] =~ m|^Date/time| ) {
             ($date) = @$row[1] =~ m|^([\d/]+)\s|;
-            $quoter->store_date(\%info, $stock, {usdate => $1}) if $date =~ m|([0-9]{1,2}/[0-9]{2}/[0-9]{4})|;
+            $quoter->store_date(\%info, $stock, {usdate => $1}) if $date =~ m|([0-9]{1,2}/[0-9]{1,2}/[0-9]{4})|;
           }
           elsif ( @$row[0] =~ m|^Last price| ) {
             ($last) = @$row[1] =~ m|^([\d\.]+)|;
