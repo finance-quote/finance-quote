@@ -464,6 +464,20 @@
   testfile: TBD
   testcases:
 #
+- module: GoogleWeb.pm
+  state: working
+  added: 2023-06-12
+  changed: ~
+  removed: ~
+  urls: https://www.google.com/finance/
+  apikey: false
+  notes: ~
+  testfile: googleweb.t
+  testcases:
+    - AAPL
+    - KNW
+    - GE
+#
 - module: HEX.pm
   state: TBD
   added: TBD

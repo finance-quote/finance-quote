@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Added GoogleWeb Module
 	* Added MarketWatch Module
 	* Replaced cached file with IO::String object in IndiaMutual.pm
 	* Fixed missing date in AEX.pm - Issue #298
