@@ -208,3 +208,9 @@ The following labels are returned:
 =item method
 
 =back
+
+=head1 AVAILABLE EXCHANGES
+
+While the Google Finance web pages contain price information from other
+stock exchanges, this module currently retrieves last trade prices for
+securities listed on the NYSE, American, and NASDAQ stock exchanges.
