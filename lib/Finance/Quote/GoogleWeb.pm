@@ -58,7 +58,8 @@ sub googleweb {
 
   foreach my $stock (@stocks) {
 
-    $url   = $GOOGLE_URL . "quote/" . $stock;
+    my $ucstock = uc($stock);
+    $url   = $GOOGLE_URL . "quote/" . $ucstock;
     $reply = $ua->request( GET $url);
 
     my $code    = $reply->code;
@@ -68,65 +69,83 @@ sub googleweb {
 
     ### Body: $body
 
-    my ($name, $bid, $ask, $last, $open, $high, $low, $date);
+    my ($name, $last, $date, $currency, $time, $taglink, $link);
 
     $info{ $stock, "symbol" } = $stock;
 
     if ( $code == 200 ) {
 
       # Use HTML::TreeBuilder to parse HTML in $body
+      # Without the exchange Google returns a list of possible matches
+      # For example AAPL will give you a list of links that will
+      # include AAPL:NASDAQ
       $tree = HTML::TreeBuilder->new;
-      if ($tree->parse($body)) {
-
-        $tree->eof;
-        if ( $tree->look_down(_tag => 'div', id => 'ctl00_body_divNoData') ) {
+      if ($tree->parse_content($body)) {
+        #
+        # Get link with exchange appended (NYSE|NASDAQ|NYSEAMERICAN)
+        $taglink = $tree->look_down(_tag => 'a', href => qr!^./quote/$ucstock:(NYSE|NASDAQ|NYSEAMERICAN)!);
+        if ($taglink) {
+          $link = $taglink->attr('href');
+          $link =~ s|\./quote|quote|;
+        } else {
           $info{ $stock, "success" } = 0;
-          $info{ $stock, "errormsg" } =
-            "Error retrieving quote for $stock. No data returned";
+          $info{ $stock, "errormsg" } = "$stock not found on Google Finance";
           next;
         }
-        $name = $tree->look_down(_tag => 'h2', class => qr/^mBot0 large textStyled/)->as_text;
-        $info{ $stock, 'success' } = 1;
-        ($info{ $stock, 'name' } = $name) =~ s/^\s+|\s+$//g ;
-        $info{ $stock, 'currency' } = 'RON';
-        $info{ $stock, 'method' } = 'bvb';
-        $table = $tree->look_down(_tag => 'table', id => qr/^ctl00_body_ctl02_PricesControl_dvCPrices/)->as_HTML;
-        $pricetable = HTML::TableExtract->new();
-        $pricetable->parse($table);
-        foreach my $row ($pricetable->rows) {
-          if ( @$row[0] =~ m/Ask$/ ) {
-            ($bid, $ask) = @$row[1] =~ m|^\s+([\d\.]+)\s+\/\s+([\d\.]+)|;
-            $info{ $stock, 'bid' } = $bid;
-            $info{ $stock, 'ask' } = $ask;
-          }
-          elsif ( @$row[0] =~ m|^Date/time| ) {
-            ($date) = @$row[1] =~ m|^([\d/]+)\s|;
-            $quoter->store_date(\%info, $stock, {usdate => $1}) if $date =~ m|([0-9]{1,2}/[0-9]{2}/[0-9]{4})|;
-          }
-          elsif ( @$row[0] =~ m|^Last price| ) {
-            ($last) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'last' } = $last;
-          }
-          elsif ( @$row[0] =~ m|^Open price| ) {
-            ($open) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'open' } = $open;
-          }
-          elsif ( @$row[0] =~ m|^High price| ) {
-            ($high) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'high' } = $high;
-          }
-          elsif ( @$row[0] =~ m|^Low price| ) {
-            ($low) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'low' } = $low;
-          }
-        }
-
-      } else {
-        $tree->eof;
+      } else {  # Could not parse body into tree
         $info{ $stock, "success" } = 0;
         $info{ $stock, "errormsg" } =
           "Error retrieving quote for $stock. Could not parse HTML returned from $url.";
+        next;
       }
+
+      # Found a link that looks like STOCK:EXCHANGE
+      # Fetch that link and parse
+      $url = $GOOGLE_URL . $link;
+
+      $reply = $ua->get($url);
+
+      if ($reply->code ne "200") {
+        $info{ $stock, "success" } = 0;
+        $info{ $stock, "errormsg" } =
+          "Error retrieving quote for $stock from $url";
+        next;
+      }
+      
+      # Parse returned HTML
+      $body = decode('UTF-8', $reply->content);
+      unless ($tree->parse_content($body)) {
+        $info{ $stock, "success" } = 0;
+        $info{ $stock, "errormsg" } =
+          "Cannot parse HTML from $url";
+        next;
+      }
+
+      # Look for div tag with data-last-price attribute
+      $taglink =
+        $tree->look_down(_tag => 'div', 'data-last-price' => qr|[0-9.]+|);
+      unless ($taglink) {
+        $info{ $stock, "success" } = 0;
+        $info{ $stock, "errormsg" } = "Cannot find price data in $url";
+        next;
+      }
+
+      $last = $taglink->attr('data-last-price');
+      # Google does not include .00 if the price is a whole dollar amount
+      unless ( $last =~ /\./ ) {
+        $last = $last . '.00';
+      }
+      $time = $taglink->attr('data-last-normal-market-timestamp');
+      $currency = $taglink->attr('data-currency-code');
+      my ( undef, undef, undef, $mday, $mon, $year, undef, undef, undef ) =
+        localtime($time);
+      $date = sprintf("%d/%02d/%02d", $year + 1900, $mon + 1, $mday);
+
+      $info{ $stock, 'method' } = 'googleweb';
+      $info{ $stock, 'last' } = $last;
+      $info{ $stock, 'currency' } = $currency;
+      $quoter->store_date(\%info, $stock, { isodate => $date});
+      $info{ $stock, 'success' } = 1;
 
     } else {       # HTTP Request failed (code != 200)
       $info{ $stock, "success" } = 0;
