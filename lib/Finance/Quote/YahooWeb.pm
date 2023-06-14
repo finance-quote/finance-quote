@@ -16,6 +16,7 @@ package Finance::Quote::YahooWeb;
 use warnings;
 use strict;
 
+use Date::Business;
 use HTTP::Request::Common;
 use HTML::TreeBuilder::XPath;
 use Text::Template;
@@ -39,6 +40,52 @@ sub methods {
     sub labels {
         return ( yahooweb => \@labels );
     }
+}
+
+# Needed for Date::Business
+sub holiday($$) {
+  my ($start, $end) = @_;
+
+  my ($numHolidays) = 0;
+  my ($holiday, @holidays);
+
+  # Get Stock Exchange holidays at
+  # https://www.nyse.com/markets/hours-calendars
+  # 2023
+  push @holidays, '20230619';
+  push @holidays, '20230704';
+  push @holidays, '20230904';
+  push @holidays, '20231123';
+  push @holidays, '20231225';
+
+  # 2024
+  push @holidays, '20240101';
+  push @holidays, '20240115';
+  push @holidays, '20240219';
+  push @holidays, '20240329';
+  push @holidays, '20240527';
+  push @holidays, '20240619';
+  push @holidays, '20240704';
+  push @holidays, '20240902';
+  push @holidays, '20241128';
+  push @holidays, '20241225';
+
+  # 2025
+  push @holidays, '20240101';
+  push @holidays, '20240120';
+  push @holidays, '20240217';
+  push @holidays, '20240418';
+  push @holidays, '20240526';
+  push @holidays, '20240619';
+  push @holidays, '20240704';
+  push @holidays, '20240901';
+  push @holidays, '20241127';
+  push @holidays, '20241225';
+
+  foreach $holiday (@holidays) {
+    $numHolidays++ if ($start le $holiday && $end ge $holiday);
+  }
+  return $numHolidays;
 }
 
 sub yahooweb {
@@ -67,7 +114,7 @@ sub yahooweb {
 
         my ($name, $yahoo_symbol) = map { $_ =~ /^(.+) \(([^)]+)\)/ ? ($1, $2) : () } $tree->findnodes_as_strings('//*[@id="quote-header-info"]//div//h1');
         
-        if ($symbol ne $yahoo_symbol) {
+        if (uc($symbol) ne uc($yahoo_symbol)) {
             ### Error: $symbol, $yahoo_symbol
             $info{ $symbol, "success" } = 0;
             $info{ $symbol, "errmsg" } = 'Unexpected response from Yahoo site';
@@ -87,8 +134,11 @@ sub yahooweb {
         ### YahooWeb Result: $xpath, $last
         $info{ $symbol, 'last'} = $last;
 
+        # Use Date::Business to get last business day
+        my $d = Date::Business->new(FORCE => 'prev', HOLIDAY => \&holiday);
+
         # date, isodate
-        $quoter->store_date(\%info, $symbol, {today => 1});   
+        $quoter->store_date(\%info, $symbol, {isodate => $d->image()});   
         $info{ $symbol, 'symbol' } = $symbol;
         $info{ $symbol, 'method' } = 'yahooweb';
         $info{ $symbol, 'success' } = 1;
