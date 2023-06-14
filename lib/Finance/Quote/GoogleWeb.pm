@@ -69,7 +69,7 @@ sub googleweb {
 
     ### Body: $body
 
-    my ($name, $last, $date, $currency, $time, $taglink, $link);
+    my ($name, $last, $date, $currency, $time, $taglink, $link, $exchange);
 
     $info{ $stock, "symbol" } = $stock;
 
@@ -87,6 +87,7 @@ sub googleweb {
         if ($taglink) {
           $link = $taglink->attr('href');
           $link =~ s|\./quote|quote|;
+          ($exchange = $link) =~ s/.*${ucstock}://;
         } else {
           $info{ $stock, "success" } = 0;
           $info{ $stock, "errormsg" } = "$stock not found on Google Finance";
@@ -135,6 +136,11 @@ sub googleweb {
       unless ( $last =~ /\./ ) {
         $last = $last . '.00';
       }
+      # Also fix missing cents (15.30 will be 15.3 in the HTML)
+      if ( $last =~ /\d+\.\d$/ ) {
+        $last = $last . '0';
+      }
+
       $time = $taglink->attr('data-last-normal-market-timestamp');
       $currency = $taglink->attr('data-currency-code');
       my ( undef, undef, undef, $mday, $mon, $year, undef, undef, undef ) =
@@ -144,6 +150,7 @@ sub googleweb {
       $info{ $stock, 'method' } = 'googleweb';
       $info{ $stock, 'last' } = $last;
       $info{ $stock, 'currency' } = $currency;
+      $info{ $stock, 'exchange' } = $exchange;
       $quoter->store_date(\%info, $stock, { isodate => $date});
       $info{ $stock, 'success' } = 1;
 
