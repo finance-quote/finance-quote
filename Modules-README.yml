@@ -1051,6 +1051,33 @@
     - AENA.MC
     - CFR.JO
 #
+- module: YahooWeb.pm
+  state: working
+  added: 2023-05-31
+  changed:
+  removed:
+  urls:
+    - https://finance.yahoo.com/quote/{$symbol}?p={$symbol}
+  apikey: false
+  notes: ~
+  testfile: yahooweb.t
+  testcases:
+    - MSFT
+    - AMZN
+    - AAPL
+    - GOOGL
+    - GOOG
+    - META
+    - CSCO
+    - INTC
+    - CMCSA
+    - PEP
+    - BRK-A
+    - SEB
+    - NVR
+    - BKNG
+    - IBKR
+#
 - module: YahooYQL.pm
   state: TBD
   added: TBD
