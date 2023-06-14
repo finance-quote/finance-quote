@@ -104,6 +104,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Union
     XETRA
     YahooJSON
+    YahooWeb
     ZA
 /;
 
@@ -1709,6 +1710,7 @@ http://www.gnucash.org/
   Finance::Quote::TwelveData,
   Finance::Quote::Union,
   Finance::Quote::YahooJSON,
+  Finance::Quote::YahooWeb,
   Finance::Quote::ZA
 
 You should have received the Finance::Quote hacker's guide with this package.
