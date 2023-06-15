@@ -78,6 +78,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Fool
     Fundata
     GoldMoney
+    GoogleWeb
     HU
     IEXCloud
     IndiaMutual
@@ -1688,6 +1689,7 @@ http://www.gnucash.org/
   Finance::Quote::Fool,
   Finance::Quote::Fundata
   Finance::Quote::GoldMoney,
+  Finance::Quote::GoogleWeb,
   Finance::Quote::HU,
   Finance::Quote::IEXCloud,
   Finance::Quote::IndiaMutual,
