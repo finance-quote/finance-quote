@@ -71,16 +71,16 @@ sub holiday($$) {
   push @holidays, '20241225';
 
   # 2025
-  push @holidays, '20240101';
-  push @holidays, '20240120';
-  push @holidays, '20240217';
-  push @holidays, '20240418';
-  push @holidays, '20240526';
-  push @holidays, '20240619';
-  push @holidays, '20240704';
-  push @holidays, '20240901';
-  push @holidays, '20241127';
-  push @holidays, '20241225';
+  push @holidays, '20250101';
+  push @holidays, '20250120';
+  push @holidays, '20250217';
+  push @holidays, '20250418';
+  push @holidays, '20250526';
+  push @holidays, '20250619';
+  push @holidays, '20250704';
+  push @holidays, '20250901';
+  push @holidays, '20251127';
+  push @holidays, '20251225';
 
   foreach $holiday (@holidays) {
     $numHolidays++ if ($start le $holiday && $end ge $holiday);
