@@ -82,7 +82,7 @@ sub xetra {
       $td1 = ($lastvalue->look_down('_tag'=>'td'))[9];
       @child = $td1->content_list;
       my $price = $child[0];
-      $price =~ s/\.//;
+      $price =~ s/\.//g;
       $price =~ s/,/\./;
       my $encprice = encode_entities($price);
       my @splitprice= split ('&',$encprice);
@@ -103,7 +103,7 @@ sub xetra {
       $td1 = ($lastvalue->look_down('_tag'=>'td'))[16];
       @child = $td1->content_list;
       my $change =$child[0];
-      $change =~ s/\.//;
+      $change =~ s/\.//g;
       $change =~ s/,/\./;
       my $encchange = encode_entities($change);
       my @splitcchange= split ('&',$encchange);
@@ -113,14 +113,14 @@ sub xetra {
       $td1 = ($lastvalue->look_down('_tag'=>'td'))[19];
       @child = $td1->content_list;
       my $p_change =$child[0];
-      $p_change =~ s/\.//;
+      $p_change =~ s/[\.|%]//g;
       $p_change =~ s/,/\./;
 
       #-- close
       $td1 = ($lastvalue->look_down('_tag'=>'td'))[37];
       @child = $td1->content_list;
       my $close =$child[0];
-      $close =~ s/\.//;
+      $close =~ s/\.//g;
       $close =~ s/,/\./;
       my $encclose = encode_entities($close);
       my @splitclose= split ('&',$encclose);
