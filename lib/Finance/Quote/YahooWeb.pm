@@ -96,7 +96,7 @@ sub yahooweb {
         $info{ $symbol, 'last'} = $last;
 
         # Use Date::Manip for previous workday
-        my $date = new Date::Manip::Date;
+	my $date;
         my($month, $day, $year, $wday) = (localtime())[4,3,5,6];
         $month++;
         $year += 1900;
@@ -104,8 +104,9 @@ sub yahooweb {
             $date = Date_PrevWorkDay("today", 1, 0);
             $date = substr($date,0,8);
         } else {
-            $date = $year . $month . $day
+            $date = sprintf("%04d%02d%02d", $year, $month, $day);
         }
+        ### Date: $date
 
         # date, isodate
         $quoter->store_date(\%info, $symbol, {isodate => $date});   
