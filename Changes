@@ -1,4 +1,6 @@
 {{$NEXT}}
+	* Added close, change and p_change to Tradegate, XETRA and Sinvestor
+	  Fixed bug in Tradegate, XETRA and Sinvestor for numbers equal or higher than 1.000 - PR #304
 	* Added GoogleWeb Module
 	* YahooWeb module added - PR #296
 	* Added MarketWatch Module

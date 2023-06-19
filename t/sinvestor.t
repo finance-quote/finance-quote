@@ -23,13 +23,16 @@ my $today    = today();
 my $window   = 32;   
 
 my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_reference)
-                'success' => sub {$_[0]},
-                'last'    => sub {looks_like_number($_[0])},
-                'volume'  => sub {looks_like_number($_[0])},
-                'isodate' => sub {Date::Range->new($today - $window, $today)->includes(Date::Simple::ISO->new($_[0]))},
-                'date'    => sub {my $a = Date::Manip::Date->new(); $a->parse_format('%m/%d/%Y', $_[0]);
-                                  my $b = Date::Manip::Date->new(); $b->parse_format('%Y-%m-%d', $_[2]->{$_[1], 'isodate'});
-                                  return $a->cmp($b) == 0;},
+                'success'  => sub {$_[0]},
+                'last'     => sub {looks_like_number($_[0])},
+                'volume'   => sub {looks_like_number($_[0])},
+                'close'    => sub {looks_like_number($_[0])},
+                'change'   => sub {looks_like_number($_[0])},
+                'p_change' => sub {looks_like_number($_[0])},
+                'isodate'  => sub {Date::Range->new($today - $window, $today)->includes(Date::Simple::ISO->new($_[0]))},
+                'date'     => sub {my $a = Date::Manip::Date->new(); $a->parse_format('%m/%d/%Y', $_[0]);
+                                   my $b = Date::Manip::Date->new(); $b->parse_format('%Y-%m-%d', $_[2]->{$_[1], 'isodate'});
+                                   return $a->cmp($b) == 0;},
                );
 my $q        = Finance::Quote->new();
 
