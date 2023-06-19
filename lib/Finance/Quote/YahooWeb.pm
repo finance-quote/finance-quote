@@ -16,7 +16,7 @@ package Finance::Quote::YahooWeb;
 use warnings;
 use strict;
 
-use Date::Business;
+use Date::Manip;
 use HTTP::Request::Common;
 use HTML::TreeBuilder::XPath;
 use Text::Template;
@@ -40,52 +40,6 @@ sub methods {
     sub labels {
         return ( yahooweb => \@labels );
     }
-}
-
-# Needed for Date::Business
-sub holiday($$) {
-  my ($start, $end) = @_;
-
-  my ($numHolidays) = 0;
-  my ($holiday, @holidays);
-
-  # Get Stock Exchange holidays at
-  # https://www.nyse.com/markets/hours-calendars
-  # 2023
-  push @holidays, '20230619';
-  push @holidays, '20230704';
-  push @holidays, '20230904';
-  push @holidays, '20231123';
-  push @holidays, '20231225';
-
-  # 2024
-  push @holidays, '20240101';
-  push @holidays, '20240115';
-  push @holidays, '20240219';
-  push @holidays, '20240329';
-  push @holidays, '20240527';
-  push @holidays, '20240619';
-  push @holidays, '20240704';
-  push @holidays, '20240902';
-  push @holidays, '20241128';
-  push @holidays, '20241225';
-
-  # 2025
-  push @holidays, '20250101';
-  push @holidays, '20250120';
-  push @holidays, '20250217';
-  push @holidays, '20250418';
-  push @holidays, '20250526';
-  push @holidays, '20250619';
-  push @holidays, '20250704';
-  push @holidays, '20250901';
-  push @holidays, '20251127';
-  push @holidays, '20251225';
-
-  foreach $holiday (@holidays) {
-    $numHolidays++ if ($start le $holiday && $end ge $holiday);
-  }
-  return $numHolidays;
 }
 
 sub yahooweb {
@@ -125,20 +79,36 @@ sub yahooweb {
 
         my ($exchange, $currency) = map { $_ =~ /^(.+)[.] Currency in (.+)$/ ? ($1, $2) : () } $tree->findnodes_as_strings('//*[@id="quote-header-info"]//div//span');
         $info{ $symbol, 'exchange' } = $exchange;
-        $info{ $symbol, 'currency' } = $currency;
+        if ($currency =~ /^GBp/) {
+            $info{ $symbol, 'currency' } = 'GBP';
+        } else {
+            $info{ $symbol, 'currency' } = $currency;
+        }
 
         my $xpath = $XPATH->fill_in(HASH => {symbol => $symbol});
         my $last = $tree->findvalue($xpath);
         $last =~ s/,//g;
+        if ($currency =~ /^GBp/) {
+            $last = $last / 100;
+        }
 
         ### YahooWeb Result: $xpath, $last
         $info{ $symbol, 'last'} = $last;
 
-        # Use Date::Business to get last business day
-        my $d = Date::Business->new(FORCE => 'prev', HOLIDAY => \&holiday);
+        # Use Date::Manip for previous workday
+        my $date = new Date::Manip::Date;
+        my($month, $day, $year, $wday) = (localtime())[4,3,5,6];
+        $month++;
+        $year += 1900;
+        if ($wday == 0 || $wday == 6) {
+            $date = Date_PrevWorkDay("today", 1, 0);
+            $date = substr($date,0,8);
+        } else {
+            $date = $year . $month . $day
+        }
 
         # date, isodate
-        $quoter->store_date(\%info, $symbol, {isodate => $d->image()});   
+        $quoter->store_date(\%info, $symbol, {isodate => $date});   
         $info{ $symbol, 'symbol' } = $symbol;
         $info{ $symbol, 'method' } = 'yahooweb';
         $info{ $symbol, 'success' } = 1;
