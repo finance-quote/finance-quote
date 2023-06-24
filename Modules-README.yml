@@ -1028,7 +1028,7 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2023-05-25
+  changed: 2023-06-24
   removed:
   urls:
     - https://query2.finance.yahoo.com/v11/finance/quoteSummary/...?modules=price,summaryDetail,defaultKeyStatistics

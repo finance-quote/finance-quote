@@ -119,7 +119,7 @@ sub yahoo_json {
 
                 $info{ $stocks, "success" } = 1;
                 $info{ $stocks, "exchange" } =
-                    "Sourced from Yahoo Finance (as JSON)";
+                    $json_resources_price->{'exchangeName'};
                 $info{ $stocks, "method" } = "yahoo_json";
                 $info{ $stocks, "name" }   = $stocks . ' (' . $json_name . ')';
                 $info{ $stocks, "type" }   = $json_type;
