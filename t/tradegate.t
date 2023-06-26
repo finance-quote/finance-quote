@@ -26,6 +26,7 @@ my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_refer
                 'success'  => sub {$_[0]},
                 'last'     => sub {looks_like_number($_[0])},
                 'volume'   => sub {looks_like_number($_[0])},
+                'price'    => sub {looks_like_number($_[0])},
                 'close'    => sub {looks_like_number($_[0])},
                 'change'   => sub {looks_like_number($_[0])},
                 'p_change' => sub {looks_like_number($_[0])},
@@ -34,22 +35,27 @@ my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_refer
                                    my $b = Date::Manip::Date->new(); $b->parse_format('%Y-%m-%d', $_[2]->{$_[1], 'isodate'});
                                    return $a->cmp($b) == 0;},
                );
-my $q        = Finance::Quote->new();
 
-plan tests => 1 + %check*@valid + @invalid;
+plan tests => 2 * (1 + %check * @valid + @invalid);
 
-my %quotes = $q->fetch('tradegate', @symbols);
-ok(%quotes);
+my $q1      = Finance::Quote->new();
+my %quotes1 = $q1->fetch('tradegate', @symbols);
+my $q2      = Finance::Quote->new('Tradegate', 'tradegate' => {INST_ID => '0000003'});
+my %quotes2 = $q2->fetch('tradegate', @symbols);
+ok(%quotes1);
+ok(%quotes2);
 
 ### [<now>] quotes: %quotes
 
 foreach my $symbol (@valid) {
   while (my ($key, $lambda) = each %check) {
-    ok($lambda->($quotes{$symbol, $key}, $symbol, \%quotes), "$symbol: $key -> $quotes{$symbol, $key}");
+    ok($lambda->($quotes1{$symbol, $key}, $symbol, \%quotes1), "$symbol: $key -> $quotes1{$symbol, $key}");
+    ok($lambda->($quotes2{$symbol, $key}, $symbol, \%quotes2), "$symbol: $key -> $quotes2{$symbol, $key}");
   }
 }
     
 foreach my $symbol (@invalid) {
-  ok((not $quotes{'BOGUS', 'success'}), 'failed as expected');
+  ok((not $quotes1{'BOGUS', 'success'}), 'failed as expected');
+  ok((not $quotes2{'BOGUS', 'success'}), 'failed as expected');
 }
 

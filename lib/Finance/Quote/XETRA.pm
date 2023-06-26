@@ -28,11 +28,15 @@ use Web::Scraper;
 
 # VERSION
 
-my $xetra_URL = 'https://web.s-investor.de/app/detail.htm?INST_ID=0000057&boerse=GER&isin=';
+my $xetra_URL = 'https://web.s-investor.de/app/detail.htm?boerse=GER&isin=';
 
 sub methods {
   return (xetra   => \&xetra,
           europe  => \&xetra);
+}
+
+sub parameters {
+  return ('INST_ID');
 }
 
 our @labels = qw/symbol last close exchange volume open price change p_change/;
@@ -43,9 +47,12 @@ sub labels {
 }
 
 sub xetra {
-  my $quoter = shift;
-  my $ua     = $quoter->user_agent();
-  my $agent  = $ua->agent;
+  my $quoter  = shift;
+  my $inst_id = exists $quoter->{module_specific_data}->{xetra}->{INST_ID} ?
+                       $quoter->{module_specific_data}->{xetra}->{INST_ID} :
+                       '0000057';
+  my $ua      = $quoter->user_agent();
+  my $agent   = $ua->agent;
   $ua->agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36');
 
   my %info;
@@ -54,9 +61,11 @@ sub xetra {
 
   foreach my $symbol (@_) {
     eval {
+      my $url = $xetra_URL
+                . $symbol
+                . '&INST_ID='
+                . $inst_id;
 
-
-      my $url = $xetra_URL.join('', $symbol);
       my $symlen = length($symbol);
 
       my $tree = HTML::TreeBuilder->new_from_url($url);
@@ -164,6 +173,8 @@ Finance::Quote::xetra - Obtain quotes from S-Investor platform.
     use Finance::Quote;
 
     $q = Finance::Quote->new;
+    or
+    $q = Finance::Quote->new('XETRA', 'xetra' => {INST_ID => 'your institute id'});
 
     %info = Finance::Quote->fetch("xetra", "DE000ENAG999");  # Only query xetra
     %info = Finance::Quote->fetch("europe", "brd");     # Failover to other sources OK.
@@ -178,13 +189,22 @@ the DAX and other stock market indices.
 Suitable for shares and ETFs that are traded in Germany.
 
 This module is loaded by default on a Finance::Quote object. It's also possible
-to load it explicitly by placing "xetra" in the argument list to
+to load it explicitly by placing "XETRA" in the argument list to
 Finance::Quote->new().
 
 This module provides "xetra" and "europe" fetch methods.
 
 Information obtained by this module may be covered by s-investor.de terms and
 conditions.
+
+=head1 INST_ID
+
+https://s-investor.de/ supports different institute IDs. The default value "0000057" is
+used (Krefeld) if no institute ID is provided. A list of institute IDs is provided here:
+https://web.s-investor.de/app/webauswahl.jsp
+
+The INST_ID may be set by providing a module specific hash to
+Finance::Quote->new as in the above example (optional).
 
 =head1 LABELS RETURNED
 
@@ -196,5 +216,9 @@ method
 success
 symbol
 volume
+price
+close
+change
+p_change
 
 

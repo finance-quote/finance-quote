@@ -28,11 +28,15 @@ use Web::Scraper;
 
 # VERSION
 
-my $Sinvestor_URL = 'https://web.s-investor.de/app/detail.htm?INST_ID=0000057&isin=';
+my $Sinvestor_URL = 'https://web.s-investor.de/app/detail.htm?isin=';
 
 sub methods {
   return (sinvestor => \&sinvestor,
           europe    => \&sinvestor);
+}
+
+sub parameters {
+  return ('INST_ID');
 }
 
 our @labels = qw/symbol last close exchange volume open price change p_change/;
@@ -43,9 +47,12 @@ sub labels {
 }
 
 sub sinvestor {
-  my $quoter = shift;
-  my $ua     = $quoter->user_agent();
-  my $agent  = $ua->agent;
+  my $quoter  = shift;
+  my $inst_id = exists $quoter->{module_specific_data}->{sinvestor}->{INST_ID} ?
+                       $quoter->{module_specific_data}->{sinvestor}->{INST_ID} :
+                       '0000057';
+  my $ua      = $quoter->user_agent();
+  my $agent   = $ua->agent;
   $ua->agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36');
 
   my %info;
@@ -54,9 +61,11 @@ sub sinvestor {
 
   foreach my $symbol (@_) {
     eval {
+      my $url = $Sinvestor_URL
+                . $symbol
+                . '&INST_ID='
+                . $inst_id;
 
-
-      my $url = $Sinvestor_URL.join('', $symbol);
       my $symlen = length($symbol);
 
       my $tree = HTML::TreeBuilder->new_from_url($url);
@@ -96,7 +105,7 @@ sub sinvestor {
       $td1 = ($lastvalue->look_down('_tag'=>'td'))[13];
       @child = $td1->content_list;
       my $volume = $child[0];
-      
+
       $lastvalue = $tree->look_down('id'=>'detailVergleichszahlen');
 
       #-- change (absolute change)
@@ -164,6 +173,8 @@ Finance::Quote::Sinvestor - Obtain quotes from S-Investor platform.
     use Finance::Quote;
 
     $q = Finance::Quote->new;
+    or
+    $q = Finance::Quote->new('Sinvestor', 'sinvestor' => {INST_ID => 'your institute id'});
 
     %info = Finance::Quote->fetch("Sinvestor", "DE000ENAG999");  # Only query Sinvestor
     %info = Finance::Quote->fetch("europe", "brd");     # Failover to other sources OK.
@@ -186,6 +197,15 @@ This module provides "Sinvestor" and "europe" fetch methods.
 Information obtained by this module may be covered by s-investor.de terms and
 conditions.
 
+=head1 INST_ID
+
+https://s-investor.de/ supports different institute IDs. The default value "0000057" is
+used (Krefeld) if no institute ID is provided. A list of institute IDs is provided here:
+https://web.s-investor.de/app/webauswahl.jsp
+
+The INST_ID may be set by providing a module specific hash to
+Finance::Quote->new as in the above example (optional).
+
 =head1 LABELS RETURNED
 
 The following labels are returned:
@@ -196,5 +216,9 @@ method
 success
 symbol
 volume
+price
+close
+change
+p_change
 
 
