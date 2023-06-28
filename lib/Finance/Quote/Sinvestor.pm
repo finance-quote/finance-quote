@@ -69,86 +69,94 @@ sub sinvestor {
       my $symlen = length($symbol);
 
       my $tree = HTML::TreeBuilder->new_from_url($url);
+      
+      my $lastvalue = $tree->look_down('class'=>'si_seitenbezeichnung');
+      my @child = $lastvalue->content_list;
 
-      my $lastvalue = $tree->look_down('class'=>'si_inner_content_box');
-
-      my $td1 = ($lastvalue->look_down('_tag'=>'td'))[1];
-      my @child = $td1->content_list;
-      my $isin =$child[0];
-
-      $td1 = ($lastvalue->look_down('_tag'=>'td'))[3];
-      @child = $td1->content_list;
-      my $sharename = $child[0];
-
-      $td1 = ($lastvalue->look_down('_tag'=>'td'))[5];
-      @child = $td1->content_list;
-      my $exchange = $child[0];
-
-      $td1 = ($lastvalue->look_down('_tag'=>'td'))[7];
-      @child = $td1->content_list;
-      my $date = substr($child[0], 0, 8);
-
-      $td1 = ($lastvalue->look_down('_tag'=>'td'))[9];
-      @child = $td1->content_list;
-      my $price = $child[0];
-      $price =~ s/\.//g;
-      $price =~ s/,/\./;
-      my $encprice = encode_entities($price);
-      my @splitprice= split ('&',$encprice);
-      $price = $splitprice[0];
-
-      $td1 = ($lastvalue->look_down('_tag'=>'td'))[11];
-      @child = $td1->content_list;
-      my $currency = $child[0];
-      $currency =~ s/Euro/EUR/;
-
-      $td1 = ($lastvalue->look_down('_tag'=>'td'))[13];
-      @child = $td1->content_list;
-      my $volume = $child[0];
-
-      $lastvalue = $tree->look_down('id'=>'detailVergleichszahlen');
-
-      #-- change (absolute change)
-      $td1 = ($lastvalue->look_down('_tag'=>'td'))[16];
-      @child = $td1->content_list;
-      my $change =$child[0];
-      $change =~ s/\.//g;
-      $change =~ s/,/\./;
-      my $encchange = encode_entities($change);
-      my @splitcchange= split ('&',$encchange);
-      $change = $splitcchange[0];
-
-      #-- p_change (relative change)
-      $td1 = ($lastvalue->look_down('_tag'=>'td'))[19];
-      @child = $td1->content_list;
-      my $p_change =$child[0];
-      $p_change =~ s/[\.|%]//g;
-      $p_change =~ s/,/\./;
-
-      #-- close
-      $td1 = ($lastvalue->look_down('_tag'=>'td'))[37];
-      @child = $td1->content_list;
-      my $close =$child[0];
-      $close =~ s/\.//g;
-      $close =~ s/,/\./;
-      my $encclose = encode_entities($close);
-      my @splitclose= split ('&',$encclose);
-      $close = $splitclose[0];
-
-      $info{$symbol, 'success'}   = 1;
-      $info{$symbol, 'method'}    = 'Sinvestor';
-      $info{$symbol, 'symbol'}    = $isin;
-      $info{$symbol, 'name'}      = $sharename;
-      $info{$symbol, 'exchange'}  = $exchange;
-      $info{$symbol, 'last'}      = $price;
-      $info{$symbol, 'price'}     = $price;
-      $info{$symbol, 'close'}     = $close;
-      $info{$symbol, 'change'}    = $change;
-      $info{$symbol, 'p_change'}  = $p_change;
-      $info{$symbol, 'volume'}    = $volume;
-      $info{$symbol, 'currency'}  = $currency;
-#      $info{$symbol, 'date'}      = $date;
-      $quoter->store_date(\%info, $symbol, {eurodate => $date});
+      if ($child[0] eq 'S-Investor Ausnahme') {
+        $info{ $symbol, 'success' } = 0;
+        $info{ $symbol, 'errormsg' } = 'Invalid institute id. Get a valid institute id from https://web.s-investor.de/app/webauswahl.jsp';
+      } else {
+        $lastvalue = $tree->look_down('class'=>'si_inner_content_box');
+  
+        my $td1 = ($lastvalue->look_down('_tag'=>'td'))[1];
+        @child = $td1->content_list;
+        my $isin =$child[0];
+  
+        $td1 = ($lastvalue->look_down('_tag'=>'td'))[3];
+        @child = $td1->content_list;
+        my $sharename = $child[0];
+  
+        $td1 = ($lastvalue->look_down('_tag'=>'td'))[5];
+        @child = $td1->content_list;
+        my $exchange = $child[0];
+  
+        $td1 = ($lastvalue->look_down('_tag'=>'td'))[7];
+        @child = $td1->content_list;
+        my $date = substr($child[0], 0, 8);
+  
+        $td1 = ($lastvalue->look_down('_tag'=>'td'))[9];
+        @child = $td1->content_list;
+        my $price = $child[0];
+        $price =~ s/\.//g;
+        $price =~ s/,/\./;
+        my $encprice = encode_entities($price);
+        my @splitprice= split ('&',$encprice);
+        $price = $splitprice[0];
+  
+        $td1 = ($lastvalue->look_down('_tag'=>'td'))[11];
+        @child = $td1->content_list;
+        my $currency = $child[0];
+        $currency =~ s/Euro/EUR/;
+  
+        $td1 = ($lastvalue->look_down('_tag'=>'td'))[13];
+        @child = $td1->content_list;
+        my $volume = $child[0];
+  
+        $lastvalue = $tree->look_down('id'=>'detailVergleichszahlen');
+  
+        #-- change (absolute change)
+        $td1 = ($lastvalue->look_down('_tag'=>'td'))[16];
+        @child = $td1->content_list;
+        my $change =$child[0];
+        $change =~ s/\.//g;
+        $change =~ s/,/\./;
+        my $encchange = encode_entities($change);
+        my @splitcchange= split ('&',$encchange);
+        $change = $splitcchange[0];
+  
+        #-- p_change (relative change)
+        $td1 = ($lastvalue->look_down('_tag'=>'td'))[19];
+        @child = $td1->content_list;
+        my $p_change =$child[0];
+        $p_change =~ s/[\.|%]//g;
+        $p_change =~ s/,/\./;
+  
+        #-- close
+        $td1 = ($lastvalue->look_down('_tag'=>'td'))[37];
+        @child = $td1->content_list;
+        my $close =$child[0];
+        $close =~ s/\.//g;
+        $close =~ s/,/\./;
+        my $encclose = encode_entities($close);
+        my @splitclose= split ('&',$encclose);
+        $close = $splitclose[0];
+  
+        $info{$symbol, 'success'}   = 1;
+        $info{$symbol, 'method'}    = 'Sinvestor';
+        $info{$symbol, 'symbol'}    = $isin;
+        $info{$symbol, 'name'}      = $sharename;
+        $info{$symbol, 'exchange'}  = $exchange;
+        $info{$symbol, 'last'}      = $price;
+        $info{$symbol, 'price'}     = $price;
+        $info{$symbol, 'close'}     = $close;
+        $info{$symbol, 'change'}    = $change;
+        $info{$symbol, 'p_change'}  = $p_change;
+        $info{$symbol, 'volume'}    = $volume;
+        $info{$symbol, 'currency'}  = $currency;
+  #      $info{$symbol, 'date'}      = $date;
+        $quoter->store_date(\%info, $symbol, {eurodate => $date});
+      }
     };
     if ($@) {
       $info{$symbol, 'success'}  = 0;
