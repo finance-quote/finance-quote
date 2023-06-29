@@ -712,9 +712,13 @@
 - module: Sinvestor.pm
   state: working
   added: 2022-10-19
-  changed: 2023-06-18
+  changed: 2023-06-26
   removed: ~
-  urls: https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+  urls:
+    - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+    - https://web.s-investor.de/app/webauswahl.jsp
+  notes: |
+    INST_ID is an optional parameter.
   apikey: false
   notes: shares and funds from various sources
   testfile: sinvestor.t
@@ -787,9 +791,13 @@
 - module: Tradegate.pm
   state: working
   added: 2022-10-19
-  changed: 2023-06-18
+  changed: 2023-06-26
   removed: ~
-  urls: https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+  urls:
+    - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+    - https://web.s-investor.de/app/webauswahl.jsp
+  notes: |
+    INST_ID is an optional parameter.
   apikey: false
   notes: share quotes from the Tradegate platform
   testfile: tradegate.t
@@ -1012,9 +1020,13 @@
 - module: XETRA.pm
   state: working
   added: ~
-  changed: 2023-06-18
+  changed: 2023-06-26
   removed: ~
-  urls: https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+  urls:
+    - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+    - https://web.s-investor.de/app/webauswahl.jsp
+  notes: |
+    INST_ID is an optional parameter.
   apikey: false
   notes: share quotes from the XETRA platform
   testfile: xetra.t
