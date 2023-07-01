@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.57      2023-07-01 12:37:07-07:00 America/Los_Angeles
 	* Correct set exchange in YahooJSON.pm - Issue #306
 	* Added close, change and p_change to Tradegate, XETRA and Sinvestor
 	  Added optional parameter INST_ID to specify the institute id.

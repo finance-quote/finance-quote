@@ -556,6 +556,7 @@ http://www.gnucash.org/
     Finance::Quote::Fool,
     Finance::Quote::Fundata
     Finance::Quote::GoldMoney,
+    Finance::Quote::GoogleWeb,
     Finance::Quote::HU,
     Finance::Quote::IEXCloud,
     Finance::Quote::IndiaMutual,
@@ -578,6 +579,7 @@ http://www.gnucash.org/
     Finance::Quote::TwelveData,
     Finance::Quote::Union,
     Finance::Quote::YahooJSON,
+    Finance::Quote::YahooWeb,
     Finance::Quote::ZA
 
 You should have received the Finance::Quote hacker's guide with this package.
