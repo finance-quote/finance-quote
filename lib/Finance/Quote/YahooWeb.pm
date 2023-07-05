@@ -144,7 +144,7 @@ This module provides the "yahooweb" fetch method.
 The following labels may be returned by Finance::Quote::YahooWeb :
     symbol name exchange currency isodate last
 
-=head1 CAVIATS
+=head1 CAVEATS
 
 Yahoo cleverly obscures the trade date using JavaScript. Because of this
 the module uses the current date, but accounts for weekends.
