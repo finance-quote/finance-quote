@@ -13,13 +13,32 @@ you can 'perldoc lib/Finance/Quote.pm' before the install.
 
 How do I install this package?
 ==============================
-See the `INSTALL' file. It's very simple.
+If you downloaded the Finance-Quote-N.NN.tar.gz tarball from CPAN
+(N.NN is the version number, ex: Finance-Quote-1.50.tar.gz),
+run the following commands:
+
+  tar xzf Finance-Quote-1.50.tar.gz
+  cd Finance-Quote-1.50.tar.gz
+  perl Makefile.PL
+  make
+  make test
+  make install
+
+If you have the CPAN module installed:
+Using cpanm (Requires App::cpanminus)
+
+  cpanm Finance::Quote
+
+or Using CPAN shell
+
+  perl -MCPAN -e shell
+  install Finance::Quote
 
 I've found a bug / written a patch / have an idea. What do I do?
 =================================================================
 Well, you could always mail it to <finance-quote-devel@lists.sourceforge.net>,
 which is read by all the active developers. Preferably, you
-might wish to visit 
+might wish to visit
 <https://github.com/finance-quote/finance-quote> to report issues or
 <https://github.com/finance-quote/finance-quote/pulls> to view or
 create a pull request.
