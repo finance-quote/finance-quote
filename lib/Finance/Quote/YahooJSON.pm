@@ -150,6 +150,16 @@ sub yahoo_json {
                     $info{ $stocks, "currency"} = "ZAR";
                 }
 
+                # Apply the same hack for Tel Aviv Stock Exchange
+                # (TASE) prices as they are returned in ILA (Agorot)
+                # instead of ILS (Shekels). TASE symbols are suffixed
+                # with ".TA" when querying Yahoo e.g. POLI.TA
+
+                if ($info{$stocks,"currency"} eq "ILA") {
+                    $info{$stocks,"last"}=$info{$stocks,"last"}/100;
+                    $info{ $stocks, "currency"} = "ILS";
+                }
+
             # Add extra fields using names as per yahoo to make it easier
             #  to switch from yahoo to yahooJSON
             # Code added by goodvibes
