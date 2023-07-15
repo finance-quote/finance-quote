@@ -1066,7 +1066,7 @@
 - module: YahooWeb.pm
   state: working
   added: 2023-05-31
-  changed:
+  changed: 2023-07-15
   removed:
   urls:
     - https://finance.yahoo.com/quote/{$symbol}?p={$symbol}
@@ -1089,6 +1089,7 @@
     - NVR
     - BKNG
     - IBKR
+    - T
 #
 - module: YahooYQL.pm
   state: TBD
