@@ -279,9 +279,9 @@
 - module: CurrencyRates/YahooJSON.pm
   state: working
   Added: 2023-04-09
-  changed: 2023-05-26
+  changed: 2023-07-14
   removed: ~
-  urls: https://query2.finance.yahoo.com/v11/finance/quoteSummary/...?modules=price
+  urls: https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price
   apikey: false
   notes: |
     URL is constructed by adding "$from$to%3DX" to Yahoo URL.
@@ -1040,10 +1040,10 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2023-06-24
+  changed: 2023-07-14
   removed:
   urls:
-    - https://query2.finance.yahoo.com/v11/finance/quoteSummary/...?modules=price,summaryDetail,defaultKeyStatistics
+    - https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price,summaryDetail,defaultKeyStatistics
   apikey: false
   notes: |
     Module to get data from Yahoo's API

@@ -16,6 +16,8 @@
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #    02110-1301, USA
 
+#    Copyright (C) 2023, Bruce Schuck <bschuck@asgard-systems.com>
+
 package Finance::Quote::CurrencyRates::YahooJSON;
 
 use strict;
@@ -28,8 +30,8 @@ use JSON;
 
 # VERSION
 
-my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/';
-my $YIND_URL_TAIL = '?modules=price';
+my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=';
+my $YIND_URL_TAIL = '&modules=price';
 
 sub new
 {

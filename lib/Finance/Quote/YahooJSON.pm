@@ -35,8 +35,8 @@ use Time::Piece;
 
 # VERSION
 
-my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/';
-my $YIND_URL_TAIL = '?modules=price,summaryDetail,defaultKeyStatistics';
+my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=';
+my $YIND_URL_TAIL = '&modules=price,summaryDetail,defaultKeyStatistics';
 
 sub methods {
     return ( yahoo_json => \&yahoo_json,

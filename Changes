@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Another fix to the URL in YahooJSON and CurrencyRates/YahooJSON - Issue #318
 
 1.57      2023-07-01 12:37:07-07:00 America/Los_Angeles
 	* Correct set exchange in YahooJSON.pm - Issue #306
