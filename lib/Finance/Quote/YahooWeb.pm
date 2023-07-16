@@ -1,3 +1,4 @@
+# vi: set noai ic ts=4 sw=4 showmode showmatch:  
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -16,8 +17,8 @@ package Finance::Quote::YahooWeb;
 use warnings;
 use strict;
 
-use Date::Manip;
 use HTTP::Request::Common;
+use HTML::TableExtract;
 use HTML::TreeBuilder::XPath;
 use Text::Template;
 
@@ -26,7 +27,7 @@ use if DEBUG, 'Smart::Comments';
 
 # VERSION
 
-my $URL   = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://finance.yahoo.com/quote/{$symbol}?p={$symbol}');
+my $URL   = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://finance.yahoo.com/quote/{$symbol}/history?p={$symbol}');
 my $AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36';
 my $XPATH = Text::Template->new(TYPE => 'STRING', SOURCE => '//*[@data-symbol=~"^{$symbol}$"][@data-field=~"regularMarketPrice"]');
 
@@ -35,7 +36,8 @@ sub methods {
 }
 
 {
-    our @labels = qw/symbol name exchange currency isodate last/;
+    our @labels =
+        qw/symbol name exchange currency isodate last open high low volume/;
 
     sub labels {
         return ( yahooweb => \@labels );
@@ -85,31 +87,57 @@ sub yahooweb {
             $info{ $symbol, 'currency' } = $currency;
         }
 
-        my $xpath = $XPATH->fill_in(HASH => {symbol => $symbol});
-        my $last = $tree->findvalue($xpath);
+        my $te = HTML::TableExtract->new(
+            headers => ['Date', 'Open', 'High', 'Low', 'Close\*', 'Adj Close\*\*', 'Volume'],
+            attribs => { 'data-test' => "historical-prices" } );
+        unless ($te->parse($reply->decoded_content)) {
+            $info{ $symbol, "success" } = 0;
+            $info{ $symbol, "errmsg" } = "YahooWeb - History table not found.";
+            next;
+        }
+        my $historytable = $te->first_table_found();
+        ### 1st Row: $historytable->row(0)
+        my ($month, $day, $year) = $historytable->cell(0,0)
+            =~ m|(\w+) (\d+), (\d{4})|;
+        ### Month: $month
+        ### Day: $day
+        ### Year: $year
+
+        my $last = $historytable->cell(0,4);
         $last =~ s/,//g;
         if ($currency =~ /^GBp/) {
             $last = $last / 100;
         }
 
-        ### YahooWeb Result: $xpath, $last
-        $info{ $symbol, 'last'} = $last;
-
-        # Use Date::Manip for previous workday
-	my $date;
-        my($month, $day, $year, $wday) = (localtime())[4,3,5,6];
-        $month++;
-        $year += 1900;
-        if ($wday == 0 || $wday == 6) {
-            $date = Date_PrevWorkDay("today", 1, 0);
-            $date = substr($date,0,8);
-        } else {
-            $date = sprintf("%04d%02d%02d", $year, $month, $day);
+        my $open = $historytable->cell(0,1);
+        $open =~ s/,//g;
+        if ($currency =~ /^GBp/) {
+            $open = $open / 100;
         }
-        ### Date: $date
 
-        # date, isodate
-        $quoter->store_date(\%info, $symbol, {isodate => $date});   
+        my $high = $historytable->cell(0,2);
+        $high =~ s/,//g;
+        if ($currency =~ /^GBp/) {
+            $high = $high / 100;
+        }
+
+        my $low = $historytable->cell(0,3);
+        $low =~ s/,//g;
+        if ($currency =~ /^GBp/) {
+            $low = $low / 100;
+        }
+
+        my $volume = $historytable->cell(0,6);
+        $volume =~ s/,//g;
+
+        ### YahooWeb Result: $last
+        $info{ $symbol, 'last'} = $last;
+        $info{ $symbol, 'open'} = $open;
+        $info{ $symbol, 'high'} = $high;
+        $info{ $symbol, 'low'} = $low;
+        $info{ $symbol, 'volume'} = $volume;
+
+        $quoter->store_date(\%info, $symbol, {month => $month, day => $day, year => $year});   
         $info{ $symbol, 'symbol' } = $symbol;
         $info{ $symbol, 'method' } = 'yahooweb';
         $info{ $symbol, 'success' } = 1;
@@ -142,11 +170,6 @@ This module provides the "yahooweb" fetch method.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::YahooWeb :
-    symbol name exchange currency isodate last
-
-=head1 CAVEATS
-
-Yahoo cleverly obscures the trade date using JavaScript. Because of this
-the module uses the current date, but accounts for weekends.
+    symbol name exchange currency isodate last open high low volume
 
 =cut

@@ -1,5 +1,6 @@
 {{$NEXT}}
-	* YahooWeb.pm - Fixed incorrect pricing for single character symbols - Issue #319
+	* YahooWeb.pm - Fixed incorrect pricing for single character symbols
+	  and changed URL to get trade date - Issues #314 #319
 	* Another fix to the URL in YahooJSON and CurrencyRates/YahooJSON - Issue #318
 
 1.57      2023-07-01 12:37:07-07:00 America/Los_Angeles
