@@ -17,7 +17,6 @@ package Finance::Quote::YahooWeb;
 use warnings;
 use strict;
 
-use Date::Manip;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 use HTML::TreeBuilder::XPath;
@@ -37,7 +36,8 @@ sub methods {
 }
 
 {
-    our @labels = qw/symbol name exchange currency isodate last/;
+    our @labels =
+        qw/symbol name exchange currency isodate last open high low volume/;
 
     sub labels {
         return ( yahooweb => \@labels );
@@ -88,7 +88,7 @@ sub yahooweb {
         }
 
         my $te = HTML::TableExtract->new(
-            headers => ['Date', 'High', 'Low', 'Close\*', 'Adj Close\*\*', 'Volume'],
+            headers => ['Date', 'Open', 'High', 'Low', 'Close\*', 'Adj Close\*\*', 'Volume'],
             attribs => { 'data-test' => "historical-prices" } );
         $te->parse($reply->decoded_content);
         my $historytable = $te->first_table_found();
@@ -105,8 +105,33 @@ sub yahooweb {
             $last = $last / 100;
         }
 
+        my $open = $historytable->cell(0,1);
+        $open =~ s/,//g;
+        if ($currency =~ /^GBp/) {
+            $open = $open / 100;
+        }
+
+        my $high = $historytable->cell(0,2);
+        $high =~ s/,//g;
+        if ($currency =~ /^GBp/) {
+            $high = $high / 100;
+        }
+
+        my $low = $historytable->cell(0,3);
+        $low =~ s/,//g;
+        if ($currency =~ /^GBp/) {
+            $low = $low / 100;
+        }
+
+        my $volume = $historytable->cell(0,6);
+        $volume =~ s/,//g;
+
         ### YahooWeb Result: $last
         $info{ $symbol, 'last'} = $last;
+        $info{ $symbol, 'open'} = $open;
+        $info{ $symbol, 'high'} = $high;
+        $info{ $symbol, 'low'} = $low;
+        $info{ $symbol, 'volume'} = $volume;
 
         $quoter->store_date(\%info, $symbol, {month => $month, day => $day, year => $year});   
         $info{ $symbol, 'symbol' } = $symbol;
@@ -141,11 +166,6 @@ This module provides the "yahooweb" fetch method.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::YahooWeb :
-    symbol name exchange currency isodate last
-
-=head1 CAVEATS
-
-Yahoo cleverly obscures the trade date using JavaScript. Because of this
-the module uses the current date, but accounts for weekends.
+    symbol name exchange currency isodate last open high low volume
 
 =cut
