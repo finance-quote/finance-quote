@@ -90,7 +90,11 @@ sub yahooweb {
         my $te = HTML::TableExtract->new(
             headers => ['Date', 'Open', 'High', 'Low', 'Close\*', 'Adj Close\*\*', 'Volume'],
             attribs => { 'data-test' => "historical-prices" } );
-        $te->parse($reply->decoded_content);
+        unless ($te->parse($reply->decoded_content)) {
+            $info{ $symbol, "success" } = 0;
+            $info{ $symbol, "errmsg" } = "YahooWeb - History table not found.";
+            next;
+        }
         my $historytable = $te->first_table_found();
         ### 1st Row: $historytable->row(0)
         my ($month, $day, $year) = $historytable->cell(0,0)
