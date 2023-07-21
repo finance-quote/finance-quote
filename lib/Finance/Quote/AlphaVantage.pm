@@ -364,4 +364,22 @@ variable ALPHAVANTAGE_API_KEY.
 The following labels may be returned by Finance::Quote::AlphaVantage :
 symbol, open, close, high, low, last, volume, method, isodate, currency.
 
+=head1 CAVEATs
+
+Since the JSON returned by the GLOBAL_QUOTE API does not specify
+the currency of the price data, there is no way to determine the
+correct currency without an additional call to the SYMBOL_SEARCH
+API. To avoid even slower throttling, this module expects the
+user to know which securties from certain countries may be traded
+in the non-ISO4217 currency.
+
+An example are London Stock Exchange traded GBP.L (Global Petroleum Limited)
+and GBPG.L
+(Goldman Sachs Access UK Gilts 1-10 Years UCITS ETF CLASS GBP (Dist)).
+GBP.L is traded in GBX, which is also known as GBp (Great Britain Pence),
+and GBPG.L is traded in the iso-4217 currency GBP (Great Britain Pounds).
+The user will need to add ".X" to symbols to return GBX priced securities
+as GBP. For the example above the user would use the symbol GBP.L.X in
+the call to the alphavantage method for the prices to be output as GBP.
+
 =cut
