@@ -28,7 +28,6 @@ my @symbols = qw/
     TWTR
     AAPL
     ORCL
-    FB
     CMCSA
     INTC
     NFLX
