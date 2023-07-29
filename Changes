@@ -1,6 +1,8 @@
 {{$NEXT}}
 	* AlphaVantage.pm - Apply currency scaling (GBp -> GBP) when symbol
 	  had additional ".X" suffix - Issue #281
+	  Fixed check for "Information" JSON usually returned when daily API
+	  limit has been reached.
 	* YahooWeb.pm - Fixed incorrect pricing for single character symbols
 	  and changed URL to get trade date - Issues #314 #319
 	* Another fix to the URL in YahooJSON and CurrencyRates/YahooJSON - Issue #318

@@ -73,7 +73,7 @@
 - module: AlphaVantage.pm
   state: working
   added:
-  changed: 2023-07-21
+  changed: 2023-07-28
   removed:
   urls:
     - https://www.alphavantage.co/query?function=GLOBAL_QUOTE&apikey=$ALPHAVANTAGE_API_KEY&symbol=
