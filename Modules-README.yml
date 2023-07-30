@@ -73,7 +73,7 @@
 - module: AlphaVantage.pm
   state: working
   added:
-  changed: 2019-12-01
+  changed: 2023-07-28
   removed:
   urls:
     - https://www.alphavantage.co/query?function=GLOBAL_QUOTE&apikey=$ALPHAVANTAGE_API_KEY&symbol=
@@ -81,7 +81,8 @@
   notes: |
     Module to acquire data from https://www.alphavantage.co/.
     Users must first request an API key and set the environment
-    variable ALPHAVANTAGE_API_KEY.
+    variable ALPHAVANTAGE_API_KEY. The AlphaVantage API does not
+    return a currency.
   testfile: alphavantage.t
   testcases:
     - IBM
@@ -97,7 +98,6 @@
     - TWTR
     - AAPL
     - ORCL
-    - FB
     - CMCSA
     - INTC
     - NFLX

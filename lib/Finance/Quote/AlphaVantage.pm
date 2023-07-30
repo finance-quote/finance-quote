@@ -223,10 +223,17 @@ sub alphavantage {
             $try_cnt += 1;
         }
 
-        if ( !$json_data || $json_data->{'Error Message'} ) {
+        if ( !$json_data ) {
             $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } =
-                $json_data->{'Error Message'} || $json_data->{'Information'};
+            $info{ $stock, 'errormsg' } = 'Query returned no JSON';
+            next;
+        } elsif ( $json_data->{'Error Message'} ) {
+            $info{ $stock, 'success' } = 0;
+            $info{ $stock, 'errormsg' } = $json_data->{'Error Message'};
+            next;
+        } elsif ( $json_data->{'Information'} ) {
+            $info{ $stock, 'success' } = 0;
+            $info{ $stock, 'errormsg' } = $json_data->{'Information'};
             next;
         }
 
