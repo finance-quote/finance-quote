@@ -68,6 +68,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     CSE
     Cdnfundlibrary
     Comdirect
+    Consorsbank
     Currencies
     DWS
     Deka
@@ -1688,6 +1689,7 @@ http://www.gnucash.org/
   Finance::Quote::CSE,
   Finance::Quote::Cdnfundlibrary,
   Finance::Quote::Comdirect,
+  Finance::Quote::Consorsbank,
   Finance::Quote::Currencies,
   Finance::Quote::DWS,
   Finance::Quote::Deka,
