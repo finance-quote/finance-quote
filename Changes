@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Bloomberg.pm - Changed modules to utilize cookie jar - PR #331 - Issue #324
 	* Added Consorsbank module
 	* AlphaVantage.pm - Apply currency scaling (GBp -> GBP) when symbol
 	  had additional ".X" suffix - Issue #281
