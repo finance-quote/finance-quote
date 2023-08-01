@@ -546,6 +546,7 @@ http://www.gnucash.org/
     Finance::Quote::CSE,
     Finance::Quote::Cdnfundlibrary,
     Finance::Quote::Comdirect,
+    Finance::Quote::Consorsbank,
     Finance::Quote::Currencies,
     Finance::Quote::DWS,
     Finance::Quote::Deka,

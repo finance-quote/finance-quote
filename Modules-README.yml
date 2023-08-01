@@ -249,6 +249,32 @@
   testfile: TBD
   testcases:
 #
+- module: Consorsbank.pm
+  state: working
+  added: 2023-07-20
+  changed: ~
+  removed: ~
+  urls:
+    - https://www.consorsbank.de/web-financialinfo-service/api/marketdata/stocks?id=$symbol&field=QuotesV1&field=BasicV1
+  apikey: false
+  notes: |
+    Module to acquire data from https://www.consorsbank.de.
+  testfile: consorsbank.t
+  testcases:
+    - DE0007664005
+    - 766400
+    - DE0008469008
+    - FR0003500008
+    - _81341467
+    - DE000CX0QLH6
+    - DE0001102580
+    - FR0010411884
+    - LU1508476725
+    - EU0009652759
+    - FR0010037341
+    - DE000DB4CAT1
+    - BOGUS
+#
 - module: Currencies.pm
   state: working
   added: TBD

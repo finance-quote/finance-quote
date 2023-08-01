@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Added Consorsbank module
 	* AlphaVantage.pm - Apply currency scaling (GBp -> GBP) when symbol
 	  had additional ".X" suffix - Issue #281
 	  Fixed check for "Information" JSON usually returned when daily API
