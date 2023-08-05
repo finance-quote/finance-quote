@@ -162,15 +162,35 @@ sub alphavantage {
 
     my @stocks = @_;
     my $quantity = @stocks;
-    my ( %info, $reply, $url, $code, $desc, $body );
+    my ( %info, $reply, $url, $code, $desc, $body, $ticker, $adjust );
     my $ua = $quoter->user_agent();
     my $launch_time = time();
+
+#   Since the JSON returned by the GLOBAL_QUOTE API does not specify
+#   the currency of the price data, there is no way to determine the
+#   correct currency without an additional call to the SYMBOL_SEARCH
+#   API. To avoid even slower throttling, this module expects the
+#   user to know which securties from certain countries may be traded
+#   in the non-ISO4217 currency.
+#   Example is LSE traded GBP.L and GBPG.L. GBP.L is traded in GBX,
+#   which is also known as GBp, and GBPG.L is traded in the iso-4217
+#   currency GBP (Great Britain Pounds).
+#   The user will add ".X" to symbols to return GBX priced securities
+#   as GBP.
 
     my $token = exists $quoter->{module_specific_data}->{alphavantage}->{API_KEY} ? 
                 $quoter->{module_specific_data}->{alphavantage}->{API_KEY}        :
                 $ENV{"ALPHAVANTAGE_API_KEY"};
 
     foreach my $stock (@stocks) {
+
+        if ($stock =~ /\.X$/) {
+            $adjust = 1;
+            ($ticker = $stock) =~ s/\.X$//;
+        } else {
+            $adjust = 0;
+            $ticker = $stock
+        }
 
         if ( !defined $token ) {
             $info{ $stock, 'success' } = 0;
@@ -184,7 +204,7 @@ sub alphavantage {
             . '&apikey='
             . $token
             . '&symbol='
-            . $stock;
+            . $ticker;
 
         my $get_content = sub {
             sleep_before_query();
@@ -240,7 +260,7 @@ sub alphavantage {
         my $quote = $json_data->{'Global Quote'};
         if ( ! %{$quote} ) {
             $info{ $stock, 'success' } = 0;
-            $info{ $stock, 'errormsg' } = "json_data doesn't contain Global Quote";
+            $info{ $stock, 'errormsg' } = "json_data does not contain Global Quote";
             next;
         }
 
@@ -278,13 +298,13 @@ sub alphavantage {
         $quoter->store_date( \%info, $stock, { isodate => $quote->{'07. latest trading day'} } );
 
         # deduce currency
-        if ( $stock =~ /(\..*)/ ) {
+        if ( $ticker =~ /(\..*)/ ) {
             my $suffix = uc $1;
             if ( $currencies_by_suffix{$suffix} ) {
                 $info{ $stock, 'currency' } = $currencies_by_suffix{$suffix};
 
-                # divide GBP quotes by 100
-                if ( ($info{ $stock, 'currency' } eq 'GBP') || ($info{$stock,'currency'} eq 'GBX') ) {
+                # divide .X quotes by 100
+                if ( $adjust == 1 ) {
                     foreach my $field ( $quoter->default_currency_fields ) {
                         next unless ( $info{ $stock, $field } );
                         $info{ $stock, $field } =
@@ -350,5 +370,23 @@ variable ALPHAVANTAGE_API_KEY.
 
 The following labels may be returned by Finance::Quote::AlphaVantage :
 symbol, open, close, high, low, last, volume, method, isodate, currency.
+
+=head1 CAVEATs
+
+Since the JSON returned by the GLOBAL_QUOTE API does not specify
+the currency of the price data, there is no way to determine the
+correct currency without an additional call to the SYMBOL_SEARCH
+API. To avoid even slower throttling, this module expects the
+user to know which securties from certain countries may be traded
+in the non-ISO4217 currency.
+
+An example are London Stock Exchange traded GBP.L (Global Petroleum Limited)
+and GBPG.L
+(Goldman Sachs Access UK Gilts 1-10 Years UCITS ETF CLASS GBP (Dist)).
+GBP.L is traded in GBX, which is also known as GBp (Great Britain Pence),
+and GBPG.L is traded in the iso-4217 currency GBP (Great Britain Pounds).
+The user will need to add ".X" to symbols to return GBX priced securities
+as GBP. For the example above the user would use the symbol GBP.L.X in
+the call to the alphavantage method for the prices to be output as GBP.
 
 =cut
