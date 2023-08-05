@@ -1,4 +1,6 @@
 {{$NEXT}}
+	* Consorsbank.pm - New module - PR #329
+	* Stooq.pm - New module - Issue #203
 	* Bloomberg.pm - Changed modules to utilize cookie jar - PR #331 - Issue #324
 	* Added Consorsbank module
 	* AlphaVantage.pm - Apply currency scaling (GBp -> GBP) when symbol
