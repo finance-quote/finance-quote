@@ -789,6 +789,23 @@
   testfile: TBD
   testcases:
 #
+- module: Stooq.pm
+  state: working
+  added: 2023-08-04
+  changed: ~
+  removed: ~
+  urls:
+    - https://stooq.com/q/?s=
+  apikey: false
+  notes: ~
+  testfile: stooq.t
+  testcases:
+    - DNP
+    - ISLN.UK
+    - LRQ
+    - GBP.UK
+    - GBPG.UK
+#
 - module: TMX.pm
   state: working
   added: TBD

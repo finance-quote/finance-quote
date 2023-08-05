@@ -14,7 +14,7 @@ if (not $ENV{ONLINE_TEST}) {
 }
 
 my $q        = Finance::Quote->new('Stooq', timeout => 30);
-my @valid    = ('ISLN.UK', 'LRQ', 'GBP.UK', 'GBPG.UK');
+my @valid    = ('DNP', 'ISLN.UK', 'LRQ', 'GBP.UK', 'GBPG.UK');
 my @invalid  = qw/BOGUS/;
 my @symbols  = (@valid, @invalid);
 my $year     = (localtime())[5] + 1900;

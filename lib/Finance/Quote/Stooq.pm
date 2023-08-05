@@ -52,6 +52,14 @@ my %currencies_by_link = (
   '?i=89' => "ZAR",
 );
 
+my %currencies_by_symbol = (
+  'p.' => "GBX",
+  '&pound;' => "GBP",
+  'z\x{142}' => "PLN",
+  '\$' => "USD",
+  '?i=89' => "ZAR",
+);
+
 sub labels { 
   return (stooq  => \@labels,
           europe => \@labels, 
@@ -83,21 +91,38 @@ sub stooq {
     ### Body: $body
 
     my ($name, $bid, $ask, $last, $open, $high, $low, $date, $currency);
+    my ($te, $table);
 
     $info{ $stock, "symbol" } = $stock;
 
     if ( $code == 200 ) {
 
       # Use HTML::TableExtract to parse HTML in $body
+
+      # The table with the security name is the only table
+      # with bgcolor=e9e9e9 style=z-index:1
+      $te = HTML::TableExtract->new(
+        attribs => { bgcolor => 'e9e9e9', style => 'z-index:1' } );
+      if (($te->parse($body)) && ($table = $te->first_table_found)) {
+        ### NameTable Rows: $table->rows()
+        ($name) = $table->cell(0,1) =~ m|^.*?(\w.*)$|;
+        $te->eof;
+      }
+
       # The table with the price data is the only table with
       # attribute id='t1'
-      my $te = HTML::TableExtract->new( keep_html => 1,
+      $te = HTML::TableExtract->new( keep_html => 1,
                                         attribs => { id => 't1' } );
-      if (($te->parse($body)) && (my $table = $te->first_table_found)) {
+      if (($te->parse($body)) && ($table = $te->first_table_found)) {
         (my $last) = $table->cell(0,0) =~ m|^.+>([\d\.]+)<|;
         (my $currlink) = $table->cell(0,0) =~ m|<a href=t/(\?i=\d+)>|;
         if ( $currencies_by_link{$currlink} ) {
           $currency = $currencies_by_link{$currlink};
+        }
+        (my $currsymbol) = $table->cell(0,0)
+          =~ m|<a href=t/\?i=\d+>(\S+?)</a>|;
+        if ( $currencies_by_symbol{$currsymbol} ) {
+          $currency = $currencies_by_symbol{$currsymbol};
         }
         (my $date) = $table->cell(0,1) =~ m|Date.+>(\d{4}-\d{2}-\d{2})<|;
         (my $high, my $low) = $table->cell(1,1)
@@ -107,13 +132,14 @@ sub stooq {
         (my $ask) = $table->cell(4,1) =~ m|Ask.+>([\d\.]+)<|;
         # If last and date are defined, save values in hash
         if ( ($last) && ($date) ) {
-          $info{ $stock, 'success' } = 1;
-          $info{ $stock, 'method' } = 'stooq';
-          $info{ $stock, 'last' } = $last;
+          $info{ $stock, 'success' }  = 1;
+          $info{ $stock, 'method' }   = 'stooq';
+          $info{ $stock, 'name' }     = $name;
+          $info{ $stock, 'last' }     = $last;
           $info{ $stock, 'currency' } = $currency;
-          $info{ $stock, 'open' } = $open;
-          $info{ $stock, 'high' } = $high;
-          $info{ $stock, 'low' } = $low;
+          $info{ $stock, 'open' }     = $open;
+          $info{ $stock, 'high' }     = $high;
+          $info{ $stock, 'low' }      = $low;
           $quoter->store_date(\%info, $stock, { isodate => $date });
         }
       } else {
