@@ -63,6 +63,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     AlphaVantage
     BSEIndia
     Bloomberg
+    BorsaItaliana
     Bourso
     BVB
     CSE
