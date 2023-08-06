@@ -95,6 +95,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     SEB
     SIX
     Sinvestor
+    Stooq
     TesouroDireto
     Tiaacref
     TMX
