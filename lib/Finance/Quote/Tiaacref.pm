@@ -43,6 +43,10 @@ use Try::Tiny;
 my $TIAA_MAIN_URL = 'https://www.tiaa.org/public/investment-performance';
 my $TIAA_DATA_URL = 'https://www.tiaa.markitondemand.com/Research/Public/Export/Details';
 
+sub features() {
+    return {'description' => 'Fetch quotes from TIAA (formerly TIAA-CREF)'};
+}
+
 sub methods { return (tiaacref=>\&tiaacref); }
 
 sub labels { return (tiaacref => [qw/
@@ -325,4 +329,4 @@ symbol, exchange, name, date, nav, price.
 
 TIAA, L<http://www.tiaa.org>
 
-=cut
+TIAA (formerly TIAA-CREF)y=cut

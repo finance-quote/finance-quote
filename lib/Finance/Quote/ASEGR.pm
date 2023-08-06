@@ -38,6 +38,10 @@ our %labels = (symbol => ['symbol', 'trading symbol'],
                low    => ['min'],
                isin   => ['isin']);
 
+sub features() {
+    return {'description' => 'Fetch quotes from Athens Exchange Group'};
+}
+
 sub methods { 
   return ( greece => \&asegr,
 	   asegr  => \&asegr,

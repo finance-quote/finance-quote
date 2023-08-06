@@ -33,6 +33,10 @@ use JSON;
 
 # VERSION
 
+sub features() {
+    return {'description' => 'Fetch quotes for Brazilian government bounds'};
+}
+
 sub methods { return (tesouro_direto => \&tesouro); }
 sub labels { return (tesouro_direto => [qw/exchange date isodate symbol name price last method currency/]); }
 

@@ -49,6 +49,10 @@ use vars qw/$ASX_URL_PRIMARY $ASX_URL_ALTERNATE/;
 $ASX_URL_PRIMARY = 'https://www.asx.com.au/asx/1/share/';
 $ASX_URL_ALTERNATE = 'https://asx.api.markitdigital.com/asx-research/1.0/companies/';
 
+sub features() {
+    return {'description' => 'Fetch quotes from asx.com.au'};
+}
+
 sub methods {return (australia => \&asx,asx => \&asx)}
 
 {

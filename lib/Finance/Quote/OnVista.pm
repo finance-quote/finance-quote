@@ -46,6 +46,10 @@ use vars qw($OnVista_URL);
 
 my $OnVista_URL = 'https://www.onvista.de';
 
+sub features() {
+    return {'description' => 'Fetch quotes from OnVista'};
+}
+
 sub methods {return (onvista => \&onvista);}
 sub labels {return ( onvista => [qw/name last date isodate time currency method exchange/] );}
 

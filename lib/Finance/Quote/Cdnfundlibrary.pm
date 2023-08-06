@@ -25,7 +25,7 @@ use JSON;
 use warnings;
 use Time::Piece;
 
-#VERSION
+# VERSION
 
 # URLs of where to obtain information.
 

@@ -32,6 +32,10 @@ use String::Util qw(trim);
 
 # VERSION
 
+sub features() {
+    return {'description' => 'Fetch quotes from Amsterdam Euronext eXchange'};
+}
+
 sub methods { 
   return (dutch => \&aex,
           aex   => \&aex);

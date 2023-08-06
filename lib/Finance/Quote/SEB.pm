@@ -41,6 +41,10 @@ use utf8;
 # VERSION
 $SEB_FUNDS_URL = 'https://seb.se/pow/fmk/2100/Senaste_fondkurserna.TXT';
 
+sub features() {
+    return {'description' => 'Fetch quotes from seb.se'};
+}
+
 sub methods { return (seb_funds => \&seb_funds); }
 
 {

@@ -27,6 +27,10 @@ use XML::LibXML;
 
 # VERSION
 
+sub features() {
+    return {'description' => 'Fetch currency rates from ecb.europa.eu'};
+}
+
 sub new
 {
   my $self = shift;

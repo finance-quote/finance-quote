@@ -44,6 +44,10 @@ use Try::Tiny;
 
 $TROWEPRICE_URL = ("https://www3.troweprice.com/fb2/ppfweb/downloadPrices.do");
 
+sub features() {
+    return {'description' => 'Fetch quotes from T. Rowe Price'};
+}
+
 sub methods { return (troweprice        => \&troweprice,
                troweprice_direct => \&troweprice); }
 

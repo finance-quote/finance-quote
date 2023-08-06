@@ -32,6 +32,10 @@ use Scalar::Util qw(looks_like_number);
 
 our @labels = qw/last date isodate/;
 
+sub features() {
+    return {'description' => 'Fetch quotes from the Swiss Stock Exchange'};
+}
+
 sub labels {
   return ( six => \@labels );
 }

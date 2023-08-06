@@ -213,7 +213,7 @@ sub _goldmoney_time {
 
 =head1 NAME
 
-Finance::Quote::GoldMoney - obtain spot rates from GoldMoney.
+Finance::Quote::GoldMoney - Obtain spot rates from GoldMoney.
 
 =head1 SYNOPSIS
 

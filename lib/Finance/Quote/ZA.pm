@@ -31,6 +31,10 @@ use String::Util qw(trim);
 
 our @labels = qw/method source name symbol currency last date isodate high low p_change/;
 
+sub features() {
+    return {'description' => 'Fetch quotes from sharenet.co.za'};
+}
+
 sub labels {
   return ( sharenet => \@labels );
 }

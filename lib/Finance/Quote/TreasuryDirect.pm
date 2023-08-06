@@ -34,6 +34,10 @@ use HTTP::Request;
 
 my $TREASURY_DIRECT_URL = 'https://www.treasurydirect.gov/GA-FI/FedInvest/todaySecurityPriceDate.htm';
 
+sub features() {
+    return {'description' => 'Fetch quotes from Treasury Direct'};
+}
+
 sub methods {
   return treasurydirect => \&treasurydirect;
 }
