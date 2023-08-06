@@ -69,6 +69,10 @@ $FTFUNDS_LOOK_UD    =	"http://funds.ft.com/UnlistedTearsheet/Summary?s=";
 
 # FIXME -
 
+sub features() {
+    return {'description' => 'Fetch quotes from Financial Times Funds'};
+}
+
 sub methods { return (ftfunds => \&ftfunds_fund,
 		      ukfunds => \&ftfunds_fund); }
 

@@ -34,6 +34,10 @@ our @EXPORT_OK = qw(morningstarjp methods labels);
 $MORNINGSTAR_JP_URL =
   ('https://www.wealthadvisor.co.jp/FundData/DownloadStdYmd.do?fnc=');
 
+sub features() {
+    return {'description' => 'Fetch from Morningstar Japan'};
+}
+
 sub methods { return ( morningstarjp => \&morningstarjp ); }
 sub labels  { return ( morningstarjp => [qw/symbol date nav/] ); }
 

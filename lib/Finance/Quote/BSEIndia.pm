@@ -29,6 +29,14 @@ use if DEBUG, 'Smart::Comments', '###';
 use vars qw($BSE_URL);
 $BSE_URL = "https://www.bseindia.com";
 
+my $cachedir = $ENV{TMPDIR} // $ENV{TEMP} // '/tmp/';
+my $BSE_ZIP = $cachedir.'bseindia.zip';
+my $BSE_CSV = $cachedir.'bseindia.csv';
+
+sub features() {
+    return {'description' => 'Fetch quotes from BSE India'};
+}
+
 sub methods { return ( 'india' => \&bseindia,
                        'bseindia' => \&bseindia ); }
 

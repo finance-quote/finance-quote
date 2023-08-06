@@ -33,6 +33,10 @@ $FUNDLIB_URL =
 ("https://www.fundlibrary.com/MutualFunds/GetFundSearchResults?cifscCategoryId=0&fundCompanyId=0&fundTypeId=0&isGradeA=true&isGradeB=true&isGradeC=true&isGradeD=true&isGradeE=true&sortBy=Default&page=0&searchText=");
 $FUNDLIB_MAIN_URL=("http://www.fundlibrary.com");
 
+sub features() {
+    return {'description' => 'Fetch quotes from fundlibrary.com'};
+}
+
 sub methods { return (canadamutual => \&fundlibrary,
                        fundlibrary => \&fundlibrary); }
 

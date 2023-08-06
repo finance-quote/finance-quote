@@ -37,6 +37,10 @@ use if DEBUG, 'Smart::Comments', '###';
 
 my $STOOQ_URL = 'https://stooq.com/q/?s=';
 
+sub features() {
+    return {'description' => 'Fetch quotes from stooq.com'};
+}
+
 sub methods {
   return (stooq  => \&stooq,
           europe => \&stooq,

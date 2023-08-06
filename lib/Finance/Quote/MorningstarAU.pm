@@ -30,6 +30,10 @@ use Web::Scraper;
 
 # VERSION
 
+sub features() {
+    return {'description' => 'Fetch Australian managed fund quotes from MorningStarAU'};
+}
+
 sub methods {
   return (aufunds => \&morningstarau, morningstarau => \&morningstarau,);
 }

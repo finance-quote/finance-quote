@@ -31,6 +31,14 @@ use vars qw($NSE_MAIN_URL $NSE_URL);
 $NSE_MAIN_URL = "https://www.nseindia.com";
 $NSE_URL = "https://archives.nseindia.com";
 
+my $cachedir = $ENV{TMPDIR} // $ENV{TEMP} // '/tmp/';
+my $NSE_ZIP = $cachedir.'nseindia.zip';
+my $NSE_CSV = $cachedir.'nseindia.csv';
+
+sub features() {
+    return {'description' => 'Fetch quotes from NSE India'};
+}
+
 sub methods { return ( 'india' => \&nseindia,
                        'nseindia' => \&nseindia ); }
 

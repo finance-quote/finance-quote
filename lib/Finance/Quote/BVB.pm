@@ -37,6 +37,10 @@ use if DEBUG, 'Smart::Comments', '###';
 
 my $BVB_URL = 'https://bvb.ro/FinancialInstruments/Details/FinancialInstrumentsDetails.aspx?s=';
 
+sub features() {
+    return {'description' => 'Fetch from Bucharest Stock Exchange'};
+}
+
 sub methods {
   return (bvb        => \&bvb,
           romania    => \&bvb,

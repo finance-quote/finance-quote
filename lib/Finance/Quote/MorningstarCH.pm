@@ -52,6 +52,10 @@ $MSTARCH_NEXT_URL   =	"https://www.morningstar.ch/ch/funds/snapshot/snapshot.asp
 
 # VERSION
 
+sub features() {
+    return {'description' => 'Fetch CH Unit Trust quotes from morningstar.ch'};
+}
+
 sub methods { return (morningstarch => \&morningstarch_fund); }
 
 {

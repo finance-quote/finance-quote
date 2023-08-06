@@ -88,6 +88,10 @@ use utf8;
 
 my $Bourso_URL = 'https://www.boursorama.com/cours/';
 
+sub features() {
+    return {'description' => 'Fetch from Boursorama'};
+}
+
 sub methods {
     return (
              europe => \&bourso,

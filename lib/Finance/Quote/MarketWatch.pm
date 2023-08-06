@@ -35,6 +35,10 @@ use if DEBUG, 'Smart::Comments', '###';
 
 my $MW_URL = 'https://www.marketwatch.com/investing/stock/';
 
+sub features() {
+    return {'description' => 'Fetch quotes from MarketWatch'};
+}
+
 sub methods {
   return (marketwatch => \&marketwatch,
           nyse        => \&marketwatch,

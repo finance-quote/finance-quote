@@ -42,6 +42,10 @@ use if DEBUG, 'Smart::Comments';
 
 my $URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://caps.fool.com/Ticker/{$symbol}.aspx');
 
+sub features() {
+    return {'description' => 'Fetch quotes from Motley Fool'};
+}
+
 sub methods { 
   return ( fool   => \&fool,
            usa    => \&fool,

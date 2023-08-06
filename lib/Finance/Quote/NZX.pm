@@ -31,6 +31,10 @@ use String::Util qw(trim);
 
 our @labels = qw/last isin name currency date isodate/;
 
+sub features() {
+    return {'description' => 'Fetch quotes from New Zealand Exchange nzx.com'};
+}
+
 sub labels {
   return ( nzx => \@labels );
 }
@@ -88,8 +92,7 @@ sub nzx {
 
 =head1 NAME
 
-Finance::Quote::NZX - Obtain quotes from New Zealand's
-Exchange www.nzx.com
+Finance::Quote::NZX - Obtain quotes from New Zealand's Exchange www.nzx.com
 
 =head1 SYNOPSIS
 

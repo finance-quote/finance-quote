@@ -29,6 +29,10 @@ use Encode;
 
 my $FINANZPARTNER_URL = "https://www.finanzpartner.de/fi/";
 
+sub features() {
+    return {'description' => 'Fetch quotes from Finanzpartner.de'};
+}
+
 sub methods {return (finanzpartner        => \&finanzpartner);}
 sub labels { return (finanzpartner=>[qw/name date price last method/]); } # TODO
 

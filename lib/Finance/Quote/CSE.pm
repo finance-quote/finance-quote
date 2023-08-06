@@ -31,6 +31,10 @@ use String::Util qw(trim);
 
 our @labels = qw/last date isodate/;
 
+sub features() {
+    return {'description' => 'Fetch Colombo Stock Exchange in Sri Lanka'};
+}
+
 sub labels {
   return ( cse => \@labels );
 }

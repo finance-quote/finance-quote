@@ -31,6 +31,10 @@ my $BAMOSZ_URL = $BAMOSZ_MAINURL . "alapoldal?isin=";
 my $BSE_MAINURL = "http://www.bet.hu/";
 my $BSE_URL = $BSE_MAINURL . '/oldalak/ceg_adatlap/$security/';
 
+sub features() {
+    return {'description' => 'Fetch quotes from Hungarian Securities bet.hu and bamosz.hu'};
+}
+
 sub methods {
     return ( hufund  => \&bamosz,
              bamosz  => \&bamosz,
@@ -234,8 +238,8 @@ sub hu_decimal {
 
 =head1 NAME
 
-Finance::Quote::HU - Obtain Hungarian Securities from www.bet.hu
-and www.bamosz.hu
+Finance::Quote::HU - Obtain Hungarian Securities from www.bet.hu and
+www.bamosz.hu
 
 =head1 SYNOPSIS
 

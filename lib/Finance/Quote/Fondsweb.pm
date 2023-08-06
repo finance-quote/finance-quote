@@ -27,6 +27,10 @@ use HTML::TreeBuilder::XPath;
 
 our $FONDSWEB_URL = "https://www.fondsweb.com/de/";
 
+sub features() {
+    return {'description' => 'Fetch quotes from Fondsweb Germany'};
+}
+
 sub methods { return ( fondsweb => \&fondsweb ); }
 
 {

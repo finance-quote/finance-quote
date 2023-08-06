@@ -35,6 +35,10 @@ use if DEBUG, 'Data::Dumper';
 my $CONSORS_URL = 'https://www.consorsbank.de/web-financialinfo-service/api/marketdata/stocks?';
 my $CONSORS_SOURCE_BASE_URL = 'https://www.consorsbank.de/web/Wertpapier/';
 
+sub features() {
+    return {'description' => 'Fetch quotes from Deutsche Bank Gruppe'};
+}
+
 sub methods {
     return (
         consorsbank => \&consorsbank,

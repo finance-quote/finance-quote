@@ -39,6 +39,10 @@ use IO::String;
 $AMFI_MAIN_URL = ("http://www.amfiindia.com/");
 $AMFI_URL = ("https://www.amfiindia.com/spages/NAVAll.txt");
 
+sub features() {
+    return {'description' => 'Fetch quotes from Indian mutal fund prices from amfiindia.com'};
+}
+
 sub methods { return (indiamutual => \&amfiindia,
                       amfiindia => \&amfiindia); }
 

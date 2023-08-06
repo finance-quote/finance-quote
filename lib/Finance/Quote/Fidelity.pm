@@ -44,6 +44,10 @@ use if DEBUG, 'Smart::Comments';
 
 $FIDELITY_URL = ("https://fundresearch.fidelity.com/mutual-funds/fidelity-funds-daily-pricing-yields/download");
 
+sub features() {
+    return {'description' => 'Fetch quotes from Fidelity Investments'};
+}
+
 sub methods {return (fidelity        => \&fidelity,
                      fidelity_direct => \&fidelity);}
 

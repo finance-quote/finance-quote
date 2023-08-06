@@ -48,6 +48,10 @@ $MSTARUK_NEXT_URL	=	"http://www.morningstar.co.uk/uk/funds/snapshot/snapshot.asp
 
 # FIXME -
 
+sub features() {
+    return {'description' => 'Fetch UK Unit Trust quotes from morningstar.com'};
+}
+
 sub methods { return (morningstaruk => \&mstaruk_fund,
                       mstaruk => \&mstaruk_fund,
                       ukfunds => \&mstaruk_fund); }

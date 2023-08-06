@@ -14,6 +14,10 @@ use vars qw($BLOOMBERG_URL);
 
 $BLOOMBERG_URL = 'https://www.bloomberg.com/quote/';
 
+sub features() {
+    return {'description' => 'Fetch from Bloomberg.com'};
+}
+
 sub methods { return (bloomberg => \&bloomberg); }
 
 {

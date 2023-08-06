@@ -38,6 +38,9 @@ my $FUNDATA_URL = "http://idata.fundata.com/MutualFunds/FundSnapshot.aspx?IID=";
 our @totalqueries=();
 my $maxQueries = { quantity => 3, seconds => 10};   # allow 'quantity' calls in 'seconds', then sleep
 
+sub features() {
+    return {'description' => 'Fetch Canadian mutual fund quotes from Fundata'};
+}
 
 sub methods {
     return (canadamutual => \&fundata,

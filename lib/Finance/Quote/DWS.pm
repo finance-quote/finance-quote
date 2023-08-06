@@ -29,6 +29,10 @@ use if DEBUG, 'Smart::Comments';
 
 our @labels = qw/name date isodate last name currency/;
 
+sub features() {
+    return {'description' => 'Fetch quotes from Deutsche Bank Gruppe'};
+}
+
 sub labels {
   return(dwsfunds => \@labels);
 }
@@ -120,7 +124,7 @@ sub dwsfunds {
 
 =head1 NAME
 
-Finance::Quote::DWS - Obtain quotes from DWS (Deutsche Bank Gruppe)
+Finance::Quote::DWS - Obtain quotes from DWS (Fondsweb Germany)
 
 =head1 SYNOPSIS
 

@@ -37,6 +37,10 @@ use warnings;
 
 # VERSION
 
+sub features() {
+    return {'description' => 'Fetch quotes from GoldMoney'};
+}
+
 sub methods {
     return ( goldmoney => \&goldmoney );
 }

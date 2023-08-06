@@ -29,6 +29,10 @@ use String::Util qw(trim);
 
 our @labels = qw/last date isodate/;
 
+sub features() {
+    return {'description' => 'Fetch quotes from comdirect.de'};
+}
+
 sub labels {
   return ( comdirect => \@labels );
 }
