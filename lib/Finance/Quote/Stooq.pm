@@ -140,7 +140,17 @@ sub stooq {
           $info{ $stock, 'open' }     = $open;
           $info{ $stock, 'high' }     = $high;
           $info{ $stock, 'low' }      = $low;
+          $info{ $stock, 'bid' }      = $bid if ($bid);
+          $info{ $stock, 'ask' }      = $ask if ($ask);
           $quoter->store_date(\%info, $stock, { isodate => $date });
+          # Adjust/scale price data if currency is GBX
+          if ( $currency eq 'GBX' ) {
+            foreach my $field ( $quoter->default_currency_fields ) {
+              next unless ( $info{ $stock, $field } );
+              $info{ $stock, $field } =
+                $quoter->scale_field( $info{ $stock, $field }, 0.01 );
+            }
+          }
         }
       } else {
         $te->eof;
