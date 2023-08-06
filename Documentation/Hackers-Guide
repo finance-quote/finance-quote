@@ -12,7 +12,7 @@ $Version$
 		3.1. The package name
 		3.2. The methods() subroutine
 		3.3. The functions specified by methods()
-		3.4. The parameters() subroutine - Modules requiring API Keys
+        3.4  The features() subroutine - Module info and requirements (eg API keys) 
 		3.5. Currency
                 3.6. Development & Debugging Code
                 3.7. Dates
@@ -233,19 +233,27 @@ It is also very very strongly recommended that you place your module's
 name in the {$stock,"source"} field.  This allows others to check where
 information was obtained, and to use it appropriately.
 
-3.4 The parameters() subroutine - Modules requiring API Keys
-------------------------------------------------------------
-Some data sources require an API Key (sometimes called a token) in
-order to access the securities or exchange data. AlphaVantage.pm
-is one example.
+3.4 The features() subroutine - Module info and requirements (eg API keys) 
+----------------------------------------------------------------------------
 
-In order to assist programs using Finance::Quote to identify those
-modules that require an API Key please include this function if
-your module is using a data source that requires a key/token.
+The features() method returns information about the module, including a
+conscise description. The returned hash can also contain information about
+required items such as API Keys (sometimes called tokens) in order to access
+the securities or exchange data. AlphaVantage.pm is one example.
 
-	sub parameters {
-		return ('API_KEY');
-	}
+At a minimun, include the 'description' key.  For a module with an API key,
+features might look like:
+
+    sub features() {
+        return {'description' => 'Fetch quotes from xyz.com',
+                'features'    => {'API_KEY' => {'description' => 'registered user API key'}}};
+    }
+
+Defined keys & values for features() return hash:
+
+  - 'description' => string describing the module
+  - 'features'    => hash where the key names are required parameters
+                     and the values are hashes with a 'description' key
 
 3.5 Currency
 -------------

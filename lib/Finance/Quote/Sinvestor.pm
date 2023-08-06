@@ -35,8 +35,9 @@ sub methods {
           europe    => \&sinvestor);
 }
 
-sub parameters {
-  return ('INST_ID');
+sub features() {
+    return {'description' => 'Fetch quotes from s-investor.de',
+        'features' => {'INST_ID' => {'description' => 'institute id for fetch (default 0000057 for Krefeld'}}};
 }
 
 our @labels = qw/symbol last close exchange volume open price change p_change/;

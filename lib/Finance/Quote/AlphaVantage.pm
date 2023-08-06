@@ -127,8 +127,9 @@ sub methods {
     );
 }
 
-sub parameters {
-  return ('API_KEY');
+sub features() {
+    return {'description' => 'Fetch quotes from alphavantage.co',
+        'features' => {'API_KEY' => {'description' => 'registered user API key'}}};
 }
 
 {

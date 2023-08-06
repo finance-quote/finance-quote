@@ -36,8 +36,9 @@ sub methods {
   return ( twelvedata => \&twelvedata );
 }
 
-sub parameters {
-  return ('API_KEY');
+sub features() {
+    return {'description' => 'Fetch quotes from twelvedata.com',
+        'features' => {'API_KEY' => {'description' => 'registered user API key'}}};
 }
 
 {

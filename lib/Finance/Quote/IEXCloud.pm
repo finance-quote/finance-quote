@@ -37,8 +37,9 @@ sub methods {
            nyse     => \&iexcloud );
 }
 
-sub parameters {
-  return ('API_KEY');
+sub features() {
+    return {'description' => 'Fetch quotes from iexcloud.io',
+        'features' => {'API_KEY' => {'description' => 'registered user API key'}}};
 }
 
 {

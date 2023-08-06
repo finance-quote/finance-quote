@@ -34,9 +34,8 @@ ok( $t4->get_timeout() == 4, "check default timeout was used");
 
 my %features = Finance::Quote::get_features();
 ### [<now>] features: %features
-ok(exists $features{'quote_methods'}
+ok(exists $features{'version'}
+   and exists $features{'quote_methods'}
    and exists $features{'quote_modules'}
-   and exists $features{'currency_modules'}
-   and exists $features{'parameters'}, "features keys");
-
+   and exists $features{'currency_modules'});
 

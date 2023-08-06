@@ -323,20 +323,27 @@ sub get_methods {
   return(wantarray ? keys %METHODS : [keys %METHODS]);
 }
 
-# return hash:
+# get_features() returns a informational hash with the following keys and values
 #
-#  quote_methods => hash of
-#      method_name => array of module names
-#  quote_modules => hash of
-#      module_name => array of parameters
-#  currency_modules => hash of
-#      module_name =>  array of parameters
+# z = get_features();
 #
-# { 
-#    'quote_methods' => {'group' => ['module', 'module'], ...},
-#    'quote_modules' => {'abc' => ['API_KEY'], ...},
-#    'currency_modules' => {'xyz' => [], 'lmn' => ['USER_NAME', 'API_KEY']},
-# } 
+# z['version']                      = current version of Finance::Quote
+# z['quote_methods']['method']      = hash
+#              ['modules']          = Array of module names used for the method  
+# z['quote_modules']['module']      = hash 
+#              ['description']      = Concise description of module
+#              ['features']['name'] = hash
+#                   ['description'] = Concise description of the feature
+# z['currency_modules']['module']   = hash 
+#              ['description']      = Concise description of module
+#              ['features']['name'] = hash
+#                   ['description'] = Concise description of the feature
+# {
+#   'version'       => '1.57',
+#   'quote_methods' => {'nyse' => {'modules' => ['alphavantage', 'googleweb']},
+#   'quote_modules' => {'iexcloud' => {'description' => 'Quotes from iexcloud.io',
+#                                      'features' => {'API_KEY' => {'description' => 'registered user API key'}}}}   
+#   'curreny_modules' => {...}
 
 sub get_features {
   # Create a dummy object to ensure METHODS is populated
@@ -344,9 +351,10 @@ sub get_features {
   my $baseclass = ref $t;
 
   my %feature = (
+    'version' => $VERSION,
     'quote_methods' => {map {$_, [map {$_->{name}} @{$METHODS{$_}}]} keys %METHODS},
-    'quote_modules' => {map {$_, []} @MODULES},
-    'currency_modules' => {map {$_, []} @CURRENCY_RATES_MODULES},
+    'quote_modules' => {map {$_, {}} @MODULES},
+    'currency_modules' => {map {$_, {}} @CURRENCY_RATES_MODULES},
   );
 
   my %mods = ('quote_modules' => $baseclass,
@@ -356,8 +364,8 @@ sub get_features {
     foreach my $name (keys %{$feature{$field}}) {
       my $modpath = "${base}::${name}";
 
-      if ($modpath->can("parameters")) {
-        push (@{$feature{$field}->{$name}}, $modpath->parameters());
+      if ($modpath->can("features")) {
+          $feature{$field}->{$name} = $modpath->features();
       }
     }
   }
