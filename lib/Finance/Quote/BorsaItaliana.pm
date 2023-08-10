@@ -87,6 +87,13 @@ sub borsa_italiana {
             };
 
             my $result = $widget->scrape($reply);
+            # check if found
+            unless (exists $result->{val}) {
+                $info{$stocks, 'success'} = 0;
+                $info{$stocks, 'errormsg'} = 'Failed to find ISIN';
+                next;
+            }
+
             my $value = $result->{val};
             $value =~ s/[^0123456789,]//g;
             $value =~ s/,/./g;
@@ -96,6 +103,13 @@ sub borsa_italiana {
             };
 
             $result = $widget->scrape($reply);
+            # check if found
+            unless (exists $result->{dt}) {
+                $info{$stocks, 'success'} = 0;
+                $info{$stocks, 'errormsg'} = 'Failed to find ISIN';
+                next;
+            }
+
             my $date = $result->{dt}[1];
             $date =~ s/.*Contratto:\ //g;
             $date =~ s/[^0123456789]//g;
