@@ -7,14 +7,15 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 22;
-
 # Test BSEIndia functions.
 
 my $q = Finance::Quote->new();
-my @stocks = ("500010", "532540", "INE009A01021", "INE062A01020");
+my @stocks = ("532540", "INE009A01021", "INE062A01020");
 my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
+
+# Tests: fetch, fetch BOGUS, and 5 per stock
+plan tests => 2 + 5*@stocks;
 
 my %quotes = $q->fetch("bseindia", @stocks);
 ok(%quotes);

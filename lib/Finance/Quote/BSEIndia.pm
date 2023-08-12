@@ -5,11 +5,13 @@
 #
 
 package Finance::Quote::BSEIndia;
-require 5.010;
 
 use strict;
 use POSIX qw(strftime);
 use IO::Uncompress::Unzip qw(unzip $UnzipError);
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments', '###';
 
 # VERSION
 
@@ -125,7 +127,7 @@ sub bseindia {
 
     foreach my $symbol (@symbols) {
         unless (exists $info{$symbol, 'success'}) {
-        print "$symbol not found\n";
+        ### Not Found: $symbol
         $info{$symbol, 'success'} = 0;
         $info{$symbol, 'errormsg'} = 'Stock not found on BSE.';
     }
