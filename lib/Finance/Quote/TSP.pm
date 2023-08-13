@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=2 sw=2 noai ic showmode showmatch:  
 #
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
@@ -26,8 +27,6 @@
 #
 #
 # This code is derived from version 0.9 of the AEX.pm module.
-
-require 5.005;
 
 use strict;
 
@@ -73,6 +72,7 @@ sub tsp {
   return unless @symbols;
 
   my %info;
+  my @line;
 
   # Ask for the last 7 days
   my $startdate = strftime("%Y-%m-%d", localtime (time - 7*24*3600));
@@ -84,11 +84,14 @@ sub tsp {
   ### [<now>] url  : $url
   ### [<now>] reply: $reply
   
-  return unless ($reply->is_success);
-
-  my @line = split(/\n/, $reply->content);
-
-  return unless (@line > 1);
+  unless (($reply->is_success) && (@line = split(/\n/, $reply->content)) && (@line > 1)) {
+    foreach my $symbol (@symbols) {
+      $info{$symbol, "success"}  = 0;
+      $info{$symbol, "errormsg"} = "TSP fetch failed. No data for $symbol.";
+    }
+    ### Failure: %info
+    return wantarray ? %info : \%info;
+  }
 
   my @header = split(/,/, $line[0]);
   my %column = map { format_name($header[$_]) => $_ } 0 .. $#header;
