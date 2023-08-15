@@ -46,25 +46,25 @@ sub methods {
 our @labels = qw/symbol name open high low last bid ask date currency method/;
 
 my %currencies_by_link = (
-  '?i=21' => "EUR",
-  '?i=23' => "GBP",
-  '?i=25' => "HKD",
-  '?i=30' => "HUF",
-  '?i=39' => "JPY",
-  '?i=60' => "PLN",
-  '?i=77' => "USD",
+  '?i=21' => "EUR", # Europe (€)
+  '?i=23' => "GBP", # United Kingdom (£)
+  '?i=25' => "HKD", # Hong Kong (HK$)
+  '?i=30' => "HUF", # Hungary (Ft)
+  '?i=39' => "JPY", # Japan (¥)
+  '?i=60' => "PLN", # Poland (zł)
+  '?i=77' => "USD", # United States ($)
 );
 
 my %currencies_by_symbol = (
-  'p.'       => "GBX",
-  '&pound;'  => "GBP",
-  '&euro;'   => "EUR",
-  'z\x{142}' => "PLN",
-  '\$'       => "USD",
-  '&cent;'   => "USX",
-  'HK\$'     => "HKD",
-  '&yen;'    => "JPY",
-  'Ft'       => "HUF",
+  '&pound;'  => "GBP", # United Kingdom (£)
+  'p.'       => "GBX", # United Kingdom (penny)
+  '&euro;'   => "EUR", # Europe (€)
+  'z\x{142}' => "PLN", # Poland (zł)
+  '\$'       => "USD", # United States ($)
+  '&cent;'   => "USX", # United States (¢)
+  'HK\$'     => "HKD", # Hong Kong (HK$)
+  '&yen;'    => "JPY", # Japan (¥)
+  'Ft'       => "HUF", # Hungary (Ft)
 );
 
 sub labels { 
@@ -125,9 +125,9 @@ sub stooq {
 
         # usually currency is embedded in an A tag
         #   curency default: td > b[> span_with_price] + "&nbsp;" + _a_linking_to_currency
-		    #   curency USD/HUF: td > b > _a_linking_to_currency + "&nbsp;" + span_with_price
-        # except for commodities:
-		    #   commodities:     td > b[> span_with_price] + "&nbsp;_currency_without_link_"
+	#   curency USD/HUF: td > b > _a_linking_to_currency + "&nbsp;" + span_with_price
+        # except for commodities there's no A tag:
+	#   commodities:     td > b[> span_with_price] + "&nbsp;_currency_without_link_"
         (my $currlink) = $table->cell(0,0) =~ m|<a href=t/(\?i=\d+)>|;
         if ( $currencies_by_link{$currlink} ) {
           $currency = $currencies_by_link{$currlink};
