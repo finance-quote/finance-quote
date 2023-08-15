@@ -73,7 +73,7 @@
 - module: AlphaVantage.pm
   state: working
   added:
-  changed: 2019-12-01
+  changed: 2023-07-28
   removed:
   urls:
     - https://www.alphavantage.co/query?function=GLOBAL_QUOTE&apikey=$ALPHAVANTAGE_API_KEY&symbol=
@@ -81,7 +81,8 @@
   notes: |
     Module to acquire data from https://www.alphavantage.co/.
     Users must first request an API key and set the environment
-    variable ALPHAVANTAGE_API_KEY.
+    variable ALPHAVANTAGE_API_KEY. The AlphaVantage API does not
+    return a currency.
   testfile: alphavantage.t
   testcases:
     - IBM
@@ -97,7 +98,6 @@
     - TWTR
     - AAPL
     - ORCL
-    - FB
     - CMCSA
     - INTC
     - NFLX
@@ -154,7 +154,7 @@
 - module: Bloomberg.pm
   state: working
   added: 
-  changed: 2022-04-17
+  changed: 2023-08-01
   removed: 
   urls: https://www.bloomberg.com/quote/
   apikey: false
@@ -165,7 +165,8 @@
     - AMZN:US
     - AAPL:US
     - GOOGL:US
-    - FB:US
+    - META:US
+    - FOLSHM1:LN
 #
 - module: Bourso.pm
   state: working
@@ -249,6 +250,32 @@
   testfile: TBD
   testcases:
 #
+- module: Consorsbank.pm
+  state: working
+  added: 2023-07-20
+  changed: ~
+  removed: ~
+  urls:
+    - https://www.consorsbank.de/web-financialinfo-service/api/marketdata/stocks?id=$symbol&field=QuotesV1&field=BasicV1
+  apikey: false
+  notes: |
+    Module to acquire data from https://www.consorsbank.de.
+  testfile: consorsbank.t
+  testcases:
+    - DE0007664005
+    - 766400
+    - DE0008469008
+    - FR0003500008
+    - _81341467
+    - DE000CX0QLH6
+    - DE0001102580
+    - FR0010411884
+    - LU1508476725
+    - EU0009652759
+    - FR0010037341
+    - DE000DB4CAT1
+    - BOGUS
+#
 - module: Currencies.pm
   state: working
   added: TBD
@@ -279,9 +306,9 @@
 - module: CurrencyRates/YahooJSON.pm
   state: working
   Added: 2023-04-09
-  changed: 2023-05-26
+  changed: 2023-07-14
   removed: ~
-  urls: https://query2.finance.yahoo.com/v11/finance/quoteSummary/...?modules=price
+  urls: https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price
   apikey: false
   notes: |
     URL is constructed by adding "$from$to%3DX" to Yahoo URL.
@@ -762,6 +789,23 @@
   testfile: TBD
   testcases:
 #
+- module: Stooq.pm
+  state: working
+  added: 2023-08-04
+  changed: ~
+  removed: ~
+  urls:
+    - https://stooq.com/q/?s=
+  apikey: false
+  notes: ~
+  testfile: stooq.t
+  testcases:
+    - DNP
+    - ISLN.UK
+    - LRQ
+    - GBP.UK
+    - GBPG.UK
+#
 - module: TMX.pm
   state: working
   added: TBD
@@ -1040,10 +1084,10 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2023-06-24
+  changed: 2023-07-14
   removed:
   urls:
-    - https://query2.finance.yahoo.com/v11/finance/quoteSummary/...?modules=price,summaryDetail,defaultKeyStatistics
+    - https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price,summaryDetail,defaultKeyStatistics
   apikey: false
   notes: |
     Module to get data from Yahoo's API
@@ -1066,7 +1110,7 @@
 - module: YahooWeb.pm
   state: working
   added: 2023-05-31
-  changed:
+  changed: 2023-07-16
   removed:
   urls:
     - https://finance.yahoo.com/quote/{$symbol}?p={$symbol}
@@ -1089,6 +1133,7 @@
     - NVR
     - BKNG
     - IBKR
+    - T
 #
 - module: YahooYQL.pm
   state: TBD

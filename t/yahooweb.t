@@ -17,7 +17,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-my @valid    = qw/MSFT AMZN AAPL GOOGL GOOG META CSCO INTC CMCSA PEP BRK-A SEB NVR BKNG IBKR/;
+my @valid    = qw/MSFT AMZN AAPL GOOGL GOOG META CSCO INTC CMCSA PEP BRK-A SEB NVR BKNG IBKR T/;
 my @invalid  = ('BOGUS');
 my @symbols  = (@valid, @invalid);
 

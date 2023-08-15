@@ -1,5 +1,17 @@
 {{$NEXT}}
 
+1.58      2023-08-12 10:59:05-07:00 America/Los_Angeles
+	* Consorsbank.pm - New module - PR #329
+	* Stooq.pm - New module - Issue #203
+	* Bloomberg.pm - Changed modules to utilize cookie jar - PR #331 - Issue #324
+	* AlphaVantage.pm - Apply currency scaling (GBp -> GBP) when symbol
+	  had additional ".X" suffix - Issue #281
+	  Fixed check for "Information" JSON usually returned when daily API
+	  limit has been reached.
+	* YahooWeb.pm - Fixed incorrect pricing for single character symbols
+	  and changed URL to get trade date - Issues #314 #319
+	* Another fix to the URL in YahooJSON and CurrencyRates/YahooJSON - Issue #318
+
 1.57      2023-07-01 12:37:07-07:00 America/Los_Angeles
 	* Correct set exchange in YahooJSON.pm - Issue #306
 	* Added close, change and p_change to Tradegate, XETRA and Sinvestor

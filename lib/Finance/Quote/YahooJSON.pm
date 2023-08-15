@@ -35,8 +35,8 @@ use Time::Piece;
 
 # VERSION
 
-my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/';
-my $YIND_URL_TAIL = '?modules=price,summaryDetail,defaultKeyStatistics';
+my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=';
+my $YIND_URL_TAIL = '&modules=price,summaryDetail,defaultKeyStatistics';
 
 sub methods {
     return ( yahoo_json => \&yahoo_json,
@@ -148,6 +148,16 @@ sub yahoo_json {
                 if ($info{$stocks,"currency"} eq "ZAc") {
                     $info{$stocks,"last"}=$info{$stocks,"last"}/100;
                     $info{ $stocks, "currency"} = "ZAR";
+                }
+
+                # Apply the same hack for Tel Aviv Stock Exchange
+                # (TASE) prices as they are returned in ILA (Agorot)
+                # instead of ILS (Shekels). TASE symbols are suffixed
+                # with ".TA" when querying Yahoo e.g. POLI.TA
+
+                if ($info{$stocks,"currency"} eq "ILA") {
+                    $info{$stocks,"last"}=$info{$stocks,"last"}/100;
+                    $info{ $stocks, "currency"} = "ILS";
                 }
 
             # Add extra fields using names as per yahoo to make it easier
