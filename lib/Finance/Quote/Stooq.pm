@@ -138,6 +138,7 @@ sub stooq {
             $currency = $currencies_by_symbol{$currsymbol};
           }
         }
+	
         (my $date) = $table->cell(0,1) =~ m|Date.+>(\d{4}-\d{2}-\d{2})<|;
         (my $high, my $low) = $table->cell(1,1)
           =~ m|.+>([\d\.]+)<.+>([\d\.]+)<|;
