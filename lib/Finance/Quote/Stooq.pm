@@ -46,18 +46,25 @@ sub methods {
 our @labels = qw/symbol name open high low last bid ask date currency method/;
 
 my %currencies_by_link = (
+  '?i=21' => "EUR",
   '?i=23' => "GBP",
+  '?i=25' => "HKD",
+  '?i=30' => "HUF",
+  '?i=39' => "JPY",
   '?i=60' => "PLN",
   '?i=77' => "USD",
-  '?i=89' => "ZAR",
 );
 
 my %currencies_by_symbol = (
-  'p.' => "GBX",
-  '&pound;' => "GBP",
+  'p.'       => "GBX",
+  '&pound;'  => "GBP",
+  '&euro;'   => "EUR",
   'z\x{142}' => "PLN",
-  '\$' => "USD",
-  '?i=89' => "ZAR",
+  '\$'       => "USD",
+  '&cent;'   => "USX",
+  'HK\$'     => "HKD",
+  '&yen;'    => "JPY",
+  'Ft'       => "HUF",
 );
 
 sub labels { 
@@ -115,14 +122,21 @@ sub stooq {
                                         attribs => { id => 't1' } );
       if (($te->parse($body)) && ($table = $te->first_table_found)) {
         (my $last) = $table->cell(0,0) =~ m|^.+>([\d\.]+)<|;
+
+        # usually currency is embedded in an A tag
+        #   curency default: td > b[> span_with_price] + "&nbsp;" + _a_linking_to_currency
+		    #   curency USD/HUF: td > b > _a_linking_to_currency + "&nbsp;" + span_with_price
+        # except for commodities:
+		    #   commodities:     td > b[> span_with_price] + "&nbsp;_currency_without_link_"
         (my $currlink) = $table->cell(0,0) =~ m|<a href=t/(\?i=\d+)>|;
         if ( $currencies_by_link{$currlink} ) {
           $currency = $currencies_by_link{$currlink};
-        }
-        (my $currsymbol) = $table->cell(0,0)
-          =~ m|<a href=t/\?i=\d+>(\S+?)</a>|;
-        if ( $currencies_by_symbol{$currsymbol} ) {
-          $currency = $currencies_by_symbol{$currsymbol};
+        } else {
+          (my $currsymbol) = $table->cell(0,0)
+            =~ m|[\d\.]+\s([^/]*)/(ozt\|lb\|t\|gal\|bbl\|bu\|mmBtu)|;
+          if ( $currencies_by_symbol{$currsymbol} ) {
+            $currency = $currencies_by_symbol{$currsymbol};
+          }
         }
         (my $date) = $table->cell(0,1) =~ m|Date.+>(\d{4}-\d{2}-\d{2})<|;
         (my $high, my $low) = $table->cell(1,1)
@@ -143,8 +157,8 @@ sub stooq {
           $info{ $stock, 'bid' }      = $bid if ($bid);
           $info{ $stock, 'ask' }      = $ask if ($ask);
           $quoter->store_date(\%info, $stock, { isodate => $date });
-          # Adjust/scale price data if currency is GBX
-          if ( $currency eq 'GBX' ) {
+          # Adjust/scale price data if currency is GBX (GBp) or USX (USc)
+          if ( ( $currency eq 'GBX' ) || ( $currency eq 'USX' ) ) {
             foreach my $field ( $quoter->default_currency_fields ) {
               next unless ( $info{ $stock, $field } );
               $info{ $stock, $field } =
