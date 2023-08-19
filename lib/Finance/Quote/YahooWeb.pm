@@ -96,38 +96,55 @@ sub yahooweb {
             next;
         }
         my $historytable = $te->first_table_found();
-        ### 1st Row: $historytable->row(0)
-        my ($month, $day, $year) = $historytable->cell(0,0)
+        # Find a row with a price
+        my $row = 0;
+        foreach my $r ($historytable->rows) {
+            if (defined $historytable->cell($row, 4) &&
+                $historytable->cell($row, 4) ne "-") {
+                last;
+            }
+            $row += 1;
+        } 
+        my $rows = $historytable->rows(); 
+        ### Row count: scalar @$rows
+        ### Index: $row
+        if ($row ge @$rows) {
+            $info{ $symbol, "success" } = 0;
+            $info{ $symbol, "errmsg" } = "YahooWeb - no row with a price.";
+            next;
+        }
+        ### Row: $historytable->row($row)
+        my ($month, $day, $year) = $historytable->cell($row,0)
             =~ m|(\w+) (\d+), (\d{4})|;
         ### Month: $month
         ### Day: $day
         ### Year: $year
 
-        my $last = $historytable->cell(0,4);
+        my $last = $historytable->cell($row,4);
         $last =~ s/,//g;
         if ($currency =~ /^GBp/) {
             $last = $last / 100;
         }
 
-        my $open = $historytable->cell(0,1);
+        my $open = $historytable->cell($row,1);
         $open =~ s/,//g;
         if ($currency =~ /^GBp/) {
             $open = $open / 100;
         }
 
-        my $high = $historytable->cell(0,2);
+        my $high = $historytable->cell($row,2);
         $high =~ s/,//g;
         if ($currency =~ /^GBp/) {
             $high = $high / 100;
         }
 
-        my $low = $historytable->cell(0,3);
+        my $low = $historytable->cell($row,3);
         $low =~ s/,//g;
         if ($currency =~ /^GBp/) {
             $low = $low / 100;
         }
 
-        my $volume = $historytable->cell(0,6);
+        my $volume = $historytable->cell($row,6);
         $volume =~ s/,//g;
 
         ### YahooWeb Result: $last
