@@ -65,7 +65,7 @@ sub methods {
 }
 {
     my @labels = qw/date isodate volume currency method exchangeName instrumentType
-        open high low close last nav adjclose/;
+        open high low close nav adjclose/;
 
     sub labels {
         return ( yahoo_chart => \@labels,
@@ -309,7 +309,7 @@ This module provides the "yahoo_chart" fetch method.
 
 The following labels may be returned by Finance::Quote::YahooChart :
 success date isodate volume currency method exchange type symbol
-open high low close last nav adjclose 
+open high low close nav adjclose 
 
 =head1 SEE ALSO
 
