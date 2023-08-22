@@ -579,6 +579,7 @@ http://www.gnucash.org/
     Finance::Quote::Troweprice,
     Finance::Quote::TwelveData,
     Finance::Quote::Union,
+    Finance::Quote::YahooChart,
     Finance::Quote::YahooJSON,
     Finance::Quote::YahooWeb,
     Finance::Quote::ZA
