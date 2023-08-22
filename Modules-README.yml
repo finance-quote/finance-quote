@@ -1080,6 +1080,32 @@
     - XS0937858271
     - NL0000009165
 #
+- module: YahooChart.pm
+  state: working
+  added:
+  changed: 2023-08-22
+  removed:
+  urls:
+    - https://query1.finance.yahoo.com/v8/finance/chart/...?interval=1d&period1=...&period2=...
+  apikey: false
+  notes: |
+    Module to get data from Yahoo's Chart API
+  testfile: yahoochart.t
+  testcases:
+    - SUZLON.BO
+    - RECLTD.NS
+    - AMZN
+    - SOLB.BR
+    - ^DJI
+    - AENA.MC
+    - CFR.JO
+    - BK
+    - BOGUS
+    - 12345
+    - ITG
+    - BEL20.BR
+    - INGDIRECTFNE.BC
+#
 - module: YahooJSON.pm
   state: working
   added:
