@@ -65,7 +65,7 @@ sub methods {
 }
 {
     my @labels = qw/date isodate volume currency method exchangeName instrumentType
-        open high low close nav adjclose/;
+        open high low close nav price adjclose/;
 
     sub labels {
         return ( yahoo_chart => \@labels,
@@ -207,6 +207,7 @@ sub yahoo_chart {
                     $info{ $stocks, 'close' } = $info{ $stocks, 'adjclose' };
                 }
 
+                $info{ $stocks, 'last' } = $info{ $stocks, 'adjclose' };
 
                 # The Yahoo JSON interface returns London prices in GBp (pence) instead of GBP (pounds)
                 # and the Yahoo Base had a hack to convert them to GBP.  In theory all the callers
@@ -217,7 +218,7 @@ sub yahoo_chart {
 
                 if ( ($info{$stocks,"currency"} eq "GBp") ||
                      ($info{$stocks,"currency"} eq "GBX")) {
-                    for my $price (qw/open high low close last nav adjclose regularMarketPrice chartPreviousClose/) {
+                    for my $price (qw/open high low close last nav price adjclose regularMarketPrice chartPreviousClose/) {
                         if (defined ($info{$stocks, $price})) {
                             $info{$stocks,$price}=$info{$stocks,$price}/100;
                         }
@@ -231,7 +232,7 @@ sub yahoo_chart {
                 # with ".JO" when querying Yahoo e.g. ANG.JO
 
                 if ($info{$stocks,"currency"} eq "ZAc") {
-                    for my $price (qw/open high low close last nav adjclose regularMarketPrice chartPreviousClose/) {
+                    for my $price (qw/open high low close last nav price adjclose regularMarketPrice chartPreviousClose/) {
                         if (defined ($info{$stocks, $price})) {
                             $info{$stocks,$price}=$info{$stocks,$price}/100;
                         }
@@ -245,7 +246,7 @@ sub yahoo_chart {
                 # with ".TA" when querying Yahoo e.g. POLI.TA
 
                 if ($info{$stocks,"currency"} eq "ILA") {
-                    for my $price (qw/open high low close last nav adjclose regularMarketPrice chartPreviousClose/) {
+                    for my $price (qw/open high low close last nav price adjclose regularMarketPrice chartPreviousClose/) {
                         if (defined ($info{$stocks, $price})) {
                             $info{$stocks,$price}=$info{$stocks,$price}/100;
                         }
@@ -309,7 +310,7 @@ This module provides the "yahoo_chart" fetch method.
 
 The following labels may be returned by Finance::Quote::YahooChart :
 success date isodate volume currency method exchange type symbol
-open high low close nav adjclose 
+open high low close nav price adjclose 
 
 =head1 SEE ALSO
 
