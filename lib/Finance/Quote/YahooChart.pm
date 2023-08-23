@@ -38,7 +38,6 @@ use strict;
 
 use constant DEBUG => $ENV{DEBUG}; 
 use if DEBUG, 'Smart::Comments', '###'; 
-use Data::Dumper; 
 
 package Finance::Quote::YahooChart;
 
