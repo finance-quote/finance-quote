@@ -152,7 +152,7 @@ sub yahooweb {
         $info{ $symbol, 'open'} = $open;
         $info{ $symbol, 'high'} = $high;
         $info{ $symbol, 'low'} = $low;
-        $info{ $symbol, 'volume'} = $volume;
+        $info{ $symbol, 'volume'} = $volume unless $volume eq "-";
 
         $quoter->store_date(\%info, $symbol, {month => $month, day => $day, year => $year});   
         $info{ $symbol, 'symbol' } = $symbol;
