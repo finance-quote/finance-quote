@@ -108,7 +108,7 @@ sub yahooweb {
         my $rows = $historytable->rows(); 
         ### Row count: scalar @$rows
         ### Index: $row
-        if ($row ge @$rows) {
+        if ($row >= @$rows) {
             $info{ $symbol, "success" } = 0;
             $info{ $symbol, "errormsg" } = "YahooWeb - no row with a price.";
             next;
