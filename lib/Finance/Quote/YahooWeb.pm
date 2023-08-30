@@ -60,7 +60,7 @@ sub yahooweb {
         ### YahooWeb: $url
         unless ($reply->is_success) {
             $info{ $symbol, "success" } = 0;
-            $info{ $symbol, "errmsg" } = join ' ', $reply->code, $reply->message;
+            $info{ $symbol, "errormsg" } = join ' ', $reply->code, $reply->message;
             next; 
         }
        
@@ -73,7 +73,7 @@ sub yahooweb {
         if (uc($symbol) ne uc($yahoo_symbol)) {
             ### Error: $symbol, $yahoo_symbol
             $info{ $symbol, "success" } = 0;
-            $info{ $symbol, "errmsg" } = 'Unexpected response from Yahoo site';
+            $info{ $symbol, "errormsg" } = 'Unexpected response from Yahoo site';
             next; 
         }
 
@@ -92,7 +92,7 @@ sub yahooweb {
             attribs => { 'data-test' => "historical-prices" } );
         unless ($te->parse($reply->decoded_content)) {
             $info{ $symbol, "success" } = 0;
-            $info{ $symbol, "errmsg" } = "YahooWeb - History table not found.";
+            $info{ $symbol, "errormsg" } = "YahooWeb - History table not found.";
             next;
         }
         my $historytable = $te->first_table_found();
@@ -110,7 +110,7 @@ sub yahooweb {
         ### Index: $row
         if ($row ge @$rows) {
             $info{ $symbol, "success" } = 0;
-            $info{ $symbol, "errmsg" } = "YahooWeb - no row with a price.";
+            $info{ $symbol, "errormsg" } = "YahooWeb - no row with a price.";
             next;
         }
         ### Row: $historytable->row($row)
