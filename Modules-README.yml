@@ -1109,7 +1109,7 @@
 - module: YahooWeb.pm
   state: working
   added: 2023-05-31
-  changed: 2023-07-16
+  changed: 2023-07-18
   removed:
   urls:
     - https://finance.yahoo.com/quote/{$symbol}?p={$symbol}
