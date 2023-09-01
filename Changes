@@ -1,6 +1,6 @@
 {{$NEXT}}
 	* Stooq.pm - Added new currencies and a fix for commodities' prices
-    * YahooWeb.pm - Skip rows in the price table where the prices ar "-".
+	* YahooWeb.pm - Skip rows in the price table where the prices ar "-".
       This seems to happen sometimes with TIAA (and perhaps other) secyrutues
       including TILIX and QCILIX
 	* TSP.pm - Was not returning hash when the HTTP GET failed completely
