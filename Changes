@@ -1,8 +1,8 @@
 {{$NEXT}}
 	* Stooq.pm - Added new currencies and a fix for commodities' prices
 	* YahooWeb.pm - Skip rows in the price table where the prices ar "-".
-      This seems to happen sometimes with TIAA (and perhaps other) secyrutues
-      including TILIX and QCILIX
+	  This seems to happen sometimes with TIAA (and perhaps other) secyrutues
+	  including TILIX and QCILIX
 	* TSP.pm - Was not returning hash when the HTTP GET failed completely
 	  or the content did not contain the expected CSV file. - Issue #338
 	* BSEIndia.pm - Removed print when symbol not found - Issue #335
