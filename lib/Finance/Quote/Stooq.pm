@@ -60,9 +60,9 @@ my %currencies_by_symbol = (
   'p.'       => "GBX", # United Kingdom (penny)
   '&euro;'   => "EUR", # Europe (€)
   'z\x{142}' => "PLN", # Poland (zł)
-  '\$'       => "USD", # United States ($)
+  '$'       => "USD", # United States ($)
   '&cent;'   => "USX", # United States (¢)
-  'HK\$'     => "HKD", # Hong Kong (HK$)
+  'HK$'     => "HKD", # Hong Kong (HK$)
   '&yen;'    => "JPY", # Japan (¥)
   'Ft'       => "HUF", # Hungary (Ft)
 );
@@ -82,7 +82,7 @@ sub stooq {
 #  my $ua = LWP::UserAgent->new(cookie_jar => $cj);
   my $ua = $quoter->user_agent();
   $ua->cookie_jar($cj);
-  $ua->default_header('Accept_Encoding' => 'deflate');
+  $ua->default_header('Accept-Encoding' => 'deflate');
   $ua->default_header('Accept-Language' => 'en-US,en;q=0.5');
 
   foreach my $stock (@stocks) {
@@ -125,15 +125,15 @@ sub stooq {
 
         # usually currency is embedded in an A tag
         #   curency default: td > b[> span_with_price] + "&nbsp;" + _a_linking_to_currency
-	#   curency USD/HUF: td > b > _a_linking_to_currency + "&nbsp;" + span_with_price
+        #   curency USD/HUF: td > b > _a_linking_to_currency + "&nbsp;" + span_with_price
         # except for commodities there's no A tag:
-	#   commodities:     td > b[> span_with_price] + "&nbsp;_currency_without_link_"
+        #   commodities:     td > b[> span_with_price] + "&nbsp;_currency_without_link_"
         (my $currlink) = $table->cell(0,0) =~ m|<a href=t/(\?i=\d+)>|;
         if ( $currencies_by_link{$currlink} ) {
           $currency = $currencies_by_link{$currlink};
         } else {
           (my $currsymbol) = $table->cell(0,0)
-            =~ m|[\d\.]+\s([^/]*)/(ozt\|lb\|t\|gal\|bbl\|bu\|mmBtu)|;
+            =~ m|[\d\.]+</span></b>&nbsp;([^/]+)/(ozt\|lb\|t\|gal\|bbl\|bu\|mmBtu)|;
           if ( $currencies_by_symbol{$currsymbol} ) {
             $currency = $currencies_by_symbol{$currsymbol};
           }
@@ -164,6 +164,11 @@ sub stooq {
               next unless ( $info{ $stock, $field } );
               $info{ $stock, $field } =
                 $quoter->scale_field( $info{ $stock, $field }, 0.01 );
+            }
+            if ( $info{ $stock, 'currency' } eq 'GBX' ) {
+              $info{ $stock, 'currency' } = 'GBP';
+            } else {
+              $info{ $stock, 'currency' } = 'USD';
             }
           }
         }
