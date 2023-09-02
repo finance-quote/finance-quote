@@ -129,12 +129,12 @@ sub stooq {
         # except for commodities there's no A tag:
         #   commodities:     td > b[> span_with_price] + "&nbsp;_currency_without_link_"
         (my $currlink) = $table->cell(0,0) =~ m|<a href=t/(\?i=\d+)>|;
-        if ( $currencies_by_link{$currlink} ) {
+        if ( ($currlink) && ($currencies_by_link{$currlink}) ) {
           $currency = $currencies_by_link{$currlink};
         } else {
           (my $currsymbol) = $table->cell(0,0)
             =~ m|[\d\.]+</span></b>&nbsp;([^/]+)/(ozt\|lb\|t\|gal\|bbl\|bu\|mmBtu)|;
-          if ( $currencies_by_symbol{$currsymbol} ) {
+          if ( ($currsymbol) && ($currencies_by_symbol{$currsymbol}) ) {
             $currency = $currencies_by_symbol{$currsymbol};
           }
         }
