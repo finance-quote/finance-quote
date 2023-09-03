@@ -146,7 +146,7 @@ sub stooq {
         (my $bid) = $table->cell(4,0) =~ m|Bid.+>([\d\.]+)<|;
         (my $ask) = $table->cell(4,1) =~ m|Ask.+>([\d\.]+)<|;
         # If last and date are defined, save values in hash
-        if ( ($last) && ($date) ) {
+        if ( ($last) && ($date) && ($currency) ) {
           $info{ $stock, 'success' }  = 1;
           $info{ $stock, 'method' }   = 'stooq';
           $info{ $stock, 'name' }     = $name;
