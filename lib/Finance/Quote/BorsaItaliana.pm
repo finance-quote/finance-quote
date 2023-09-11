@@ -113,7 +113,7 @@ sub borsa_italiana {
             my $date = $result->{dt}[1];
             $date =~ s/.*Contratto:\ //g;
             $date =~ s/[^0123456789]//g;
-            my ($dd,$mm,$yy,$hh,$mi,$ss) = $date =~ /^([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})\z/ or die;
+            my ($dd,$mm,$yy,$hh,$mi,$ss) = $date =~ /^([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{1,})([0-9]{2})([0-9]{2})\z/ or die;
             my $my_date= $dd.".".$mm.".".$yy." ".$hh.":".$mi.":".$ss;
 
             $info{ $stocks, "success" } = 1;
