@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* TMX.pm - Correct a self-reference in documentation - PR #345
 	* Stooq.pm - Added new currencies and a fix for commodities' prices
 	* YahooWeb.pm - Skip rows in the price table where the prices ar "-".
 	  This seems to happen sometimes with TIAA (and perhaps other) secyrutues
