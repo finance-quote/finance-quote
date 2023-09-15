@@ -808,7 +808,7 @@
 - module: TMX.pm
   state: working
   added: TBD
-  changed: 2022-11-23
+  changed: 2023-09-14
   removed: ~
   urls: https://app-money.tmx.com/graphql
   apikey: false
