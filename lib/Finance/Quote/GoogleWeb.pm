@@ -35,6 +35,10 @@ use if DEBUG, 'Smart::Comments', '###';
 
 my $GOOGLE_URL = 'https://www.google.com/finance/';
 
+sub features() {
+    return {'description' => 'Google Finance Web Pages. US Markets and Mutual Funds.'};
+}
+
 sub methods {
   return (googleweb => \&googleweb,
           nyse      => \&googleweb,
@@ -83,7 +87,7 @@ sub googleweb {
       if ($tree->parse_content($body)) {
         #
         # Get link with exchange appended (NYSE|NASDAQ|NYSEAMERICAN)
-        $taglink = $tree->look_down(_tag => 'a', href => qr!^./quote/$ucstock:(NYSE|NASDAQ|NYSEAMERICAN)!);
+        $taglink = $tree->look_down(_tag => 'a', href => qr!^./quote/$ucstock:(MUTF|NYSE|NASDAQ|NYSEAMERICAN)!);
         if ($taglink) {
           $link = $taglink->attr('href');
           $link =~ s|\./quote|quote|;
@@ -121,6 +125,8 @@ sub googleweb {
           "Cannot parse HTML from $url";
         next;
       }
+
+      ### Tree: $tree
 
       # Look for div tag with data-last-price attribute
       $taglink =
@@ -221,3 +227,4 @@ The following labels are returned:
 While the Google Finance web pages contain price information from other
 stock exchanges, this module currently retrieves last trade prices for
 securities listed on the NYSE, American, and NASDAQ stock exchanges.
+U.S. Mutual Funds quotes can also be retrieved with this module.
