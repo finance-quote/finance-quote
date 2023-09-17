@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* GoogleWeb.pm - Updated to retrieve mutual fund prices
 	* TMX.pm - Correct a self-reference in documentation - PR #345
 	* Stooq.pm - Added new currencies and a fix for commodities' prices
 	* YahooWeb.pm - Skip rows in the price table where the prices ar "-".

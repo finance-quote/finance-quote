@@ -83,7 +83,7 @@ sub googleweb {
       if ($tree->parse_content($body)) {
         #
         # Get link with exchange appended (NYSE|NASDAQ|NYSEAMERICAN)
-        $taglink = $tree->look_down(_tag => 'a', href => qr!^./quote/$ucstock:(NYSE|NASDAQ|NYSEAMERICAN)!);
+        $taglink = $tree->look_down(_tag => 'a', href => qr!^./quote/$ucstock:(MUTF|NYSE|NASDAQ|NYSEAMERICAN)!);
         if ($taglink) {
           $link = $taglink->attr('href');
           $link =~ s|\./quote|quote|;
@@ -121,6 +121,8 @@ sub googleweb {
           "Cannot parse HTML from $url";
         next;
       }
+
+      ### Tree: $tree
 
       # Look for div tag with data-last-price attribute
       $taglink =
