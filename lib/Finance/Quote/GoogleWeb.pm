@@ -35,6 +35,10 @@ use if DEBUG, 'Smart::Comments', '###';
 
 my $GOOGLE_URL = 'https://www.google.com/finance/';
 
+sub features() {
+    return {'description' => 'Google Finance Web Pages. US Markets and Mutual Funds.'};
+}
+
 sub methods {
   return (googleweb => \&googleweb,
           nyse      => \&googleweb,
@@ -223,3 +227,4 @@ The following labels are returned:
 While the Google Finance web pages contain price information from other
 stock exchanges, this module currently retrieves last trade prices for
 securities listed on the NYSE, American, and NASDAQ stock exchanges.
+U.S. Mutual Funds quotes can also be retrieved with this module.
