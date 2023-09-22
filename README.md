@@ -1,3 +1,18 @@
+# NOTE: 
+
+This code base includes updates necessary to add YahooChart module which is 
+personally developed and tested. It employs multi-threading to fetch data when 
+available and the module does not need to ascertain whether date is a trading
+day, holiday or anything else that may not be trading day. Currenlty it i
+downloads last seven days of quote data range and then returns last valid 
+data set as the valid pricing. The return pricing is always the adjusted 
+pricing which accounts for splits and dividends.
+
+This module has been used by me for many months and it was created to get 
+around Yahoo making changes which was causing Yahoo JSON module to fail until 
+interim fix was released. As of this writing (9/22/2023) all has been fixed 
+in Yahoo JSON, thus changes from here are not needed.
+
 # NAME
 
 Finance::Quote - Get stock and mutual fund quotes from various exchanges
@@ -11,23 +26,23 @@ Finance::Quote - Get stock and mutual fund quotes from various exchanges
 
 # DESCRIPTION
 
-This module gets stock quotes from various internet sources all over the world.
-Quotes are obtained by constructing a quoter object and using the fetch method
-to gather data, which is returned as a two-dimensional hash (or a reference to
-such a hash, if called in a scalar context).  For example:
+This module gets stock quotes from various internet sources all over the 
+world. Quotes are obtained by constructing a quoter object and using the fetch 
+method to gather data, which is returned as a two-dimensional hash (or a 
+reference to such a hash, if called in a scalar context).  For example:
 
     $q = Finance::Quote->new;
     %info = $q->fetch("australia", "CML");
     print "The price of CML is ".$info{"CML", "price"};
 
-The first part of the hash (eg, "CML") is referred to as the stock.
-The second part (in this case, "price") is referred to as the label.
+The first part of the hash (eg, "CML") is referred to as the stock. The second 
+part (in this case, "price") is referred to as the label.
 
 ## LABELS
 
-When information about a stock is returned, the following standard labels may
-be used.  Some custom-written modules may use labels not mentioned here.  If
-you wish to be certain that you obtain a certain set of labels for a given
+When information about a stock is returned, the following standard labels may 
+be used.  Some custom-written modules may use labels not mentioned here. If 
+you wish to be certain that you obtain a certain set of labels for a given 
 stock, you can specify that using require\_labels().
 
     ask          Ask
@@ -64,17 +79,16 @@ stock, you can specify that using require\_labels().
     year_range   52-Week Range
     yield        Yield (usually 30 day avg)
 
-If all stock lookups fail (possibly because of a failed connection) then the
+If all stock lookups fail (possibly because of a failed connection) then the 
 empty list may be returned, or undef in a scalar context.
 
 # INSTALLATION
 
-Please note that the Github repository is not meant for general users
-of Finance::Quote for installation.
+Please note that the Github repository is not meant for general users of 
+Finance::Quote for installation.
 
-If you downloaded the Finance-Quote-N.NN.tar.gz tarball from CPAN
-(N.NN is the version number, ex: Finance-Quote-1.50.tar.gz),
-run the following commands:
+If you downloaded the Finance-Quote-N.NN.tar.gz tarball from CPAN (N.NN is the 
+version number, ex: Finance-Quote-1.50.tar.gz), run the following commands:
 
     tar xzf Finance-Quote-1.50.tar.gz
     cd Finance-Quote-1.50.tar.gz
@@ -125,8 +139,8 @@ You can also look for information at:
 
 # PUBLIC CLASS METHODS
 
-Finance::Quote implements public class methods for constructing a quoter
-object, getting or setting default class values, and for listing available
+Finance::Quote implements public class methods for constructing a quoter 
+object, getting or setting default class values, and for listing available 
 methods.
 
 ## new
