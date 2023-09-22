@@ -3,7 +3,7 @@
 This code base includes updates necessary to add YahooChart module which is 
 personally developed and tested. It employs multi-threading to fetch data when 
 available and the module does not need to ascertain whether date is a trading
-day, holiday or anything else that may not be trading day. Currenlty it i
+day, holiday or anything else that may not be trading day. Currenlty it 
 downloads last seven days of quote data range and then returns last valid 
 data set as the valid pricing. The return pricing is always the adjusted 
 pricing which accounts for splits and dividends.
