@@ -37,33 +37,41 @@ use strict;
 #-## 
 
 use constant DEBUG => $ENV{DEBUG}; 
-use if DEBUG, 'Smart::Comments', '###'; 
+use if DEBUG, 'Smart::Comments', '###';
 
 package Finance::Quote::YahooChart;
 
 use JSON qw( decode_json );
-use vars qw($VERSION $YIND_URL_HEAD $YIND_URL_TAIL);
+use vars qw( $VERSION $YIND_URL_HEAD $YIND_URL_TAIL );
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 use Time::Piece;
+use threads;
+use Thread::Queue;
+use Config;
 
 # VERSION
 
 my $endepoc = time(); # now in UNIX epoc seconds
 my $startepoc = $endepoc - (7 * 24 * 60 * 60); # 7 days ago in UNIX epoc seconds
 
+my $browser = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36';
+
 # https://query1.finance.yahoo.com/v8/finance/chart/AAPL?symbol=AAPL&period1=0&period2=9999999999&interval=1d&includePrePost=true&events=div%7Csplit
 # Valid intervals: [1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo, 6mo, ytd, 1y, 2y, 5y, 10y, max]
 my $YIND_URL_HEAD = 'https://query1.finance.yahoo.com/v8/finance/chart/';
 my $YIND_URL_TAIL = '?interval=1d&period1=' . $startepoc . '&period2=' . $endepoc;
+
+my $can_use_threads = eval 'use threads; 1';
+### [<now>] can_use_threads : $can_use_threads 
 
 sub methods {
     return ( yahoo_chart => \&yahoo_chart,
     );
 }
 {
-    my @labels = qw/date isodate volume currency method exchangeName instrumentType
+    my @labels = qw/date isodate volume currency method exchange type
         open high low close nav price adjclose/;
 
     sub labels {
@@ -78,20 +86,60 @@ sub yahoo_chart {
     my @stocks = @_;
     my ( %info, $reply, $url, $te, $ts, $row, @cells, $ce );
     my ( $my_date, $amp_stocks );
+    
     my $ua = $quoter->user_agent();
+    $ua->agent ($browser);
 
-    foreach my $stocks (@stocks) {
+    my $result_q = Thread::Queue->new;
+    my $lock_var : shared;
 
-        # Issue 202 - Fix symbols with Ampersand
-        # Can also be written as
-				# $amp_stocks = $stocks =~ s/&/%26/gr;
-        ($amp_stocks = $stocks) =~ s/&/%26/g;
+    if ($can_use_threads) {
 
-        $url   = $YIND_URL_HEAD . $amp_stocks . $YIND_URL_TAIL;
+        my @threads = map {
+            threads->create(
+                sub {
+                    my $stocks = shift;
 
-        ### [<now>]   url  : $url
-        $reply = $ua->request( GET $url);
-        ### [<now>] reply  : $reply
+                    ($amp_stocks = $stocks) =~ s/&/%26/g;
+                    $url = $YIND_URL_HEAD . $amp_stocks . $YIND_URL_TAIL;
+
+                    ### [<now>:THREAD]   url : $url 
+                    my $reply = $ua->request( GET $url );
+                    ### [<now>:THREAD] reply : $reply
+                    {
+                        lock ( $lock_var );
+                        $result_q->enqueue( $stocks );
+                        $result_q->enqueue( $reply );
+                    }
+                }, 
+            $_)
+        } @stocks;
+
+        $_->join() for @threads;
+
+        $result_q->end;
+        
+    } else {
+
+        foreach my $stocks (@stocks) {       ### Evaluating |===[%]    |
+            ($amp_stocks = $stocks) =~ s/&/%26/g;
+            $url = $YIND_URL_HEAD . $amp_stocks . $YIND_URL_TAIL;
+
+            ### [<now>]    url : $url 
+            my $reply = $ua->request( GET $url );
+            ### [<now>] reply : $reply
+
+            $result_q->enqueue( $stocks );
+            $result_q->enqueue( $reply );
+            }
+
+        $result_q->end;
+
+    }
+
+    while (defined (my $stocks = $result_q->dequeue())) {        ### Evaluating |===[%]    |
+    
+        my $reply   = $result_q->dequeue;
 
         my $code    = $reply->code;
         my $desc    = HTTP::Status::status_message($code);
@@ -125,11 +173,13 @@ sub yahoo_chart {
             else {
 
                 # instrumentType shows whether the stock is equity, index, currency, or commodity
-                $info{ $stocks, 'type'} = $json_data->{'meta'}{'instrumentType'};
+                $info{ $stocks, 'type'    } = $json_data->{'meta'}{'instrumentType'};
                 $info{ $stocks, 'exchange'} = $json_data->{'meta'}{'exchangeName'};
                 $info{ $stocks, 'currency'} = $json_data->{'meta'}{'currency'};
+                $info{ $stocks, 'timezone'} = $json_data->{'meta'}{'timezone'};
 
                 my $timestamps = $json_data->{'timestamp'};
+                my $json_timestamp;
 
                 if (not defined ($timestamps)) {
                     $info{ $stocks, "errormsg" } = 
@@ -148,13 +198,14 @@ sub yahoo_chart {
                 ### [<now>] valid data row index : $tablerows
 
                 if ($tablerows < 0) {
+                    $json_timestamp = $json_data->{'meta'}{'regularMarketTime'};
                     $info{ $stocks, "errormsg" } = 
                         "Error retrieving quote for $stocks - No valid pricing data row found in the data returned by the API.";
                     return wantarray() ? %info : \%info;
                     return \%info;
+                } else {
+                    $json_timestamp = $json_data->{'timestamp'}[$tablerows];
                 }
-
-                my $json_timestamp = $json_data->{'timestamp'}[$tablerows];
 
                 if (defined ($ENV{YAHOO_CHART_EXTENDED})) {
                     for my $element (keys %{$json_data->{'meta'}}) {
@@ -192,10 +243,6 @@ sub yahoo_chart {
                     $info{ $stocks, $prices } = $json_data->{'indicators'}{'adjclose'}[0]{$prices}[$tablerows];
                 }
 
-                for my $prices (keys %{$json_data->{'indicators'}{'quote'}[0]}) {
-                    $info{ $stocks, $prices } = $json_data->{'indicators'}{'quote'}[0]{$prices}[$tablerows];
-                }
-
                 # We always provide the adjclose as that is the real price for the security. 
                 # The adjusted close metric returns the closing price of the stock for that day, adjusted for 
                 # splits and dividends.
@@ -204,9 +251,8 @@ sub yahoo_chart {
                 }
                 else {
                     $info{ $stocks, 'close' } = $info{ $stocks, 'adjclose' };
+                    $info{ $stocks, 'last' } = $info{ $stocks, 'adjclose' };
                 }
-
-                $info{ $stocks, 'last' } = $info{ $stocks, 'adjclose' };
 
                 # The Yahoo JSON interface returns London prices in GBp (pence) instead of GBP (pounds)
                 # and the Yahoo Base had a hack to convert them to GBP.  In theory all the callers
