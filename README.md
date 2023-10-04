@@ -2,16 +2,20 @@
 
 This code base includes updates necessary to add YahooChart module which is 
 personally developed and tested. It employs multi-threading to fetch data when 
-available and the module does not need to ascertain whether date is a trading
-day, holiday or anything else that may not be trading day. Currenlty it 
-downloads last seven days of quote data range and then returns last valid 
+available and the module does not need to ascertain whether day is a trading
+day, holiday or anything else that may not be a trading day. Currenlty it 
+downloads last seven days of quote data set and then returns last valid 
 data set as the valid pricing. The return pricing is always the adjusted 
 pricing which accounts for splits and dividends.
 
 This module has been used by me for many months and it was created to get 
 around Yahoo making changes which was causing Yahoo JSON module to fail until 
-interim fix was released. As of this writing (9/22/2023) all has been fixed 
-in Yahoo JSON, thus changes from here are not needed.
+interim fix was released. As of this writing (9/22/2023), the author has fixed 
+Yahoo JSON on permenanet basis, thus changes from here are really not needed.
+
+If you do use this module, however, you get speed of multi-threading when lots
+of quote is requested. This module can also retrieve currency but this seems 
+to be very limited as to what can be retrieved from Yahoo's Chart API.
 
 # NAME
 
