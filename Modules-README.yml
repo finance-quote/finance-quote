@@ -666,6 +666,28 @@
   testfile: morningstarUK.t
   testcases:
 #
+- module: MumbaiStock.pm
+  state: working
+  added: 2023-10-13
+  changed:
+  removed:
+  urls:
+    - https://www.bseindia.com/download/BhavCopy/Equity/BSE_EQ_BHAVCOPY_${DDMMYYYY}.ZIP
+  methods:
+    - mumbaistock
+    - mstkindia
+  apikey: false
+  notes: |
+    Module to fetch equity quotes from https://www.bseindia.com/ standardised schema
+  testfile: mumbaistock.t
+  testcases:
+    - 532540
+    - 500008
+    - 500400
+    - 500387
+    - 500390
+    - 500469
+#
 - module: NSEIndia.pm
   state: working
   added: 2020-06-27

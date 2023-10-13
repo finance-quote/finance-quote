@@ -88,6 +88,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     MorningstarCH
     MorningstarJP
     MorningstarUK
+    MumbaiStock
     NSEIndia
     NZX
     OnVista
@@ -1709,6 +1710,7 @@ http://www.gnucash.org/
   Finance::Quote::MorningstarCH,
   Finance::Quote::MorningstarJP,
   Finance::Quote::MorningstarUK,
+  Finance::Quote::MumbaiStock,
   Finance::Quote::NSEIndia,
   Finance::Quote::NZX,
   Finance::Quote::OnVista,

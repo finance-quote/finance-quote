@@ -565,6 +565,7 @@ http://www.gnucash.org/
     Finance::Quote::MorningstarCH,
     Finance::Quote::MorningstarJP,
     Finance::Quote::MorningstarUK,
+    Finance::Quote::MumbaiStock,
     Finance::Quote::NSEIndia,
     Finance::Quote::NZX,
     Finance::Quote::OnVista,
