@@ -575,7 +575,7 @@
 - module: IndiaMutual.pm
   state: working
   added: TBD
-  changed: 2023-06-06
+  changed: 2023-11-18
   removed: ~
   urls: https://www.amfiindia.com/spages/NAVAll.txt
   apikey: false
