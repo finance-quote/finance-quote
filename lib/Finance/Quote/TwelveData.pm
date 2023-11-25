@@ -60,8 +60,8 @@ sub twelvedata {
     my $agent = $ua->agent();
     $ua->agent($AGENT);
 
-    my $token = exists $quoter->{module_specific_data}->{twelvedata}->{API_KEY} ? 
-                $quoter->{module_specific_data}->{twelvedata}->{API_KEY}        :
+    my $token = exists $quoter->{method_specific_data}->{twelvedata}->{API_KEY} ? 
+                $quoter->{method_specific_data}->{twelvedata}->{API_KEY}        :
                 $ENV{"TWELVEDATA_API_KEY"};
 
     foreach my $symbol (@stocks) {

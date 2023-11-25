@@ -25,15 +25,26 @@ use Web::Scraper;
 
 # VERSION
 
-my $BAMOSZ_MAINURL = "http://www.bamosz.hu/";
-my $BAMOSZ_URL = $BAMOSZ_MAINURL . "alapoldal?isin=";
+my $BAMOSZ_MAINURL  = "http://www.bamosz.hu/";
+my $BAMOSZ_URL      = $BAMOSZ_MAINURL . "alapoldal?isin=";
+my $BAMOSZ_DISPLAY  = "Hungarian Investment Fund and Asset Management Companies";
 
-my $BSE_MAINURL = "http://www.bet.hu/";
-my $BSE_URL = $BSE_MAINURL . '/oldalak/ceg_adatlap/$security/';
+my $BSE_MAINURL     = "http://www.bet.hu/";
+my $BSE_URL         = $BSE_MAINURL . '/oldalak/ceg_adatlap/$security/';
+my $BSE_DISPLAY     = "Budapest Stock Exchange";
 
-sub features() {
-    return {'description' => 'Fetch quotes from Hungarian Securities bet.hu and bamosz.hu'};
+my $HU_DISPLAY      = "Budapest Stock Exchange & Hungarian Investment Fund and Asset Management Companies";
+
+sub features {
+    return ( hufund  => {display => $BAMOSZ_DISPLAY},
+             bamosz  => {display => $BAMOSZ_DISPLAY},
+             hustock => {display => $BSE_DISPLAY},
+             bse     => {display => $BSE_DISPLAY},
+             bet     => {display => $BSE_DISPLAY},
+             hu      => {display => $HU_DISPLAY},
+             hungary => {display => $HU_DISPLAY} );
 }
+
 
 sub methods {
     return ( hufund  => \&bamosz,

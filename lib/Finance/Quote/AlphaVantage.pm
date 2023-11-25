@@ -25,6 +25,7 @@ package Finance::Quote::AlphaVantage;
 use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
+use Clone qw(clone);
 
 # VERSION
 
@@ -117,7 +118,6 @@ my %currencies_by_suffix = (
     '.SW'  => "CHF",    # Switzerland
 );
 
-
 sub methods {
     return ( alphavantage => \&alphavantage,
              canada       => \&alphavantage,
@@ -127,9 +127,15 @@ sub methods {
     );
 }
 
+my $DISPLAY = {'display' => 'Alpha Vantage', 'features' => {'API_KEY' => {'description' => 'registered user API key'}}};
+
 sub features() {
-    return {'description' => 'Fetch quotes from alphavantage.co',
-        'features' => {'API_KEY' => {'description' => 'registered user API key'}}};
+    return ( alphavantage => clone($DISPLAY),
+             canada       => clone($DISPLAY),
+             usa          => clone($DISPLAY),
+             nyse         => clone($DISPLAY),
+             nasdaq       => clone($DISPLAY),
+    );
 }
 
 {
@@ -179,8 +185,8 @@ sub alphavantage {
 #   The user will add ".X" to symbols to return GBX priced securities
 #   as GBP.
 
-    my $token = exists $quoter->{module_specific_data}->{alphavantage}->{API_KEY} ? 
-                $quoter->{module_specific_data}->{alphavantage}->{API_KEY}        :
+    my $token = exists $quoter->{method_specific_data}->{alphavantage}->{API_KEY} ? 
+                $quoter->{method_specific_data}->{alphavantage}->{API_KEY}        :
                 $ENV{"ALPHAVANTAGE_API_KEY"};
 
     foreach my $stock (@stocks) {

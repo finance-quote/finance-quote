@@ -49,8 +49,8 @@ sub labels {
 
 sub xetra {
   my $quoter  = shift;
-  my $inst_id = exists $quoter->{module_specific_data}->{xetra}->{INST_ID} ?
-                       $quoter->{module_specific_data}->{xetra}->{INST_ID} :
+  my $inst_id = exists $quoter->{method_specific_data}->{xetra}->{INST_ID} ?
+                       $quoter->{method_specific_data}->{xetra}->{INST_ID} :
                        '0000057';
   my $ua      = $quoter->user_agent();
   my $agent   = $ua->agent;

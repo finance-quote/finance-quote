@@ -53,8 +53,8 @@ sub features() {
 sub iexcloud {
     my $quoter = shift;
 
-    my $token = exists $quoter->{module_specific_data}->{iexcloud}->{API_KEY} ? 
-                $quoter->{module_specific_data}->{iexcloud}->{API_KEY}        :
+    my $token = exists $quoter->{method_specific_data}->{iexcloud}->{API_KEY} ? 
+                $quoter->{method_specific_data}->{iexcloud}->{API_KEY}        :
                 $ENV{"IEXCLOUD_API_KEY"};
 
     my @stocks = @_;

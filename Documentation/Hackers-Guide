@@ -233,27 +233,36 @@ It is also very very strongly recommended that you place your module's
 name in the {$stock,"source"} field.  This allows others to check where
 information was obtained, and to use it appropriately.
 
-3.4 The features() subroutine - Module info and requirements (eg API keys) 
-----------------------------------------------------------------------------
+3.4 The features() subroutine - Method info and requirements (eg API keys) 
+---------------------------------------------------------------------------
 
-The features() method returns information about the module, including a
-conscise description. The returned hash can also contain information about
-required items such as API Keys (sometimes called tokens) in order to access
-the securities or exchange data. AlphaVantage.pm is one example.
+The features() method returns information about each method in a module,
+including a conscise display string. The returned hash can also contain
+information about required items such as API Keys (sometimes called tokens) in
+order to access the securities or exchange data. AlphaVantage.pm is one
+example.
 
-At a minimun, include the 'description' key.  For a module with an API key,
-features might look like:
+At a minimun, include the 'display' key.  For a fictitious module that gets
+data from "Free Stock Quotes", its methods and features might look like:
 
-    sub features() {
-        return {'description' => 'Fetch quotes from xyz.com',
-                'features'    => {'API_KEY' => {'description' => 'registered user API key'}}};
+    sub methods {
+        return ( fsq => \&fse,
+                 usa => \&fse);
+    }
+    
+    my $DISPLAY  = "Free Stock Quotes";
+    my $FEATURES = {'API_KEY' => {'description' => 'registered user API key'}};
+    
+    sub features {
+        return ( fsq => {'display' => $DISPLAY, 'features' => $FEATURES},
+                 usa => {'display' => $DISPLAY, 'features' => $FEATURES});
     }
 
-Defined keys & values for features() return hash:
+Defined keys & values for features:
 
-  - 'description' => string describing the module
-  - 'features'    => hash where the key names are required parameters
-                     and the values are hashes with a 'description' key
+  - 'display'  => concise string describing the method for displaying to users
+  - 'features' => hash where the key names are required parameters
+                    and the values are hashes with a 'description' key
 
 3.5 Currency
 -------------
