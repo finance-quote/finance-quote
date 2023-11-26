@@ -63,12 +63,18 @@ sub finanzpartner
 
       my $processor = scraper {
         process 'span.kurs-m.pull-left', 'price[]' => 'TEXT';
+        process 'span.kurs.pull-left', 'price_alternative[]' => 'TEXT';
         process 'h1 > small', 'isin[]'             => 'TEXT';
         process 'div.col-md-2', 'date[]'           => 'TEXT';
         process 'h1 > span', 'name[]'              => 'TEXT';
       };
  
       my $data = $processor->scrape(decode_utf8 $reply->content);
+
+      # If price does not exists, then price_alternative should exist. In that case, put price_alternative into price.
+      if(exists $data->{price_alternative}) {
+        $data->{price} = $data->{price_alternative};
+      }
 
       ### data: $data
       
