@@ -8,6 +8,7 @@
 	* TSP.pm - Was not returning hash when the HTTP GET failed completely
 	  or the content did not contain the expected CSV file. - Issue #338
 	* BSEIndia.pm - Removed print when symbol not found - Issue #335
+    * Fixed XETRA, Tradegate and SInvestor after webpage was restructured - Issue #350
 
 1.58      2023-08-12 10:59:05-07:00 America/Los_Angeles
 	* Consorsbank.pm - New module - PR #329

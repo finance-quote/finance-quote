@@ -71,17 +71,16 @@ sub sinvestor {
       my $tree = HTML::TreeBuilder->new_from_url($url);
       
       my $lastvalue = $tree->look_down('class'=>'si_seitenbezeichnung');
-      my @child = $lastvalue->content_list;
 
-      if ($child[0] eq 'S-Investor Ausnahme') {
+      if (defined($lastvalue)) {
         $info{ $symbol, 'success' } = 0;
         $info{ $symbol, 'errormsg' } = 'Invalid institute id. Get a valid institute id from https://web.s-investor.de/app/webauswahl.jsp';
       } else {
-        $lastvalue = $tree->look_down('class'=>'si_inner_content_box');
-  
+        $lastvalue = $tree->look_down('id'=>'kursdaten');
+
         my $td1 = ($lastvalue->look_down('_tag'=>'td'))[1];
-        @child = $td1->content_list;
-        my $isin =$child[0];
+        my @child = $td1->content_list;
+        my $isin = $child[0];
   
         $td1 = ($lastvalue->look_down('_tag'=>'td'))[3];
         @child = $td1->content_list;
@@ -113,27 +112,27 @@ sub sinvestor {
         @child = $td1->content_list;
         my $volume = $child[0];
   
-        $lastvalue = $tree->look_down('id'=>'detailVergleichszahlen');
-  
+        $lastvalue = ($tree->look_down('class'=>'contentBox oneColum'))[1];
+
         #-- change (absolute change)
-        $td1 = ($lastvalue->look_down('_tag'=>'td'))[16];
+        $td1 = ($lastvalue->look_down('_tag'=>'td'))[13];
         @child = $td1->content_list;
-        my $change =$child[0];
+        my $change = $child[0];
         $change =~ s/\.//g;
         $change =~ s/,/\./;
         my $encchange = encode_entities($change);
         my @splitcchange= split ('&',$encchange);
         $change = $splitcchange[0];
-  
+
         #-- p_change (relative change)
-        $td1 = ($lastvalue->look_down('_tag'=>'td'))[19];
+        $td1 = ($lastvalue->look_down('_tag'=>'td'))[16];
         @child = $td1->content_list;
         my $p_change =$child[0];
         $p_change =~ s/[\.|%]//g;
         $p_change =~ s/,/\./;
-  
+
         #-- close
-        $td1 = ($lastvalue->look_down('_tag'=>'td'))[37];
+        $td1 = ($lastvalue->look_down('_tag'=>'td'))[34];
         @child = $td1->content_list;
         my $close =$child[0];
         $close =~ s/\.//g;
@@ -228,5 +227,3 @@ price
 close
 change
 p_change
-
-
