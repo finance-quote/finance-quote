@@ -11,7 +11,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 8;
+plan tests => 20;
 
 my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
