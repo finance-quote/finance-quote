@@ -43,23 +43,15 @@ use Try::Tiny;
 my $TIAA_MAIN_URL = 'https://www.tiaa.org/public/investment-performance';
 my $TIAA_DATA_URL = 'https://www.tiaa.markitondemand.com/Research/Public/Export/Details';
 
-sub features() {
-    return {'description' => 'Fetch quotes from TIAA (formerly TIAA-CREF)'};
+our @LABELS = qw/method symbol exchange name date isodate nav price currency/;
+our $DISPLAY = 'TIAA (formerly TIAA-CREF)';
+our %METHOD = (subroutine => \&tiaacref, labels => \@LABELS, display => $DISPLAY);
+
+sub methods {
+    return ( 
+        tiaacref => \%METHOD,
+    );
 }
-
-sub methods { return (tiaacref=>\&tiaacref); }
-
-sub labels { return (tiaacref => [qw/
-    method
-    symbol
-    exchange
-    name
-    date
-    isodate
-    nav
-    price
-    currency
-/]); }
 
 # =======================================================================
 # TIAA-CREF Annuities are not listed on any exchange, unlike their mutual funds

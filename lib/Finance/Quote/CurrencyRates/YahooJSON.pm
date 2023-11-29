@@ -34,7 +34,7 @@ my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/?
 my $YIND_URL_TAIL = '&modules=price';
 
 sub features() {
-    return {'description' => 'Fetch currency rates from yahoo.com'};
+    return {'display' => 'Yahoo Currency Rates'};
 }
 
 sub new

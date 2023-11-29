@@ -46,12 +46,15 @@ our $UNION_URL1 = "https://legacy-apps.union-investment.de/handle?generate=true&
 # Date format 27.07.2022&end_time=01.08.2022
 our $UNION_URL2 ="&csvformat=us&choose_indi_fondsnames=";
 
-sub features() {
-    return {'description' => 'Fetch quotes from Union Inventment'};
-}
+our @LABELS = qw/exchange name date isodate price method/;
+our $DISPLAY = 'Union Inventments Germany';
+our %METHOD = (subroutine => \&unionfunds, labels => \@LABELS, display => $DISPLAY);
 
-sub methods { return (unionfunds => \&unionfunds); }
-sub labels { return (unionfunds => [qw/exchange name date isodate price method/]); }
+sub methods { 
+    return (
+        unionfunds => \%METHOD
+    );
+}
 
 # =======================================================================
 # The unionfunds routine gets quotes of UNION funds (Union Invest)

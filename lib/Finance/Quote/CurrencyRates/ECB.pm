@@ -28,7 +28,7 @@ use XML::LibXML;
 # VERSION
 
 sub features() {
-    return {'description' => 'Fetch currency rates from ecb.europa.eu'};
+    return {'display' => 'European Central Bank'};
 }
 
 sub new

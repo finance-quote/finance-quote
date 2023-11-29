@@ -30,17 +30,15 @@ use Web::Scraper;
 
 # VERSION
 
-sub features() {
-    return {'description' => 'Fetch Australian managed fund quotes from MorningStarAU'};
-}
+our @LABELS = qw/currency date isodate method name price symbol/;
+our $DISPLAY = 'MorningStar Australia';
+our %METHOD = (subroutine => \&morningstarau, labels => \@LABELS, display => $DISPLAY);
 
 sub methods {
-  return (aufunds => \&morningstarau, morningstarau => \&morningstarau,);
-}
-
-sub labels {
-  my @labels = qw/currency date isodate method name price symbol/;
-  return (aufund => \@labels, morningstarau => \@labels);
+    return (
+        aufunds => \%METHOD,
+        morningstarau => \%METHOD,
+    );
 }
 
 sub morningstarau {

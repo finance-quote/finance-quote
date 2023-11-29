@@ -44,21 +44,16 @@ use Try::Tiny;
 
 $TROWEPRICE_URL = ("https://www3.troweprice.com/fb2/ppfweb/downloadPrices.do");
 
-sub features() {
-    return {'description' => 'Fetch quotes from T. Rowe Price'};
+our @LABELS = qw/method exchange name nav date isodate price/;
+our $DISPLAY = 'T. Rowe Price';
+our %METHOD = (subroutine => \&troweprice, labels => \@LABELS, display => $DISPLAY);
+
+sub methods { 
+    return (
+        troweprice        => \%METHOD,
+        troweprice_direct => \%METHOD,
+    ); 
 }
-
-sub methods { return (troweprice        => \&troweprice,
-               troweprice_direct => \&troweprice); }
-
-{
-  my @labels = qw/method exchange name nav date isodate price/;
-
-  sub labels { return (troweprice        => \@labels,
-               troweprice_direct => \@labels); }
-}
-
-# =======================================================================
 
 sub troweprice {
 

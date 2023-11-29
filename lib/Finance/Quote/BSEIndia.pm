@@ -32,19 +32,21 @@ $BSE_URL = "https://www.bseindia.com";
 my $cachedir = $ENV{TMPDIR} // $ENV{TEMP} // '/tmp/';
 my $BSE_ZIP = $cachedir.'bseindia.zip';
 my $BSE_CSV = $cachedir.'bseindia.csv';
+my $DISPLAY = 'BSE Exchange India';
+my @labels = qw/close last high low open prevclose exchange name/;
 
-sub features() {
-    return {'description' => 'Fetch quotes from BSE India'};
-}
-
-sub methods { return ( 'india' => \&bseindia,
-                       'bseindia' => \&bseindia ); }
-
-sub labels {
-    my @labels = qw/close last high low open prevclose exchange name/;
+sub methods { 
     return (
-    india => \@labels,
-    bseindia => \@labels
+        india => {
+            subroutine => \&bseindia,
+            display => $DISPLAY,
+            labels => \@labels
+        },
+        bseindia => {
+            subroutine => \&bseindia,
+            display => $DISPLAY,
+            labels => \@labels
+        },
     );
 }
 

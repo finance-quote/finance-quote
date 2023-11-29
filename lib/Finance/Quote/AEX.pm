@@ -24,7 +24,7 @@ use warnings;
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
 
-use vars qw( $AEX_URL);
+use vars qw($AEX_URL);
 
 use LWP::UserAgent;
 use Web::Scraper;
@@ -32,20 +32,14 @@ use String::Util qw(trim);
 
 # VERSION
 
-sub features() {
-    return {'description' => 'Fetch quotes from Amsterdam Euronext eXchange'};
-}
+our $DISPLAY = 'Euronext Amsterdam';
+our @labels  = qw/name symbol price last date time p_change bid ask offer open high low close volume currency method exchange/;
 
 sub methods { 
-  return (dutch => \&aex,
-          aex   => \&aex);
-}
-
-our @labels = qw/name symbol price last date time p_change bid ask offer open high low close volume currency method exchange/;
-
-sub labels { 
-  return (dutch => \@labels,
-          aex   => \@labels);
+  return (
+      dutch => {subroutine => \&aex, display => $DISPLAY, labels => \@labels},
+      aex   => {subroutine => \&aex, display => $DISPLAY, labels => \@labels},
+  );
 }
 
 sub aex {

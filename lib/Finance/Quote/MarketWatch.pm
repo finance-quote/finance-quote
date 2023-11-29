@@ -33,24 +33,17 @@ use if DEBUG, 'Smart::Comments', '###';
 
 # VERSION
 
-my $MW_URL = 'https://www.marketwatch.com/investing/stock/';
-
-sub features() {
-    return {'description' => 'Fetch quotes from MarketWatch'};
-}
+our $MW_URL = 'https://www.marketwatch.com/investing/stock/';
+our @LABELS = qw/symbol name last date currency method/;
+our $DISPLAY = 'MarketWatch USA';
+our %METHOD = (subroutine => \&marketwatch, labels => \@LABELS, display => $DISPLAY);
 
 sub methods {
-  return (marketwatch => \&marketwatch,
-          nyse        => \&marketwatch,
-          nasdaq      => \&marketwatch);
-}
-
-our @labels = qw/symbol name last date currency method/;
-
-sub labels { 
-  return (marketwatch => \@labels,
-          nyse        => \@labels,
-          nasdaq      => \@labels); 
+  return (
+    marketwatch => \%METHOD,
+    nyse        => \%METHOD,
+    nasdaq      => \%METHOD,
+  );
 }
 
 sub marketwatch {

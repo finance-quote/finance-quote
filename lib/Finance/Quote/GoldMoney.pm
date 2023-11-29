@@ -37,16 +37,12 @@ use warnings;
 
 # VERSION
 
-sub features() {
-    return {'description' => 'Fetch quotes from GoldMoney'};
-}
+our @LABELS = qw/exchange name date isodate price method/;
+our $DISPLAY = 'GoldMoney';
+our %METHOD = (subroutine => \&goldmoney, labels => \@LABELS, display => $DISPLAY);
 
 sub methods {
-    return ( goldmoney => \&goldmoney );
-}
-
-sub labels {
-    return ( goldmoney => [qw/exchange name date isodate price method/] );
+    return ( goldmoney => \%METHOD );
 }
 
 # goldmoney($quoter, @symbols)

@@ -46,12 +46,11 @@ use vars qw($OnVista_URL);
 
 my $OnVista_URL = 'https://www.onvista.de';
 
-sub features() {
-    return {'description' => 'Fetch quotes from OnVista'};
-}
+our @LABELS = qw/name last date isodate time currency method exchange/;
+our $DISPLAY = 'onvista Germany';
+our %METHOD = (subroutine => \&onvista, labels => \@LABELS, display => $DISPLAY);
 
-sub methods {return (onvista => \&onvista);}
-sub labels {return ( onvista => [qw/name last date isodate time currency method exchange/] );}
+sub methods {return (onvista => \%METHOD);}
 
 sub onvista {
     my $quoter = shift;

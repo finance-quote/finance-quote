@@ -28,8 +28,6 @@ use String::Util qw(trim);
 
 # VERSION 
 
-our @labels = qw/symbol date isodate close volume high low isin/;
-
 our %labels = (symbol => ['symbol', 'trading symbol'],
                date   => ['date'],
                close  => ['price', 'current nominal value', 'closing price'],
@@ -37,21 +35,15 @@ our %labels = (symbol => ['symbol', 'trading symbol'],
                high   => ['max'],
                low    => ['min'],
                isin   => ['isin']);
-
-sub features() {
-    return {'description' => 'Fetch quotes from Athens Exchange Group'};
-}
+our @labels = keys %labels;
+our $DISPLAY = 'Athens Exchange Group';
 
 sub methods { 
-  return ( greece => \&asegr,
-	   asegr  => \&asegr,
-	   europe => \&asegr);
-}
-
-sub labels { 
-  return ( greece => \@labels,
-	   asegr  => \@labels,
-	   europe => \@labels);
+    return (
+        greece => {subroutine => \&asegr, display => $DISPLAY, labels => \@labels},
+        asegr  => {subroutine => \&asegr, display => $DISPLAY, labels => \@labels},
+        europe => {subroutine => \&asegr, display => $DISPLAY, labels => \@labels},
+    );
 }
 
 our @sources = qw/statistics-end-of-day-securities 
@@ -195,4 +187,4 @@ Use of www.athexgroup.gr is governed by any terms & conditions of that site.
 Finance::Quote is released under the GNU General Public License, version 2,
 which explicitly carries a "No Warranty" clause.
 
-=cut
+=cuty

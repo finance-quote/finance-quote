@@ -36,6 +36,5 @@ my %features = Finance::Quote::get_features();
 ### [<now>] features: %features
 ok(exists $features{'version'}
    and exists $features{'quote_methods'}
-   and exists $features{'quote_modules'}
    and exists $features{'currency_modules'});
 

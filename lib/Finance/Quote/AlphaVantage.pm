@@ -25,7 +25,6 @@ package Finance::Quote::AlphaVantage;
 use strict;
 use JSON qw( decode_json );
 use HTTP::Request::Common;
-use Clone qw(clone);
 
 # VERSION
 
@@ -118,32 +117,22 @@ my %currencies_by_suffix = (
     '.SW'  => "CHF",    # Switzerland
 );
 
+our $DISPLAY    = 'AlphaVantage';
+our $FEATURES   = {'API_KEY' => 'registered user API key'};
+our @LABELS     = qw/date isodate open high low close volume last net p_change/;
+our $METHODHASH = {subroutine => \&alphavantage, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS,
+                   features => $FEATURES};
+
 sub methods {
-    return ( alphavantage => \&alphavantage,
-             canada       => \&alphavantage,
-             usa          => \&alphavantage,
-             nyse         => \&alphavantage,
-             nasdaq       => \&alphavantage,
+    return ( 
+        alphavantage => $METHODHASH,
+        canada       => $METHODHASH,
+        usa          => $METHODHASH,
+        nyse         => $METHODHASH,
+        nasdaq       => $METHODHASH,
     );
-}
-
-my $DISPLAY = {'display' => 'Alpha Vantage', 'features' => {'API_KEY' => {'description' => 'registered user API key'}}};
-
-sub features() {
-    return ( alphavantage => clone($DISPLAY),
-             canada       => clone($DISPLAY),
-             usa          => clone($DISPLAY),
-             nyse         => clone($DISPLAY),
-             nasdaq       => clone($DISPLAY),
-    );
-}
-
-{
-    my @labels = qw/date isodate open high low close volume last net p_change/;
-
-    sub labels {
-        return ( alphavantage => \@labels, );
-    }
 }
 
 sub sleep_before_query {

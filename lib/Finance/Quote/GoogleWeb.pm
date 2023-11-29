@@ -33,26 +33,21 @@ use if DEBUG, 'Smart::Comments', '###';
 
 # VERSION
 
-my $GOOGLE_URL = 'https://www.google.com/finance/';
+our $GOOGLE_URL = 'https://www.google.com/finance/';
+our @LABELS = qw/symbol name last date currency method/;
+our $DISPLAY = 'Google Finance USA';
+our %METHOD = (subroutine => \&googleweb, labels => \@LABELS, display => $DISPLAY);
 
 sub methods {
-  return (googleweb => \&googleweb,
-          bats      => \&googleweb,
-          nyse      => \&googleweb,
-          nasdaq    => \&googleweb);
-}
-
-our @labels = qw/symbol name last date currency method/;
-
-sub labels { 
-  return (googleweb => \@labels,
-          bats      => \@labels,
-          nyse      => \@labels,
-          nasdaq    => \@labels); 
+  return (
+    googleweb => \%METHOD,
+    bats      => \%METHOD,
+    nyse      => \%METHOD,
+    nasdaq    => \%METHOD,
+  );
 }
 
 sub googleweb {
-
   my $quoter = shift;
   my @stocks = @_;
   my (%info, $tree, $url, $reply);

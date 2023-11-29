@@ -31,21 +31,14 @@ my $URL   = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://finance.yah
 my $AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36';
 my $XPATH = Text::Template->new(TYPE => 'STRING', SOURCE => '//*[@data-symbol=~"^{$symbol}$"][@data-field=~"regularMarketPrice"]');
 
-sub features() {
-    return {'description' => 'Fetch quotes from Yahoo Finance through Web Interface'};
-}
+our @LABELS = qw/symbol name exchange currency isodate last open high low volume/;
+our $DISPLAY = 'Yahoo.com Web Interface';
+our %METHOD = (subroutine => \&yahooweb, labels => \@LABELS, display => $DISPLAY);
 
-sub methods { 
-    return ( yahooweb => \&yahooweb );
-}
-
-{
-    our @labels =
-        qw/symbol name exchange currency isodate last open high low volume/;
-
-    sub labels {
-        return ( yahooweb => \@labels );
-    }
+sub methods {
+    return (
+        yahooweb => \%METHOD,
+    );
 }
 
 sub yahooweb {

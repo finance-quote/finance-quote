@@ -12,12 +12,11 @@ use HTTP::Request::Common;
 
 # VERSION
 
-sub features() {
-    return {'description' => 'Fetch quotes from DEKA (Wertpapierhaus der Sparkassen)'};
-}
+our @LABELS = qw/exchange name date isodate price method/;
+our $DISPLAY = 'DEKA (Wertpapierhaus der Sparkassen)';
+our %METHOD = (subroutine => \&deka, labels => \@LABELS, display => $DISPLAY);
 
-sub methods { return (deka => \&deka); }
-sub labels { return (deka => [qw/exchange name date isodate price method/]); }
+sub methods { return (deka => \%METHOD); }
 
 # =======================================================================
 # The deka routine gets quotes of DEKA funds (Deka Investments)

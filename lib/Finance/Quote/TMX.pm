@@ -30,20 +30,16 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/currency name exchange volume open high low cap close year_range last p_change symbol isodate date/;
-
-sub features() {
-    return {'description' => 'Fetch quotes from the Toronto Stock Exchange'};
-}
-
-sub labels {
-  return ( tmx => \@labels );
-}
+our @LABELS = qw/currency name exchange volume open high low cap close year_range last p_change symbol isodate date/;
+our $DISPLAY = 'Toronto Stock Exchange';
+our %METHOD = (subroutine => \&tmx, labels => \@LABELS, display => $DISPLAY);
 
 sub methods {
-  return ( tmx    => \&tmx,
-           tsx => \&tmx,
-           canada => \&tmx );
+    return ( 
+        tmx => \%METHOD,
+        tsx => \%METHOD,
+        canada => \%METHOD,
+    );
 }
 
 sub tmx {

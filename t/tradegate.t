@@ -45,7 +45,8 @@ my %quotes2 = $q2->fetch('tradegate', @symbols);
 ok(%quotes1);
 ok(%quotes2);
 
-### [<now>] quotes: %quotes
+### [<now>] quotes1: %quotes1
+### [<now>] quotes2: %quotes2
 
 foreach my $symbol (@valid) {
   while (my ($key, $lambda) = each %check) {

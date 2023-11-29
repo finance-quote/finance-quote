@@ -27,18 +27,15 @@ use if DEBUG, 'Smart::Comments';
 
 # VERSION
 
-our @labels = qw/name date isodate last name currency/;
-
-sub features() {
-    return {'description' => 'Fetch quotes from Deutsche Bank Gruppe'};
-}
-
-sub labels {
-  return(dwsfunds => \@labels);
-}
+our @LABELS = qw/name date isodate last name currency/;
+our $DISPLAY = 'DWS Fund Data Service Germany';
+our %METHOD = (subroutine => \&dwsfunds, display => $DISPLAY, labels => \@LABELS);
 
 sub methods {
-  return(dwsfunds => \&dwsfunds);
+  return(
+      dwsfunds => \%METHOD,
+      germany => \%METHOD,
+  );
 }
 
 sub dwsfunds {

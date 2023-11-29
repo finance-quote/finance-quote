@@ -44,24 +44,17 @@ use if DEBUG, 'Smart::Comments';
 
 $FIDELITY_URL = ("https://fundresearch.fidelity.com/mutual-funds/fidelity-funds-daily-pricing-yields/download");
 
-sub features() {
-    return {'description' => 'Fetch quotes from Fidelity Investments'};
+our @LABELS = qw/exchange name number nav change ask date isodate yield price method/;
+our $DISPLAY = 'Fidelity Investments';
+our %METHOD = (subroutine => \&fidelity, labels => \@LABELS, display => $DISPLAY);
+
+sub methods {
+    return (
+        fidelity        => \%METHOD,
+        fidelity_direct => \%METHOD,
+    );
 }
 
-sub methods {return (fidelity        => \&fidelity,
-                     fidelity_direct => \&fidelity);}
-
-{
-	my @labels = qw/exchange name number nav change ask
-                        date isodate yield price method/;
-
-	sub labels { return (fidelity        => \@labels,
-	                     fidelity_direct => \@labels); }
-}
-
-# =======================================================================
-# the fidelity routine gets quotes from fidelity investments
-#
 sub fidelity
 {
     my $quoter = shift;

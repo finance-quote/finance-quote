@@ -38,19 +38,15 @@ my $FUNDATA_URL = "http://idata.fundata.com/MutualFunds/FundSnapshot.aspx?IID=";
 our @totalqueries=();
 my $maxQueries = { quantity => 3, seconds => 10};   # allow 'quantity' calls in 'seconds', then sleep
 
-sub features() {
-    return {'description' => 'Fetch Canadian mutual fund quotes from Fundata'};
-}
+our @LABELS = qw/method source name symbol currency date isodate nav/;
+our $DISPLAY = 'FUNDATA Canada';
+our %METHOD = (subroutine => \&fundata, labels => \@LABELS, display => $DISPLAY);
 
 sub methods {
-    return (canadamutual => \&fundata,
-            fundata => \&fundata);
-}
-
-sub labels {
-    my @labels = qw/method source name symbol currency date isodate nav/;
-    return (canadamutual => \@labels,
-            fundata => \@labels);
+    return (
+        canadamutual => \%METHOD,
+        fundata => \%METHOD,
+    );
 }
 
 sub sleep_before_query {

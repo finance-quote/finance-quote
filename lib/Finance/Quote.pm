@@ -37,6 +37,7 @@ use if DEBUG, 'Smart::Comments', '###';
 use Module::Load;
 use Exporter ();
 use Carp;
+use Clone qw(clone);
 use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
 use Encode;
@@ -235,40 +236,43 @@ sub _load_modules {
   my $class = shift;
   my $baseclass = ref $class || $class;
 
-  my @modules = ('HU', 'AlphaVantage'); # TODO @_;
+  my @modules = @_;
 
   # Go to each module and use them.  Also record what methods they support and
   # enter them into the %METHODS and %FEATURES hash.
 
   foreach my $module (@modules) {
-    my $modpath = "${baseclass}::${module}";
-    unless (defined($MODULES{$modpath})) {
+      my $modpath = "${baseclass}::${module}";
+      unless (defined($MODULES{$modpath})) {
 
-      eval {
-        load $modpath;
-        $MODULES{$modpath}   = 1;
+          eval {
+              load $modpath;
+              $MODULES{$modpath}   = 1;
 
-        my %methodhash       = $modpath->methods;
-        my %labelhash        = $modpath->labels;
-        my %featurehash      = $modpath->features;
-        my $curr_fields_func = $modpath->can("currency_fields") || \&default_currency_fields;
-        my @currency_fields  = &$curr_fields_func;
-        my %seen;
-        @currency_fields     = grep {!$seen{$_}++} @currency_fields;
+              my %methodhash       = $modpath->methods;
+              my $curr_fields_func = $modpath->can("currency_fields") || \&default_currency_fields;
+              my @currency_fields  = &$curr_fields_func;
+              my %seen;
+              @currency_fields     = grep {!$seen{$_}++} @currency_fields;
 
-        foreach my $method (keys %methodhash) {
-            push (@{$METHODS{$method}},
-                { name => $module,
-                    modpath => $modpath,
-                    function => $methodhash{$method},
-                    labels   => $labelhash{$method},
-                    currency_fields => \@currency_fields
-                });
-            push (@{$FEATURES{$method}}, $featurehash{$method});
-        }
-      };
-      carp $@ if $@;
-    }
+              foreach my $method (keys %methodhash) {
+                  ### push: $method
+                  push (@{$METHODS{$method}},
+                      { name     => $module,
+                          modpath  => $modpath,
+                          function => $methodhash{$method}{subroutine},
+                          labels   => $methodhash{$method}{labels},
+                          currency_fields => \@currency_fields
+                      });
+                  push (@{$FEATURES{$method}}, 
+                      {display => $methodhash{$method}{display},
+                          features => exists $methodhash{$method}{features} ? clone($methodhash{$method}{features}) : {}
+                      }
+                  );
+              }
+          };
+          carp $@ if $@;
+      }
   }
 }
 

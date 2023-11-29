@@ -32,87 +32,56 @@ use if DEBUG, 'Data::Dumper';
 
 # VERSION
 
-my $CONSORS_URL = 'https://www.consorsbank.de/web-financialinfo-service/api/marketdata/stocks?';
-my $CONSORS_SOURCE_BASE_URL = 'https://www.consorsbank.de/web/Wertpapier/';
+# Correspondence of FQ labels to Consorsbank API fields
 
-sub features() {
-    return {'description' => 'Fetch quotes from Deutsche Bank Gruppe'};
-}
+# success                            Did the stock successfully return information? (true/false)
+# errormsg    Info.Errors.ERROR_MESSAGE  If success is false, this field may contain the reason why.
+# symbol      Info.ID                Lookup symbol (ISIN, WKN, ticker symbol)
+# name        BasicV1.NAME_SECURITY  Company or Mutual Fund Name
+# method      'consorsbank'          The module (as could be passed to fetch) which found this information.
+# source                             Source URL, either general website or direct human-readable deep link
+# exchange    CONSORS_EXCHANGE_NAME  The exchange the information was obtained from.
+# currency    ISO_CURRENCY           ISO currency code
+
+# ask         ASK                    Ask
+# avg_vol                            Average Daily Vol
+# bid         BID                    Bid
+# cap                                Market Capitalization
+# close       PREVIOUS_LAST          Previous Close
+# date        DATETIME_PRICE         Last Trade Date  (MM/DD/YY format)
+# day_range   HIGH, LOW              Day's Range
+# div                                Dividend per Share
+# div_date                           Dividend Pay Date
+# div_yield                          Dividend Yield
+# eps                                Earnings per Share
+# ex_div                             Ex-Dividend Date.
+# high        HIGH                   Highest trade today
+# last        PRICE                  Last Price
+# low         LOW                    Lowest trade today
+# nav                                Net Asset Value
+# net         PERFORMANCE            Net Change
+# open        FIRST                  Today's Open
+# p_change    PERFORMANCE_PCT        Percent Change from previous day's close
+# pe                                 P/E Ratio
+# time        DATETIME_PRICE         Last Trade Time
+# type                               The type of equity returned
+# volume      TOTAL_VOLUME           Volume
+# year_range  HIGH_PRICE_1_YEAR - LOW_PRICE_1_YEAR   52-Week Range
+# yield                              Yield (usually 30 day avg)
+
+our $CONSORS_URL = 'https://www.consorsbank.de/web-financialinfo-service/api/marketdata/stocks?';
+our $CONSORS_SOURCE_BASE_URL = 'https://www.consorsbank.de/web/Wertpapier/';
+our @LABELS = qw/symbol name method source exchange currency ask bid close date day_range high last low net open p_change volume year_range/;
+our $DISPLAY = 'Consors Bank Germany';
+our %METHOD = (subroutine => \&consorsbank, labels => \@LABELS, display => $DISPLAY);
 
 sub methods {
     return (
-        consorsbank => \&consorsbank,
-        europe => \&consorsbank
+        consorsbank => \%METHOD,
+        europe => \%METHOD,
     );
 }
 
-{
-    # Correspondence of FQ labels to Consorsbank API fields
-
-    # success                            Did the stock successfully return information? (true/false)
-    # errormsg    Info.Errors.ERROR_MESSAGE  If success is false, this field may contain the reason why.
-    # symbol      Info.ID                Lookup symbol (ISIN, WKN, ticker symbol)
-    # name        BasicV1.NAME_SECURITY  Company or Mutual Fund Name
-    # method      'consorsbank'          The module (as could be passed to fetch) which found this information.
-    # source                             Source URL, either general website or direct human-readable deep link
-    # exchange    CONSORS_EXCHANGE_NAME  The exchange the information was obtained from.
-    # currency    ISO_CURRENCY           ISO currency code
-
-    # ask         ASK                    Ask
-    # avg_vol                            Average Daily Vol
-    # bid         BID                    Bid
-    # cap                                Market Capitalization
-    # close       PREVIOUS_LAST          Previous Close
-    # date        DATETIME_PRICE         Last Trade Date  (MM/DD/YY format)
-    # day_range   HIGH, LOW              Day's Range
-    # div                                Dividend per Share
-    # div_date                           Dividend Pay Date
-    # div_yield                          Dividend Yield
-    # eps                                Earnings per Share
-    # ex_div                             Ex-Dividend Date.
-    # high        HIGH                   Highest trade today
-    # last        PRICE                  Last Price
-    # low         LOW                    Lowest trade today
-    # nav                                Net Asset Value
-    # net         PERFORMANCE            Net Change
-    # open        FIRST                  Today's Open
-    # p_change    PERFORMANCE_PCT        Percent Change from previous day's close
-    # pe                                 P/E Ratio
-    # time        DATETIME_PRICE         Last Trade Time
-    # type                               The type of equity returned
-    # volume      TOTAL_VOLUME           Volume
-    # year_range  HIGH_PRICE_1_YEAR - LOW_PRICE_1_YEAR   52-Week Range
-    # yield                              Yield (usually 30 day avg)
-
-    my @labels = qw/
-        symbol
-        name
-        method
-        source
-        exchange
-        currency
-        ask
-        bid
-        close
-        date
-        day_range
-        high
-        last
-        low
-        net
-        open
-        p_change
-        volume
-        year_range
-    /;
-
-    # Function that lists the data items available from Consorsbank
-    sub labels {
-        return (
-            consorsbank => \@labels,
-            europe => \@labels);
-    }
-}
 
 sub consorsbank {
 

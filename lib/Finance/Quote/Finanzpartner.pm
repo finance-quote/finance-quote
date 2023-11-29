@@ -29,12 +29,15 @@ use Encode;
 
 my $FINANZPARTNER_URL = "https://www.finanzpartner.de/fi/";
 
-sub features() {
-    return {'description' => 'Fetch quotes from Finanzpartner.de'};
-}
+our @LABELS = qw/name date price last method/;
+our $DISPLAY = 'Finanz Partner Germany';
+our %METHOD = (subroutine => \&finanzpartner, labels => \@LABELS, display => $DISPLAY);
 
-sub methods {return (finanzpartner        => \&finanzpartner);}
-sub labels { return (finanzpartner=>[qw/name date price last method/]); } # TODO
+sub methods {
+    return (
+        finanzpartner => \%METHOD,
+    );
+}
 
 sub finanzpartner
 {

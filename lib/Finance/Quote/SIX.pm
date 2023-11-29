@@ -30,18 +30,12 @@ use Scalar::Util qw(looks_like_number);
 
 # VERSION
 
-our @labels = qw/last date isodate/;
-
-sub features() {
-    return {'description' => 'Fetch quotes from the Swiss Stock Exchange'};
-}
-
-sub labels {
-  return ( six => \@labels );
-}
+our @LABELS = qw/last date isodate/;
+our $DISPLAY = 'Swiss Stock Exchange';
+our %METHOD = (subroutine => \&six, labels => \@LABELS, display => $DISPLAY);
 
 sub methods {
-  return ( six => \&six );
+  return ( six => \%METHOD);
 }
 
 sub six {

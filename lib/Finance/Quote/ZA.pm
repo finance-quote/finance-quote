@@ -29,18 +29,14 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/method source name symbol currency last date isodate high low p_change/;
-
-sub features() {
-    return {'description' => 'Fetch quotes from sharenet.co.za'};
-}
-
-sub labels {
-  return ( sharenet => \@labels );
-}
+our @LABELS = qw/method source name symbol currency last date isodate high low p_change/;
+our $DISPLAY = 'Sharenet South Africa';
+our %METHOD = (subroutine => \&sharenet, labels => \@LABELS, display => $DISPLAY);
 
 sub methods {
-  return ( za => \&sharenet );
+    return (
+        za => \%METHOD,
+    );
 }
 
 sub sharenet {

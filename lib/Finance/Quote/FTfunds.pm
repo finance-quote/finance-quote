@@ -65,26 +65,16 @@ $FTFUNDS_MAIN_URL   =   "https://markets.ft.com";
 $FTFUNDS_LOOK_LD    =   "https://markets.ft.com/data/funds/tearsheet/summary?s=";
 $FTFUNDS_LOOK_UD    =	"http://funds.ft.com/UnlistedTearsheet/Summary?s=";
 
-                        # this will work with ISIN codes only.
+our @LABELS = qw/name currency last date time price nav source iso_date method net p_change success errormsg/;
+our $DISPLAY = 'Financial Times';
+our %METHOD = (subroutine => \&ftfunds_fund, labels => \@LABELS, display => $DISPLAY);
 
-# FIXME -
-
-sub features() {
-    return {'description' => 'Fetch quotes from Financial Times Funds'};
+sub methods { 
+    return (
+        ftfunds => \%METHOD,
+		ukfunds => \%METHOD,
+    );
 }
-
-sub methods { return (ftfunds => \&ftfunds_fund,
-		      ukfunds => \&ftfunds_fund); }
-
-{
-    my @labels = qw/name currency last date time price nav source iso_date method net p_change success errormsg/;
-
-    sub labels { return (ftfunds => \@labels,
-			 ukfunds => \@labels); }
-}
-
-#
-# =======================================================================
 
 sub ftfunds_fund  {
     my $quoter = shift;

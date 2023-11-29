@@ -34,18 +34,14 @@ use HTTP::Request;
 
 my $TREASURY_DIRECT_URL = 'https://www.treasurydirect.gov/GA-FI/FedInvest/todaySecurityPriceDate.htm';
 
-sub features() {
-    return {'description' => 'Fetch quotes from Treasury Direct'};
-}
+our @LABELS = qw/ method source symbol rate bid ask price date isodate /;
+our $DISPLAY = 'Treasure Direct USA';
+our %METHOD = (subroutine => \&treasurydirect, labels => \@LABELS, display => $DISPLAY);
 
 sub methods {
-  return treasurydirect => \&treasurydirect;
-}
-
-
-sub labels {
-  my @labels = qw/ method source symbol rate bid ask price date isodate /;
-  return treasurydirect => \@labels;
+    return (
+        treasurydirect => \%METHOD,
+    );
 }
 
 sub treasurydirect {

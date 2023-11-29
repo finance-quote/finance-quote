@@ -26,17 +26,11 @@ use HTML::TreeBuilder::XPath;
 # VERSION 
 
 our $FONDSWEB_URL = "https://www.fondsweb.com/de/";
+our @LABELS = qw/name symbol isin date isodate year_range nav last price currency source method type/;
+our $DISPLAY = 'Fondsweb Germnay';
+our %METHOD = (subroutine => \&fondsweb, labels => \@LABELS, display => $DISPLAY);
 
-sub features() {
-    return {'description' => 'Fetch quotes from Fondsweb Germany'};
-}
-
-sub methods { return ( fondsweb => \&fondsweb ); }
-
-{
-	my @labels = qw/name symbol isin date isodate year_range nav last price currency source method type/;
-	sub labels { return (fondsweb => \@labels); }
-}
+sub methods { return ( fondsweb => \%METHOD ); }
 
 # 123.456.789,00 -> 123456789.00
 sub decimalPeriod {

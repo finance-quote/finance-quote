@@ -12,18 +12,18 @@ use Encode;
 
 use vars qw($BLOOMBERG_URL);
 
-$BLOOMBERG_URL = 'https://www.bloomberg.com/quote/';
+our $BLOOMBERG_URL = 'https://www.bloomberg.com/quote/';
+our $DISPLAY = 'Bloomberg';
+our @LABELS = qw/method name last currency symbol isodate/;
 
-sub features() {
-    return {'description' => 'Fetch from Bloomberg.com'};
-}
-
-sub methods { return (bloomberg => \&bloomberg); }
-
-{
-  my @labels = qw/method name last currency symbol isodate/;
-
-  sub labels { return (bloomberg => \@labels); }
+sub methods { 
+    return (
+        bloomberg => {
+            subroutine => \&bloomberg,
+            display => $DISPLAY,
+            labels => \@LABELS
+        }
+    );
 }
 
 sub bloomberg {

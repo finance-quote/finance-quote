@@ -27,18 +27,12 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/last date isodate/;
-
-sub features() {
-    return {'description' => 'Fetch quotes from comdirect.de'};
-}
-
-sub labels {
-  return ( comdirect => \@labels );
-}
+our @LABELS = qw/last date isodate/;
+our $DISPLAY = 'comdirect Germany';
+our %METHOD = (subroutine => \&comdirect, labels => \@LABELS, display => $DISPLAY);
 
 sub methods {
-  return ( comdirect => \&comdirect );
+  return ( comdirect => \%METHOD );
 }
 
 sub comdirect {

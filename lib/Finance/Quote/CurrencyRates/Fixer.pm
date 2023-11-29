@@ -28,7 +28,7 @@ use JSON;
 # VERSION
 
 sub features() {
-    return {'description' => 'Fetch currency rates from fixer.io',
+    return {'display' => 'Fixer.io',
         'features' => {'API_KEY' => {'description' => 'registered user API key'}}};
 }
 

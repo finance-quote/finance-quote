@@ -25,52 +25,31 @@ use Web::Scraper;
 
 # VERSION
 
-my $BAMOSZ_MAINURL  = "http://www.bamosz.hu/";
-my $BAMOSZ_URL      = $BAMOSZ_MAINURL . "alapoldal?isin=";
-my $BAMOSZ_DISPLAY  = "Hungarian Investment Fund and Asset Management Companies";
+our $BAMOSZ_MAINURL  = "http://www.bamosz.hu/";
+our $BAMOSZ_URL      = $BAMOSZ_MAINURL . "alapoldal?isin=";
+our $BAMOSZ_DISPLAY  = "Hungarian Investment Fund and Asset Management Companies";
+our @BAMOSZ_LABELS   = qw/symbol method source name currency isin date isodate price last/;
+our %BAMOSZ_METHOD   = (subroutine => \&bamosz, labels => \@BAMOSZ_LABELS, display => $BAMOSZ_DISPLAY);
 
-my $BSE_MAINURL     = "http://www.bet.hu/";
-my $BSE_URL         = $BSE_MAINURL . '/oldalak/ceg_adatlap/$security/';
-my $BSE_DISPLAY     = "Budapest Stock Exchange";
+our $BSE_MAINURL     = "http://www.bet.hu/";
+our $BSE_URL         = $BSE_MAINURL . '/oldalak/ceg_adatlap/$security/';
+our $BSE_DISPLAY     = "Budapest Stock Exchange";
+our @BSE_LABELS      = qw/symbol method source currency isin date isodate price open close high low p_change last/;
+our %BSE_METHOD      = (subroutine => \&bse, labels => \@BSE_LABELS, display => $BSE_DISPLAY);
 
-my $HU_DISPLAY      = "Budapest Stock Exchange & Hungarian Investment Fund and Asset Management Companies";
-
-sub features {
-    return ( hufund  => {display => $BAMOSZ_DISPLAY},
-             bamosz  => {display => $BAMOSZ_DISPLAY},
-             hustock => {display => $BSE_DISPLAY},
-             bse     => {display => $BSE_DISPLAY},
-             bet     => {display => $BSE_DISPLAY},
-             hu      => {display => $HU_DISPLAY},
-             hungary => {display => $HU_DISPLAY} );
-}
-
-
+our $HU_DISPLAY      = "Budapest Stock Exchange & Hungarian Investment Fund and Asset Management Companies";
+our @HU_LABELS       = (@BSE_LABELS, "name");
+our %HU_METHOD       = (subroutine => \&hu, labels => \@HU_LABELS, display => $HU_DISPLAY);
+    
 sub methods {
-    return ( hufund  => \&bamosz,
-             bamosz  => \&bamosz,
-             hustock => \&bse,
-             bse     => \&bse,
-             bet     => \&bse,
-             hu      => \&hu,
-             hungary => \&hu
-    );
-}
-
-sub labels {
-    my @fundlabels =
-        qw/symbol method source name currency isin date isodate price last/;
-    my @stocklabels =
-        qw/symbol method source currency isin date isodate price open close
-           high low p_change last/;
-    my @alllabels = ( @stocklabels, "name" );
-    return ( hufund  => \@fundlabels,
-             bamosz  => \@fundlabels,
-             hustock => \@stocklabels,
-             bse     => \@stocklabels,
-             bet     => \@stocklabels,
-             hu      => \@alllabels,
-             hungary => \@alllabels
+    return ( 
+        hufund  => \%BAMOSZ_METHOD,
+        bamosz  => \%BAMOSZ_METHOD,
+        hustock => \%BSE_METHOD,
+        bse     => \%BSE_METHOD,
+        bet     => \%BSE_METHOD,
+        hu      => \%HU_METHOD,
+        hungary => \%HU_METHOD
     );
 }
 

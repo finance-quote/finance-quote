@@ -35,18 +35,14 @@ my $cachedir = $ENV{TMPDIR} // $ENV{TEMP} // '/tmp/';
 my $NSE_ZIP = $cachedir.'nseindia.zip';
 my $NSE_CSV = $cachedir.'nseindia.csv';
 
-sub features() {
-    return {'description' => 'Fetch quotes from NSE India'};
-}
+our @LABELS = qw/close last high low open prevclose exchange/;
+our $DISPLAY = 'National Stock Exchange India';
+our %METHOD = (subroutine => \&nseindia, labels => \@LABELS, display => $DISPLAY);
 
-sub methods { return ( 'india' => \&nseindia,
-                       'nseindia' => \&nseindia ); }
-
-sub labels {
-    my @labels = qw/close last high low open prevclose exchange/;
-    return (
-    india => \@labels,
-    nseindia => \@labels
+sub methods { 
+    return ( 
+        'india' => \%METHOD,
+        'nseindia' => \%METHOD,
     );
 }
 

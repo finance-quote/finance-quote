@@ -28,7 +28,7 @@ use JSON;
 # VERSION
 
 sub features() {
-    return {'description' => 'Fetch currency rates from openexchangerates.org',
+    return {'display' => 'Open Exchange Rates',
         'features' => {'API_KEY' => {'description' => 'registered user API key'}}};
 }
 

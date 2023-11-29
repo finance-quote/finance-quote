@@ -29,18 +29,12 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/last date isodate/;
-
-sub features() {
-    return {'description' => 'Fetch Colombo Stock Exchange in Sri Lanka'};
-}
-
-sub labels {
-  return ( cse => \@labels );
-}
+our @LABELS = qw/last date isodate/;
+our $DISPLAY = 'Colombo Stock Exchange Sri Lanka';
+our %METHOD = (subroutine => \&cse, labels => \@LABELS, display => $DISPLAY);
 
 sub methods {
-  return ( cse => \&cse );
+  return ( cse => \%METHOD );
 }
 
 sub cse {

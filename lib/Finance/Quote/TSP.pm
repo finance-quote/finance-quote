@@ -48,15 +48,14 @@ $TSP_URL      = 'https://www.tsp.gov/data/fund-price-history.csv';
 $TSP_MAIN_URL = 'http://www.tsp.gov';
 @HEADERS      = ('user-agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36');
 
-sub features() {
-    return {'description' => 'Fetch quotes for Thrift Savings Plan from tsp.gov'};
-}
+our @LABELS = qw/name date isodate currency close/;
+our $DISPLAY = 'Thrift Savings Plan USA';
+our %METHOD = (subroutine => \&tsp, labels => \@LABELS, display => $DISPLAY);
 
-sub methods { return (tsp => \&tsp) }
-
-{
-  my @labels = qw/name date isodate currency close/;
-  sub labels { return (tsp => \@labels); }
+sub methods {
+    return ( 
+        tsp => \%METHOD,
+    );
 }
 
 sub format_name {

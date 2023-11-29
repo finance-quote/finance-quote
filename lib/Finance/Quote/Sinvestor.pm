@@ -30,21 +30,15 @@ use Web::Scraper;
 
 my $Sinvestor_URL = 'https://web.s-investor.de/app/detail.htm?isin=';
 
+our @LABELS = qw/symbol last close exchange volume open price change p_change/;
+our $DISPLAY = 'S-Investor German Sparkasse';
+our %METHOD = (subroutine => \&sinvestor, labels => \@LABELS, display => $DISPLAY);
+
 sub methods {
-  return (sinvestor => \&sinvestor,
-          europe    => \&sinvestor);
-}
-
-sub features() {
-    return {'description' => 'Fetch quotes from s-investor.de',
-        'features' => {'INST_ID' => {'description' => 'institute id for fetch (default 0000057 for Krefeld'}}};
-}
-
-our @labels = qw/symbol last close exchange volume open price change p_change/;
-
-sub labels {
-  return (sinvestor => \@labels,
-          europe    => \@labels);
+    return (
+        sinvestor => \%METHOD,
+        europe    => \%METHOD,
+    );
 }
 
 sub sinvestor {
