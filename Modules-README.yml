@@ -430,15 +430,18 @@
   testcases:
 #
 - module: Finanzpartner.pm
-  state: TBD
+  state: working
   added: TBD
-  changed: ~
+  changed: 2023-11-27
   removed: ~
-  urls:
+  urls: https://www.finanzpartner.de/fi/
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: finanzpartner.t
   testcases:
+   - "LU0293315023", 
+   - "LU0856992614", 
+   - "LU1720050803".
 #
 - module: Fool.pm
   state: working
