@@ -16,11 +16,11 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-my @valid    = ('DE0008404005', 'NL0011540547', 'FR0000120628', 'XS0937858271', 'NL0000009165');
+my @valid    = ('DE0008404005', 'NL0011540547', 'FR0000120628', 'XS2630111719', 'NL0000009165');
 my @invalid  = ('BOGUS');
 my @symbols  = (@valid, @invalid);
 my $today    = today();
-my $window   = 32;   # XS0937858271 quotes are only updates 1-2 a month
+my $window   = 32;   # XS2630111719 quotes are only updates 1-2 a month
 
 my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_reference)
                 'success'  => sub {$_[0]},
