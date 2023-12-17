@@ -395,11 +395,11 @@
   state: working
   added: TBD
   changed: 2020-03-21
-  removed: ~
+  removed: 2023-12-16
   urls:
     - https://fundresearch.fidelity.com/mutual-funds/fidelity-funds-daily-pricing-yields/download
   apikey: false
-  notes: ~
+  notes: Disabled 2023-12-16. Removed from Quote.pm until issue 346 is fixed.
   testfile: fidelity.t
   testcases:
     - FGRIX
@@ -430,15 +430,18 @@
   testcases:
 #
 - module: Finanzpartner.pm
-  state: TBD
+  state: working
   added: TBD
-  changed: ~
+  changed: 2023-11-27
   removed: ~
-  urls:
+  urls: https://www.finanzpartner.de/fi/
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: finanzpartner.t
   testcases:
+   - "LU0293315023", 
+   - "LU0856992614", 
+   - "LU1720050803".
 #
 - module: Fool.pm
   state: working
@@ -493,7 +496,7 @@
 - module: GoogleWeb.pm
   state: working
   added: 2023-09-16
-  changed: ~
+  changed: 2023-12-16
   removed: ~
   urls: https://www.google.com/finance/
   apikey: false
@@ -501,8 +504,10 @@
   testfile: googleweb.t
   testcases:
     - AAPL
+    - ESML
     - KNW
     - GE
+    - NULC
 #
 - module: HEX.pm
   state: TBD

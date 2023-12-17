@@ -35,12 +35,9 @@ use if DEBUG, 'Smart::Comments', '###';
 
 my $GOOGLE_URL = 'https://www.google.com/finance/';
 
-sub features() {
-    return {'description' => 'Google Finance Web Pages. US Markets and Mutual Funds.'};
-}
-
 sub methods {
   return (googleweb => \&googleweb,
+          bats      => \&googleweb,
           nyse      => \&googleweb,
           nasdaq    => \&googleweb);
 }
@@ -49,6 +46,7 @@ our @labels = qw/symbol name last date currency method/;
 
 sub labels { 
   return (googleweb => \@labels,
+          bats      => \@labels,
           nyse      => \@labels,
           nasdaq    => \@labels); 
 }
@@ -86,8 +84,8 @@ sub googleweb {
       $tree = HTML::TreeBuilder->new;
       if ($tree->parse_content($body)) {
         #
-        # Get link with exchange appended (NYSE|NASDAQ|NYSEAMERICAN)
-        $taglink = $tree->look_down(_tag => 'a', href => qr!^./quote/$ucstock:(MUTF|NYSE|NASDAQ|NYSEAMERICAN)!);
+        # Get link with exchange appended (MUTF|NYSE|NASDAQ|NYSEAMERICAN|BATS)
+        $taglink = $tree->look_down(_tag => 'a', href => qr!^./quote/$ucstock:(MUTF|NYSE|NASDAQ|NYSEAMERICAN|BATS)!);
         if ($taglink) {
           $link = $taglink->attr('href');
           $link =~ s|\./quote|quote|;
@@ -199,7 +197,7 @@ This module is loaded by default on a Finance::Quote object. It's also possible
 to load it explicitly by placing "googleweb" in the argument list to
 Finance::Quote->new().
 
-This module provides "googleweb", "nyse", and "nasdaq"
+This module provides "googleweb", "bats", "nyse", and "nasdaq"
 fetch methods.
 
 =head1 LABELS RETURNED
@@ -226,5 +224,5 @@ The following labels are returned:
 
 While the Google Finance web pages contain price information from other
 stock exchanges, this module currently retrieves last trade prices for
-securities listed on the NYSE, American, and NASDAQ stock exchanges.
+securities listed on the NYSE, American, BATS, and NASDAQ stock exchanges.
 U.S. Mutual Funds quotes can also be retrieved with this module.
