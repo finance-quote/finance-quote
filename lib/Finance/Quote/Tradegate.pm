@@ -69,7 +69,7 @@ sub tradegate {
       my $symlen = length($symbol);
 
       my $tree = HTML::TreeBuilder->new_from_url($url);
-      
+
       my $lastvalue = $tree->look_down('class'=>'si_seitenbezeichnung');
 
       if (defined($lastvalue)) {
@@ -112,50 +112,63 @@ sub tradegate {
         @child = $td1->content_list;
         my $volume = $child[0];
 
-        $lastvalue = ($tree->look_down('class'=>'contentBox oneColum'))[1];
+        my @searchvalue = $tree->look_down('class'=>'contentBox oneColum');
+        my $isFound = 0;
+        foreach (@searchvalue)
+        {
+          if (($_->content_list)[0]{'_content'}[0]{'_content'}[0] eq 'Aktuelle Vergleichszahlen')
+          {
+            $isFound = 1;
 
-        #-- change (absolute change)
-        $td1 = ($lastvalue->look_down('_tag'=>'td'))[13];
-        @child = $td1->content_list;
-        my $change = $child[0];
-        $change =~ s/\.//g;
-        $change =~ s/,/\./;
-        my $encchange = encode_entities($change);
-        my @splitcchange= split ('&',$encchange);
-        $change = $splitcchange[0];
+            #-- change (absolute change)
+            $td1 = ($_->look_down('_tag'=>'td'))[13];
+            @child = $td1->content_list;
+            my $change = $child[0];
+            $change =~ s/\.//g;
+            $change =~ s/,/\./;
+            my $encchange = encode_entities($change);
+            my @splitcchange= split ('&',$encchange);
+            $change = $splitcchange[0];
 
-        #-- p_change (relative change)
-        $td1 = ($lastvalue->look_down('_tag'=>'td'))[16];
-        @child = $td1->content_list;
-        my $p_change =$child[0];
-        $p_change =~ s/[\.|%]//g;
-        $p_change =~ s/,/\./;
+            #-- p_change (relative change)
+            $td1 = ($_->look_down('_tag'=>'td'))[16];
+            @child = $td1->content_list;
+            my $p_change =$child[0];
+            $p_change =~ s/[\.|%]//g;
+            $p_change =~ s/,/\./;
 
-        #-- close
-        $td1 = ($lastvalue->look_down('_tag'=>'td'))[34];
-        @child = $td1->content_list;
-        my $close =$child[0];
-        $close =~ s/\.//g;
-        $close =~ s/,/\./;
-        my $encclose = encode_entities($close);
-        my @splitclose= split ('&',$encclose);
-        $close = $splitclose[0];
-  
-  
-        $info{$symbol, 'success'}   = 1;
-        $info{$symbol, 'method'}    = 'Tradegate';
-        $info{$symbol, 'symbol'}    = $isin;
-        $info{$symbol, 'name'}      = $sharename;
-        $info{$symbol, 'exchange'}  = $exchange;
-        $info{$symbol, 'last'}      = $price;
-        $info{$symbol, 'price'}     = $price;
-        $info{$symbol, 'close'}     = $close;
-        $info{$symbol, 'change'}    = $change;
-        $info{$symbol, 'p_change'}  = $p_change;
-        $info{$symbol, 'volume'}    = $volume;
-        $info{$symbol, 'currency'}  = $currency;
-  #      $info{$symbol, 'date'}     = $date;
-        $quoter->store_date(\%info, $symbol, {eurodate => $date});
+            #-- close
+            $td1 = ($_->look_down('_tag'=>'td'))[34];
+            @child = $td1->content_list;
+            my $close = $child[0];
+            $close =~ s/\.//g;
+            $close =~ s/,/\./;
+            my $encclose = encode_entities($close);
+            my @splitclose= split ('&',$encclose);
+            $close = $splitclose[0];
+
+            $info{$symbol, 'success'}   = 1;
+            $info{$symbol, 'method'}    = 'Tradegate';
+            $info{$symbol, 'symbol'}    = $isin;
+            $info{$symbol, 'name'}      = $sharename;
+            $info{$symbol, 'exchange'}  = $exchange;
+            $info{$symbol, 'last'}      = $price;
+            $info{$symbol, 'price'}     = $price;
+            $info{$symbol, 'close'}     = $close;
+            $info{$symbol, 'change'}    = $change;
+            $info{$symbol, 'p_change'}  = $p_change;
+            $info{$symbol, 'volume'}    = $volume;
+            $info{$symbol, 'currency'}  = $currency;
+            #$info{$symbol, 'date'}     = $date;
+            $quoter->store_date(\%info, $symbol, {eurodate => $date});
+          }
+        }
+
+        if (!$isFound)
+        {
+           $info{$symbol, 'success'}  = 0;
+           $info{$symbol, 'errormsg'} = "Error retreiving $symbol: $@";
+        }
       }
     };
     if ($@) {
