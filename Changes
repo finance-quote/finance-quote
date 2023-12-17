@@ -1,5 +1,5 @@
 {{$NEXT}}
-  * Fixed XETRA, Tradegate and SInvestor after webpage was restructured - Issue #350
+	* Fixed XETRA, Tradegate and SInvestor after webpage was restructured - Issue #350
 	* Fidelity.pm temporarily disabled - Issue #346
 	* Finanzpartner.pm - Fix scraper, did not work if quote was higher than the previous day's quote.
 	* GoogleWeb.pm - Updated to retrieve mutual fund nd BATS prices - Issue #355
