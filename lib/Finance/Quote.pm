@@ -73,7 +73,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     DWS
     Deka
     FTfunds
-    Fidelity
     Finanzpartner
     Fondsweb
     Fool
@@ -113,7 +112,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
-@EXPORT_OK = qw/fidelity troweprice asx tiaacref
+@EXPORT_OK = qw/troweprice asx tiaacref
                 currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
@@ -1695,7 +1694,6 @@ http://www.gnucash.org/
   Finance::Quote::DWS,
   Finance::Quote::Deka,
   Finance::Quote::FTfunds,
-  Finance::Quote::Fidelity,
   Finance::Quote::Finanzpartner,
   Finance::Quote::Fondsweb,
   Finance::Quote::Fool,

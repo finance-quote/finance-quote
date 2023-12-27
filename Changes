@@ -1,5 +1,8 @@
 {{$NEXT}}
-	* GoogleWeb.pm - Updated to retrieve mutual fund prices
+	* Fixed XETRA, Tradegate and SInvestor after webpage was restructured - Issue #350
+	* Fidelity.pm temporarily disabled - Issue #346
+	* Finanzpartner.pm - Fix scraper, did not work if quote was higher than the previous day's quote.
+	* GoogleWeb.pm - Updated to retrieve mutual fund nd BATS prices - Issue #355
 	* TMX.pm - Correct a self-reference in documentation - PR #345
 	* Stooq.pm - Added new currencies and a fix for commodities' prices
 	* YahooWeb.pm - Skip rows in the price table where the prices ar "-".
