@@ -255,20 +255,26 @@ sub _load_modules {
               my %seen;
               @currency_fields     = grep {!$seen{$_}++} @currency_fields;
 
+              ### iterating: %methodhash
               foreach my $method (keys %methodhash) {
-                  ### push: $method
-                  push (@{$METHODS{$method}},
-                      { name     => $module,
-                          modpath  => $modpath,
-                          function => $methodhash{$method}{subroutine},
-                          labels   => $methodhash{$method}{labels},
-                          currency_fields => \@currency_fields
-                      });
-                  push (@{$FEATURES{$method}}, 
-                      {display => $methodhash{$method}{display},
-                          features => exists $methodhash{$method}{features} ? clone($methodhash{$method}{features}) : {}
+                  if (ref $methodhash{$method} eq ref {}
+                      && exists $methodhash{$method}{subroutine}
+                      && exists $methodhash{$method}{labels}
+                      && exists $methodhash{$method}{display} ) {
+                          ### push: $method
+                          push (@{$METHODS{$method}},
+                              { name     => $module,
+                                  modpath  => $modpath,
+                                  function => $methodhash{$method}{subroutine},
+                                  labels   => $methodhash{$method}{labels},
+                                  currency_fields => \@currency_fields
+                              });
+                          push (@{$FEATURES{$method}}, 
+                              {display => $methodhash{$method}{display},
+                                  features => exists $methodhash{$method}{features} ? clone($methodhash{$method}{features}) : {}
+                              }
+                          );
                       }
-                  );
               }
           };
           carp $@ if $@;
