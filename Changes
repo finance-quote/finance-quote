@@ -3,6 +3,11 @@
 	* Fidelity.pm temporarily disabled - Issue #346
 	* Finanzpartner.pm - Fix scraper, did not work if quote was higher than the previous day's quote.
 	* GoogleWeb.pm - Updated to retrieve mutual fund nd BATS prices - Issue #355
+	* BSEIndia.pm - Updated to use standardised data file at URL
+          https://www.bseindia.com/download/BhavCopy/Equity/BSE_EQ_BHAVCOPY_{DDMMYYYY}.ZIP
+          Eliminated need to use temp folders by storing standardised file data from URL into a variable.
+          Updated names of source fields to conform to those in the standardised data file
+        * IndiaMutual.pm - Eliminated need to use temp folders by storing nav file data from URL into a variable.
 	* TMX.pm - Correct a self-reference in documentation - PR #345
 	* Stooq.pm - Added new currencies and a fix for commodities' prices
 	* YahooWeb.pm - Skip rows in the price table where the prices ar "-".
