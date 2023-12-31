@@ -551,7 +551,6 @@ http://www.gnucash.org/
     Finance::Quote::DWS,
     Finance::Quote::Deka,
     Finance::Quote::FTfunds,
-    Finance::Quote::Fidelity,
     Finance::Quote::Finanzpartner,
     Finance::Quote::Fondsweb,
     Finance::Quote::Fool,

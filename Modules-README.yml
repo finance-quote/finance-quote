@@ -392,7 +392,7 @@
     - GB00B7W6PR65
 #
 - module: Fidelity.pm
-  state: working
+  state: Not Working
   added: TBD
   changed: 2020-03-21
   removed: 2023-12-16
