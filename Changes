@@ -2,16 +2,16 @@
 	* Fixed XETRA, Tradegate and SInvestor after webpage was restructured - Issue #350
 	* Fidelity.pm temporarily disabled - Issue #346
 	* Finanzpartner.pm - Fix scraper, did not work if quote was higher than the previous day's quote.
-	* GoogleWeb.pm - Updated to retrieve mutual fund nd BATS prices - Issue #355
-	* BSEIndia.pm - Updated to use standardised data file at URL
-          https://www.bseindia.com/download/BhavCopy/Equity/BSE_EQ_BHAVCOPY_{DDMMYYYY}.ZIP
-          Eliminated need to use temp folders by storing standardised file data from URL into a variable.
-          Updated names of source fields to conform to those in the standardised data file
-        * IndiaMutual.pm - Eliminated need to use temp folders by storing nav file data from URL into a variable.
+	* GoogleWeb.pm - Updated to retrieve mutual fund and BATS prices - Issue #355
+	* BSEIndia.pm - Updated to use standardized data file at URL
+	  https://www.bseindia.com/download/BhavCopy/Equity/BSE_EQ_BHAVCOPY_{DDMMYYYY}.ZIP
+	  Eliminated need to use temp folders by storing standardized file data from URL into a variable.
+	  Updated names of source fields to conform to those in the standardized data file
+	* IndiaMutual.pm - Eliminated need to use temp folders by storing nav file data from URL into a variable.
 	* TMX.pm - Correct a self-reference in documentation - PR #345
 	* Stooq.pm - Added new currencies and a fix for commodities' prices
-	* YahooWeb.pm - Skip rows in the price table where the prices ar "-".
-	  This seems to happen sometimes with TIAA (and perhaps other) secyrutues
+	* YahooWeb.pm - Skip rows in the price table where the prices are "-".
+	  This seems to happen sometimes with TIAA (and perhaps other) securities
 	  including TILIX and QCILIX
 	* TSP.pm - Was not returning hash when the HTTP GET failed completely
 	  or the content did not contain the expected CSV file. - Issue #338
