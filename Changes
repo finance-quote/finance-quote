@@ -1,5 +1,24 @@
 {{$NEXT}}
 
+1.59      2023-12-31 14:52:12-08:00 America/Los_Angeles
+	* Fixed XETRA, Tradegate and SInvestor after webpage was restructured - Issue #350
+	* Fidelity.pm temporarily disabled - Issue #346
+	* Finanzpartner.pm - Fix scraper, did not work if quote was higher than the previous day's quote.
+	* GoogleWeb.pm - Updated to retrieve mutual fund and BATS prices - Issue #355
+	* BSEIndia.pm - Updated to use standardized data file at URL
+	  https://www.bseindia.com/download/BhavCopy/Equity/BSE_EQ_BHAVCOPY_{DDMMYYYY}.ZIP
+	  Eliminated need to use temp folders by storing standardized file data from URL into a variable.
+	  Updated names of source fields to conform to those in the standardized data file
+	* IndiaMutual.pm - Eliminated need to use temp folders by storing nav file data from URL into a variable.
+	* TMX.pm - Correct a self-reference in documentation - PR #345
+	* Stooq.pm - Added new currencies and a fix for commodities' prices
+	* YahooWeb.pm - Skip rows in the price table where the prices are "-".
+	  This seems to happen sometimes with TIAA (and perhaps other) securities
+	  including TILIX and QCILIX
+	* TSP.pm - Was not returning hash when the HTTP GET failed completely
+	  or the content did not contain the expected CSV file. - Issue #338
+	* BSEIndia.pm - Removed print when symbol not found - Issue #335
+
 1.58      2023-08-12 10:59:05-07:00 America/Los_Angeles
 	* Consorsbank.pm - New module - PR #329
 	* Stooq.pm - New module - Issue #203

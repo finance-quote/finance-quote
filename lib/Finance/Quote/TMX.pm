@@ -126,7 +126,7 @@ sub tmx {
 
 =head1 NAME
 
-Finance::Quote::TSX - Obtain quotes from the Toronto Stock Exchange 
+Finance::Quote::TMX - Obtain quotes from the Toronto Stock Exchange 
 (https://money.tmx.com)
 
 =head1 SYNOPSIS

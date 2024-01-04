@@ -56,21 +56,21 @@ sub amfiindia   {
     my @symbols = @_;
 
     # Make sure symbols are requested
-    ##CAN exit more gracefully - add later##
 
     return unless @symbols;
 
     # Local Variables
     my %fundquote;
     my($ua, $url, $reply);
-
-    $ua = $quoter->user_agent;
-
+	my($req, $output);						# Added for retrieving file contents to variable
+	
     $url = "$AMFI_URL";
 
-    ### cache : $AMFI_NAV_LIST
-  
-    $reply = $ua->get($url);
+ 	# Code to read file into variable
+    $ua = $quoter->get_user_agent();
+    $ua->agent("");							# make user_agent as empty for a conducive server response
+	$req = HTTP::Request->new(GET => $url);	#done to avoid downloading file
+	$reply = $ua->request($req);
 
     # Make sure something is returned
     unless ($reply->is_success or $reply->code == RC_NOT_MODIFIED) {
@@ -82,7 +82,7 @@ sub amfiindia   {
     }
 
     # Attach body of response to IO::String object for file-like processing
-    my $nav_fh = IO::String->new($reply->content)
+    # my $nav_fh = IO::String->new($reply->content)
 ;
     # Create a hash of all stocks requested
     my %symbolhash;
@@ -91,12 +91,25 @@ sub amfiindia   {
         $symbolhash{$symbol} = 0;
     }
 
+	# Read whole file from variable into array
+	$output = $reply->content;
+	my @array = split("\n", $output);
+	my @words;
+	
     #Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Net Asset Value;Date
-    while (<$nav_fh>) {
+    # Note it is best to use Scheme Code as not all rows have ISINs in the source file
+    foreach (@array) {
       next if !/\;/;
       chomp;
       s/\r//;
-          my ($symbol1, $symbol2, $symbol3, $name, $nav, $date) = split /\s*\;\s*/;
+      
+      @words = split(";", $_);					#the delimiter is ; not a ,
+     
+      my ($symbol1, $symbol2, $symbol3, $name, $nav, $date);
+      $symbol1 = $words[0];
+	  $symbol2 = $words[1];
+	  $symbol3 = $words[2];
+	  
       my $symbol;
       if (exists $symbolhash{$symbol1}) {
           $symbol = $symbol1;
@@ -115,12 +128,12 @@ sub amfiindia   {
       $fundquote{$symbol, "source"} = $AMFI_MAIN_URL;
       $fundquote{$symbol, "link"} = $url;
       $fundquote{$symbol, "method"} = "amfiindia";
-      $fundquote{$symbol, "name"} = $name;
-      $fundquote{$symbol, "nav"} = $nav;
-      $quoter->store_date(\%fundquote, $symbol, {eurodate => $date});
+      $fundquote{$symbol, "name"} = $words[3];
+      $fundquote{$symbol, "nav"} = $words[4];
+      $quoter->store_date(\%fundquote, $symbol, {eurodate => $words[5]});
+      
       $fundquote{$symbol, "success"} = 1;
     }
-    close($nav_fh);
 
     foreach my $symbol (@symbols) {
     unless (exists $fundquote{$symbol, 'success'}) {

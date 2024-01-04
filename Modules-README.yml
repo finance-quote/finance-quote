@@ -123,10 +123,10 @@
 - module: BSEIndia.pm
   state: working
   added: 2020-06-27
-  changed:
+  changed: 2023-12-27
   removed:
   urls:
-    - https://www.bseindia.com/download/BhavCopy/Equity/EQ_ISINCODE_${DDMMYY}.zip
+    - https://www.bseindia.com/download/BhavCopy/Equity/BSE_EQ_BHAVCOPY_{DDMMYYYY}.ZIP
   methods:
     - india
     - bseindia
@@ -135,7 +135,6 @@
     Module to fetch equity quotes from https://www.bseindia.com/
   testfile: bseindia.t
   testcases:
-    - 500010
     - 532540
     - INE009A01021
     - INE062A01020
@@ -393,14 +392,14 @@
     - GB00B7W6PR65
 #
 - module: Fidelity.pm
-  state: working
+  state: Not Working
   added: TBD
   changed: 2020-03-21
-  removed: ~
+  removed: 2023-12-16
   urls:
     - https://fundresearch.fidelity.com/mutual-funds/fidelity-funds-daily-pricing-yields/download
   apikey: false
-  notes: ~
+  notes: Disabled 2023-12-16. Removed from Quote.pm until issue 346 is fixed.
   testfile: fidelity.t
   testcases:
     - FGRIX
@@ -431,15 +430,18 @@
   testcases:
 #
 - module: Finanzpartner.pm
-  state: TBD
+  state: working
   added: TBD
-  changed: ~
+  changed: 2023-11-27
   removed: ~
-  urls:
+  urls: https://www.finanzpartner.de/fi/
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: finanzpartner.t
   testcases:
+   - "LU0293315023", 
+   - "LU0856992614", 
+   - "LU1720050803".
 #
 - module: Fool.pm
   state: working
@@ -493,8 +495,8 @@
 #
 - module: GoogleWeb.pm
   state: working
-  added: 2023-06-12
-  changed: ~
+  added: 2023-09-16
+  changed: 2023-12-16
   removed: ~
   urls: https://www.google.com/finance/
   apikey: false
@@ -502,8 +504,10 @@
   testfile: googleweb.t
   testcases:
     - AAPL
+    - ESML
     - KNW
     - GE
+    - NULC
 #
 - module: HEX.pm
   state: TBD
@@ -576,7 +580,7 @@
 - module: IndiaMutual.pm
   state: working
   added: TBD
-  changed: 2023-06-06
+  changed: 2023-11-18
   removed: ~
   urls: https://www.amfiindia.com/spages/NAVAll.txt
   apikey: false
@@ -739,7 +743,7 @@
 - module: Sinvestor.pm
   state: working
   added: 2022-10-19
-  changed: 2023-06-26
+  changed: 2023-11-27
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
@@ -792,7 +796,7 @@
 - module: Stooq.pm
   state: working
   added: 2023-08-04
-  changed: ~
+  changed: 2023-08-15
   removed: ~
   urls:
     - https://stooq.com/q/?s=
@@ -809,7 +813,7 @@
 - module: TMX.pm
   state: working
   added: TBD
-  changed: 2022-11-23
+  changed: 2023-09-14
   removed: ~
   urls: https://app-money.tmx.com/graphql
   apikey: false
@@ -835,7 +839,7 @@
 - module: Tradegate.pm
   state: working
   added: 2022-10-19
-  changed: 2023-06-26
+  changed: 2023-11-27
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
@@ -873,7 +877,7 @@
 - module: TSP.pm
   state: working
   added: 2005-03-02
-  changed: 2022-07-29
+  changed: 2023-08-12
   removed:
   urls:
     - https://www.tsp.gov/fund-performance/
@@ -1064,7 +1068,7 @@
 - module: XETRA.pm
   state: working
   added: ~
-  changed: 2023-06-26
+  changed: 2023-11-27
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
@@ -1110,7 +1114,7 @@
 - module: YahooWeb.pm
   state: working
   added: 2023-05-31
-  changed: 2023-07-16
+  changed: 2023-07-18
   removed:
   urls:
     - https://finance.yahoo.com/quote/{$symbol}?p={$symbol}
