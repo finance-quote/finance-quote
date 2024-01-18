@@ -49,7 +49,6 @@ use HTML::TableExtract;
 use Time::Piece;
 use threads;
 use Thread::Queue;
-use Config;
 
 # VERSION
 
@@ -64,7 +63,11 @@ my $YIND_URL_HEAD = 'https://query1.finance.yahoo.com/v8/finance/chart/';
 my $YIND_URL_TAIL = '?interval=1d&period1=' . $startepoc . '&period2=' . $endepoc;
 
 my $can_use_threads = eval 'use threads; 1';
+
 ### [<now>] can_use_threads : $can_use_threads 
+
+my $result_q = Thread::Queue->new;
+my $lock_var : shared;
 
 sub methods {
     return ( yahoo_chart => \&yahoo_chart,
@@ -87,9 +90,6 @@ sub yahoo_chart {
     my ( %info, $reply, $url, $te, $ts, $row, @cells, $ce );
     my ( $my_date, $amp_stocks );
     
-    my $ua = $quoter->user_agent();
-    $ua->agent ($browser);
-
     my $result_q = Thread::Queue->new;
     my $lock_var : shared;
 
@@ -103,13 +103,30 @@ sub yahoo_chart {
                     ($amp_stocks = $stocks) =~ s/&/%26/g;
                     $url = $YIND_URL_HEAD . $amp_stocks . $YIND_URL_TAIL;
 
-                    ### [<now>:THREAD]   url : $url 
-                    my $reply = $ua->request( GET $url );
+                    ### [<now>:THREAD]   url : $url
+                    my $request = GET $url;
+                    $request->protocol('HTTP/1.0');
+
+                    my $ua = $quoter->user_agent(keep_alive => -1);
+                    $ua->agent ($browser);
+
+                    my $reply   = $ua->request( $request );
+                    my $code    = $reply->code;
+                    my $headers = $reply->headers_as_string;
+                    my $body    = $reply->content;
                     ### [<now>:THREAD] reply : $reply
+
+                    #HTTP_Response succeeded - parse the data
+                    my $json_info = JSON::decode_json $body;
+                    my $json_data = $json_info->{'chart'}{'result'}[0];
+                    my $error_msg = $json_info->{'chart'}{'error'};
+
                     {
                         lock ( $lock_var );
                         $result_q->enqueue( $stocks );
-                        $result_q->enqueue( $reply );
+                        $result_q->enqueue( $code );
+                        $result_q->enqueue( $error_msg );
+                        $result_q->enqueue( $json_data );
                     }
                 }, 
             $_)
@@ -125,12 +142,29 @@ sub yahoo_chart {
             ($amp_stocks = $stocks) =~ s/&/%26/g;
             $url = $YIND_URL_HEAD . $amp_stocks . $YIND_URL_TAIL;
 
-            ### [<now>]    url : $url 
-            my $reply = $ua->request( GET $url );
+            ### [<now>]   url : $url
+            my $request =  GET $url;
+            $request->protocol('HTTP/1.0');
+
+            my $ua = $quoter->user_agent(keep_alive => -1);
+            $ua->agent ($browser);
+                    
+            my $reply   = $ua->request( $request );
+            my $code    = $reply->code;
+            my $headers = $reply->headers_as_string;
+            my $body    = $reply->content;
             ### [<now>] reply : $reply
 
+            #HTTP_Response succeeded - parse the data
+            my $json_info = JSON::decode_json $body;
+            my $json_data = $json_info->{'chart'}{'result'}[0];
+            my $error_msg = $json_info->{'chart'}{'error'};
+
             $result_q->enqueue( $stocks );
-            $result_q->enqueue( $reply );
+            $result_q->enqueue( $code );
+            $result_q->enqueue( $error_msg );
+            $result_q->enqueue( $json_data );
+
             }
 
         $result_q->end;
@@ -138,37 +172,26 @@ sub yahoo_chart {
     }
 
     while (defined (my $stocks = $result_q->dequeue())) {        ### Evaluating |===[%]    |
-    
-        my $reply   = $result_q->dequeue;
 
-        my $code    = $reply->code;
-        my $desc    = HTTP::Status::status_message($code);
-        my $headers = $reply->headers_as_string;
-        my $body    = $reply->content;
+        my $code        = $result_q->dequeue;
+        my $error_msg   = $result_q->dequeue;
+        my $json_data   = $result_q->dequeue;
 
-        #Response variables available:
-        #Response code: 	$code
-        #Response description: 	$desc
-        #HTTP Headers:		$headers
-        #Response body		$body
-
+        my $desc        = HTTP::Status::status_message($code);
+        
+        $info{ $stocks, "success" } = 0;
         $info{ $stocks, "symbol" } = $stocks;
         $info{ $stocks, "method" } = "yahoo_chart";
-        $info{ $stocks, "success" } = 0;
 
         if ( $code == 200 ) {
 
-            #HTTP_Response succeeded - parse the data
-            my $json_info = JSON::decode_json $body;
-            my $json_data = $json_info->{'chart'}{'result'}[0];
-
 #            if (not defined $json_data->{'indicators'}{'quote'}) {
-            if (defined $json_info->{'chart'}{'error'}) {
+            if (defined $error_msg) {
 
                 $info{ $stocks, "errormsg" } = 
                     "Error retrieving quote for $stocks - no listing for this name found. Please check symbol and the two letter extension (if any).\n\
-                     Received " . $json_info->{'chart'}{'error'} . " error.";
-
+                     Received " . $error_msg . " error.";
+                next;
             }
             else {
 
@@ -179,13 +202,11 @@ sub yahoo_chart {
                 $info{ $stocks, 'timezone'} = $json_data->{'meta'}{'timezone'};
 
                 my $timestamps = $json_data->{'timestamp'};
-                my $json_timestamp;
 
                 if (not defined ($timestamps)) {
                     $info{ $stocks, "errormsg" } = 
                         "Error retrieving quote for $stocks - No historical pricing data found in the data returned by the API.";
-                    return wantarray() ? %info : \%info;
-                    return \%info;
+                    next;
                 }
 
                 my $tablerows = scalar (@{$timestamps});
@@ -196,13 +217,14 @@ sub yahoo_chart {
                     $tablerows -= 1;
                 }
                 ### [<now>] valid data row index : $tablerows
+                
+                my $json_timestamp;
 
                 if ($tablerows < 0) {
                     $json_timestamp = $json_data->{'meta'}{'regularMarketTime'};
                     $info{ $stocks, "errormsg" } = 
                         "Error retrieving quote for $stocks - No valid pricing data row found in the data returned by the API.";
-                    return wantarray() ? %info : \%info;
-                    return \%info;
+                    next;
                 } else {
                     $json_timestamp = $json_data->{'timestamp'}[$tablerows];
                 }
