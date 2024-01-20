@@ -674,7 +674,7 @@
 - module: NSEIndia.pm
   state: working
   added: 2020-06-27
-  changed:
+  changed: 2024-01-12
   removed:
   urls:
     - https://archives.nseindia.com/content/historical/EQUITIES/${YYYY}/${MMM}/cm${DDMMMYYYY}bhav.csv.zip
@@ -686,7 +686,7 @@
     Module to fetch equity quotes from https://www.nseindia.com/
   testfile: nseindia.t
   testcases:
-    - HDFC
+    - HDFCBANK
     - TCS
     - INE009A01021
     - INE062A01020
