@@ -31,8 +31,8 @@ use vars qw($NSE_MAIN_URL $NSE_URL);
 $NSE_MAIN_URL = "https://www.nseindia.com";
 $NSE_URL = "https://archives.nseindia.com";
 
-our $DISPLAY = 'National Stock Exchange India';
-our @LABELS = qw/close last high low open prevclose exchange/;
+my $DISPLAY = 'National Stock Exchange India';
+my @labels = qw/close last high low open prevclose exchange/;
 
 sub methods { 
     return (
@@ -42,7 +42,7 @@ sub methods {
             labels => \@labels
         },
         nseindia => {
-            subroutine => \&nsseindia,
+            subroutine => \&nseindia,
             display => $DISPLAY,
             labels => \@labels
         },
