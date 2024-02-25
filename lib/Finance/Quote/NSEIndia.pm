@@ -31,18 +31,21 @@ use vars qw($NSE_MAIN_URL $NSE_URL);
 $NSE_MAIN_URL = "https://www.nseindia.com";
 $NSE_URL = "https://archives.nseindia.com";
 
-my $cachedir = $ENV{TMPDIR} // $ENV{TEMP} // '/tmp/';
-my $NSE_ZIP = $cachedir.'nseindia.zip';
-my $NSE_CSV = $cachedir.'nseindia.csv';
-
-our @LABELS = qw/close last high low open prevclose exchange/;
 our $DISPLAY = 'National Stock Exchange India';
-our %METHOD = (subroutine => \&nseindia, labels => \@LABELS, display => $DISPLAY);
+our @LABELS = qw/close last high low open prevclose exchange/;
 
 sub methods { 
-    return ( 
-        'india' => \%METHOD,
-        'nseindia' => \%METHOD,
+    return (
+        india => {
+            subroutine => \&nseindia,
+            display => $DISPLAY,
+            labels => \@labels
+        },
+        nseindia => {
+            subroutine => \&nsseindia,
+            display => $DISPLAY,
+            labels => \@labels
+        },
     );
 }
 

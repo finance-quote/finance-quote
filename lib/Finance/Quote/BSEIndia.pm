@@ -29,9 +29,6 @@ use if DEBUG, 'Smart::Comments', '###';
 use vars qw($BSE_URL);
 $BSE_URL = "https://www.bseindia.com";
 
-my $cachedir = $ENV{TMPDIR} // $ENV{TEMP} // '/tmp/';
-my $BSE_ZIP = $cachedir.'bseindia.zip';
-my $BSE_CSV = $cachedir.'bseindia.csv';
 my $DISPLAY = 'BSE Exchange India';
 my @labels = qw/close last high low open prevclose exchange name/;
 
