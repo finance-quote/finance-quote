@@ -41,13 +41,13 @@ use utf8;
 # VERSION
 $SEB_FUNDS_URL = 'https://seb.se/pow/fmk/2100/Senaste_fondkurserna.TXT';
 
-sub methods { return (seb_funds => \&seb_funds); }
+our @LABELS = qw/date isodate method source name currency price/;
+our $DISPLAY = 'SEB Sweden';
+our %METHOD = (subroutine => \&seb_funds, labels => \@LABELS, display => $DISPLAY);
 
-{
-  my @labels = qw/date isodate method source name currency price/;
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
-  sub labels { return (seb_funds => \@labels); }
-}
+sub methods { return (seb_funds => \%METHOD); }
 
 sub seb_funds {
   my $quoter  = shift;

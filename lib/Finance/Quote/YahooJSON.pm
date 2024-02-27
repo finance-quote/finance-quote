@@ -38,18 +38,16 @@ use Time::Piece;
 my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=';
 my $YIND_URL_TAIL = '&modules=price,summaryDetail,defaultKeyStatistics';
 
-sub methods {
-    return ( yahoo_json => \&yahoo_json,
-    );
-}
-{
-    my @labels = qw/name last date isodate volume currency method exchange type
-        div_yield eps pe year_range open high low close/;
+our @LABELS = qw/name last date isodate volume currency method exchange type div_yield eps pe year_range open high low close/;
+our $DISPLAY = 'Yahoo.com V11 API';
+our %METHOD = (subroutine => \&yahoo_json, labels => \@LABELS, display => $DISPLAY);
 
-    sub labels {
-        return ( yahoo_json => \@labels,
-        );
-    }
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods {
+    return (
+        yahoo_json   => \%METHOD,
+    );
 }
 
 sub yahoo_json {

@@ -37,13 +37,14 @@ use if DEBUG, 'Smart::Comments', '###';
 use Module::Load;
 use Exporter ();
 use Carp;
+use Clone qw(clone);
 use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
 use Encode;
 use JSON qw( decode_json );
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
-            $TIMEOUT @MODULES %MODULES %METHODS $AUTOLOAD
+            $TIMEOUT @MODULES %MODULES %METHODS %FEATURES $AUTOLOAD
             @CURRENCY_RATES_MODULES $USE_EXPERIMENTAL_UA/;
 
 # VERSION
@@ -237,35 +238,47 @@ sub _load_modules {
 
   my @modules = @_;
 
-  # Go to each module and use them.  Also record what methods
-  # they support and enter them into the %METHODS hash.
+  # Go to each module and use them.  Also record what methods they support and
+  # enter them into the %METHODS and %FEATURES hash.
 
   foreach my $module (@modules) {
-    my $modpath = "${baseclass}::${module}";
-    unless (defined($MODULES{$modpath})) {
+      my $modpath = "${baseclass}::${module}";
+      unless (defined($MODULES{$modpath})) {
 
-      eval {
-        load $modpath;
-        $MODULES{$modpath}   = 1;
+          eval {
+              load $modpath;
+              $MODULES{$modpath}   = 1;
 
-        my %methodhash       = $modpath->methods;
-        my %labelhash        = $modpath->labels;
-        my $curr_fields_func = $modpath->can("currency_fields") || \&default_currency_fields;
-        my @currency_fields  = &$curr_fields_func;
-        my %seen;
-        @currency_fields     = grep {!$seen{$_}++} @currency_fields;
+              my %methodhash       = $modpath->methods;
+              my $curr_fields_func = $modpath->can("currency_fields") || \&default_currency_fields;
+              my @currency_fields  = &$curr_fields_func;
+              my %seen;
+              @currency_fields     = grep {!$seen{$_}++} @currency_fields;
 
-        foreach my $method (keys %methodhash) {
-          push (@{$METHODS{$method}},
-              { name => $module,
-              modpath => $modpath,
-              function => $methodhash{$method},
-              labels   => $labelhash{$method},
-              currency_fields => \@currency_fields});
-        }
-      };
-      carp $@ if $@;
-    }
+              ### iterating: %methodhash
+              foreach my $method (keys %methodhash) {
+                  if (ref $methodhash{$method} eq ref {}
+                      && exists $methodhash{$method}{subroutine}
+                      && exists $methodhash{$method}{labels}
+                      && exists $methodhash{$method}{display} ) {
+                          ### push: $method
+                          push (@{$METHODS{$method}},
+                              { name     => $module,
+                                  modpath  => $modpath,
+                                  function => $methodhash{$method}{subroutine},
+                                  labels   => $methodhash{$method}{labels},
+                                  currency_fields => \@currency_fields
+                              });
+                          push (@{$FEATURES{$method}}, 
+                              {display => $methodhash{$method}{display},
+                                  features => exists $methodhash{$method}{features} ? clone($methodhash{$method}{features}) : {}
+                              }
+                          );
+                      }
+              }
+          };
+          carp $@ if $@;
+      }
   }
 }
 
@@ -323,41 +336,40 @@ sub get_methods {
   return(wantarray ? keys %METHODS : [keys %METHODS]);
 }
 
-# return hash:
+# get_features() returns a informational hash with the following keys and values
 #
-#  quote_methods => hash of
-#      method_name => array of module names
-#  quote_modules => hash of
-#      module_name => array of parameters
-#  currency_modules => hash of
-#      module_name =>  array of parameters
+# z = get_features();
 #
-# { 
-#    'quote_methods' => {'group' => ['module', 'module'], ...},
-#    'quote_modules' => {'abc' => ['API_KEY'], ...},
-#    'currency_modules' => {'xyz' => [], 'lmn' => ['USER_NAME', 'API_KEY']},
-# } 
+# z['version']                             = current version of Finance::Quote
+# z['quote_methods']                       = hash with method names as keys
+#                   ['method']             = list for each method
+#                             [0]          = index in list
+#                             ['display']  = display name for method
+#                             ['features'] = optional feature hash for method
+# z['currency_modules']                    = hash with module names as keys
+#                   ['module']             = hash for each module
+#                             ['display']  = display name for module
+#                             ['features'] = optional feature hash for module
 
 sub get_features {
-  # Create a dummy object to ensure METHODS is populated
+  # Create a dummy object to ensure METHODS and FEATURES is populated
   my $t = Finance::Quote->new(currency_rates => {order => \@CURRENCY_RATES_MODULES});
   my $baseclass = ref $t;
-
+  
   my %feature = (
-    'quote_methods' => {map {$_, [map {$_->{name}} @{$METHODS{$_}}]} keys %METHODS},
-    'quote_modules' => {map {$_, []} @MODULES},
-    'currency_modules' => {map {$_, []} @CURRENCY_RATES_MODULES},
+    'version' => $VERSION,
+    'quote_methods' => \%FEATURES,
+    'currency_modules' => {map {$_, {}} @CURRENCY_RATES_MODULES},
   );
 
-  my %mods = ('quote_modules' => $baseclass,
-              'currency_modules' => "${baseclass}::CurrencyRates");
+  my %mods = ('currency_modules' => "${baseclass}::CurrencyRates");
 
   while (my ($field, $base) = each %mods) {
     foreach my $name (keys %{$feature{$field}}) {
       my $modpath = "${base}::${name}";
 
-      if ($modpath->can("parameters")) {
-        push (@{$feature{$field}->{$name}}, $modpath->parameters());
+      if ($modpath->can("features")) {
+          $feature{$field}->{$name} = $modpath->features();
       }
     }
   }
@@ -433,7 +445,7 @@ sub new {
                          required_labels => ['ARRAY', 'REQUIRED'],
                          currency_rates  => ['HASH', 'currency_rates']);
 
-  $this->{module_specific_data} = {};
+  $this->{method_specific_data} = {};
   my @load_modules = ();
 
   for (my $i = 0; $i < @_; $i++) {
@@ -445,7 +457,7 @@ sub new {
       $i += 1;
     }
     elsif ($i + 1 < @_ and ref $_[$i+1] eq 'HASH') {
-      $this->{module_specific_data}->{$_[$i]} = $_[$i+1];
+      $this->{method_specific_data}->{$_[$i]} = $_[$i+1];
       $i += 1;
     }
     elsif ($_[$i] eq '-defaults') {

@@ -46,22 +46,19 @@ $MSTARUK_MAIN_URL   =   "http://www.morningstar.co.uk";
 $MSTARUK_LOOK_UP    =   "http://www.morningstar.co.uk/uk/funds/SecuritySearchResults.aspx?search=";
 $MSTARUK_NEXT_URL	=	"http://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=";
 
-# FIXME -
+our @LABELS = qw/name currency last date time price nav source iso_date method net p_change success errormsg/;
+our $DISPLAY = 'MorningStar UK';
+our %METHOD = (subroutine => \&mstaruk_fund, labels => \@LABELS, display => $DISPLAY);
 
-sub methods { return (morningstaruk => \&mstaruk_fund,
-                      mstaruk => \&mstaruk_fund,
-                      ukfunds => \&mstaruk_fund); }
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
-{
-    my @labels = qw/name currency last date time price nav source iso_date method net p_change success errormsg/;
-
-    sub labels { return (morningstaruk => \@labels,
-                         mstaruk => \@labels,
-                         ukfunds => \@labels); }
+sub methods { 
+    return (
+        morningstaruk => \%METHOD,
+        mstaruk => \%METHOD,
+        ukfunds => \%METHOD,
+    ); 
 }
-
-#
-# =======================================================================
 
 sub mstaruk_fund  {
     my $quoter = shift;

@@ -29,14 +29,23 @@ use if DEBUG, 'Smart::Comments', '###';
 use vars qw($BSE_URL);
 $BSE_URL = "https://www.bseindia.com";
 
-sub methods { return ( 'india' => \&bseindia,
-                       'bseindia' => \&bseindia ); }
+my $DISPLAY = 'BSE Exchange India';
+my @labels = qw/close last high low open prevclose exchange name/;
 
-sub labels {
-    my @labels = qw/close last high low open prevclose exchange name/;
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods { 
     return (
-    india => \@labels,
-    bseindia => \@labels
+        india => {
+            subroutine => \&bseindia,
+            display => $DISPLAY,
+            labels => \@labels
+        },
+        bseindia => {
+            subroutine => \&bseindia,
+            display => $DISPLAY,
+            labels => \@labels
+        },
     );
 }
 

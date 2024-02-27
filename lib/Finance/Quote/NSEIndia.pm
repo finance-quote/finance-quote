@@ -31,14 +31,23 @@ use vars qw($NSE_MAIN_URL $NSE_URL);
 $NSE_MAIN_URL = "https://www.nseindia.com";
 $NSE_URL = "https://archives.nseindia.com";
 
-sub methods { return ( 'india' => \&nseindia,
-                       'nseindia' => \&nseindia ); }
+my $DISPLAY = 'National Stock Exchange India';
+my @labels = qw/close last high low open prevclose exchange/;
 
-sub labels {
-    my @labels = qw/close last high low open prevclose exchange/;
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods { 
     return (
-    india => \@labels,
-    nseindia => \@labels
+        india => {
+            subroutine => \&nseindia,
+            display => $DISPLAY,
+            labels => \@labels
+        },
+        nseindia => {
+            subroutine => \&nseindia,
+            display => $DISPLAY,
+            labels => \@labels
+        },
     );
 }
 

@@ -10,12 +10,13 @@ use vars qw( $OSLOBORS_COMPONENTS_URL );
 
 $OSLOBORS_COMPONENTS_URL = "https://www.oslobors.no/ob/servlets/components?type=table&source=feed.omff.FUNDS&view=REALTIME&columns=ITEM%2C+PRICECHANGEPCT%2C+PRICE%2C+DATE%2C+QUOTATIONCURRENCY&filter=ITEM_SECTOR%3D%3Ds";
 
-sub methods { return (oslobors => \&oslobors); }
+our @LABELS = qw/date isodate method source currency price p_change/;
+our $DISPLAY = 'Oslo Stock Exchange';
+our %METHOD = (subroutine => \&oslobors, labels => \@LABELS, display => $DISPLAY);
 
-{
-  my @labels = qw/date isodate method source currency price p_change/;
-  sub labels { return (oslobors => \@labels); }
-}
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods { return (oslobors => \%METHOD); }
 
 sub oslobors {
   my $quoter = shift;

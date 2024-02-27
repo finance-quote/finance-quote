@@ -33,6 +33,10 @@ use JSON;
 my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=';
 my $YIND_URL_TAIL = '&modules=price';
 
+sub features() {
+    return {'display' => 'Yahoo Currency Rates'};
+}
+
 sub new
 {
   my $self = shift;

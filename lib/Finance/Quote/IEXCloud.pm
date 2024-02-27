@@ -28,32 +28,28 @@ use DateTime::Format::Strptime qw( strptime strftime );
 
 # VERSION
 
-my $IEX_URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://cloud.iexapis.com/v1/stock/{$symbol}/quote?token={$token}');
+our $IEX_URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://cloud.iexapis.com/v1/stock/{$symbol}/quote?token={$token}');
+our @LABELS = qw/symbol open close high low last volume method isodate currency/;
+our $DISPLAY = "IEX Cloud";
+our %FEATURE = (API_KEY => {'description' => 'registered user API key'});
+our %METHOD = (subroutine => \&iexcloud, labels => \@LABELS, display => $DISPLAY, features => \%FEATURE);
+
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
 sub methods { 
-  return ( iexcloud => \&iexcloud,
-           usa      => \&iexcloud,
-           nasdaq   => \&iexcloud,
-           nyse     => \&iexcloud );
-}
-
-sub parameters {
-  return ('API_KEY');
-}
-
-{
-    our @labels = qw/symbol open close high low last volume method isodate currency/;
-
-    sub labels {
-        return ( iexcloud => \@labels, );
-    }
+    return ( 
+        iexcloud => \%METHOD,
+        usa      => \%METHOD,
+        nasdaq   => \%METHOD,
+        nyse     => \%METHOD,
+    );
 }
 
 sub iexcloud {
     my $quoter = shift;
 
-    my $token = exists $quoter->{module_specific_data}->{iexcloud}->{API_KEY} ? 
-                $quoter->{module_specific_data}->{iexcloud}->{API_KEY}        :
+    my $token = exists $quoter->{method_specific_data}->{iexcloud}->{API_KEY} ? 
+                $quoter->{method_specific_data}->{iexcloud}->{API_KEY}        :
                 $ENV{"IEXCLOUD_API_KEY"};
 
     my @stocks = @_;

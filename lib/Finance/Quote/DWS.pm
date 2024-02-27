@@ -27,14 +27,17 @@ use if DEBUG, 'Smart::Comments';
 
 # VERSION
 
-our @labels = qw/name date isodate last name currency/;
+our @LABELS = qw/name date isodate last name currency/;
+our $DISPLAY = 'DWS Fund Data Service Germany';
+our %METHOD = (subroutine => \&dwsfunds, display => $DISPLAY, labels => \@LABELS);
 
-sub labels {
-  return(dwsfunds => \@labels);
-}
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
 sub methods {
-  return(dwsfunds => \&dwsfunds);
+  return(
+      dwsfunds => \%METHOD,
+      germany => \%METHOD,
+  );
 }
 
 sub dwsfunds {
@@ -120,7 +123,7 @@ sub dwsfunds {
 
 =head1 NAME
 
-Finance::Quote::DWS - Obtain quotes from DWS (Deutsche Bank Gruppe)
+Finance::Quote::DWS - Obtain quotes from DWS (Fondsweb Germany)
 
 =head1 SYNOPSIS
 

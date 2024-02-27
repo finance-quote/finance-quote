@@ -37,12 +37,14 @@ use warnings;
 
 # VERSION
 
-sub methods {
-    return ( goldmoney => \&goldmoney );
-}
+our @LABELS = qw/exchange name date isodate price method/;
+our $DISPLAY = 'GoldMoney';
+our %METHOD = (subroutine => \&goldmoney, labels => \@LABELS, display => $DISPLAY);
 
-sub labels {
-    return ( goldmoney => [qw/exchange name date isodate price method/] );
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods {
+    return ( goldmoney => \%METHOD );
 }
 
 # goldmoney($quoter, @symbols)
@@ -213,7 +215,7 @@ sub _goldmoney_time {
 
 =head1 NAME
 
-Finance::Quote::GoldMoney - obtain spot rates from GoldMoney.
+Finance::Quote::GoldMoney - Obtain spot rates from GoldMoney.
 
 =head1 SYNOPSIS
 

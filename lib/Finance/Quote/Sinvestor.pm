@@ -30,26 +30,23 @@ use Web::Scraper;
 
 my $Sinvestor_URL = 'https://web.s-investor.de/app/detail.htm?isin=';
 
+our @LABELS = qw/symbol last close exchange volume open price change p_change/;
+our $DISPLAY = 'S-Investor German Sparkasse';
+our %METHOD = (subroutine => \&sinvestor, labels => \@LABELS, display => $DISPLAY);
+
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
-  return (sinvestor => \&sinvestor,
-          europe    => \&sinvestor);
-}
-
-sub parameters {
-  return ('INST_ID');
-}
-
-our @labels = qw/symbol last close exchange volume open price change p_change/;
-
-sub labels {
-  return (sinvestor => \@labels,
-          europe    => \@labels);
+    return (
+        sinvestor => \%METHOD,
+        europe    => \%METHOD,
+    );
 }
 
 sub sinvestor {
   my $quoter  = shift;
-  my $inst_id = exists $quoter->{module_specific_data}->{sinvestor}->{INST_ID} ?
-                       $quoter->{module_specific_data}->{sinvestor}->{INST_ID} :
+  my $inst_id = exists $quoter->{method_specific_data}->{sinvestor}->{INST_ID} ?
+                       $quoter->{method_specific_data}->{sinvestor}->{INST_ID} :
                        '0000057';
   my $ua      = $quoter->user_agent();
   my $agent   = $ua->agent;

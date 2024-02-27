@@ -32,22 +32,18 @@ my $URL      = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://api.twel
 my $THROTTLE = 1.05 * 60.0/8.0;  # 5% more than maximum seconds / request for free tier
 my $AGENT    = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36';
 
-sub methods { 
-  return ( twelvedata => \&twelvedata );
+our @LABELS = qw/symbol name exchange currency isodate currency open high low close/;
+our $DISPLAY = 'TwelveData';
+our %FEATURES = ('API_KEY' => {'description' => 'registered user API key'});
+our %METHOD = (subroutine => \&twelvedata, labels => \@LABELS, display => $DISPLAY, features => \%FEATURES);
+
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods {
+    return (
+        twelvedata => \%METHOD,
+    );
 }
-
-sub parameters {
-  return ('API_KEY');
-}
-
-{
-    our @labels = qw/symbol name exchange currency isodate currency open high low close/;
-
-    sub labels {
-        return ( twelvedata => \@labels );
-    }
-}
-
 
 sub twelvedata {
     my $quoter = shift;
@@ -59,8 +55,8 @@ sub twelvedata {
     my $agent = $ua->agent();
     $ua->agent($AGENT);
 
-    my $token = exists $quoter->{module_specific_data}->{twelvedata}->{API_KEY} ? 
-                $quoter->{module_specific_data}->{twelvedata}->{API_KEY}        :
+    my $token = exists $quoter->{method_specific_data}->{twelvedata}->{API_KEY} ? 
+                $quoter->{method_specific_data}->{twelvedata}->{API_KEY}        :
                 $ENV{"TWELVEDATA_API_KEY"};
 
     foreach my $symbol (@stocks) {

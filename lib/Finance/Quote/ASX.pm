@@ -49,31 +49,16 @@ use vars qw/$ASX_URL_PRIMARY $ASX_URL_ALTERNATE/;
 $ASX_URL_PRIMARY = 'https://www.asx.com.au/asx/1/share/';
 $ASX_URL_ALTERNATE = 'https://asx.api.markitdigital.com/asx-research/1.0/companies/';
 
-sub methods {return (australia => \&asx,asx => \&asx)}
+our $DISPLAY = 'Australian Stock Exchange';
+our @labels = qw/ask bid cap close date eps high last low name net open p_change pe type volume/;
 
-{
-	my @labels = qw/
-			ask
-			bid
-			cap
-			close
-			date
-			eps
-			high
-			last
-			low
-			name
-			net
-			open
-			p_change
-			pe
-			type
-			volume/;
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
-# Function that lists the data items available from the Australian Securities Exchange (ASX)
-
-	sub labels { return (australia => \@labels,
-						 asx	   => \@labels); }
+sub methods {
+    return (
+        australia => {subroutine => \&asx, display => $DISPLAY, labels => \@labels},
+        asx       => {subroutine => \&asx, display => $DISPLAY, labels => \@labels},
+    );
 }
 
 # Australian Stock Exchange (ASX)

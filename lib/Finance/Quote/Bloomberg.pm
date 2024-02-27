@@ -12,14 +12,20 @@ use Encode;
 
 use vars qw($BLOOMBERG_URL);
 
-$BLOOMBERG_URL = 'https://www.bloomberg.com/quote/';
+our $BLOOMBERG_URL = 'https://www.bloomberg.com/quote/';
+our $DISPLAY = 'Bloomberg';
+our @LABELS = qw/method name last currency symbol isodate/;
 
-sub methods { return (bloomberg => \&bloomberg); }
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
-{
-  my @labels = qw/method name last currency symbol isodate/;
-
-  sub labels { return (bloomberg => \@labels); }
+sub methods { 
+    return (
+        bloomberg => {
+            subroutine => \&bloomberg,
+            display => $DISPLAY,
+            labels => \@LABELS
+        }
+    );
 }
 
 sub bloomberg {

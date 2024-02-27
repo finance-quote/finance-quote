@@ -39,17 +39,18 @@ use IO::String;
 $AMFI_MAIN_URL = ("http://www.amfiindia.com/");
 $AMFI_URL = ("https://www.amfiindia.com/spages/NAVAll.txt");
 
-sub methods { return (indiamutual => \&amfiindia,
-                      amfiindia => \&amfiindia); }
+our @LABELS = qw/method source link name currency date isodate nav/;
+our $DISPLAY = 'Association of Mutual Funds in India';
+our %METHOD = (subroutine => \&amfiindia, labels => \@LABELS, display => $DISPLAY);
 
-{
-    my @labels = qw/method source link name currency date isodate nav/;
-    sub labels { return (indiamutual => \@labels,
-                         amfiindia => \@labels); }
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods { 
+  return (
+    indiamutual => \%METHOD,
+    amfiindia => \%METHOD,
+  );
 }
-
-#
-# =======================================================================
 
 sub amfiindia   {
     my $quoter = shift;

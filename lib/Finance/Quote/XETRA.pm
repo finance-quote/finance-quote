@@ -30,26 +30,24 @@ use Web::Scraper;
 
 my $xetra_URL = 'https://web.s-investor.de/app/detail.htm?boerse=GER&isin=';
 
+our @LABELS = qw/symbol last close exchange volume open price change p_change/;
+our $DISPLAY = 'XETRA via German Sparkasse';
+our %FEATURES = ('INST_ID' => {'description' => 'institute id for fetch (default 0000056 for Krefeld)'});
+our %METHOD = (subroutine => \&xetra, labels => \@LABELS, display => $DISPLAY, features => \%FEATURES);
+
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
-  return (xetra   => \&xetra,
-          europe  => \&xetra);
-}
-
-sub parameters {
-  return ('INST_ID');
-}
-
-our @labels = qw/symbol last close exchange volume open price change p_change/;
-
-sub labels {
-  return (xetra   => \@labels,
-          europe  => \@labels);
+    return (
+        xetra   => \%METHOD,
+        europe  => \%METHOD,
+    );
 }
 
 sub xetra {
   my $quoter  = shift;
-  my $inst_id = exists $quoter->{module_specific_data}->{xetra}->{INST_ID} ?
-                       $quoter->{module_specific_data}->{xetra}->{INST_ID} :
+  my $inst_id = exists $quoter->{method_specific_data}->{xetra}->{INST_ID} ?
+                       $quoter->{method_specific_data}->{xetra}->{INST_ID} :
                        '0000057';
   my $ua      = $quoter->user_agent();
   my $agent   = $ua->agent;

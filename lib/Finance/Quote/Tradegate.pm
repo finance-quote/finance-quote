@@ -30,26 +30,24 @@ use Web::Scraper;
 
 my $Tradegate_URL = 'https://web.s-investor.de/app/detail.htm?boerse=TDG&isin=';
 
+our @LABELS = qw/symbol last close exchange volume open price change p_change/;
+our $DISPLAY = 'Tradegate via German Sparkasse';
+our %FEATURES = ('INST_ID' => {'description' => 'institute id for fetch (default 0000057 for Krefeld)'});
+our %METHOD = (subroutine => \&tradegate, labels => \@LABELS, display => $DISPLAY, features => \%FEATURES);
+
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
-  return (tradegate => \&tradegate,
-          europe    => \&tradegate);
-}
-
-sub parameters {
-  return ('INST_ID');
-}
-
-our @labels = qw/symbol last close exchange volume open price change p_change/;
-
-sub labels {
-  return (tradegate => \@labels,
-          europe    => \@labels);
+    return (
+        tradegate => \%METHOD,
+        europe    => \%METHOD,
+    );
 }
 
 sub tradegate {
   my $quoter  = shift;
-  my $inst_id = exists $quoter->{module_specific_data}->{tradegate}->{INST_ID} ?
-                       $quoter->{module_specific_data}->{tradegate}->{INST_ID} :
+  my $inst_id = exists $quoter->{method_specific_data}->{tradegate}->{INST_ID} ?
+                       $quoter->{method_specific_data}->{tradegate}->{INST_ID} :
                        '0000057';
   my $ua      = $quoter->user_agent();
   my $agent   = $ua->agent;

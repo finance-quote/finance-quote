@@ -34,14 +34,16 @@ use HTTP::Request;
 
 my $TREASURY_DIRECT_URL = 'https://www.treasurydirect.gov/GA-FI/FedInvest/todaySecurityPriceDate.htm';
 
+our @LABELS = qw/ method source symbol rate bid ask price date isodate /;
+our $DISPLAY = 'Treasure Direct USA';
+our %METHOD = (subroutine => \&treasurydirect, labels => \@LABELS, display => $DISPLAY);
+
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
-  return treasurydirect => \&treasurydirect;
-}
-
-
-sub labels {
-  my @labels = qw/ method source symbol rate bid ask price date isodate /;
-  return treasurydirect => \@labels;
+    return (
+        treasurydirect => \%METHOD,
+    );
 }
 
 sub treasurydirect {

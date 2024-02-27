@@ -34,8 +34,17 @@ our @EXPORT_OK = qw(morningstarjp methods labels);
 $MORNINGSTAR_JP_URL =
   ('https://www.wealthadvisor.co.jp/FundData/DownloadStdYmd.do?fnc=');
 
-sub methods { return ( morningstarjp => \&morningstarjp ); }
-sub labels  { return ( morningstarjp => [qw/symbol date nav/] ); }
+our @LABELS = qw/symbol date nav/;
+our $DISPLAY = 'MorningStar Japan';
+our %METHOD = (subroutine => \&morningstarjp, labels => \@LABELS, display => $DISPLAY);
+
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods {
+    return (
+        morningstarjp => \%METHOD,
+    );
+}
 
 sub morningstarjp
 {

@@ -40,18 +40,20 @@ use if DEBUG, 'Smart::Comments';
 
 # VERSION
 
-my $URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://caps.fool.com/Ticker/{$symbol}.aspx');
+our $URL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://caps.fool.com/Ticker/{$symbol}.aspx');
+our @LABELS = qw/date isodate open high low close volume last/;
+our $DISPLAY = 'Motley Fool';
+our %METHOD = (subroutine => \&fool, labels => \@LABELS, display => $DISPLAY);
+
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
 sub methods { 
-  return ( fool   => \&fool,
-           usa    => \&fool,
-           nasdaq => \&fool,
-           nyse   => \&fool);
-}
-
-my @labels = qw/date isodate open high low close volume last/;
-sub labels {
-  return ( iexcloud => \@labels, );
+  return ( 
+    fool   => \%METHOD,
+    usa    => \%METHOD,
+    nasdaq => \%METHOD,
+    nyse   => \%METHOD,
+  );
 }
 
 sub fool {
@@ -153,7 +155,7 @@ conditions.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::Fool:
+The following laybels may be returned by Finance::Quote::Fool:
 symbol, day_range, open, volume, close, year_range, last, currency,
 method.
 

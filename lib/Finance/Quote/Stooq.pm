@@ -37,13 +37,19 @@ use if DEBUG, 'Smart::Comments', '###';
 
 my $STOOQ_URL = 'https://stooq.com/q/?s=';
 
-sub methods {
-  return (stooq  => \&stooq,
-          europe => \&stooq,
-          poland => \&stooq);
-}
+our @LABELS = qw/symbol name open high low last bid ask date currency method/;
+our $DISPLAY = 'Stooq Poland';
+our %METHOD = (subroutine => \&stooq, labels => \@LABELS, display => $DISPLAY);
 
-our @labels = qw/symbol name open high low last bid ask date currency method/;
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods {
+  return (
+    stooq  => \%METHOD,
+    europe => \%METHOD,
+    poland => \%METHOD,
+  );
+}
 
 my %currencies_by_link = (
   '?i=21' => "EUR", # Europe (€)
@@ -67,14 +73,7 @@ my %currencies_by_symbol = (
   'Ft'       => "HUF", # Hungary (Ft)
 );
 
-sub labels { 
-  return (stooq  => \@labels,
-          europe => \@labels, 
-          poland => \@labels);
-}
-
 sub stooq {
-
   my $quoter = shift;
   my @stocks = @_;
   my (%info, $tree, $table, $pricetable, $url, $reply);

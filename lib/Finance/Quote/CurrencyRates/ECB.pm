@@ -27,6 +27,10 @@ use XML::LibXML;
 
 # VERSION
 
+sub features() {
+    return {'display' => 'European Central Bank'};
+}
+
 sub new
 {
   my $self = shift;

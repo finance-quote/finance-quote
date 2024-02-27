@@ -86,27 +86,19 @@ use utf8;
 
 # VERSION
 
-my $Bourso_URL = 'https://www.boursorama.com/cours/';
+our $Bourso_URL = 'https://www.boursorama.com/cours/';
+our $DISPLAY = 'Boursorama';
+our @LABELS = qw/name last date isodate p_change open high low close volume currency method exchange/;
+our %METHOD = (subroutine => \&bourso, display => $DISPLAY, labels => \@LABELS);
+
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
 sub methods {
     return (
-             europe => \&bourso,
-             france => \&bourso,
-             bourso => \&bourso
+             europe => \%METHOD,
+             france => \%METHOD,
+             bourso => \%METHOD,
     );
-}
-
-{
-    my @labels =
-        qw/name last date isodate p_change open high low close volume currency method exchange/;
-
-    sub labels {
-        return (
-                 europe => \@labels,
-                 france => \@labels,
-                 bourso => \@labels
-        );
-    }
 }
 
 sub bourso_to_number {

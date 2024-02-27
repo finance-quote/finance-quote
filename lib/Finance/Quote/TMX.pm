@@ -30,16 +30,18 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/currency name exchange volume open high low cap close year_range last p_change symbol isodate date/;
+our @LABELS = qw/currency name exchange volume open high low cap close year_range last p_change symbol isodate date/;
+our $DISPLAY = 'Toronto Stock Exchange';
+our %METHOD = (subroutine => \&tmx, labels => \@LABELS, display => $DISPLAY);
 
-sub labels {
-  return ( tmx => \@labels );
-}
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
 sub methods {
-  return ( tmx    => \&tmx,
-           tsx => \&tmx,
-           canada => \&tmx );
+    return ( 
+        tmx => \%METHOD,
+        tsx => \%METHOD,
+        canada => \%METHOD,
+    );
 }
 
 sub tmx {
@@ -137,7 +139,7 @@ Finance::Quote::TMX - Obtain quotes from the Toronto Stock Exchange
 
     %stockinfo = $q->fetch('tmx','NT-T');   # Only query TMX
     %stockinfo = $q->fetch('canada','NT');  # Failover to other Canadian sources
-
+y
 =head1 DESCRIPTION
 
 This module obtains information from the Toronto Stock Exchange,

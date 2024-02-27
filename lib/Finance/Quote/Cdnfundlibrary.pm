@@ -25,7 +25,7 @@ use JSON;
 use warnings;
 use Time::Piece;
 
-#VERSION
+# VERSION
 
 # URLs of where to obtain information.
 
@@ -33,14 +33,17 @@ $FUNDLIB_URL =
 ("https://www.fundlibrary.com/MutualFunds/GetFundSearchResults?cifscCategoryId=0&fundCompanyId=0&fundTypeId=0&isGradeA=true&isGradeB=true&isGradeC=true&isGradeD=true&isGradeE=true&sortBy=Default&page=0&searchText=");
 $FUNDLIB_MAIN_URL=("http://www.fundlibrary.com");
 
-sub methods { return (canadamutual => \&fundlibrary,
-                       fundlibrary => \&fundlibrary); }
+our @LABELS = qw/method source link name currency last date isodate nav yield price net p_change/;
+our $DISPLAY = 'Fund Library Canada';
+our %METHOD = (subroutine => \&fundlibrary, display => $DISPLAY, labels => \@LABELS);
 
-{
-    my @labels = qw/method source link name currency last date isodate nav yield
-        price net p_change/;
-    sub labels { return (canadamutual => \@labels,
-                          fundlibrary => \@labels); }
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods {
+    return (
+        canadamutual => \%METHOD,
+        fundlibrary => \%METHOD,
+    );
 }
 
 sub  trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };

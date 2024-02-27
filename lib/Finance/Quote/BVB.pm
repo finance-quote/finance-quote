@@ -35,22 +35,20 @@ use if DEBUG, 'Smart::Comments', '###';
 
 # VERSION
 
-my $BVB_URL = 'https://bvb.ro/FinancialInstruments/Details/FinancialInstrumentsDetails.aspx?s=';
+our $BVB_URL = 'https://bvb.ro/FinancialInstruments/Details/FinancialInstrumentsDetails.aspx?s=';
+our @LABELS  = qw/symbol name open high low last bid ask date currency method/;
+our $DISPLAY = 'Bucharest Stock Exchange';
+our %METHOD  = (subroutine => \&bvb, labels => \@LABELS, display => $DISPLAY);
+
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
 sub methods {
-  return (bvb        => \&bvb,
-          romania    => \&bvb,
-          tradeville => \&bvb,
-          europe     => \&bvb);
-}
-
-our @labels = qw/symbol name open high low last bid ask date currency method/;
-
-sub labels { 
-  return (bvb        => \@labels,
-          romania    => \@labels,
-          tradeville => \@labels,
-          europe     => \@labels); 
+  return (
+    bvb        => \%METHOD,
+    romania    => \%METHOD,
+    tradeville => \%METHOD,
+    europe     => \%METHOD
+  );
 }
 
 sub bvb {

@@ -27,8 +27,9 @@ use JSON;
 
 # VERSION
 
-sub parameters {
-  return ('API_KEY');
+sub features() {
+    return {'display' => 'Open Exchange Rates',
+        'features' => {'API_KEY' => {'description' => 'registered user API key'}}};
 }
 
 sub new

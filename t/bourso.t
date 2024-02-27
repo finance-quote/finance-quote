@@ -27,13 +27,13 @@ if ( not $ENV{ONLINE_TEST} ) {
 #    tracker            Tracker         1rTBX4
 
 my %valid    = ('MP-802941'       => {currency => 'EUR', days =>  32, name => 'Covéa Actions Asie C'},            # Fund, EUR
-                '1rPAF'           => {currency => 'EUR', days =>   7, name => 'AIR FRANCE-KLM'},                  # Stock, EUR, Euronext Paris
+                '1rPAF'           => {currency => 'EUR', days =>   7, name => 'AIR FRANCE - KLM'},                # Stock, EUR, Euronext Paris
                 'MSFT'            => {currency => 'USD', days =>   7, name => 'MICROSOFT'},                       # Stock, USD, NASDAQ
                 'FF11-SOLB'       => {currency => 'EUR', days =>   7, name => 'SOLVAY'},                          # Stock, EUR, Euronext Bruxelles
                 '2rPDE000CX0QLH6' => {currency => 'EUR', days =>   7, name => 'GOLD/CITI WT OPEN'},               # Warrant
                 '1rPFR0010371401' => {currency => ''  , days => 100, name => 'FRENCH REPUBLIC 4% 25/10/38 EUR'},  # Bond, EUR, Euronext Paris,
                 '1rPCAC'          => {currency => 'Pts', days =>   7, name => 'CAC 40'},                          # Index, Pts, Paris,
-                '1rTBX4'          => {currency => 'EUR', days =>   7, name => 'Lyxor CAC 40 Daily Double Short UCITS ETF - Acc'}, # Tracker, EUR
+                '1rTBX4'          => {currency => 'EUR', days =>   7, name => 'Amundi CAC 40 Daily (-2x) Inverse UCITS ETF Acc'}, # Tracker, EUR
                 'FR0010037341'    => {currency => 'EUR', days =>  7, name => 'CM-AM Europe Growth RC'},           # Added to check for spaces in quote
                 );
 my %invalid  = ('BOGUS' => undef);

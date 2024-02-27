@@ -44,17 +44,18 @@ use Try::Tiny;
 
 $TROWEPRICE_URL = ("https://www3.troweprice.com/fb2/ppfweb/downloadPrices.do");
 
-sub methods { return (troweprice        => \&troweprice,
-               troweprice_direct => \&troweprice); }
+our @LABELS = qw/method exchange name nav date isodate price/;
+our $DISPLAY = 'T. Rowe Price';
+our %METHOD = (subroutine => \&troweprice, labels => \@LABELS, display => $DISPLAY);
 
-{
-  my @labels = qw/method exchange name nav date isodate price/;
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
-  sub labels { return (troweprice        => \@labels,
-               troweprice_direct => \@labels); }
+sub methods { 
+    return (
+        troweprice        => \%METHOD,
+        troweprice_direct => \%METHOD,
+    ); 
 }
-
-# =======================================================================
 
 sub troweprice {
 

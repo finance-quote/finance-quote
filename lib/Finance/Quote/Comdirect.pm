@@ -27,14 +27,14 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/last date isodate/;
+our @LABELS = qw/last date isodate/;
+our $DISPLAY = 'comdirect Germany';
+our %METHOD = (subroutine => \&comdirect, labels => \@LABELS, display => $DISPLAY);
 
-sub labels {
-  return ( comdirect => \@labels );
-}
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
 sub methods {
-  return ( comdirect => \&comdirect );
+  return ( comdirect => \%METHOD );
 }
 
 sub comdirect {

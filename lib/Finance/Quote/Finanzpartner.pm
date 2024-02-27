@@ -29,8 +29,17 @@ use Encode;
 
 my $FINANZPARTNER_URL = "https://www.finanzpartner.de/fi/";
 
-sub methods {return (finanzpartner        => \&finanzpartner);}
-sub labels { return (finanzpartner=>[qw/name date price last method/]); } # TODO
+our @LABELS = qw/name date price last method/;
+our $DISPLAY = 'Finanz Partner Germany';
+our %METHOD = (subroutine => \&finanzpartner, labels => \@LABELS, display => $DISPLAY);
+
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods {
+    return (
+        finanzpartner => \%METHOD,
+    );
+}
 
 sub finanzpartner
 {

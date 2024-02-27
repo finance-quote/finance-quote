@@ -43,25 +43,21 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTTP::Cookies;
 
-
 $MSTARCH_MAIN_URL   =	"https://www.morningstar.ch";
 $MSTARCH_LOOK_UP    =	"https://www.morningstar.ch/ch/funds/SecuritySearchResults.aspx?search=";
 $MSTARCH_NEXT_URL   =	"https://www.morningstar.ch/ch/funds/snapshot/snapshot.aspx?id=";
 
-# FIXME -
+our @LABELS = qw/name currency last date time price nav source iso_date method net p_change success errormsg/;
+our $DISPLAY = 'MorningStar Switzerland';
+our %METHOD = (subroutine => \&morningstarch, labels => \@LABELS, display => $DISPLAY);
 
-# VERSION
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
-sub methods { return (morningstarch => \&morningstarch_fund); }
-
-{
-    my @labels = qw/name currency last date time price nav source iso_date method net p_change success errormsg/;
-
-    sub labels { return (morningstarch => \@labels); }
+sub methods {
+    return (
+        morningstarch => \%METHOD,
+    );
 }
-
-#
-# =======================================================================
 
 sub morningstarch_fund  {
     my $quoter = shift;

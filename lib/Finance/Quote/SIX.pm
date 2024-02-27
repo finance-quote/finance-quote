@@ -30,14 +30,14 @@ use Scalar::Util qw(looks_like_number);
 
 # VERSION
 
-our @labels = qw/last date isodate/;
+our @LABELS = qw/last date isodate/;
+our $DISPLAY = 'Swiss Stock Exchange';
+our %METHOD = (subroutine => \&six, labels => \@LABELS, display => $DISPLAY);
 
-sub labels {
-  return ( six => \@labels );
-}
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
 sub methods {
-  return ( six => \&six );
+  return ( six => \%METHOD);
 }
 
 sub six {

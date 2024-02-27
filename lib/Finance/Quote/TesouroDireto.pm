@@ -33,8 +33,17 @@ use JSON;
 
 # VERSION
 
-sub methods { return (tesouro_direto => \&tesouro); }
-sub labels { return (tesouro_direto => [qw/exchange date isodate symbol name price last method currency/]); }
+our @LABELS = qw/exchange date isodate symbol name price last method currency/;
+our $DISPLAY = 'Tesouro Direto Brazil';
+our %METHOD = (subroutine => \&tesouro, labels => \@LABELS, display => $DISPLAY);
+
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods {
+    return ( 
+        tesouro_direto => \%METHOD,
+    );
+}
 
 sub tesouro
 {

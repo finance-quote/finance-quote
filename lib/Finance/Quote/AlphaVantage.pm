@@ -117,26 +117,24 @@ my %currencies_by_suffix = (
     '.SW'  => "CHF",    # Switzerland
 );
 
+our $DISPLAY    = 'AlphaVantage';
+our $FEATURES   = {'API_KEY' => 'registered user API key'};
+our @LABELS     = qw/date isodate open high low close volume last net p_change/;
+our $METHODHASH = {subroutine => \&alphavantage, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS,
+                   features => $FEATURES};
+
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
 sub methods {
-    return ( alphavantage => \&alphavantage,
-             canada       => \&alphavantage,
-             usa          => \&alphavantage,
-             nyse         => \&alphavantage,
-             nasdaq       => \&alphavantage,
+    return ( 
+        alphavantage => $METHODHASH,
+        canada       => $METHODHASH,
+        usa          => $METHODHASH,
+        nyse         => $METHODHASH,
+        nasdaq       => $METHODHASH,
     );
-}
-
-sub parameters {
-  return ('API_KEY');
-}
-
-{
-    my @labels = qw/date isodate open high low close volume last net p_change/;
-
-    sub labels {
-        return ( alphavantage => \@labels, );
-    }
 }
 
 sub sleep_before_query {
@@ -178,8 +176,8 @@ sub alphavantage {
 #   The user will add ".X" to symbols to return GBX priced securities
 #   as GBP.
 
-    my $token = exists $quoter->{module_specific_data}->{alphavantage}->{API_KEY} ? 
-                $quoter->{module_specific_data}->{alphavantage}->{API_KEY}        :
+    my $token = exists $quoter->{method_specific_data}->{alphavantage}->{API_KEY} ? 
+                $quoter->{method_specific_data}->{alphavantage}->{API_KEY}        :
                 $ENV{"ALPHAVANTAGE_API_KEY"};
 
     foreach my $stock (@stocks) {

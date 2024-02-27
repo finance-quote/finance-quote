@@ -29,14 +29,14 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/last isin name currency date isodate/;
+our @LABELS = qw/last isin name currency date isodate/;
+our $DISPLAY = "New Zeland's Exchange";
+our %METHOD = (subroutine => \&nzx, labels => \@LABELS, display => $DISPLAY);
 
-sub labels {
-  return ( nzx => \@labels );
-}
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
 sub methods {
-  return ( nzx => \&nzx );
+  return ( nzx => \%METHOD );
 }
 
 sub nzx {
@@ -88,8 +88,7 @@ sub nzx {
 
 =head1 NAME
 
-Finance::Quote::NZX - Obtain quotes from New Zealand's
-Exchange www.nzx.com
+Finance::Quote::NZX - Obtain quotes from New Zealand's Exchange www.nzx.com
 
 =head1 SYNOPSIS
 

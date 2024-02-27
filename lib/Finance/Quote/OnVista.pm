@@ -46,8 +46,13 @@ use vars qw($OnVista_URL);
 
 my $OnVista_URL = 'https://www.onvista.de';
 
-sub methods {return (onvista => \&onvista);}
-sub labels {return ( onvista => [qw/name last date isodate time currency method exchange/] );}
+our @LABELS = qw/name last date isodate time currency method exchange/;
+our $DISPLAY = 'onvista Germany';
+our %METHOD = (subroutine => \&onvista, labels => \@LABELS, display => $DISPLAY);
+
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods {return (onvista => \%METHOD);}
 
 sub onvista {
     my $quoter = shift;
