@@ -31,6 +31,8 @@ our @LABELS = qw/last date isodate/;
 our $DISPLAY = 'comdirect Germany';
 our %METHOD = (subroutine => \&comdirect, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
   return ( comdirect => \%METHOD );
 }

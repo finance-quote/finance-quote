@@ -91,6 +91,8 @@ our $DISPLAY = 'Boursorama';
 our @LABELS = qw/name last date isodate p_change open high low close volume currency method exchange/;
 our %METHOD = (subroutine => \&bourso, display => $DISPLAY, labels => \@LABELS);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return (
              europe => \%METHOD,

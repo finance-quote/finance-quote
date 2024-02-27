@@ -32,6 +32,8 @@ $BSE_URL = "https://www.bseindia.com";
 my $DISPLAY = 'BSE Exchange India';
 my @labels = qw/close last high low open prevclose exchange name/;
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods { 
     return (
         india => {

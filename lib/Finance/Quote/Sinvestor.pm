@@ -34,6 +34,8 @@ our @LABELS = qw/symbol last close exchange volume open price change p_change/;
 our $DISPLAY = 'S-Investor German Sparkasse';
 our %METHOD = (subroutine => \&sinvestor, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return (
         sinvestor => \%METHOD,

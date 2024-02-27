@@ -33,6 +33,8 @@ our @LABELS = qw/method source name symbol currency last date isodate high low p
 our $DISPLAY = 'Sharenet South Africa';
 our %METHOD = (subroutine => \&sharenet, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return (
         za => \%METHOD,

@@ -75,6 +75,8 @@ our @LABELS = qw/symbol name method source exchange currency ask bid close date 
 our $DISPLAY = 'Consors Bank Germany';
 our %METHOD = (subroutine => \&consorsbank, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return (
         consorsbank => \%METHOD,

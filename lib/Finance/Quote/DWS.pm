@@ -31,6 +31,8 @@ our @LABELS = qw/name date isodate last name currency/;
 our $DISPLAY = 'DWS Fund Data Service Germany';
 our %METHOD = (subroutine => \&dwsfunds, display => $DISPLAY, labels => \@LABELS);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
   return(
       dwsfunds => \%METHOD,

@@ -14,6 +14,8 @@ our @LABELS = qw/date isodate method source currency price p_change/;
 our $DISPLAY = 'Oslo Stock Exchange';
 our %METHOD = (subroutine => \&oslobors, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods { return (oslobors => \%METHOD); }
 
 sub oslobors {

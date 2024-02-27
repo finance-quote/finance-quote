@@ -34,6 +34,8 @@ $NSE_URL = "https://archives.nseindia.com";
 my $DISPLAY = 'National Stock Exchange India';
 my @labels = qw/close last high low open prevclose exchange/;
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods { 
     return (
         india => {

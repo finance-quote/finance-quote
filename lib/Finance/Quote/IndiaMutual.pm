@@ -43,6 +43,8 @@ our @LABELS = qw/method source link name currency date isodate nav/;
 our $DISPLAY = 'Association of Mutual Funds in India';
 our %METHOD = (subroutine => \&amfiindia, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods { 
   return (
     indiamutual => \%METHOD,

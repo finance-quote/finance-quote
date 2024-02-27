@@ -42,6 +42,8 @@ our @LABELS = qw/method source name symbol currency date isodate nav/;
 our $DISPLAY = 'FUNDATA Canada';
 our %METHOD = (subroutine => \&fundata, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return (
         canadamutual => \%METHOD,

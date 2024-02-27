@@ -48,6 +48,8 @@ our @LABELS = qw/exchange name number nav change ask date isodate yield price me
 our $DISPLAY = 'Fidelity Investments';
 our %METHOD = (subroutine => \&fidelity, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return (
         fidelity        => \%METHOD,

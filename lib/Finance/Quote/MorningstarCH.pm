@@ -51,6 +51,8 @@ our @LABELS = qw/name currency last date time price nav source iso_date method n
 our $DISPLAY = 'MorningStar Switzerland';
 our %METHOD = (subroutine => \&morningstarch, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return (
         morningstarch => \%METHOD,

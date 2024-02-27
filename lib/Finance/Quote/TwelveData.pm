@@ -37,6 +37,8 @@ our $DISPLAY = 'TwelveData';
 our %FEATURES = ('API_KEY' => {'description' => 'registered user API key'});
 our %METHOD = (subroutine => \&twelvedata, labels => \@LABELS, display => $DISPLAY, features => \%FEATURES);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return (
         twelvedata => \%METHOD,

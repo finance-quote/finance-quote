@@ -34,6 +34,8 @@ our @LABELS = qw/currency name exchange volume open high low cap close year_rang
 our $DISPLAY = 'Toronto Stock Exchange';
 our %METHOD = (subroutine => \&tmx, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return ( 
         tmx => \%METHOD,

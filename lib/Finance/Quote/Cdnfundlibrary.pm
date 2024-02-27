@@ -37,6 +37,8 @@ our @LABELS = qw/method source link name currency last date isodate nav yield pr
 our $DISPLAY = 'Fund Library Canada';
 our %METHOD = (subroutine => \&fundlibrary, display => $DISPLAY, labels => \@LABELS);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return (
         canadamutual => \%METHOD,

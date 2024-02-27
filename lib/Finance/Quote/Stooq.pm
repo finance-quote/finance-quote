@@ -41,6 +41,8 @@ our @LABELS = qw/symbol name open high low last bid ask date currency method/;
 our $DISPLAY = 'Stooq Poland';
 our %METHOD = (subroutine => \&stooq, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
   return (
     stooq  => \%METHOD,

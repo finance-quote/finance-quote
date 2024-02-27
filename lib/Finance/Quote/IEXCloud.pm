@@ -34,6 +34,8 @@ our $DISPLAY = "IEX Cloud";
 our %FEATURE = (API_KEY => {'description' => 'registered user API key'});
 our %METHOD = (subroutine => \&iexcloud, labels => \@LABELS, display => $DISPLAY, features => \%FEATURE);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods { 
     return ( 
         iexcloud => \%METHOD,

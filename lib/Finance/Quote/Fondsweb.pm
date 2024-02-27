@@ -30,6 +30,8 @@ our @LABELS = qw/name symbol isin date isodate year_range nav last price currenc
 our $DISPLAY = 'Fondsweb Germnay';
 our %METHOD = (subroutine => \&fondsweb, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods { return ( fondsweb => \%METHOD ); }
 
 # 123.456.789,00 -> 123456789.00

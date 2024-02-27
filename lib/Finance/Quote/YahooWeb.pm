@@ -35,6 +35,8 @@ our @LABELS = qw/symbol name exchange currency isodate last open high low volume
 our $DISPLAY = 'Yahoo.com Web Interface';
 our %METHOD = (subroutine => \&yahooweb, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return (
         yahooweb => \%METHOD,

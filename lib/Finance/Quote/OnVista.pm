@@ -50,6 +50,8 @@ our @LABELS = qw/name last date isodate time currency method exchange/;
 our $DISPLAY = 'onvista Germany';
 our %METHOD = (subroutine => \&onvista, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {return (onvista => \%METHOD);}
 
 sub onvista {

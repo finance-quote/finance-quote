@@ -48,6 +48,8 @@ our @LABELS = qw/method exchange name nav date isodate price/;
 our $DISPLAY = 'T. Rowe Price';
 our %METHOD = (subroutine => \&troweprice, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods { 
     return (
         troweprice        => \%METHOD,

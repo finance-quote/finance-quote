@@ -16,6 +16,8 @@ our $BLOOMBERG_URL = 'https://www.bloomberg.com/quote/';
 our $DISPLAY = 'Bloomberg';
 our @LABELS = qw/method name last currency symbol isodate/;
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods { 
     return (
         bloomberg => {

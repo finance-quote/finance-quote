@@ -45,6 +45,8 @@ our @LABELS = qw/date isodate open high low close volume last/;
 our $DISPLAY = 'Motley Fool';
 our %METHOD = (subroutine => \&fool, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods { 
   return ( 
     fool   => \%METHOD,

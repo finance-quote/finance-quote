@@ -35,6 +35,8 @@ our $DISPLAY = 'Tradegate via German Sparkasse';
 our %FEATURES = ('INST_ID' => {'description' => 'institute id for fetch (default 0000057 for Krefeld)'});
 our %METHOD = (subroutine => \&tradegate, labels => \@LABELS, display => $DISPLAY, features => \%FEATURES);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return (
         tradegate => \%METHOD,

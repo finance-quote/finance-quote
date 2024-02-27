@@ -47,6 +47,8 @@ our @LABELS = qw/method symbol exchange name date isodate nav price currency/;
 our $DISPLAY = 'TIAA (formerly TIAA-CREF)';
 our %METHOD = (subroutine => \&tiaacref, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return ( 
         tiaacref => \%METHOD,

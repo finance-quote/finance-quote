@@ -52,6 +52,8 @@ our @LABELS = qw/name date isodate currency close/;
 our $DISPLAY = 'Thrift Savings Plan USA';
 our %METHOD = (subroutine => \&tsp, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return ( 
         tsp => \%METHOD,

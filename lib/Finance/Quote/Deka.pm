@@ -16,6 +16,8 @@ our @LABELS = qw/exchange name date isodate price method/;
 our $DISPLAY = 'DEKA (Wertpapierhaus der Sparkassen)';
 our %METHOD = (subroutine => \&deka, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods { return (deka => \%METHOD); }
 
 # =======================================================================

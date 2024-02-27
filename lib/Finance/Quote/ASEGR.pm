@@ -38,6 +38,8 @@ our %labels = (symbol => ['symbol', 'trading symbol'],
 our @labels = keys %labels;
 our $DISPLAY = 'Athens Exchange Group';
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods { 
     return (
         greece => {subroutine => \&asegr, display => $DISPLAY, labels => \@labels},

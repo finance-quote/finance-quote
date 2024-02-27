@@ -33,6 +33,8 @@ our @LABELS = qw/last isin name currency date isodate/;
 our $DISPLAY = "New Zeland's Exchange";
 our %METHOD = (subroutine => \&nzx, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
   return ( nzx => \%METHOD );
 }

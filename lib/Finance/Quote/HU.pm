@@ -41,6 +41,8 @@ our $HU_DISPLAY      = "Budapest Stock Exchange & Hungarian Investment Fund and 
 our @HU_LABELS       = (@BSE_LABELS, "name");
 our %HU_METHOD       = (subroutine => \&hu, labels => \@HU_LABELS, display => $HU_DISPLAY);
     
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return ( 
         hufund  => \%BAMOSZ_METHOD,

@@ -35,6 +35,8 @@ use String::Util qw(trim);
 our $DISPLAY = 'Euronext Amsterdam';
 our @labels  = qw/name symbol price last date time p_change bid ask offer open high low close volume currency method exchange/;
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods { 
   return (
       dutch => {subroutine => \&aex, display => $DISPLAY, labels => \@labels},

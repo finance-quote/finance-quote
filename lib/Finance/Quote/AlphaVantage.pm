@@ -125,6 +125,8 @@ our $METHODHASH = {subroutine => \&alphavantage,
                    labels => \@LABELS,
                    features => $FEATURES};
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return ( 
         alphavantage => $METHODHASH,

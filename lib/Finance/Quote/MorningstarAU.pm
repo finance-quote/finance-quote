@@ -34,6 +34,8 @@ our @LABELS = qw/currency date isodate method name price symbol/;
 our $DISPLAY = 'MorningStar Australia';
 our %METHOD = (subroutine => \&morningstarau, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return (
         aufunds => \%METHOD,

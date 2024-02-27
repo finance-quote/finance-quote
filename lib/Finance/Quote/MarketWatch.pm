@@ -38,6 +38,8 @@ our @LABELS = qw/symbol name last date currency method/;
 our $DISPLAY = 'MarketWatch USA';
 our %METHOD = (subroutine => \&marketwatch, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
   return (
     marketwatch => \%METHOD,

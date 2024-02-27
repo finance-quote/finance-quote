@@ -42,6 +42,8 @@ our @LABELS = qw/name last date isodate volume currency method exchange type div
 our $DISPLAY = 'Yahoo.com V11 API';
 our %METHOD = (subroutine => \&yahoo_json, labels => \@LABELS, display => $DISPLAY);
 
+sub labels { my %m = methods(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
     return (
         yahoo_json   => \%METHOD,
