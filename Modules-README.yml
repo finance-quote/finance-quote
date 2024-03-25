@@ -153,7 +153,7 @@
 - module: Bloomberg.pm
   state: working
   added: 
-  changed: 2023-08-01
+  changed: 2024-03-18
   removed: 
   urls: https://www.bloomberg.com/quote/
   apikey: false
@@ -166,6 +166,7 @@
     - GOOGL:US
     - META:US
     - FOLSHM1:LN
+    - UKX:IND
 #
 - module: Bourso.pm
   state: working
