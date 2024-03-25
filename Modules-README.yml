@@ -166,6 +166,7 @@
     - GOOGL:US
     - META:US
     - FOLSHM1:LN
+    - UKX:IND
 #
 - module: Bourso.pm
   state: working
