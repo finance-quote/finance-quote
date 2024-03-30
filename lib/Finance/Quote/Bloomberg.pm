@@ -7,6 +7,7 @@ use HTTP::Request::Common;
 use HTTP::CookieJar::LWP ();
 use HTML::TreeBuilder;
 use Encode;
+use JSON;
 
 # VERSION
 
@@ -39,7 +40,6 @@ sub bloomberg {
         'User-Agent' => 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:67.0) Gecko/20100101 Firefox/67.0', 
         'Referer' => 'https://www.bloomberg.com/',
         'Accept' => '*/*',
-        'Accept-Encoding' => 'br', 
         'Accept-Language' => 'en-US,en;q=0.5',
         'Pragma' => 'no-cache', );
     $reply = $ua->get($url, @ns_headers);
@@ -52,10 +52,13 @@ sub bloomberg {
 
     eval {
       my $tree  = HTML::TreeBuilder->new_from_content(decode_utf8 $reply->content);
-      my $desc  = $tree->look_down(_tag=>'div', 'class'=>qr/SecurityName_extraLarge/)->as_text();
-      my $price = $tree->look_down(_tag=>'div', 'class'=>qr/^sized-price SizedPrice_extraLarge/)->as_text();
-      my $curr  = $tree->look_down(_tag=>'span', 'class'=>qr/^quotePageHeader_securityDetails/)->as_text();
-      my $date  = $tree->look_down(_tag=>'span', 'class'=>qr/^marketStatus_exchangeDelay/)->right();
+      my $json = encode_utf8 (($tree->look_down(_tag=>'script', 'id'=>'__NEXT_DATA__')->content_list())[0]);
+      my $json_decoded = decode_json $json;
+      my $json_quote = $json_decoded->{'props'}{'pageProps'}{'quote'};
+      my $desc = $json_quote->{'longName'};
+      my $price = $json_quote->{'price'};
+      my $curr  = $json_quote->{'issuedCurrency'};
+      my $date  = $json_quote->{'lastUpdate'};
 
       $curr =~ s/.*[(](.*)[)].*/$1/;
       $price =~ s/,//g;
@@ -63,8 +66,7 @@ sub bloomberg {
         $curr = "GBP";
         $price = $price / 100;
       }
-      $date = $1 . "20" . $2 if $date =~ m|([0-9]{1,2}/[0-9]{1,2}/)([0-9]{2})$|;
-      $date = $1 if $date =~ m|([0-9]{1,2}/[0-9]{1,2}/[0-9]{4})|;
+      $date = $1 if $date =~ m|([0-9]{4}-[0-9]{2}-[0-9]{2})T.*|;
 
       $funds{$name, 'method'}   = 'bloomberg';
       $funds{$name, 'name'}     = $desc;
@@ -72,7 +74,7 @@ sub bloomberg {
       $funds{$name, 'currency'} = $curr;
       $funds{$name, 'symbol'}   = $name;
 
-      $quoter->store_date(\%funds, $name, {usdate => $date});
+      $quoter->store_date(\%funds, $name, {isodate => $date});
 
       $funds{$name, 'success'}  = 1;
     };
