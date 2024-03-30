@@ -41,41 +41,43 @@ the team members.
 
 =back
 
-2. Setup a Development Environment
-==================================
+=head1 Setup a Development Environment
 
-To develop and test modules, you need a clone of the Finance-Quote git repo, a
-recent version of perl, and the Dist::Zilla module and its dependencies.  The 
-following steps provide a recipe for setup.
+=for comment TODO: Enhance section to specify Linux, Windows, or OSX
 
-  A. Clone the git repo
+To develop and test modules, you need a clone of the Finance-Quote git repo,
+a recent version of perl, and the Dist::Zilla module and its dependencies.
+The following steps provide a recipe for setup.
+
+=over
+
+=item A: Clone the git repo
   
-    $ git clone https://github.com/finance-quote/finance-quote.git
+ $ git clone https://github.com/finance-quote/finance-quote.git
   
-  B. (Optional) Install latest stable copy of perl in ~/perl5
+=item B: (Optional) Install latest stable copy of perl in ~/perl5
   
-    $ curl -L https://install.perlbrew.pl | bash
-    $ echo "source ~/perl5/perlbrew/etc/bashrc" >> ~/.bash_profile     # or the equivalent for your shell
-    $ perlbrew --notest install perl-5.28.1                            # --notest is risky, but significant speeds installation
-    $ perlbrew switch perl-5.28.1
-    $ perlbrew install-cpanm
-    $ cpanm install Dist::Zilla
+ $ curl -L https://install.perlbrew.pl | bash
+ $ echo "source ~/perl5/perlbrew/etc/bashrc" >> ~/.bash_profile     # or the equivalent for your shell
+ $ perlbrew --notest install perl-5.28.1                            # --notest is risky, but significant speeds installation
+ $ perlbrew switch perl-5.28.1
+ $ perlbrew install-cpanm
+ $ cpanm install Dist::Zilla
     
-    # inside the finance-quote directory 
-    # remove --missing to install missing & upgrade existing required package
-  
-    $ dzil authordeps --missing | cpanm --notest
-    $ dzil listdeps --missing | cpanm --notest
+ # inside the finance-quote directory 
+ # remove --missing to install missing & upgrade existing required package
+ 
+ $ dzil authordeps --missing | cpanm --notest
+ $ dzil listdeps --missing | cpanm --notest
 
-    $ cpanm install Data::Dumper::Perltidy Smart::Comments
+ $ cpanm install Data::Dumper::Perltidy Smart::Comments
   
-  C. Test out finance-quote
+=item C: Test out finance-quote
   
     # Light-weight test mode that skips all online tests
 
     $ dzil test
   
-
     # To run all the skipped tests, you need three environment variables:
     #  TEST_AUTHOR          - when set, tests are run to check for required modules
     #  ONLINE_TEST          - when set, online tests are executed
@@ -86,35 +88,33 @@ following steps provide a recipe for setup.
     $ cpanm Test::Pod Test::Pod::Coverage Test::Kwalitee Test::Perl::Critic
     $ TEST_AUTHOR=1 ONLINE_TEST=1 ALPHAVANTAGE_API_KEY=<YOUR API KEY> dzil test
 
-
     # To do an online test for one module 
 
     $ ONLINE_TEST=1 dzil run prove -lv t/iexcloud.t
-
 
     # Use prove to during test development - it is fast
 
     $ prove -lv t/fq-class-methods.t
 
+=back
 
-3. How to write a Finance::Quote module
-=======================================
+=head1 How to write a Finance::Quote module
 
 Finding a source of information, and writing code to parse and interpret
 that information is a difficult task.  As such, we've aimed to make
 writing a Finance::Quote module as easy as possible.  There are only
 a few simple rules you need to follow:
 
-3.1. The package name
----------------------
+=head2 The package name
+
 Finance::Quote expects that its loadable modules will be in the
 Finance::Quote namespace somewhere.  Hence, if you were writing
 a module called "DodgyBank" that returned information on DodgyBank's
 managed funds, a reasonable name for that module would be
 Finance::Quote::DodgyBank.
 
-3.2. The methods() subroutine
------------------------------
+=head2 The methods() subroutine
+
 Your module must have a subroutine named methods().  This function will
 be called by the Finance::Quote harness when it loads your module, and
 is used to determine which methods your module provides.  The methods()
@@ -167,8 +167,8 @@ where the information is coming from.  In the second, failover methods mean
 that many different functions could be used to fetch the stock information,
 not just the one you have defined.
 
-3.3 The functions specified by methods()
-----------------------------------------
+=head2 The functions specified by methods()
+
 The functions referred to by methods() will be passed a Finance::Quote
 object when called, and a list of zero or more symbol names.  The
 Finance::Quote object provides the following ready-to-use methods:
@@ -236,8 +236,8 @@ It is also very very strongly recommended that you place your module's
 name in the {$stock,"source"} field.  This allows others to check where
 information was obtained, and to use it appropriately.
 
-3.4 The parameters() subroutine - Modules requiring API Keys
-------------------------------------------------------------
+=head2 The parameters() subroutine - Modules requiring API Keys
+
 Some data sources require an API Key (sometimes called a token) in
 order to access the securities or exchange data. AlphaVantage.pm
 is one example.
@@ -250,8 +250,8 @@ your module is using a data source that requires a key/token.
 		return ('API_KEY');
 	}
 
-3.5 Currency
--------------
+=head2 Currency
+
 Finance::Quote has support for multiple currencies and for currency
 conversion.  As long as you provide a little bit of information about
 the information you are returning, the Finance::Quote framework can
@@ -297,8 +297,8 @@ to use the defaults, but also add some of your own:
 In the example above, the default fields would be available for currency
 conversion, but the "commission" field would also be converted.
 
-3.6 Development & Debugging Code
---------------------------------
+=head2 Development & Debugging Code
+
 There are multiple ways to include extra code in Perl modules to facilitate
 development and debugging. For Finance::Quote modules, please use the following
 strategy that uses a combination of a DEBUG constant and the Smart::Comments
@@ -329,8 +329,8 @@ compilation.
     print "More complex debugging code\n";
   }
 
-3.7 Dates
-----------
+=head2 Dates
+
 Do not parse dates directly in your module.  Instead you should use
 the function $q->store_date(), which handles a variety of date
 formats.  In its simplest form, you simply tell the function what
@@ -346,16 +346,16 @@ function this way:
 
 See the documentation in Quote.pm for more information.
 
-3.8 Things to avoid
---------------------
+=head2 Things to avoid
+
 Some sources of information will provide more stock information than
 requested.  Some code may rely upon your code only returning information
 about the stocks that the caller requested.  As such, you should
 never return information about stocks that were not requested, even
 if you fetch and/or process that information.
 
-3.9 Using your new module
---------------------------
+=head2 Using your new module
+
 Using your new module is easy.  Normally when using Finance::Quote you'd
 do something like the following:
 
@@ -384,8 +384,7 @@ This mainly exists to maintain compatibility with previous versions of
 Finance::Quote.
 
 
-4. How to write a Finance::Quote::CurrencyRates module
-======================================================
+=head1 How to write a Finance::Quote::CurrencyRates module
 
 Currency Rate modules carryout a single task: Given two currencies, return
 multipliers that describe the relative value of the currencies. In the
@@ -412,15 +411,13 @@ conversion rate (the third row).
 Currency rate modules should avoid carrying out arithmetic and leave it to
 Finance::Quote to use the multipliers to compute the final conversion value.
 
-4.1. The package name
----------------------
+=head2 The package name
 
 Currency rate modules belong in the Finance::Quote::CurrencyRates namespace and
 the name of the module should be descriptive. Use PascalCase (upper CamelCase)
 for the module name.
 
-4.2. The new() constructor
---------------------------
+=head2 The new() constructor
 
 Currency rate modules are called from a Finance::Quote quoter object when
 currency conversion is either explicitly requested from a caller or to convert
@@ -448,8 +445,7 @@ alternately read the API key from an environment variable.
 Clearly document all currency rate module options in the POD documentation for
 the module.
 
-4.3. The multipliers() function
--------------------------------
+=head2 The multipliers() function
 
 Finance::Quote calls the currency rate object method multipliers() with the
 arguments (object, user_agent, from, to), where
@@ -472,8 +468,7 @@ On error, multipliers() must either return undef or throw and exception
 with die().
 
 
-5. How to contribute your module to the world
-=============================================
+=head1 How to contribute your module to the world
 
 Check list:
 
@@ -500,8 +495,8 @@ Contact developers at finance-quote-devel@sourceforge.net to discuss
 new modules, ask questions, or get help opening a merge request.
 
 
-6. How to find out more
-=======================
+=head1 How to find out more
+
 The Finance::Quote GitHub page is located at
 
   https://github.com/finance-quote/finance-quote
@@ -510,8 +505,7 @@ and contains information about the project and links to older SourceForge
 documentation.
 
 
-7. How to join the mailing lists
-================================
+=head1 How to join the mailing lists
 
 There are two mailing lists for Finance::Quote.  These can both be accessed
 from:
