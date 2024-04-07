@@ -16,6 +16,9 @@
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #    02110-1301, USA
 
+# 2024-04-07: Commented call to sleep_before_query in get_content
+#             subroutine. AlphaVantage is not throttling API calls,
+#             but limits usage with free API key to 25 per day.
 # 2019-12-01: Added additional labels for net and p_change. Set
 #             close to previous close as returned in the JSON.
 #             Bruce Schuck (bschuck at asgard hyphen systems dot com)
@@ -207,7 +210,7 @@ sub alphavantage {
             . $ticker;
 
         my $get_content = sub {
-            sleep_before_query();
+            # sleep_before_query();
             my $time=int(time()-$launch_time);
             # print STDERR "Query at:".$time."\n";
             $reply = $ua->request( GET $url);
