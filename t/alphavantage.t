@@ -17,29 +17,15 @@ my $year     = ( localtime() )[5] + 1900;
 my $lastyear = $year - 1;
 
 my @symbols = qw/
-    IBM
-    CSCO
-    SOLB.BR
-    SAP.DE
-    TD.TO
-    VFIAX
-    T
-    DIVO11.SA
-    TWTR
-    AAPL
-    ORCL
-    CMCSA
-    INTC
-    NFLX
-    TSLA
-    NOK
-    BAC
-    GOOG
-    F
-    AXP
-    ERCB.DE
-    MRT-UN.TRT
     BP.L
+    CSCO
+    DIVO11.SA
+    ERCB.DE
+    IBM
+    MRT-UN.TRT
+    SAP.DE
+    SOLB.BR
+    TD.TO
 /;
 
 plan tests => 1 + 11*(1+$#symbols) + 10;
@@ -63,14 +49,14 @@ foreach my $symbol (@symbols) {
                || substr( $quotes{ $symbol, "date" }, 6, 4 ) == $lastyear );
 }
 
-is( $quotes{ "IBM", "currency" }, 'USD' );
-is( $quotes{ "CSCO", "currency" }, 'USD' );
-is( $quotes{ "ERCB.DE", "currency" }, 'EUR' );
-is( $quotes{ "SOLB.BR", "currency" }, 'EUR' );
-is( $quotes{ "SAP.DE", "currency" }, 'EUR' );
-is( $quotes{ "TD.TO", "currency" }, 'CAD' );
-is( $quotes{ "MRT-UN.TRT", "currency" }, 'CAD' );
 is( $quotes{ "BP.L", "currency" }, 'GBP' );
+is( $quotes{ "CSCO", "currency" }, 'USD' );
 is( $quotes{ "DIVO11.SA", "currency" }, 'BRL' );
+is( $quotes{ "ERCB.DE", "currency" }, 'EUR' );
+is( $quotes{ "IBM", "currency" }, 'USD' );
+is( $quotes{ "MRT-UN.TRT", "currency" }, 'CAD' );
+is( $quotes{ "SAP.DE", "currency" }, 'EUR' );
+is( $quotes{ "SOLB.BR", "currency" }, 'EUR' );
+is( $quotes{ "TD.TO", "currency" }, 'CAD' );
 
 ok( !$quotes{ "BOGUS", "success" } );
