@@ -12,7 +12,7 @@ plan tests => 22;
 # Test NSEIndia functions.
 
 my $q = Finance::Quote->new();
-my @stocks = ("HDFC", "TCS", "INE009A01021", "INE062A01020");
+my @stocks = ("HDFCBANK", "TCS", "INE009A01021", "INE062A01020");
 my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 

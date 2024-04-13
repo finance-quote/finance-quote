@@ -610,8 +610,8 @@ sub fetch {
   # my $count_ua = LWP::UserAgent->new(timeout => 10);
   # my $count_response = $count_ua->head($COUNT_URL);
 
-  ### COUNT_URL: $COUNT_URL
-  ### Code: $count_response->code
+  # ### COUNT_URL: $COUNT_URL
+  # ### Code: $count_response->code
 
   # Failover code.  This steps through all available methods while
   # we still have failed stocks to look-up.  This loop only

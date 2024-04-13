@@ -1,5 +1,7 @@
 {{$NEXT}}
-
+	* Bloomberg.pm - Changed module to extract data from JSON structure embedded within the HTML - Issue #360
+	* NSEIndia.pm - Eliminated need to use temp folders by storing file data from URL into a variable.
+	
 1.59      2023-12-31 14:52:12-08:00 America/Los_Angeles
 	* Fixed XETRA, Tradegate and SInvestor after webpage was restructured - Issue #350
 	* Fidelity.pm temporarily disabled - Issue #346
