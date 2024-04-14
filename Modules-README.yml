@@ -218,7 +218,7 @@
   state: failing
   added: TBD
   changed: 2019-12-01
-  removed: ~
+  removed: 2024-04-14
   urls:
     - https://www.fundlibrary.com/MutualFunds/GetFundSearchResults?cifscCategoryId=0&fundCompanyId=0&fundTypeId=0&isGradeA=true&isGradeB=true&isGradeC=true&isGradeD=true&isGradeE=true&sortBy=Default&page=0&searchText=
   apikey: false
@@ -393,7 +393,7 @@
     - GB00B7W6PR65
 #
 - module: Fidelity.pm
-  state: Not Working
+  state: failing
   added: TBD
   changed: 2020-03-21
   removed: 2023-12-16
@@ -445,10 +445,10 @@
    - "LU1720050803".
 #
 - module: Fool.pm
-  state: working
+  state: failing
   added: 2001-05-08
   changed: 2023-05-29
-  removed:
+  removed: 2024-04-14
   urls:
     - http://caps.fool.com/Ticker/{$symbol}.aspx
   apikey: false
@@ -470,10 +470,10 @@
     - BKNG
 #
 - module: Fundata.pm
-  state: TBD
+  state: failing
   added: TBD
   change: TBD
-  removed:
+  removed: 2024-04-14
   urls:
     - http://idata.fundata.com/MutualFunds/FundSnapshot.aspx?IID={$symbol}
   apikey: false
