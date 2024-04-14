@@ -18,10 +18,6 @@
 
 #    Copyright (C) 2023, Bruce Schuck <bschuck@asgard-systems.com>
 
-#    Changes:
-#    2024-04-13 - Changed to use
-#    https://query1.finance.yahoo.com/v8/finance/chart/
-
 package Finance::Quote::CurrencyRates::YahooJSON;
 
 use strict;
@@ -32,10 +28,13 @@ use if DEBUG, 'Smart::Comments';
 
 use JSON;
 
+use HTTP::Cookies;
+
 # VERSION
 
-my $YIND_URL_HEAD = 'https://query1.finance.yahoo.com/v8/finance/chart/';
-my $YIND_URL_TAIL = '?metrics=high&interval=1d&range=1d';
+my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbols=';
+my $YIND_URL_TAIL = '&modules=price';
+my $browser = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36';
 
 sub new
 {
@@ -58,11 +57,25 @@ sub multipliers
 
   my $json_data;
   my $rate;
-  my $reply = $ua->get($YIND_URL_HEAD
-      . ${from}
-      . ${to}
-      . '%3DX'
-      . $YIND_URL_TAIL);
+
+  my $cookie_jar = HTTP::Cookies->new();
+
+  $ua->cookie_jar( $cookie_jar );
+  $ua->agent($browser);
+  
+  # get Yahoo cookies that are needed for crumb
+  my $reply = $ua->get('https://login.yahoo.com');
+
+  # get the crumb that corrosponds to cookies retrieved
+  $reply = $ua->get('https://query2.finance.yahoo.com/v1/test/getcrumb');
+  my $crumb = $reply->content;
+
+  $reply = $ua->get($YIND_URL_HEAD
+    . ${from}
+    . ${to}
+    . '%3DX'
+    . '&crumb=' . $crumb 
+    . $YIND_URL_TAIL);
 
   ### HTTP Status: $reply->code
   return unless ($reply->code == 200);
@@ -73,12 +86,12 @@ sub multipliers
 
   ### JSON: $json_data
 
-  if ( !$json_data || !$json_data->{'chart'}->{'result'}->[0]->{'meta'}->{'regularMarketPrice'} ) {
+  if ( !$json_data || !$json_data->{'quoteSummary'}->{'result'}->[0]->{'price'}->{'regularMarketPrice'}{'raw'} ) {
     return;
   }
 
   $rate =
-    $json_data->{'chart'}->{'result'}->[0]->{'meta'}->{'regularMarketPrice'};
+    $json_data->{'quoteSummary'}->{'result'}->[0]->{'price'}->{'regularMarketPrice'}{'raw'};
 
   ### Rate from JSON: $rate
 

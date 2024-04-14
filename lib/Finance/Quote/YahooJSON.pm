@@ -23,15 +23,14 @@
 
 package Finance::Quote::YahooJSON;
 
-use strict;
+require 5.005;
 
+use strict;
 use JSON qw( decode_json );
 use vars qw($VERSION $YIND_URL_HEAD $YIND_URL_TAIL);
 use HTTP::Request::Common;
 use Time::Piece;
-# use HTTP::CookieJar::LWP;
 use HTTP::Cookies;
-
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
 
@@ -63,31 +62,33 @@ sub yahoo_json {
     my ( $my_date, $amp_stocks );
     my $ua = $quoter->user_agent();
 
-    # my $cookie_jar = HTTP::CookieJar::LWP->new();
     my $cookie_jar = HTTP::Cookies->new;
 
     $ua->cookie_jar($cookie_jar);
     $ua->agent($browser);
-    
+
     # get Yahoo cookies that are needed for crumb
-    $reply = $ua->request(GET 'https://login.yahoo.com');
+    $reply = $ua->get('https://login.yahoo.com');
 
     # get the crumb that corrosponds to cookies retrieved
-    $reply = $ua->request(GET 'https://query2.finance.yahoo.com/v1/test/getcrumb');
+    $reply = $ua->get('https://query2.finance.yahoo.com/v1/test/getcrumb');
     my $crumb = $reply->content;
 
-    ### [<now>]    cookie_jar : $cookie_jar 
-    ### [<now>]         crumb : $crumb 
+    ### [<now>]    cookie_jar : $cookie_jar
+    ### [<now>]         crumb : $crumb
 
     foreach my $stocks (@stocks) {
 
         # Issue 202 - Fix symbols with Ampersand
         # Can also be written as
-				# $amp_stocks = $stocks =~ s/&/%26/gr;
+		# $amp_stocks = $stocks =~ s/&/%26/gr;
         ($amp_stocks = $stocks) =~ s/&/%26/g;
 
         $url   = $YIND_URL_HEAD . $amp_stocks . '&crumb=' . $crumb . $YIND_URL_TAIL;
         $reply = $ua->request( GET $url);
+
+        ### [<now>]    url : $url
+        ### [<now>]  reply : $reply
 
         my $code    = $reply->code;
         my $desc    = HTTP::Status::status_message($code);
@@ -179,9 +180,9 @@ sub yahoo_json {
                     $info{ $stocks, "currency"} = "ILS";
                 }
 
-            # Add extra fields using names as per yahoo to make it easier
-            #  to switch from yahoo to yahooJSON
-            # Code added by goodvibes
+                # Add extra fields using names as per yahoo to make it easier
+                #  to switch from yahoo to yahooJSON
+                # Code added by goodvibes
                 {
                   # turn off warnings in this block to fix bogus
                   # 'Use of uninitialized value in multiplication' warning
