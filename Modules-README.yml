@@ -306,12 +306,12 @@
 - module: CurrencyRates/YahooJSON.pm
   state: working
   Added: 2023-04-09
-  changed: 2023-07-14
+  changed: 2024-04-13
   removed: ~
-  urls: https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price
+  urls: https://query1.finance.yahoo.com/v8/finance/chart/...=X?metrics=high&interval=1d&range=1d
   apikey: false
   notes: |
-    URL is constructed by adding "$from$to%3DX" to Yahoo URL.
+    URL is constructed by adding "$from$to%3DX" ($from$to=X) to Yahoo URL.
     Can be used for crypto by adding "$from-$to" to the URL.
   testfile: currency.t
   testcases:
@@ -1089,7 +1089,7 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2023-07-14
+  changed: 2024-04-13
   removed:
   urls:
     - https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price,summaryDetail,defaultKeyStatistics
@@ -1099,6 +1099,7 @@
     See issue https://github.com/finance-quote/finance-quote/issues/264
     Dependability of Yahoo REST API has been
     spotty.
+    Code needed to be added to use Cookies and a "crumb" from Yahoo.
   testfile: yahoojson.t
   testcases:
     - SUZLON.BO
