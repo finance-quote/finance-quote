@@ -1,4 +1,9 @@
 {{$NEXT}}
+	* YahooJSON.pm - Added code to retrieve cookies and a "crumb" required
+		to continue to utilize the v11 API. Issue #369.
+		The YahooJSON.pm currency module was changed to use the v8 API.
+	* Added initial version of CONTRIBUTING.pod that metacpan.org utilizes.
+		It will completely replace the Hacker's Guide in the future.
 	* Bloomberg.pm - Changed module to extract data from JSON structure embedded within the HTML - Issue #360
 	* NSEIndia.pm - Eliminated need to use temp folders by storing file data from URL into a variable.
 	
