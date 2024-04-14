@@ -1,4 +1,6 @@
 {{$NEXT}}
+	* Removed not working modules. Issues #346, #366, and #368.
+		Fidelity.pm, Cdbfundlibrary.com, Fundata.pm, and Fool.pm.
 	* YahooJSON.pm - Added code to retrieve cookies and a "crumb" required
 		to continue to utilize the v11 API. Issue #369.
 		The YahooJSON.pm currency module was changed to use the v8 API.
