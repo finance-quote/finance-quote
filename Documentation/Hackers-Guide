@@ -482,6 +482,7 @@ Check list:
   o Created a well-named test file in the t/ directory, including a test that succeeds and a test that fails
   o Ensure tests 00-store-date.t, 01-pod.t, 02-pod-coverage.t, 03-kwalitee.t, 04-critic.t, 05-data-dumper.t pass
   o Added module information in alphabetical order to the Modules-README.yml file
+  o Add a quick description of the change/addition to the Changes file. Most recent changes at the top of the list. Add new lines just below the {{$NEXT}} label at the top of the file.
 
 Contributions to Finance-Quote are best presented as pull requests on GitHub.com.  
 
