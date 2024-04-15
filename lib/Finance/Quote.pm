@@ -1695,6 +1695,7 @@ http://www.gnucash.org/
   Finance::Quote::HU,
   Finance::Quote::IEXCloud,
   Finance::Quote::IndiaMutual,
+  Finance::Quote::MarketWatch,
   Finance::Quote::MorningstarAU,
   Finance::Quote::MorningstarCH,
   Finance::Quote::MorningstarJP,
