@@ -499,24 +499,79 @@ with die().
 
 Check list:
 
-  o Created a well-named module file in the Finance directory tree
-  o Included POD documentation at the bottom of module file
-  o Included a VERSION comment just *after* the use module statements
-  o Added the module name in alphabetical order to the @MODULES or @CURRENCY_MODULES variable in Quote.pm
-  o Added the module name in alphabetical order in the SEE ALSO section of the Quote.pm POD
-  o Created a well-named test file in the t/ directory, including a test that succeeds and a test that fails
-  o Ensure tests 00-store-date.t, 01-pod.t, 02-pod-coverage.t, 03-kwalitee.t, 04-critic.t, 05-data-dumper.t pass
-  o Added module information in alphabetical order to the Modules-README.yml file
+=over
+
+=item *
+
+Created a well-named module file in the Finance directory tree.
+
+=item *
+
+Included POD documentation at the bottom of module file.
+
+=item *
+
+Included a VERSION comment just *after* the use module statements.
+
+=item *
+
+Added the module name in alphabetical order to the @MODULES or @CURRENCY_MODULES variable in Quote.pm.
+
+=item *
+
+Added the module name in alphabetical order in the SEE ALSO section of the Quote.pm POD.
+
+=item *
+
+Created a well-named test file in the t/ directory, including a test that succeeds and a test that fails.
+
+=item *
+
+Ensure tests 00-store-date.t, 01-pod.t, 02-pod-coverage.t, 03-kwalitee.t, 04-critic.t, 05-data-dumper.t pass.
+
+=item *
+
+Added module information in alphabetical order to the Modules-README.yml file.
+
+=item *
+
+Add a quick description of the change/addition to the Changes file. Most recent changes at the top of the list. Add new lines just below the {{$NEXT}} label at the top of the file.
+
+=back
 
 Contributions to Finance-Quote are best presented as pull requests on GitHub.com. 
 
-  A. Create a GitHub account and sign-in
-  B. Go to https://github.com/finance-quote/finance-quote
-  C. Click "Fork" in the upper-right corner
-  D. Commit your new module and other code changes to the fork
-  E. Click "New Pull Request" on https://github.com/finance-quote/finance-quote
-  F. Click "Compare Across Forks"
-  G. Select the appropriate commits and create the merge request
+=over
+
+=item 1.
+
+Create a GitHub account and sign-in
+
+=item 2.
+
+Go to https://github.com/finance-quote/finance-quote
+
+=item 3.
+
+Click "Fork" in the upper-right corner
+
+=item 4.
+
+Commit your new module and other code changes to the fork
+
+=item 5.
+
+Click "New Pull Request" on https://github.com/finance-quote/finance-quote
+
+=item 6.
+
+Click "Compare Across Forks"
+
+=item 7.
+
+Select the appropriate commits and create the merge request
+
+=back
 
 Contact developers at L<mailto:finance-quote-devel@sourceforge.net> to discuss
 new modules, ask questions, or get help opening a merge request.

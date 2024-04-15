@@ -43,6 +43,7 @@ my $browser = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.3
 
 sub methods {
     return ( yahoo_json => \&yahoo_json,
+    return ( yahoojson => \&yahoo_json,
     );
 }
 {
