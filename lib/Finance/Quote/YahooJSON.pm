@@ -42,8 +42,12 @@ my $YIND_URL_TAIL = '&modules=price,summaryDetail,defaultKeyStatistics';
 my $browser = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36';
 
 sub methods {
-    return ( yahoo_json => \&yahoo_json,
-    return ( yahoojson => \&yahoo_json,
+    return (
+      yahoo_json => \&yahoo_json,
+      yahoojson  => \&yahoo_json,
+      usa        => \&yahoo_json,
+      nyse       => \&yahoo_json,
+      nasdaq     => \&yahoo_json,
     );
 }
 {
@@ -51,7 +55,12 @@ sub methods {
         div_yield eps pe year_range open high low close/;
 
     sub labels {
-        return ( yahoo_json => \@labels,
+        return (
+          yahoo_json => \@labels,
+          yahoojson  => \@labels,
+          usa        => \@labels,
+          nyse       => \@labels,
+          nasdaq     => \@labels,
         );
     }
 }
