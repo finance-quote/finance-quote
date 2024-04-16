@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.60      2024-04-15 17:34:46-07:00 America/Los_Angeles
 	* Removed not working modules. Issues #346, #366, and #368.
 		Fidelity.pm, Cdbfundlibrary.com, Fundata.pm, and Fool.pm.
 	* YahooJSON.pm - Added code to retrieve cookies and a "crumb" required
