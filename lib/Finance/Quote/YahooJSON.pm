@@ -79,8 +79,11 @@ sub yahoo_json {
     $ua->cookie_jar($cookie_jar);
     $ua->agent($browser);
     
-    # get Yahoo cookies that are needed for crumb
-    $reply = $ua->request(GET 'https://login.yahoo.com');
+    # get initial Yahoo cookie -- A3 
+    $reply = $ua->request(GET 'https://fc.yahoo.com');
+
+    # get rest of Yahoo cookies -- A1 and A1S 
+    $reply = $ua->request(GET 'https://www.yahoo.com');
 
     # get the crumb that corrosponds to cookies retrieved
     $reply = $ua->request(GET 'https://query2.finance.yahoo.com/v1/test/getcrumb');
