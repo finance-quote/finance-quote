@@ -761,6 +761,20 @@
     - DE0009809566
     - DE0008491002
 #
+- module: SIX.pm
+  state: working
+  added: TBD
+  changed: 2024-04-18
+  removed: ~
+  urls: https://www.six-group.com/fqs/snap.json?
+  apikey: false
+  notes: ~
+  testfile: six.t
+  testcases:
+    - NESN
+    - CSSMI
+    - AAPL
+#
 - module: SIXfunds.pm
   state: TBD
   added: TBD

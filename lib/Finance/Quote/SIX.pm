@@ -30,7 +30,7 @@ use Scalar::Util qw(looks_like_number);
 
 # VERSION
 
-our @labels = qw/last date isodate/;
+our @labels = qw/last date isodate symbol/;
 
 sub labels {
   return ( six => \@labels );
@@ -71,9 +71,10 @@ sub six {
       my %metamap   = map {$metacols[$_] => $_} (0 .. $#metacols);
       my $metarow   = $metadata->{rowData}->[0];
 
+      $info{$symbol, 'symbol'}   = $metarow->[$metamap{ValorSymbol}];
       $info{$symbol, 'isin'}     = $metarow->[$metamap{ISIN}];
       $info{$symbol, 'name'}     = $metarow->[$metamap{IssuerNameFull}];
-      $info{$symbol, 'currency'} = $metarow->[$metamap{NominalCurrency}];
+      $info{$symbol, 'currency'} = $metarow->[$metamap{TradingBaseCurrency}];
 
       $quoter->store_date(\%info, $symbol, {isodate => $metarow->[$metamap{MarketDate}]});
 
@@ -93,6 +94,7 @@ sub six {
       $info{$symbol, 'high'}    = $datarow->[$datamap{DailyHighPrice}] if $datarow->[$datamap{DailyHighPrice}];
       $info{$symbol, 'low'}     = $datarow->[$datamap{DailyLowPrice}]  if $datarow->[$datamap{DailyLowPrice}];
       $info{$symbol, 'open'}    = $datarow->[$datamap{OpeningPrice}]   if $datarow->[$datamap{OpeningPrice}];
+      $info{$symbol, 'last'}    = $datarow->[$datamap{ClosingPrice}]   if $datarow->[$datamap{ClosingPrice}];
       $info{$symbol, 'volume'}  = $datarow->[$datamap{TotalVolume}]    if $datarow->[$datamap{TotalVolume}];
       $info{$symbol, 'success'} = 1;
     };
