@@ -1,4 +1,6 @@
 {{$NEXT}}
+	* SIX.pm - Changed lookup for currency, added lookups for symbol and last. Issue #380
+	* YahooJSON.pm - URLs to retrieve required cookies and crumbs were changed to allow EU based users to use the module. Issue #373
 
 1.60      2024-04-15 17:34:46-07:00 America/Los_Angeles
 	* Removed not working modules. Issues #346, #366, and #368.
