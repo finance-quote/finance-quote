@@ -20,12 +20,16 @@ use strict;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 use HTML::TreeBuilder::XPath;
+use LWP::Protocol::http;
 use Text::Template;
 
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
 
 # VERSION
+
+# Fix for 500 Header line too long message
+push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, MaxLineLength => 0);
 
 my $URL   = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://finance.yahoo.com/quote/{$symbol}/history?p={$symbol}');
 my $AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36';
@@ -55,9 +59,12 @@ sub yahooweb {
 
     foreach my $symbol (@stocks) {
         $url   = $URL->fill_in(HASH => {symbol => $symbol});
+
+        ### [<now>] YahooWeb: $url
         $reply = $ua->request(GET $url);
 
-        ### YahooWeb: $url
+        ### [<now>] Reply: $reply
+
         unless ($reply->is_success) {
             $info{ $symbol, "success" } = 0;
             $info{ $symbol, "errormsg" } = join ' ', $reply->code, $reply->message;
@@ -67,6 +74,8 @@ sub yahooweb {
         my $tree = HTML::TreeBuilder::XPath->new();
         $tree->ignore_unknown(0);
         $tree->parse($reply->decoded_content);
+
+        ### [<now>] Tree after parse: $tree
 
         my ($name, $yahoo_symbol) = map { $_ =~ /^(.+) \(([^)]+)\)/ ? ($1, $2) : () } $tree->findnodes_as_strings('//*[@id="quote-header-info"]//div//h1');
         
