@@ -52,7 +52,7 @@ sub yahooweb {
     my $quoter = shift;
 
     my @stocks = @_;
-    my ( %info, $url, $reply );
+    my ( %info, $url, $reply, $script_tag );
     my $ua = $quoter->user_agent();
     my $agent = $ua->agent();
     $ua->agent($AGENT);
@@ -75,7 +75,13 @@ sub yahooweb {
         $tree->ignore_unknown(0);
         $tree->parse($reply->decoded_content);
 
-        ### [<now>] Tree after parse: $tree
+        # ### [<now>] Tree after parse: $tree
+
+        # $tree->dump;
+
+        $script_tag = $tree->look_down(_tag => 'script', type => 'application/json', data-url => qr!https://query1.finance.yahoo.com/v7/finance/quote?fields=fiftyTwoWeekHigh.*|);
+
+        ### [<now>] script_tag: $script_tag
 
         my ($name, $yahoo_symbol) = map { $_ =~ /^(.+) \(([^)]+)\)/ ? ($1, $2) : () } $tree->findnodes_as_strings('//*[@id="quote-header-info"]//div//h1');
         
