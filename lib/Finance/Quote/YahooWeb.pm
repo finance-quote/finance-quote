@@ -20,11 +20,14 @@ use strict;
 use HTTP::Request::Common;
 use HTML::TableExtract;
 use HTML::TreeBuilder::XPath;
+use JSON qw( decode_json );
 use LWP::Protocol::http;
 use Text::Template;
 
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
+
+use constant URLTAG => "data-url";
 
 # VERSION
 
@@ -79,9 +82,17 @@ sub yahooweb {
 
         # $tree->dump;
 
-        $script_tag = $tree->look_down(_tag => 'script', type => 'application/json', data-url => qr!https://query1.finance.yahoo.com/v7/finance/quote?fields=fiftyTwoWeekHigh.*|);
+        $script_tag = $tree->look_down(_tag => 'script', type => 'application/json', URLTAG, qr!https://query1.finance.yahoo.com/v7/finance/quote\?fields=fiftyTwoWeekHigh.*! );
 
         ### [<now>] script_tag: $script_tag
+
+        my @numfound = $script_tag->content_list();
+
+        ### [<now>] numfound: @numfound
+
+        my $json_data = JSON::decode_json $numfound[0];
+
+        ### [<now>] json_data: $json_data
 
         my ($name, $yahoo_symbol) = map { $_ =~ /^(.+) \(([^)]+)\)/ ? ($1, $2) : () } $tree->findnodes_as_strings('//*[@id="quote-header-info"]//div//h1');
         
