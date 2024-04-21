@@ -18,7 +18,6 @@ use warnings;
 use strict;
 
 use HTTP::Request::Common;
-use HTML::TableExtract;
 use HTML::TreeBuilder::XPath;
 use JSON qw( decode_json );
 use LWP::Protocol::http;
@@ -28,6 +27,7 @@ use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
 
 use constant URLTAG => "data-url";
+use constant JSONBODY => "body";
 
 # VERSION
 
@@ -90,11 +90,34 @@ sub yahooweb {
 
         ### [<now>] numfound: @numfound
 
-        my $json_data = JSON::decode_json $numfound[0];
+        my $json_data;
+        eval {$json_data = JSON::decode_json $numfound[0]};
+        if($@) {
+            $info{ $symbol, 'success' } = 0;
+            $info{ $symbol, 'errormsg' } = $@;
+            next;
+        }
 
         ### [<now>] json_data: $json_data
 
-        my ($name, $yahoo_symbol) = map { $_ =~ /^(.+) \(([^)]+)\)/ ? ($1, $2) : () } $tree->findnodes_as_strings('//*[@id="quote-header-info"]//div//h1');
+        my $json_symbol =
+            $json_data->{'body'};
+        ### [<now>] json_symbol: $json_symbol;
+
+        eval {$json_data = JSON::decode_json $json_symbol};
+        if($@) {
+            $info{ $symbol, 'success' } = 0;
+            $info{ $symbol, 'errormsg' } = $@;
+            next;
+        }
+
+        ### [<now>] json_data 2: $json_data
+
+        my $yahoo_symbol =
+            $json_data->{'quoteResponse'}{'result'}[0]{'symbol'};
+        ### [<now>] yahoo_symbol: $yahoo_symbol
+
+        my $name = $json_data->{'quoteResponse'}{'result'}[0]{'shortName'};
         
         if (uc($symbol) ne uc($yahoo_symbol)) {
             ### Error: $symbol, $yahoo_symbol
@@ -104,74 +127,49 @@ sub yahooweb {
         }
 
         $info{ $symbol, 'name' } = $name;
+        my $currency = $json_data->{'quoteResponse'}{'result'}[0]{'currency'};
+        $info{ $symbol, 'currency' } = $currency;
+        $info{ $symbol, 'exchange' } = 
+            $json_data->{'quoteResponse'}{'result'}[0]{'fullExchangeName'};
 
-        my ($exchange, $currency) = map { $_ =~ /^(.+)[.] Currency in (.+)$/ ? ($1, $2) : () } $tree->findnodes_as_strings('//*[@id="quote-header-info"]//div//span');
-        $info{ $symbol, 'exchange' } = $exchange;
         if ($currency =~ /^GBp/) {
             $info{ $symbol, 'currency' } = 'GBP';
         } else {
             $info{ $symbol, 'currency' } = $currency;
         }
 
-        my $te = HTML::TableExtract->new(
-            headers => ['Date', 'Open', 'High', 'Low', 'Close\*', 'Adj Close\*\*', 'Volume'],
-            attribs => { 'data-test' => "historical-prices" } );
-        unless ($te->parse($reply->decoded_content)) {
-            $info{ $symbol, "success" } = 0;
-            $info{ $symbol, "errormsg" } = "YahooWeb - History table not found.";
-            next;
-        }
-        my $historytable = $te->first_table_found();
-        # Find a row with a price
-        my $row = 0;
-        foreach my $r ($historytable->rows) {
-            if (defined $historytable->cell($row, 4) &&
-                $historytable->cell($row, 4) ne "-") {
-                last;
-            }
-            $row += 1;
-        } 
-        my $rows = $historytable->rows(); 
-        ### Row count: scalar @$rows
-        ### Index: $row
-        if ($row >= @$rows) {
-            $info{ $symbol, "success" } = 0;
-            $info{ $symbol, "errormsg" } = "YahooWeb - no row with a price.";
-            next;
-        }
-        ### Row: $historytable->row($row)
-        my ($month, $day, $year) = $historytable->cell($row,0)
-            =~ m|(\w+) (\d+), (\d{4})|;
-        ### Month: $month
-        ### Day: $day
-        ### Year: $year
-
-        my $last = $historytable->cell($row,4);
+        my $last = $json_data->{'quoteResponse'}{'result'}[0]{'regularMarketPrice'}{'fmt'};
         $last =~ s/,//g;
         if ($currency =~ /^GBp/) {
             $last = $last / 100;
         }
 
-        my $open = $historytable->cell($row,1);
+        my $open = $json_data->{'quoteResponse'}{'result'}[0]{'regularMarketOpen'}{'fmt'};
         $open =~ s/,//g;
         if ($currency =~ /^GBp/) {
             $open = $open / 100;
         }
 
-        my $high = $historytable->cell($row,2);
+        my $high = $json_data->{'quoteResponse'}{'result'}[0]{'regularMarketDayHigh'}{'fmt'};
         $high =~ s/,//g;
         if ($currency =~ /^GBp/) {
             $high = $high / 100;
         }
 
-        my $low = $historytable->cell($row,3);
+        my $low = $json_data->{'quoteResponse'}{'result'}[0]{'regularMarketDayLow'}{'fmt'};
         $low =~ s/,//g;
         if ($currency =~ /^GBp/) {
             $low = $low / 100;
         }
 
-        my $volume = $historytable->cell($row,6);
+        my $volume = $json_data->{'quoteResponse'}{'result'}[0]{'regularMarketVolume'}{'raw'};
         $volume =~ s/,//g;
+
+        # regularMarketTime in JSON is seconds since epoch
+        my $tradedate = $json_data->{'quoteResponse'}{'result'}[0]{'regularMarketTime'}{'raw'};
+        my (undef,undef,undef,$day,$month,$year,undef,undef,undef) = localtime($tradedate);
+        $month += 1;
+        $year += 1900;
 
         ### YahooWeb Result: $last
         $info{ $symbol, 'last'} = $last;
