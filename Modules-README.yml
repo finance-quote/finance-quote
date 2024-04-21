@@ -153,7 +153,7 @@
 - module: Bloomberg.pm
   state: working
   added: 
-  changed: 2023-08-01
+  changed: 2024-03-18
   removed: 
   urls: https://www.bloomberg.com/quote/
   apikey: false
@@ -166,6 +166,7 @@
     - GOOGL:US
     - META:US
     - FOLSHM1:LN
+    - UKX:IND
 #
 - module: Bourso.pm
   state: working
@@ -217,7 +218,7 @@
   state: failing
   added: TBD
   changed: 2019-12-01
-  removed: ~
+  removed: 2024-04-14
   urls:
     - https://www.fundlibrary.com/MutualFunds/GetFundSearchResults?cifscCategoryId=0&fundCompanyId=0&fundTypeId=0&isGradeA=true&isGradeB=true&isGradeC=true&isGradeD=true&isGradeE=true&sortBy=Default&page=0&searchText=
   apikey: false
@@ -305,12 +306,12 @@
 - module: CurrencyRates/YahooJSON.pm
   state: working
   Added: 2023-04-09
-  changed: 2023-07-14
+  changed: 2024-04-13
   removed: ~
-  urls: https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price
+  urls: https://query1.finance.yahoo.com/v8/finance/chart/...=X?metrics=high&interval=1d&range=1d
   apikey: false
   notes: |
-    URL is constructed by adding "$from$to%3DX" to Yahoo URL.
+    URL is constructed by adding "$from$to%3DX" ($from$to=X) to Yahoo URL.
     Can be used for crypto by adding "$from-$to" to the URL.
   testfile: currency.t
   testcases:
@@ -392,7 +393,7 @@
     - GB00B7W6PR65
 #
 - module: Fidelity.pm
-  state: Not Working
+  state: failing
   added: TBD
   changed: 2020-03-21
   removed: 2023-12-16
@@ -444,10 +445,10 @@
    - "LU1720050803".
 #
 - module: Fool.pm
-  state: working
+  state: failing
   added: 2001-05-08
   changed: 2023-05-29
-  removed:
+  removed: 2024-04-14
   urls:
     - http://caps.fool.com/Ticker/{$symbol}.aspx
   apikey: false
@@ -469,10 +470,10 @@
     - BKNG
 #
 - module: Fundata.pm
-  state: TBD
+  state: failing
   added: TBD
   change: TBD
-  removed:
+  removed: 2024-04-14
   urls:
     - http://idata.fundata.com/MutualFunds/FundSnapshot.aspx?IID={$symbol}
   apikey: false
@@ -674,7 +675,7 @@
 - module: NSEIndia.pm
   state: working
   added: 2020-06-27
-  changed:
+  changed: 2024-01-12
   removed:
   urls:
     - https://archives.nseindia.com/content/historical/EQUITIES/${YYYY}/${MMM}/cm${DDMMMYYYY}bhav.csv.zip
@@ -686,7 +687,7 @@
     Module to fetch equity quotes from https://www.nseindia.com/
   testfile: nseindia.t
   testcases:
-    - HDFC
+    - HDFCBANK
     - TCS
     - INE009A01021
     - INE062A01020
@@ -759,6 +760,20 @@
     - FR0000120628
     - DE0009809566
     - DE0008491002
+#
+- module: SIX.pm
+  state: working
+  added: TBD
+  changed: 2024-04-18
+  removed: ~
+  urls: https://www.six-group.com/fqs/snap.json?
+  apikey: false
+  notes: ~
+  testfile: six.t
+  testcases:
+    - NESN
+    - CSSMI
+    - AAPL
 #
 - module: SIXfunds.pm
   state: TBD
@@ -1088,7 +1103,7 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2023-07-14
+  changed: 2024-04-18
   removed:
   urls:
     - https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price,summaryDetail,defaultKeyStatistics
@@ -1098,6 +1113,8 @@
     See issue https://github.com/finance-quote/finance-quote/issues/264
     Dependability of Yahoo REST API has been
     spotty.
+    Code needed to be added to use Cookies and a "crumb" from Yahoo.
+    Additional URL fetches were needed for EU based users.
   testfile: yahoojson.t
   testcases:
     - SUZLON.BO

@@ -9,7 +9,7 @@ if (not $ENV{'ONLINE_TEST'}) {
 }
 
 my $q        = Finance::Quote->new('Bloomberg');
-my @valid    = qw/MSFT:US AMZN:US AAPL:US GOOGL:US META:US FOLSHM1:LN/;
+my @valid    = qw/MSFT:US AMZN:US AAPL:US GOOGL:US META:US FOLSHM1:LN UKX:IND/;
 my @invalid  = qw/BOGUS/;
 my @symbols  = (@valid, @invalid);
 my $year     = (localtime())[5] + 1900;

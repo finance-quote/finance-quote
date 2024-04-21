@@ -67,7 +67,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Bourso
     BVB
     CSE
-    Cdnfundlibrary
     Comdirect
     Consorsbank
     Currencies
@@ -76,8 +75,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     FTfunds
     Finanzpartner
     Fondsweb
-    Fool
-    Fundata
     GoldMoney
     GoogleWeb
     HU
@@ -610,8 +607,8 @@ sub fetch {
   # my $count_ua = LWP::UserAgent->new(timeout => 10);
   # my $count_response = $count_ua->head($COUNT_URL);
 
-  ### COUNT_URL: $COUNT_URL
-  ### Code: $count_response->code
+  # ### COUNT_URL: $COUNT_URL
+  # ### Code: $count_response->code
 
   # Failover code.  This steps through all available methods while
   # we still have failed stocks to look-up.  This loop only
@@ -1266,7 +1263,6 @@ methods.
 
     my $q = Finance::Quote->new()
     my $q = Finance::Quote->new('-defaults')
-    my $q = Finance::Quote->new('AEX', 'Fool')
     my $q = Finance::Quote->new(timeout => 30)
     my $q = Finance::Quote->new('YahooJSON', fetch_currency => 'EUR')
     my $q = Finance::Quote->new('alphavantage' => {API_KEY => '...'})
@@ -1633,7 +1629,6 @@ information when compared to references
  Copyright 2000 Volker Stuerzl (DWS)
  Copyright 2001 Rob Sessink (AEX support)
  Copyright 2001 Leigh Wedding (ASX updates)
- Copyright 2001 Tobias Vancura (Fool support)
  Copyright 2001 James Treacy (TD Waterhouse support)
  Copyright 2008 Erik Colson (isoTime)
 
@@ -1688,7 +1683,6 @@ http://www.gnucash.org/
   Finance::Quote::Bourso,
   Finance::Quote::BVB,
   Finance::Quote::CSE,
-  Finance::Quote::Cdnfundlibrary,
   Finance::Quote::Comdirect,
   Finance::Quote::Consorsbank,
   Finance::Quote::Currencies,
@@ -1697,13 +1691,12 @@ http://www.gnucash.org/
   Finance::Quote::FTfunds,
   Finance::Quote::Finanzpartner,
   Finance::Quote::Fondsweb,
-  Finance::Quote::Fool,
-  Finance::Quote::Fundata
   Finance::Quote::GoldMoney,
   Finance::Quote::GoogleWeb,
   Finance::Quote::HU,
   Finance::Quote::IEXCloud,
   Finance::Quote::IndiaMutual,
+  Finance::Quote::MarketWatch,
   Finance::Quote::MorningstarAU,
   Finance::Quote::MorningstarCH,
   Finance::Quote::MorningstarJP,

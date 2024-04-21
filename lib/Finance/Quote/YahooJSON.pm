@@ -23,23 +23,31 @@
 
 package Finance::Quote::YahooJSON;
 
-require 5.005;
-
 use strict;
+
 use JSON qw( decode_json );
 use vars qw($VERSION $YIND_URL_HEAD $YIND_URL_TAIL);
-use LWP::UserAgent;
 use HTTP::Request::Common;
-use HTML::TableExtract;
 use Time::Piece;
+# use HTTP::CookieJar::LWP;
+use HTTP::Cookies;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
 
 # VERSION
 
-my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=';
+my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbols=';
 my $YIND_URL_TAIL = '&modules=price,summaryDetail,defaultKeyStatistics';
+my $browser = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36';
 
 sub methods {
-    return ( yahoo_json => \&yahoo_json,
+    return (
+      yahoo_json => \&yahoo_json,
+      yahoojson  => \&yahoo_json,
+      usa        => \&yahoo_json,
+      nyse       => \&yahoo_json,
+      nasdaq     => \&yahoo_json,
     );
 }
 {
@@ -47,7 +55,12 @@ sub methods {
         div_yield eps pe year_range open high low close/;
 
     sub labels {
-        return ( yahoo_json => \@labels,
+        return (
+          yahoo_json => \@labels,
+          yahoojson  => \@labels,
+          usa        => \@labels,
+          nyse       => \@labels,
+          nasdaq     => \@labels,
         );
     }
 }
@@ -56,9 +69,28 @@ sub yahoo_json {
 
     my $quoter = shift;
     my @stocks = @_;
-    my ( %info, $reply, $url, $te, $ts, $row, @cells, $ce );
+    my ( %info, $reply, $url);
     my ( $my_date, $amp_stocks );
     my $ua = $quoter->user_agent();
+
+    # my $cookie_jar = HTTP::CookieJar::LWP->new();
+    my $cookie_jar = HTTP::Cookies->new;
+
+    $ua->cookie_jar($cookie_jar);
+    $ua->agent($browser);
+    
+    # get initial Yahoo cookie -- A3 
+    $reply = $ua->request(GET 'https://fc.yahoo.com');
+
+    # get rest of Yahoo cookies -- A1 and A1S 
+    $reply = $ua->request(GET 'https://www.yahoo.com');
+
+    # get the crumb that corrosponds to cookies retrieved
+    $reply = $ua->request(GET 'https://query2.finance.yahoo.com/v1/test/getcrumb');
+    my $crumb = $reply->content;
+
+    ### [<now>]    cookie_jar : $cookie_jar 
+    ### [<now>]         crumb : $crumb 
 
     foreach my $stocks (@stocks) {
 
@@ -67,7 +99,7 @@ sub yahoo_json {
 				# $amp_stocks = $stocks =~ s/&/%26/gr;
         ($amp_stocks = $stocks) =~ s/&/%26/g;
 
-        $url   = $YIND_URL_HEAD . $amp_stocks . $YIND_URL_TAIL;
+        $url   = $YIND_URL_HEAD . $amp_stocks . '&crumb=' . $crumb . $YIND_URL_TAIL;
         $reply = $ua->request( GET $url);
 
         my $code    = $reply->code;
@@ -101,9 +133,9 @@ sub yahoo_json {
             }
             else {
 
-		my $json_resources_price = $json_data->{'quoteSummary'}{'result'}[0]{'price'};
-		my $json_resources_summaryDetail = $json_data->{'quoteSummary'}{'result'}[0]{'summaryDetail'};
-		my $json_resources_defaultKeyStatistics = $json_data->{'quoteSummary'}{'result'}[0]{'defaultKeyStatistics'};
+                my $json_resources_price = $json_data->{'quoteSummary'}{'result'}[0]{'price'};
+                my $json_resources_summaryDetail = $json_data->{'quoteSummary'}{'result'}[0]{'summaryDetail'};
+                my $json_resources_defaultKeyStatistics = $json_data->{'quoteSummary'}{'result'}[0]{'defaultKeyStatistics'};
 
                 # TODO: Check if $json_response_type is "Quote"
                 # before attempting anything else
@@ -173,7 +205,7 @@ sub yahoo_json {
                 }
                 $info{ $stocks, "eps"} =
                     $json_resources_defaultKeyStatistics->{'trailingEps'}{'raw'};
-		#    $json_resources_summaryDetail->{'epsTrailingTwelveMonths'};
+		        #    $json_resources_summaryDetail->{'epsTrailingTwelveMonths'};
                 $info{ $stocks, "pe"} = $json_resources_summaryDetail->{'trailingPE'}{'raw'};
                 $info{ $stocks, "year_range"} =
                     sprintf("%12s - %s",

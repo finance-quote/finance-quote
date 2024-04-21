@@ -1,5 +1,20 @@
 {{$NEXT}}
 
+1.61      2024-04-18 21:34:24-07:00 America/Los_Angeles
+	* SIX.pm - Changed lookup for currency, added lookups for symbol and last. Issue #380
+	* YahooJSON.pm - URLs to retrieve required cookies and crumbs were changed to allow EU based users to use the module. Issue #373
+
+1.60      2024-04-15 17:34:46-07:00 America/Los_Angeles
+	* Removed not working modules. Issues #346, #366, and #368.
+		Fidelity.pm, Cdbfundlibrary.com, Fundata.pm, and Fool.pm.
+	* YahooJSON.pm - Added code to retrieve cookies and a "crumb" required
+		to continue to utilize the v11 API. Issue #369.
+		The YahooJSON.pm currency module was changed to use the v8 API.
+	* Added initial version of CONTRIBUTING.pod that metacpan.org utilizes.
+		It will completely replace the Hacker's Guide in the future.
+	* Bloomberg.pm - Changed module to extract data from JSON structure embedded within the HTML - Issue #360
+	* NSEIndia.pm - Eliminated need to use temp folders by storing file data from URL into a variable.
+	
 1.59      2023-12-31 14:52:12-08:00 America/Los_Angeles
 	* Fixed XETRA, Tradegate and SInvestor after webpage was restructured - Issue #350
 	* Fidelity.pm temporarily disabled - Issue #346
