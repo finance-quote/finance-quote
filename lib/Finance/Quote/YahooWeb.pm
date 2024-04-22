@@ -78,13 +78,15 @@ sub yahooweb {
         $tree->ignore_unknown(0);
         $tree->parse($reply->decoded_content);
 
-        # ### [<now>] Tree after parse: $tree
-
-        # $tree->dump;
-
         $script_tag = $tree->look_down(_tag => 'script', type => 'application/json', URLTAG, qr!https://query1.finance.yahoo.com/v7/finance/quote\?fields=fiftyTwoWeekHigh.*! );
 
         ### [<now>] script_tag: $script_tag
+
+        unless($script_tag) {
+            $info{ $symbol, "success" } = 0;
+            $info{ $symbol, "errormsg" } = 'Error - Symbol not found';
+            next;
+        }
 
         my @numfound = $script_tag->content_list();
 
@@ -100,11 +102,11 @@ sub yahooweb {
 
         ### [<now>] json_data: $json_data
 
-        my $json_symbol =
+        my $json_body =
             $json_data->{'body'};
-        ### [<now>] json_symbol: $json_symbol;
+        ### [<now>] json_body: $json_body;
 
-        eval {$json_data = JSON::decode_json $json_symbol};
+        eval {$json_data = JSON::decode_json $json_body};
         if($@) {
             $info{ $symbol, 'success' } = 0;
             $info{ $symbol, 'errormsg' } = $@;
@@ -115,7 +117,6 @@ sub yahooweb {
 
         my $yahoo_symbol =
             $json_data->{'quoteResponse'}{'result'}[0]{'symbol'};
-        ### [<now>] yahoo_symbol: $yahoo_symbol
 
         my $name = $json_data->{'quoteResponse'}{'result'}[0]{'shortName'};
         
@@ -126,9 +127,9 @@ sub yahooweb {
             next; 
         }
 
-        $info{ $symbol, 'name' } = $name;
+        $info{ $symbol, 'name' } = $name if $name;
         my $currency = $json_data->{'quoteResponse'}{'result'}[0]{'currency'};
-        $info{ $symbol, 'currency' } = $currency;
+        $info{ $symbol, 'currency' } = $currency if $currency;
         $info{ $symbol, 'exchange' } = 
             $json_data->{'quoteResponse'}{'result'}[0]{'fullExchangeName'};
 
