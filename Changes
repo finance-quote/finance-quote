@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* YahooWeb.pm - Issue #377. Modified YahooWeb to account for changes from Yahoo.
 
 1.61      2024-04-18 21:34:24-07:00 America/Los_Angeles
 	* SIX.pm - Changed lookup for currency, added lookups for symbol and last. Issue #380
