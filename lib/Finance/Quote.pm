@@ -1679,6 +1679,7 @@ http://www.gnucash.org/
   Finance::Quote::ASEGR,
   Finance::Quote::ASX,
   Finance::Quote::Bloomberg,
+  Finance::Quote::BorsaItaliana,
   Finance::Quote::BSEIndia,
   Finance::Quote::Bourso,
   Finance::Quote::BVB,
