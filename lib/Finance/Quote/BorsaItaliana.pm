@@ -32,8 +32,9 @@ use Web::Scraper;
 
 # VERSION
 
-my $YIND_URL_HEAD = 'https://www.borsaitaliana.it/borsa/obbligazioni/mot/bot/scheda/';
-my $YIND_URL_TAIL = '.html';
+# URL example = https://www.borsaitaliana.it/borsa/search/scheda.html?code=IT0001086567&lang=it
+my $YIND_URL_HEAD = 'https://www.borsaitaliana.it/borsa/search/scheda.html?code=';
+my $YIND_URL_TAIL = '&lang=it';
 
 sub methods {
     return ( borsa_italiana => \&borsa_italiana,
@@ -52,19 +53,14 @@ sub methods {
 sub borsa_italiana {
 
     my $quoter = shift;
-    my @stocks = @_;
+    my @bonds = @_;
     my ( %info, $reply, $url, $te, $ts, $row, @cells, $ce );
-    my ( $my_date, $amp_stocks );
+    my ( $my_date );
     my $ua = $quoter->user_agent();
 
-    foreach my $stocks (@stocks) {
+    foreach my $bond (@bonds) {
 
-        # Issue 202 - Fix symbols with Ampersand
-        # Can also be written as
-				# $amp_stocks = $stocks =~ s/&/%26/gr;
-        ($amp_stocks = $stocks) =~ s/&/%26/g;
-
-        $url   = $YIND_URL_HEAD . $amp_stocks . $YIND_URL_TAIL;
+        $url   = $YIND_URL_HEAD . $bond . $YIND_URL_TAIL;
         $reply = $ua->get($url);
 
         my $code    = $reply->code;
@@ -78,7 +74,7 @@ sub borsa_italiana {
         #HTTP Headers:		$headers
         #Response body		$body
 
-        $info{ $stocks, "symbol" } = $stocks;
+        $info{ $bond, "symbol" } = $bond;
 
         if ( $code == 200 ) {
 
@@ -89,8 +85,8 @@ sub borsa_italiana {
             my $result = $widget->scrape($reply);
             # check if found
             unless (exists $result->{val}) {
-                $info{$stocks, 'success'} = 0;
-                $info{$stocks, 'errormsg'} = 'Failed to find ISIN';
+                $info{$bond, 'success'} = 0;
+                $info{$bond, 'errormsg'} = 'Failed to find ISIN';
                 next;
             }
 
@@ -99,14 +95,29 @@ sub borsa_italiana {
             $value =~ s/,/./g;
 
             $widget = scraper {
+                process 'title', 'name' => 'TEXT';
+            };
+
+            $result = $widget->scrape($reply);
+            # check if found
+            unless (exists $result->{name}) {
+                $info{$bond, 'success'} = 0;
+                $info{$bond, 'errormsg'} = 'Failed to find ISIN';
+                next;
+            }
+
+            my $name = $result->{name};
+            $name =~ s/quotazioni in tempo reale .* Borsa Italiana//g;
+
+            $widget = scraper {
                 process 'div.summary-fase span.t-text', 'dt[]' => 'TEXT';
             };
 
             $result = $widget->scrape($reply);
             # check if found
             unless (exists $result->{dt}) {
-                $info{$stocks, 'success'} = 0;
-                $info{$stocks, 'errormsg'} = 'Failed to find ISIN';
+                $info{$bond, 'success'} = 0;
+                $info{$bond, 'errormsg'} = 'Failed to find ISIN';
                 next;
             }
 
@@ -116,22 +127,24 @@ sub borsa_italiana {
             my ($dd,$mm,$yy,$hh,$mi,$ss) = $date =~ /^([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{1,})([0-9]{2})([0-9]{2})\z/ or die;
             my $my_date= $dd.".".$mm.".".$yy." ".$hh.":".$mi.":".$ss;
 
-            $info{ $stocks, "success" } = 1;
-            $info{ $stocks, "exchange" } = "Sourced from Borsa Italiana";
-            $info{ $stocks, "method" } = "borsa_italiana";
-            $info{ $stocks, "name" }   = $stocks;
-            $info{ $stocks, "last" }   = $value;
-            $info{ $stocks, "currency"} = "EUR";
+            $info{ $bond, "success" }  = 1;
+            $info{ $bond, "exchange" } = "Borsa Italiana";
+            $info{ $bond, "method" }   = "borsa_italiana";
+            $info{ $bond, "name" }     = $name;
+            $info{ $bond, "symbol" }   = $bond;
+            $info{ $bond, "price" }    = $value;
+            $info{ $bond, "last" }     = $value;
+            $info{ $bond, "currency" } = "EUR";
 
-            $quoter->store_date( \%info, $stocks,
+            $quoter->store_date( \%info, $bond,
                                      { eurodate => $my_date } );
         }
 
         #HTTP request fail
         else {
-            $info{ $stocks, "success" } = 0;
-            $info{ $stocks, "errormsg" } =
-                "Error retrieving quote for $stocks. Attempt to fetch the URL $url resulted in HTTP response $code ($desc)";
+            $info{ $bond, "success" } = 0;
+            $info{ $bond, "errormsg" } =
+                "Error retrieving quote for $bond. Attempt to fetch the URL $url resulted in HTTP response $code ($desc)";
         }
 
     }
@@ -167,7 +180,7 @@ This module provides the "borsa_italiana" fetch method.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::BorsaItaliana :
-name, last, isodate, currency, method, exchange.
+name, symbol, price, last, isodate, currency, method, exchange.
 
 =head1 SEE ALSO
 
