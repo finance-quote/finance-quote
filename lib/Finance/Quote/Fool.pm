@@ -62,6 +62,8 @@ sub fool {
     
     my (%info, $symbol, $url, $reply, $code, $desc, $body);
     my ($json_data, $instrumentID, $exchange, $tree );
+    my %mnames = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
+      jul => 7, aug => 8, sep => 9, oct =>10, nov =>11, dec =>12);
     my $ua = $quoter->user_agent();
     $ua->agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36');
     
@@ -185,7 +187,16 @@ sub fool {
 
         ### [<now>] Tree: $tree
 
-        #my $quotecard = $tree->look_down(_tag => 'div', 'id' => 'quote-card');
+        # Date is in a div tag
+        # <div class="text-xs text-gray-700">Price as of April 22, 2024, 4:00 p.m. ET</div>
+        my $datetag = $tree->look_down(_tag => 'div', class => 'text-xs text-gray-700');
+        my @datestring = $datetag->content_list();
+        ### [<now>] Datestring Array: @datestring
+
+        my ($month,$day,$year) = ($datestring[0] =~
+          /Price as of ([a-zA-Z]+) (\d+), (\d\d\d\d),/);
+        $month = $mnames{lc(substr($month,0,3))};
+
         my $quotecard = $tree->look_down(_tag => 'quote_card');
         unless ($quotecard) {
           $info{ $symbol, "success" } = 0;
@@ -197,6 +208,20 @@ sub fool {
 
         my $last = $quotecard->{':current-price'};
         ### [<now>] Current price: $last
+        my $high = $quotecard->{':daily-high'};
+        my $low = $quotecard->{':daily-low'};
+        my $open = $quotecard->{':open'};
+        (my $volume = $quotecard->{'volume'}) =~ s/,//g;
+
+        $info{ $symbol, 'last'} = $last;
+        $info{ $symbol, 'open'} = $open;
+        $info{ $symbol, 'high'} = $high;
+        $info{ $symbol, 'low'} = $low;
+        $info{ $symbol, 'volume'} = $volume;
+        $quoter->store_date(\%info, $symbol, {month => $month, day => $day, year => $year});   
+        $info{ $symbol, 'symbol' } = $symbol;
+        $info{ $symbol, 'method' } = 'fool';
+        $info{ $symbol, 'success' } = 1;
 
     }
 
@@ -237,7 +262,7 @@ method.
 
 =head1 SEE ALSO
 
-Motley Fool, http://caps.fool.com
+Motley Fool, http://www.fool.com
 
 Finance::Quote.
 

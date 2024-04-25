@@ -461,12 +461,13 @@
    - "LU1720050803".
 #
 - module: Fool.pm
-  state: failing
+  state: working
   added: 2001-05-08
-  changed: 2023-05-29
-  removed: 2024-04-14
+  changed: 2024-04-25
+  removed: ~
   urls:
-    - http://caps.fool.com/Ticker/{$symbol}.aspx
+    - https://api.fool.com/quotes/v4/instruments/search/?maxResults=10&apikey=public&domain=fool.com&query={$symbol}
+    - https://www.fool.com/quote/{$lcexchange}/{$lcsymbol}/
   apikey: false
   notes: Needed to set "user-agent" to something other than the default
   testfile: fool.t
