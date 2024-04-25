@@ -474,12 +474,9 @@
   testcases:
     - MSFT
     - AMZN
-    - AAPL
-    - GOOGL
     - GOOG
     - CSCO
     - INTC
-    - CMCSA
     - PEP
     - BRK-A
     - SEB

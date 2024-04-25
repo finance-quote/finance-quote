@@ -212,12 +212,14 @@ sub fool {
         my $low = $quotecard->{':daily-low'};
         my $open = $quotecard->{':open'};
         (my $volume = $quotecard->{'volume'}) =~ s/,//g;
+        my $currency = $quotecard->{'currency-code'};
 
         $info{ $symbol, 'last'} = $last;
         $info{ $symbol, 'open'} = $open;
         $info{ $symbol, 'high'} = $high;
         $info{ $symbol, 'low'} = $low;
         $info{ $symbol, 'volume'} = $volume;
+        $info{ $symbol, 'currency' } = $currency;
         $quoter->store_date(\%info, $symbol, {month => $month, day => $day, year => $year});   
         $info{ $symbol, 'symbol' } = $symbol;
         $info{ $symbol, 'method' } = 'fool';
@@ -257,8 +259,7 @@ conditions.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::Fool:
-symbol, day_range, open, volume, close, year_range, last, currency,
-method.
+symbol, open, high, low, volume, last, currency, method.
 
 =head1 SEE ALSO
 
