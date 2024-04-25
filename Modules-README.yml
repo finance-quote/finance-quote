@@ -168,6 +168,22 @@
     - FOLSHM1:LN
     - UKX:IND
 #
+- module: BorsaItaliana.pm
+  state: working
+  added: 2024-04-22
+  changed: ~
+  removed: ~
+  urls:
+    - https://www.borsaitaliana.it/borsa/search/scheda.html?code={$isin}&lang=it
+  apikey: false
+  notes: ~
+  testfile: borsa_italiana.t
+  testcases:
+    - IT0000966017
+    - IT0005592370
+    - IT0001086567
+    - IT0005534984
+#
 - module: Bourso.pm
   state: working
   added:

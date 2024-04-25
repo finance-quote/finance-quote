@@ -63,6 +63,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     AlphaVantage
     BSEIndia
     Bloomberg
+    BorsaItaliana
     Bourso
     BVB
     CSE
@@ -1678,6 +1679,7 @@ http://www.gnucash.org/
   Finance::Quote::ASEGR,
   Finance::Quote::ASX,
   Finance::Quote::Bloomberg,
+  Finance::Quote::BorsaItaliana,
   Finance::Quote::BSEIndia,
   Finance::Quote::Bourso,
   Finance::Quote::BVB,
