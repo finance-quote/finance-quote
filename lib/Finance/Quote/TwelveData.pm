@@ -41,7 +41,7 @@ sub parameters {
 }
 
 {
-    our @labels = qw/symbol name exchange currency isodate currency open high low close/;
+    our @labels = qw/symbol name exchange currency isodate currency open high low close last/;
 
     sub labels {
         return ( twelvedata => \@labels );
@@ -123,6 +123,7 @@ sub twelvedata {
         $info{ $symbol, 'high' }    = $quote->{'high'} if $quote->{'high'};
         $info{ $symbol, 'low' }     = $quote->{'low'} if $quote->{'low'};
         $info{ $symbol, 'close' }   = $quote->{'close'} if $quote->{'close'};
+        $info{ $symbol, 'last' }   = $quote->{'close'} if $quote->{'close'};
         $info{ $symbol, 'volume' }  = $quote->{'volume'} if $quote->{'volume'};
         $info{ $symbol, 'method' }  = 'twelvedata';
        
@@ -183,6 +184,6 @@ The TwelveData free key limits usage to:
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::TwelveData :
-    symbol name exchange currency isodate currency open high low close
+    symbol name exchange currency isodate currency open high low close last
 
 =cut
