@@ -1119,7 +1119,7 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2024-04-18
+  changed: 2024-04-25
   removed:
   urls:
     - https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price,summaryDetail,defaultKeyStatistics
@@ -1127,10 +1127,10 @@
   notes: |
     Module to get data from Yahoo's API
     See issue https://github.com/finance-quote/finance-quote/issues/264
-    Dependability of Yahoo REST API has been
-    spotty.
+    Dependability of Yahoo REST API has been spotty.
     Code needed to be added to use Cookies and a "crumb" from Yahoo.
     Additional URL fetches were needed for EU based users.
+    Added robust way to handle required EU consent to fetch from Yahoo.
   testfile: yahoojson.t
   testcases:
     - SUZLON.BO

@@ -1,5 +1,6 @@
 {{$NEXT}}
-	* TwelveData.pm - Added "last" to data being returned
+	* Modified yahooJSON.pm module in order handle EU consent redirects better.
+  * TwelveData.pm - Added "last" to data being returned
 	* BorsaItaliana.pm - New module for Borsa Italiana, Italian traded bonds using ISIN
 	* YahooWeb.pm - Issue #377. Modified YahooWeb to account for changes from Yahoo.
 
