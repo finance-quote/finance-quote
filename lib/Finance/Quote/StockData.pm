@@ -124,7 +124,9 @@ sub stockdata {
       $info{ $stock, 'high' } = $high;
       $info{ $stock, 'volume' } = $volume;
       $info{ $stock, 'currency' } = $currency;
+      $info{ $stock, 'method' } = 'stockdata';
       $quoter->store_date(\%info, $stock, {isodate => $isodate});
+      $info{ $stock, 'success' } = 1;
 
     } else {       # HTTP Request failed (code != 200)
       $info{ $stock, "success" } = 0;
