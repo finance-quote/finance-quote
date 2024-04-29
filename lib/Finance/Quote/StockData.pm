@@ -39,19 +39,41 @@ my $STOCKDATA_URL = 'https://api.stockdata.org/v1/data/quote?symbols=';
 # my $user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36';
 my $user_agent = 'Finance-Quote OpenSource Stock Quote Tool';
 
+our $DISPLAY    = 'StockData';
+our $FEATURES   = {'API_KEY' => 'registered user API key'};
+our @LABELS     = qw/symbol name open high low last date volume currency method/;
+our $METHODHASH = {subroutine => \&stockdata, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS,
+                   features => $FEATURES};
+
+sub methodinfo {
+    return ( 
+        stockdata => $METHODHASH,
+        nyse         => $METHODHASH,
+        nasdaq       => $METHODHASH,
+    );
+}
+
+sub labels { my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
-  return (stockdata => \&stockdata,
-          nyse      => \&stockdata,
-          nasdaq    => \&stockdata);
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
-our @labels = qw/symbol name open high low last date volume currency method/;
+#sub methods {
+#  return (stockdata => \&stockdata,
+#          nyse      => \&stockdata,
+#          nasdaq    => \&stockdata);
+#}
 
-sub labels { 
-  return (stockdata => \@labels,
-          nyse      => \@labels,
-          nasdaq    => \@labels); 
-}
+# our @labels = qw/symbol name open high low last date volume currency method/;
+
+#sub labels { 
+#  return (stockdata => \@labels,
+#          nyse      => \@labels,
+#          nasdaq    => \@labels); 
+#}
 
 sub stockdata {
 
