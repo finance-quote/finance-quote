@@ -175,26 +175,37 @@ Finance::Quote::StockData - Obtain quotes from StockData.org
 
     use Finance::Quote;
 
-    $q = Finance::Quote->new;
+    $q = Finance::Quote->new('StockData',
+        stockdata => {API_KEY => 'your-stockdata-api-token'});
 
-    %info = $q->fetch("foobar", "tlv");  # Only query foobar
+    %info = $q->fetch('stockdata', 'AAPL');  # Only query foobar
 
-    %info = $q->fetch("romania", "brd");     # Failover to other sources OK.
+    %info = $q->fetch('nyse', 'IBM');     # Failover to other sources OK.
 
 =head1 DESCRIPTION
 
-This module fetches information from L<https://foobar.ro/>.
+This module fetches information from L<https://www.stockdata.org/>.
 
 This module is loaded by default on a Finance::Quote object. It's also possible
-to load it explicitly by placing "foobar" in the argument list to
+to load it explicitly by placing "stockdata" in the argument list to
 Finance::Quote->new().
 
-This module provides "foobar", "tradeville", "romania", and "europe"
-fetch methods. It was written to replace a non-working Tradeville.pm
-module.
+This module provides "stockdata", "nyse", "nasdaq"
+fetch methods. Currently stock quote data is only
+available for securities traded on the US markets.
 
-Information obtained by this module may be covered by Bucharest Stock
+Information obtained by this module may be covered by New York
 Exchange terms and conditions.
+
+=head1 API_KEY
+
+L<https://www.stockdata.org/> requires users to register and obtain
+an API key, which is also called a token. The token is a sequence
+of random characters.
+
+The API key may be set by either providing a module specific hash to
+Finance::Quote->new as in the above example, or by setting the environment
+variable STOCKDATA_API_KEY.
 
 =head1 LABELS RETURNED
 
@@ -212,14 +223,14 @@ The following labels are returned:
 
 =item low
 
-=item price
+=item last
 
-=item bid
-
-=item ask
+=item volume
 
 =item date
 
 =item currency
 
 =back
+
+=cut
