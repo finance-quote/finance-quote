@@ -463,11 +463,11 @@
 - module: Fool.pm
   state: working
   added: 2001-05-08
-  changed: 2024-04-25
+  changed: 2024-04-30
   removed: ~
   urls:
     - https://api.fool.com/quotes/v4/instruments/search/?maxResults=10&apikey=public&domain=fool.com&query={$symbol}
-    - https://www.fool.com/quote/{$lcexchange}/{$lcsymbol}/
+    - https://api.fool.com/quotes/v4/historical/charts/{$symbol}
   apikey: false
   notes: Needed to set "user-agent" to something other than the default
   testfile: fool.t
