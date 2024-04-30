@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* New Module! StockData.pm. Methods stockdata, nyse, nasdaq.
 	* Modified yahooJSON.pm module in order handle EU consent redirects better.
   * TwelveData.pm - Added "last" to data being returned
 	* BorsaItaliana.pm - New module for Borsa Italiana, Italian traded bonds using ISIN

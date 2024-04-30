@@ -813,6 +813,28 @@
   testfile: TBD
   testcases:
 #
+- module: StockData.pm
+  state: working
+  added: 2024-04-28
+  changed: ~
+  removed: ~
+  urls: https://api.stockdata.org/v1/data/quote?symbols=
+  methods:
+    - stockdata
+    - nyse
+    - nasdaq
+  apikey: true
+  notes: |
+    Get API Key at https://www.stockdata.org/
+    100 API requests daily.
+  testfile: stockdata.t
+  testcases: 
+    - CSCO
+    - F
+    - GE
+    - SWAV
+    - WM
+#
 - module: StockHouseCanada.pm
   state: TBD
   added: TBD
