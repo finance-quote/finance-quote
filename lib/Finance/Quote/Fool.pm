@@ -30,7 +30,6 @@ package Finance::Quote::Fool;
 
 use strict;
 use HTTP::Request::Common;
-use HTML::TreeBuilder;
 use JSON qw( decode_json );
 use Text::Template;
 use Encode qw(decode);
@@ -42,7 +41,15 @@ use if DEBUG, 'Smart::Comments';
 
 my $SEARCHURL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://api.fool.com/quotes/v4/instruments/search/?maxResults=10&apikey=public&domain=fool.com&query={$symbol}');
 
-my $QUOTEURL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://www.fool.com/quote/{$lcexchange}/{$lcsymbol}/');
+# my $QUOTEURL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://www.fool.com/quote/{$lcexchange}/{$lcsymbol}/');
+
+my $QUOTEURL = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://api.fool.com/quotes/v4/historical/charts/{$instrumentID}?timeFrame=OneWeek&precision=Day&apikey=6cbf5f34-ba40-4108-a1ab-d951c608955e');
+
+# Fool returns JSON with a Currency stanza
+# '1' -> USD
+my %currencies_by_id = (
+  '1' => 'USD',
+);
 
 sub methods { 
   return ( fool   => \&fool,
@@ -51,7 +58,7 @@ sub methods {
            nyse   => \&fool);
 }
 
-my @labels = qw/date isodate open high low close volume last/;
+my @labels = qw/date isodate open high low close volume last currency/;
 sub labels {
   return ( iexcloud => \@labels, );
 }
@@ -96,6 +103,7 @@ sub fool {
         if ($@) {
             $info{ $symbol, 'success' } = 0;
             $info{ $symbol, 'errormsg' } = $@;
+            next;
         }
 
         # The JSON returned may return information for multiple
@@ -158,7 +166,7 @@ sub fool {
         }
 
         # Create QUOTE URL 
-        $url   = $QUOTEURL->fill_in(HASH => {lcsymbol => lc($symbol), lcexchange => lc($exchange)});
+        $url   = $QUOTEURL->fill_in(HASH => {instrumentID => $instrumentID});
 
         ### [<now>] Quote URL: $url
         $reply = $ua->request( GET $url);
@@ -176,54 +184,45 @@ sub fool {
 
 				### [<now>] Body: $body
 
-        $tree = HTML::TreeBuilder->new;
-        $tree->ignore_unknown(0);
-        unless ($tree->parse_content($body)) {
-            $info{ $symbol, "success" } = 0;
-            $info{ $symbol, "errormsg" } =
-              "Cannot parse HTML from $url";
+        # Parse the JSON
+        eval {$json_data = JSON::decode_json $body};
+        if ($@) {
+            $info{ $symbol, 'success' } = 0;
+            $info{ $symbol, 'errormsg' } = $@;
             next;
         }
 
-        ### [<now>] Tree: $tree
+        my $numChartBars = scalar @{$json_data->{'ChartBars'}};
+        ### [<now>] Number of ChartBars: $numChartBars
+        my $cb = $numChartBars - 1;
 
-        # Date is in a div tag
-        # <div class="text-xs text-gray-700">Price as of April 22, 2024, 4:00 p.m. ET</div>
-        my $datetag = $tree->look_down(_tag => 'div', class => 'text-xs text-gray-700');
-        my @datestring = $datetag->content_list();
-        ### [<now>] Datestring Array: @datestring
-
-        my ($month,$day,$year) = ($datestring[0] =~
-          /Price as of ([a-zA-Z]+) (\d+), (\d\d\d\d),/);
-        $month = $mnames{lc(substr($month,0,3))};
-
-        my $quotecard = $tree->look_down(_tag => 'quote_card');
-        unless ($quotecard) {
-          $info{ $symbol, "success" } = 0;
-          $info{ $symbol, "errormsg" } = "Cannot find quote_card in $url";
-          next;
+        if ( $json_data->{'Symbol'} ne $symbol ) {
+            $info{ $symbol, 'success' } = 0;
+            $info{ $symbol, 'errormsg' } = "Unexpect Data in JSON";
+            next;
         }
 
-        ### [<now>] quotecard: $quotecard
+        my $name = $json_data->{'Name'};
+        my $currencyid = $json_data->{'Currency'}{'Id'};
+        if ( $currencies_by_id{$currencyid} ) {
+          $info{ $symbol, 'currency' } = $currencies_by_id{$currencyid};
+        }
+        my $date = $json_data->{'ChartBars'}[$cb]{'PricingDate'};
+        my $open = $json_data->{'ChartBars'}[$cb]{'Open'}{'Amount'};
+        my $last = $json_data->{'ChartBars'}[$cb]{'Close'}{'Amount'};
+        my $high = $json_data->{'ChartBars'}[$cb]{'High'}{'Amount'};
+        my $low = $json_data->{'ChartBars'}[$cb]{'Low'}{'Amount'};
+        my $volume = $json_data->{'ChartBars'}[$cb]{'Volume'};
+        # my $currency = $json_data->{'ChartBars'}[$cb]{'Close'}{'CurrencyCode'};
 
-        my $last = $quotecard->{':current-price'};
-        ### [<now>] Current price: $last
-        my $high = $quotecard->{':daily-high'};
-        my $low = $quotecard->{':daily-low'};
-        my $open = $quotecard->{':open'};
-        (my $volume = $quotecard->{'volume'}) =~ s/,//g;
-        my $currency = $quotecard->{'currency-code'};
-
-        $info{ $symbol, 'last'} = $last;
-        $info{ $symbol, 'open'} = $open;
-        $info{ $symbol, 'high'} = $high;
-        $info{ $symbol, 'low'} = $low;
-        $info{ $symbol, 'volume'} = $volume;
-        $info{ $symbol, 'currency' } = $currency;
-        $quoter->store_date(\%info, $symbol, {month => $month, day => $day, year => $year});   
-        $info{ $symbol, 'symbol' } = $symbol;
-        $info{ $symbol, 'method' } = 'fool';
-        $info{ $symbol, 'success' } = 1;
+        $info{ $symbol, 'name' } = $name;
+        # $info{ $symbol, 'currency' } = $currency;
+        $info{ $symbol, 'open' } = $open;
+        $info{ $symbol, 'last' } = $last;
+        $info{ $symbol, 'high' } = $high;
+        $info{ $symbol, 'low' } = $low;
+        $info{ $symbol, 'volume' } = $volume;
+        $quoter->store_date(\%info, $symbol, {isodate => $date});
 
     }
 
