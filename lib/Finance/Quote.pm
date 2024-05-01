@@ -93,6 +93,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     SEB
     SIX
     Sinvestor
+    StockData
     Stooq
     TesouroDireto
     Tiaacref
@@ -1710,6 +1711,8 @@ http://www.gnucash.org/
   Finance::Quote::Oslobors,
   Finance::Quote::SEB,
   Finance::Quote::SIX,
+  Finance::Quote::StockData,
+  Finance::Quote::Stooq,
   Finance::Quote::TSP,
   Finance::Quote::TMX,
   Finance::Quote::Tiaacref,

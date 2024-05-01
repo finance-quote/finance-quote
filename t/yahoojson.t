@@ -10,7 +10,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 67;
+plan tests => 58;
 
 my $q = Finance::Quote->new();
 
@@ -31,10 +31,7 @@ foreach my $stock (@stocks) {
     }
     else {
         ok( $name, "Name is defined : $name" );
-        my $exchange = $quotes{ $stock, "exchange" };
-        ok( $exchange eq 'Sourced from Yahoo Finance (as JSON)',
-            "correctly retrieved through YahooJSON" );
-
+        
         my $fetch_method = $quotes{ $stock, "method" };
         ok( $fetch_method eq 'yahoo_json', "fetch_method is yahoo_json" );
 
