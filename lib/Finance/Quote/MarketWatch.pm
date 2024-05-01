@@ -56,15 +56,22 @@ sub marketwatch {
   my (%info, $tree, $url, $reply);
   my $ua = $quoter->user_agent();
 
+  my @ua_headers = (
+    'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Encoding' => 'gzip, deflate, sdch',
+    'Accept-Language' => 'en-US,en;q=0.8',
+  );
+
   foreach my $stock (@stocks) {
 
     $url   = $MW_URL . $stock;
-    $reply = $ua->get($url);
+    $reply = $ua->get($url, @ua_headers);
 
     my $code    = $reply->code;
     my $desc    = HTTP::Status::status_message($code);
     my $headers = $reply->headers_as_string;
-    my $body    = decode('UTF-8', $reply->content);
+    my $body    = $reply->decoded_content;
 
     ### Body: $body
 
