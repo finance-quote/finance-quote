@@ -16,7 +16,7 @@ my @symbols =  qw/MSFT AMZN GOOG CSCO INTC PEP BRK.A SEB NVR BKNG/;
 plan tests => 8*(1+$#symbols)+2;
 
 my %quotes = $q->fool(@symbols, "BOGUS");
-ok(%quotes);
+ok(%quotes, "Successful quote retrieval");
 
 foreach my $symbol (@symbols) {
   ok($quotes{$symbol, "symbol"} eq $symbol, "$symbol defined");
@@ -26,9 +26,9 @@ foreach my $symbol (@symbols) {
   ok($quotes{$symbol, "last"} > 0, "$symbol returned last");
   ok($quotes{$symbol, "currency"} eq 'USD', "$symbol returned currency");
   ok(substr($quotes{$symbol, "isodate"}, 0, 4) == $year
-      || substr($quotes{$symbol, "isodate"}, 0, 4) == $lastyear);
+      || substr($quotes{$symbol, "isodate"}, 0, 4) == $lastyear, "$symbol returned valid isodate");
   ok(substr($quotes{$symbol, "date"}, 6, 4) == $year
-      ||substr($quotes{$symbol, "date"}, 6, 4) == $lastyear);
+      ||substr($quotes{$symbol, "date"}, 6, 4) == $lastyear, "$symbol returned valid date");
 }
 
 ok((!$quotes{"BOGUS", "success"}),'BOGUS failed as expected');
