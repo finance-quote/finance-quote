@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=4 sw=4 noai ic showmode showmatch:  
 #    This module is based on the Finance::Quote::BSERO module
 #    It was first called BOMSE but has been renamed to yahooJSON
 #    since it gets a lot of quotes besides Indian
@@ -75,7 +76,7 @@ sub yahoo_json {
     my $quoter = shift;
     my @stocks = @_;
     my ( %info, $reply, $url);
-    my ( $my_date, $amp_stocks );
+    my ( $my_date, $amp_stocks, $symbol );
     my $ua = $quoter->user_agent();
 
     my $cookie_jar = HTTP::Cookies->new;
@@ -123,9 +124,23 @@ sub yahoo_json {
 
     # get necessary cookies
     $reply = $ua->get('https://www.yahoo.com/', "Accept" => "text/html");
+    if ($reply->code != 200) {
+        foreach $symbol (@stocks) {
+            $info{$symbol, "success"} = 0;
+            $info{$symbol, "errormsg"} = "Error accessing www.yahoo.com: $@";
+        }     
+        return wantarray() ? %info : \%info;
+    }
 
     # get the crumb that corrosponds to cookies retrieved
     $reply = $ua->request(GET 'https://query2.finance.yahoo.com/v1/test/getcrumb');
+    if ($reply->code != 200) {
+        foreach $symbol (@stocks) {
+            $info{$symbol, "success"} = 0;
+            $info{$symbol, "errormsg"} = "Error accessing queary.finance.yahoo.com/v1/test/getcrumb: $@";
+        }     
+        return wantarray() ? %info : \%info;
+    }
     my $crumb = uri_escape($reply->content);
 
     ### [<now>]    cookie_jar : $cookie_jar
