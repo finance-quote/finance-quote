@@ -200,6 +200,8 @@ sub fool {
             $info{ $symbol, 'success' } = 0;
             $info{ $symbol, 'errormsg' } = "Unexpect Data in JSON";
             next;
+        } else {
+          $info{ $symbol, 'symbol' } = $symbol;
         }
 
         my $name = $json_data->{'Name'};
@@ -215,6 +217,7 @@ sub fool {
         my $volume = $json_data->{'ChartBars'}[$cb]{'Volume'};
         # my $currency = $json_data->{'ChartBars'}[$cb]{'Close'}{'CurrencyCode'};
 
+        $info{ $symbol, 'success' } = 1;
         $info{ $symbol, 'name' } = $name;
         # $info{ $symbol, 'currency' } = $currency;
         $info{ $symbol, 'open' } = $open;
@@ -223,6 +226,8 @@ sub fool {
         $info{ $symbol, 'low' } = $low;
         $info{ $symbol, 'volume' } = $volume;
         $quoter->store_date(\%info, $symbol, {isodate => $date});
+
+        sleep 1;
 
     }
 
