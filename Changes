@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Fool.pm - Rewrote Fool.pm and added back to F::Q. Issue #379.
 	* New Module! StockData.pm. Methods stockdata, nyse, nasdaq.
 	* Modified yahooJSON.pm module in order handle EU consent redirects better.
   * TwelveData.pm - Added "last" to data being returned

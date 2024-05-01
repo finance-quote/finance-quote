@@ -461,24 +461,22 @@
    - "LU1720050803".
 #
 - module: Fool.pm
-  state: failing
+  state: working
   added: 2001-05-08
-  changed: 2023-05-29
-  removed: 2024-04-14
+  changed: 2024-04-30
+  removed: ~
   urls:
-    - http://caps.fool.com/Ticker/{$symbol}.aspx
+    - https://api.fool.com/quotes/v4/instruments/search/?maxResults=10&apikey=public&domain=fool.com&query={$symbol}
+    - https://api.fool.com/quotes/v4/historical/charts/{$symbol}
   apikey: false
   notes: Needed to set "user-agent" to something other than the default
   testfile: fool.t
   testcases:
     - MSFT
     - AMZN
-    - AAPL
-    - GOOGL
     - GOOG
     - CSCO
     - INTC
-    - CMCSA
     - PEP
     - BRK-A
     - SEB

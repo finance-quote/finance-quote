@@ -75,6 +75,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     FTfunds
     Finanzpartner
     Fondsweb
+    Fool
     GoldMoney
     GoogleWeb
     HU
@@ -1693,6 +1694,7 @@ http://www.gnucash.org/
   Finance::Quote::FTfunds,
   Finance::Quote::Finanzpartner,
   Finance::Quote::Fondsweb,
+  Finance::Quote::Fool,
   Finance::Quote::GoldMoney,
   Finance::Quote::GoogleWeb,
   Finance::Quote::HU,
