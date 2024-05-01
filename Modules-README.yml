@@ -632,11 +632,11 @@
   testcases:
 #
 - module: MarketWatch.pm
-  state: TBD
-  added: 2023-06-06
+  state: working
+  added: 2024-05-01
   changed: ~
   removed: ~
-  urls: https://www.marketwatch.com/investing/stock/aapl
+  urls: https://www.marketwatch.com/investing/stock/<symbol>
   apikey: false
   notes: ~
   testfile: marketwatch.t
