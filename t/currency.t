@@ -47,7 +47,7 @@ sub module_check
   }
 }
 
-plan tests => 6;
+plan tests => 7;
 
 # Check that FQ fails on bogus CurrencyRates method
 my $q = Finance::Quote->new('currency_rates' => {order => ['DoesNotExist']});
@@ -66,6 +66,19 @@ subtest 'AlphaVantage' => sub {
   module_check('AlphaVantage', \@valid, \@invalid, {API_KEY => $ENV{TEST_ALPHAVANTAGE_API_KEY}});
 };
 
+
+# Check CurrencyFreaks
+subtest 'CurrencyFreaks' => sub {
+  if ( not $ENV{TEST_CURRENCYFREAKS_API_KEY} ) {
+    plan skip_all =>
+        'Set $ENV{TEST_CURRENCYFREAKS_API_KEY} to run this test; get one at https://currencyfreaks.com/';
+  }
+
+  my @valid   = (['100.00 USD', 'EUR'], ['1.00 GBP', 'IDR'], ['1.23 IDR', 'CAD'], ['10.00 AUD', 'AUD'], ['1.0 INR', 'INR']);
+  my @invalid = (['20.12 ZZZ', 'GBP']);
+
+  module_check('CurrencyFreaks', \@valid, \@invalid, {API_KEY => $ENV{TEST_CURRENCYFREAKS_API_KEY}});
+};
 
 # Check ECB
 subtest 'ECB' => sub {
