@@ -90,7 +90,7 @@ sub aex {
         }
 
         # die "Failed to find isin" unless $url->as_string =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)/|;
-        unless (defined($url) && $url->as_string =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)/|) {
+        unless (defined($url) && $url->as_string =~ m|(/[A-Za-z0-9]{12}-[A-Za-z]+\b)|) {
             $info{$symbol, 'success'} = 0;
             $info{$symbol, 'errormsg'} = 'Cannot find ISIN for ' . $symbol;
             next;
