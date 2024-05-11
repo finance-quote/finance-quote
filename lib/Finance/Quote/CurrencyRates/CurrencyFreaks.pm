@@ -49,7 +49,8 @@ sub new
   ### CurrencyFreaks->new args : $args
 
   # CurrencyFreaks is permitted to use an environment variable for API key 
-  # (for backwards compatibility).  New modules should use the API_KEY from args.
+  # (for backwards compatibility).
+  # New modules should use the API_KEY from args.
 
   $this->{API_KEY} = $ENV{'CURRENCYFREAKS_API_KEY'};
   $this->{API_KEY} = $args->{API_KEY} if (ref $args eq 'HASH') and (exists $args->{API_KEY});
@@ -124,6 +125,8 @@ sub multipliers
 
 1;
 
+__END__
+
 =head1 NAME
 
 Finance::Quote::CurrencyRates::CurrencyFreaks - Obtain currency rates from
@@ -132,7 +135,8 @@ CurrencyFreaks.
 =head1 SYNOPSIS
 
     use Finance::Quote;
-    $q = Finance::Quote->new(currency_rates => {order => ['CurrencyFreaks']});
+    $q = Finance::Quote->new(currency_rates =>
+        {order => ['CurrencyFreaks'], currencyfreaks => {API_KEY => ...} } );
     $value = $q->currency('18.99 EUR', 'USD');
 
 =head1 DESCRIPTION
@@ -143,6 +147,15 @@ in the currency indicated by the second argument.
 
 This module is not the default currency conversion module for a Finance::Quote
 object. 
+
+=head1 API_KEY
+
+https://currencyfreaks.com/ requires users to register and obtain an API key,
+which is also called a token.
+
+The API key may be set by either providing a currencyfreaks hash inside the
+currency_rates hash to Finance::Quote->new as in the above example, or by
+setting the environment variable CURRENCYFREAKS_API_KEY.
 
 =head1 Terms & Conditions
 
