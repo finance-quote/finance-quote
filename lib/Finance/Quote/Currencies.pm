@@ -359,6 +359,7 @@ my %currencies = (
             'ANDORRA',
             'AUSTRIA',
             'BELGIUM',
+            'CROATIA',
             'CYPRUS',
             'ESTONIA',
             'EUROPEAN UNION',
@@ -471,12 +472,6 @@ my %currencies = (
         'name'    => 'Lempira',
         'code'    => 'HNL',
         'number'  => '340'
-    },
-    'HRK' => {
-        'country' => ['CROATIA'],
-        'name'    => 'Kuna',
-        'code'    => 'HRK',
-        'number'  => '191'
     },
     'HTG' => {
         'country' => ['HAITI'],
@@ -896,11 +891,11 @@ my %currencies = (
         'code'    => 'SHP',
         'number'  => '654'
     },
-    'SLL' => {
+    'SLE' => {
         'country' => ['SIERRA LEONE'],
         'name'    => 'Leone',
-        'code'    => 'SLL',
-        'number'  => '694'
+        'code'    => 'SLE',
+        'number'  => '925'
     },
     'SOS' => {
         'country' => ['SOMALIA'],
@@ -1059,6 +1054,12 @@ my %currencies = (
         'name'    => 'Uzbekistan Sum',
         'code'    => 'UZS',
         'number'  => '860'
+    },
+    'VED' => {
+        'country' => ['VENEZUELA (BOLIVARIAN REPUBLIC OF)'],
+        'name'    => 'Bolivar',
+        'code'    => 'VED',
+        'number'  => '926'
     },
     'VEF' => {
         'country' => ['VENEZUELA (BOLIVARIAN REPUBLIC OF)'],

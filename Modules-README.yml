@@ -319,6 +319,23 @@
     - GBP IQD
     - AUD AUD
 #
+- module: CurrencyRates/CurrencyFreaks.pm
+  state: working
+  Added: 2024-05-09
+  changed: ~
+  removed: ~
+  urls: https://api.currencyfreaks.com/v2.0/rates/latest?apikey=YOUR_APIKEY&symbols={CURRENCYCODE},{CURRENCYCODE},...
+  apikey: true
+  notes: |
+    Newly module as of 5/9/2024
+  testfile: currency.t
+  testcases:
+    - USD EUR
+    - GBP IDR
+    - IDR CAD
+    - AUD AUD
+    - INR INR
+#
 - module: CurrencyRates/YahooJSON.pm
   state: working
   Added: 2023-04-09

@@ -530,6 +530,7 @@ http://www.gnucash.org/
 # SEE ALSO
 
     Finance::Quote::CurrencyRates::AlphaVantage,
+    Finance::Quote::CurrencyRates::CurrencyFreaks,
     Finance::Quote::CurrencyRates::ECB,
     Finance::Quote::CurrencyRates::Fixer,
     Finance::Quote::CurrencyRates::OpenExchange,
@@ -538,6 +539,7 @@ http://www.gnucash.org/
     Finance::Quote::ASEGR,
     Finance::Quote::ASX,
     Finance::Quote::Bloomberg,
+    Finance::Quote::BorsaItaliana,
     Finance::Quote::BSEIndia,
     Finance::Quote::Bourso,
     Finance::Quote::BVB,
@@ -550,6 +552,7 @@ http://www.gnucash.org/
     Finance::Quote::FTfunds,
     Finance::Quote::Finanzpartner,
     Finance::Quote::Fondsweb,
+    Finance::Quote::Fool,
     Finance::Quote::GoldMoney,
     Finance::Quote::GoogleWeb,
     Finance::Quote::HU,
@@ -566,6 +569,8 @@ http://www.gnucash.org/
     Finance::Quote::Oslobors,
     Finance::Quote::SEB,
     Finance::Quote::SIX,
+    Finance::Quote::StockData,
+    Finance::Quote::Stooq,
     Finance::Quote::TSP,
     Finance::Quote::TMX,
     Finance::Quote::Tiaacref,

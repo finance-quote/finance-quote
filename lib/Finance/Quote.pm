@@ -50,6 +50,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
 
 @CURRENCY_RATES_MODULES = qw/
     AlphaVantage
+    CurrencyFreaks
     ECB
     Fixer
     OpenExchange
