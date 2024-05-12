@@ -79,7 +79,7 @@ sub load_source {
       $reply = $ua->get($link);
 
       ### Fetched : $link, $reply->code
-      my $xlsx = $reply->content();
+      my $xlsx = $reply->decoded_content();
       my $io;
       open($io, '<', \$xlsx);
 
