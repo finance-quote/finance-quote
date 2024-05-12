@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Removed throttling from AlphaVantage.pm - Issue #363
 	* Added CurrencyFreaks.pm - new currency module
 	* YahooJSON.pm - added more error handling - Issue #390
 	* Fixed MarketWatch.pm module - Issue #389

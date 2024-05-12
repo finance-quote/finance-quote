@@ -125,7 +125,7 @@ sub yahoo_json {
     # get necessary cookies
     $reply = $ua->get('https://www.yahoo.com/', "Accept" => "text/html");
     if ($reply->code != 200) {
-        foreach $symbol (@stocks) {
+        foreach my $symbol (@stocks) {
             $info{$symbol, "success"} = 0;
             $info{$symbol, "errormsg"} = "Error accessing www.yahoo.com: $@";
         }     
@@ -135,7 +135,7 @@ sub yahoo_json {
     # get the crumb that corrosponds to cookies retrieved
     $reply = $ua->request(GET 'https://query2.finance.yahoo.com/v1/test/getcrumb');
     if ($reply->code != 200) {
-        foreach $symbol (@stocks) {
+        foreach my $symbol (@stocks) {
             $info{$symbol, "success"} = 0;
             $info{$symbol, "errormsg"} = "Error accessing queary.finance.yahoo.com/v1/test/getcrumb: $@";
         }     
