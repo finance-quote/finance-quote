@@ -20,14 +20,14 @@ my %skip   = ('bond'       => {'high' => 1, 'low' => 1},
               'derivative' => {'isin' => 1},
               'index'      => {'isin' => 1});
 
-my %valid  = ('CRETA'        => 'stock',
+my %valid  = ('CPI'          => 'stock',
               'KYLO'         => 'stock',
-              'ALPHA21U0.80' => 'derivative',
+              'ALPHA25O2.20' => 'derivative',
               'AETF'         => 'etf',
-              'FORTHB1'      => 'bond',
+              'ELHAB1'       => 'bond',
               'OPAPB2'       => 'bond',
               'FTSE'         => 'index',
-              'G210120A2'    => 'bond'
+              'GEKTERNAB3'   => 'bond'
               );
 
 my %invalid  = ('BOGUS' => undef);
@@ -56,7 +56,9 @@ ok(%quotes);
 ### [<now>] quotes: %quotes
 
 foreach my $symbol (keys %valid) {
+  ### [<now>] Testing Symbol: $symbol
   while (my ($key, $lambda) = each %check) {
+    ### [<now>] Test: $key
     SKIP: {
       skip "$key not required for $symbol", 1 if exists $skip{$valid{$symbol}}->{$key};
 

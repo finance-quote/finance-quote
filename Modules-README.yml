@@ -5,7 +5,7 @@
 - module: AEX.pm
   state: working
   added: TBD
-  changed: 2023-06-05
+  changed: 2024-05-11
   removed: ~
   urls:
     - https://live.euronext.com/en/search_instruments/
@@ -20,11 +20,10 @@
     - AD
     - AMG
     - LVMH
-    - XS0937858271
     - NL0000009165
 #
 - module: AIAHK.pm
-  state: working
+  state: removed
   added: TBD
   changed: ~
   removed: ~
@@ -39,17 +38,25 @@
     - SCH-HKEQ
 #
 - module: ASEGR.pm
-  state: failing
+  state: working
   added: TBD
-  changed: ~
+  changed: 2024-05-11
   removed: ~
   urls:
   apikey: false
-  notes: >-
-    Broken and recommended for removal. All active securities are tested to be available
-    from YahooJSON (and possibly other sources).
+  notes: |
+    The module was not broken as someone previously reported.
+    Test cases in asegr.t needed to be updated.
   testfile: asegr.t
   testcases:
+    - CPI
+    - KYLO
+    - ALPHA25O2.20
+    - AETF
+    - ELHAB1
+    - OPAPB2
+    - FTSE
+    - GEKTERNAB3
 #
 - module: ASX.pm
   state: working
