@@ -530,7 +530,6 @@ http://www.gnucash.org/
 # SEE ALSO
 
     Finance::Quote::CurrencyRates::AlphaVantage,
-    Finance::Quote::CurrencyRates::CurrencyFreaks,
     Finance::Quote::CurrencyRates::ECB,
     Finance::Quote::CurrencyRates::Fixer,
     Finance::Quote::CurrencyRates::OpenExchange,

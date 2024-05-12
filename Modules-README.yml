@@ -73,7 +73,7 @@
 - module: AlphaVantage.pm
   state: working
   added:
-  changed: 2023-07-28
+  changed: 2024-04-07
   removed:
   urls:
     - https://www.alphavantage.co/query?function=GLOBAL_QUOTE&apikey=$ALPHAVANTAGE_API_KEY&symbol=
@@ -85,29 +85,15 @@
     return a currency.
   testfile: alphavantage.t
   testcases:
-    - IBM
+    - BP.L
     - CSCO
-    - SOLB.BR
-    - SAP.DE
-    - TD.TO
-    - LSE.L
-    - VFIAX
-    - T
     - DIVO11.SA
-    - OGZD.IL
-    - TWTR
-    - AAPL
-    - ORCL
-    - CMCSA
-    - INTC
-    - NFLX
-    - TSLA
-    - NOK
-    - BAC
-    - GOOG
-    - F
-    - AXP
-    - ERIC-B.STO
+    - ERCB.DE
+    - IBM
+    - MRT-UN.TRT
+    - SAP.DE
+    - SOLB.BR
+    - TD.TO
 #
 - module: BMONesbittBurns.pm
   state: failing
