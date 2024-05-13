@@ -29,6 +29,7 @@ jobs:
     - name: Set up perl
       uses: shogo82148/actions-setup-perl@v1
       with:
+          enable-modules-cache: false
           perl-version: ${{ matrix.perl }}
           distribution: ${{ ( startsWith( matrix.runner, 'windows-' ) && 'strawberry' ) || 'default' }}
 
