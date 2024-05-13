@@ -1674,6 +1674,7 @@ http://www.gnucash.org/
 =head1 SEE ALSO
 
   Finance::Quote::CurrencyRates::AlphaVantage,
+  Finance::Quote::CurrencyRates::CurrencyFreaks,
   Finance::Quote::CurrencyRates::ECB,
   Finance::Quote::CurrencyRates::Fixer,
   Finance::Quote::CurrencyRates::OpenExchange,
