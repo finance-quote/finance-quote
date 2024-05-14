@@ -77,6 +77,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Finanzpartner
     Fondsweb
     Fool
+    GenericExecutor
     GoldMoney
     GoogleWeb
     HU
@@ -106,6 +107,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     TwelveData
     Union
     XETRA
+    YahooChart
     YahooJSON
     YahooWeb
     ZA
