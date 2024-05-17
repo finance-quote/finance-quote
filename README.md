@@ -195,8 +195,8 @@ conversion method or configure fallback methods, include the 'order' key, which
 points to an array of Finance::Quote::CurrencyRates module names.
 Setting the environment variable FQ\_CURRENCY will change the default 
 endpoint used for currency conversion.
-See the documentation for the individual Finance::Quote::CurrencyRates to
-learn more. 
+See the documentation for the individual Finance::Quote::CurrencyRates
+modules to learn more. 
 
 ## get\_default\_currency\_fields
 
@@ -252,8 +252,11 @@ modules are used is controlled by the argument
 
     currency_rates => {order => [subset of $features{currency_modules}]} 
 
-to Finance::Quote->new().  By default, only AlphaVantage in used for 
-currency conversion, so "order" must be set to use other currency modules.
+to Finance::Quote->new().  By default, AlphaVantage in used for 
+currency conversion, "order" can be set to use other currency modules.
+The currency module used can also be changed by setting the FQ\_CURRENCY
+environment variable. Please note that some of the alternate currency
+modules require API keys.
 
 # PUBLIC OBJECT METHODS
 
@@ -399,8 +402,8 @@ second argument.  In the above example, `value` is `'10.23'`.
 `currency` converts a value with a currency code suffix to another currency
 using the current exchange rate as determined by the
 Finance::Quote::CurrencyRates method or methods configured for the quoter $q.
-When called as a class method, only Finance::Quote::AlphaVantage is used, which
-requires an API key. See the introduction for information on configuring
+When called as a class method, Finance::Quote::AlphaVantage is the default,
+which requires an API key. See the introduction for information on configuring
 currency rate conversions and see Finance::Quote::CurrencyRates::AlphaVantage
 for information about the API key.
 
@@ -530,6 +533,7 @@ http://www.gnucash.org/
 # SEE ALSO
 
     Finance::Quote::CurrencyRates::AlphaVantage,
+    Finance::Quote::CurrencyRates::CurrencyFreaks,
     Finance::Quote::CurrencyRates::ECB,
     Finance::Quote::CurrencyRates::Fixer,
     Finance::Quote::CurrencyRates::OpenExchange,
