@@ -32,14 +32,22 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/last isin name currency date isodate/;
+our $DISPLAY    = 'NZX - New Zealand Exchange';
+our @LABELS     = qw/last isin name currency date isodate/;
+our $METHODHASH = {subroutine => \&nzx, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS};
 
-sub labels {
-  return ( nzx => \@labels );
+sub methodinfo {
+    return ( 
+        nzx => $METHODHASH,
+    );
 }
 
+sub labels { my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
-  return ( nzx => \&nzx );
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub nzx {
@@ -64,19 +72,29 @@ sub nzx {
         ### [<now>] Result->script: $result->{script}
 
         my $json = encode_utf8($result->{script});
-        my $json_data = JSON::decode_json($json);
+        my $json_data;
+        eval {$json_data = JSON::decode_json($json)};
+        if ($@) {
+            $info{ $symbol, 'success' } = 0;
+            $info{ $symbol, 'errormsg' } = $@;
+        }
         ### [<now>] JSON Data: $json_data
 
-        die "Failed to find $symbol" unless exists $result->{last};
-     
+        unless ($json_data->{'props'}{'pageProps'}{'overview'}{'code'}
+        eq $symbol) {
+            $info{$symbol, 'success'} = 0;
+            $info{$symbol, 'errormsg'} = 'Symbol not found';
+            next;
+        }
         
         $info{$symbol, 'success'}  = 1;
         $info{$symbol, 'currency'} = 'NZD';
-        $info{$symbol, 'last'}    = $1 if $result->{last} =~ /([0-9.]+)/;
-        $info{$symbol, 'isin'}    = $result->{isin};
-        $info{$symbol, 'name'}    = $result->{name};
+        $info{$symbol, 'last'}    = $json_data->{'props'}{'pageProps'}{'overview'}{'priceAmount'};
+        $info{$symbol, 'isin'}    = $json_data->{'props'}{'pageProps'}{'overview'}{'ISIN'};
+        $info{$symbol, 'name'}    = $json_data->{'props'}{'pageProps'}{'overview'}{'name'};
       
-        $quoter->store_date(\%info, $symbol, {eurodate => $1}) if $result->{when} =~ m|([0-9]{1,2}/[0-9]{1,2}/[0-9]{4})|;
+        my $closePriceDate = $json_data->{'props'}{'pageProps'}{'overview'}{'closePriceDate'};
+        $quoter->store_date(\%info, $symbol, {isodate => $closePriceDate});
       };
       
       if ($@) {
