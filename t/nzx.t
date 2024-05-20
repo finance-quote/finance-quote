@@ -18,7 +18,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-my %valid    = ('TPW' => 'Trustpower Limited Ordinary Shares');
+my %valid    = ('MNW' => 'Manawa Energy Limited Ordinary Shares');
 my @invalid  = ('BOGUS');
 my @symbols  = (keys %valid, @invalid);
 
