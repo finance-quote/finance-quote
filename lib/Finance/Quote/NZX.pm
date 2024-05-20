@@ -89,6 +89,7 @@ sub nzx {
         
         $info{$symbol, 'success'}  = 1;
         $info{$symbol, 'currency'} = 'NZD';
+        $info{$symbol, 'symbol'}  = $symbol;
         $info{$symbol, 'last'}    = $json_data->{'props'}{'pageProps'}{'overview'}{'priceAmount'};
         $info{$symbol, 'isin'}    = $json_data->{'props'}{'pageProps'}{'overview'}{'ISIN'};
         $info{$symbol, 'name'}    = $json_data->{'props'}{'pageProps'}{'overview'}{'name'};
