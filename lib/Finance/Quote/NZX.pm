@@ -112,6 +112,8 @@ sub nzx {
 
 1;
 
+__END__
+
 =head1 NAME
 
 Finance::Quote::NZX - Obtain quotes from New Zealand's
@@ -123,11 +125,11 @@ Exchange www.nzx.com
 
     $q = Finance::Quote->new;
 
-    %stockinfo = $q->fetch('nzx','TPW');
+    %stockinfo = $q->fetch('nzx','MNW');
 
 =head1 DESCRIPTION
 
-This module obtains information fromwww.nzx.com.
+This module obtains information from L<NZX|https://www.nzx.com/>.
 
 =head1 LABELS RETURNED
 
