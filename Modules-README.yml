@@ -65,10 +65,15 @@
   removed: ~
   urls:
   apikey: false
-  notes: >-
+  notes: |
     Most securities are available from YahooJSON (and possibly other sources).
+    Primary URL https://www.asx.com.au/asx/1/share/$symbol now utilizing
+    Imperva's Incapsula to prevent web scraping and robots. The alternate
+    URL https://asx.api.markitdigital.com/asx-research/1.0/companies/
+    does not return a trade date.
   testfile: asx.t
   testcases:
+    - These need to be updated
     - WES
     - BOQ
     - XRO
@@ -446,7 +451,7 @@
   testcases:
 #
 - module: FinanceCanada.pm
-  state: Not Working
+  state: removed
   added: Unknown
   changed: ~
   removed: 2020-10-10
@@ -654,6 +659,24 @@
     - AAPL
     - NXPI
     - PCAR
+#
+- module: MorningstarAU.pm
+  state: failing
+  added: TBD
+  changed:
+  removed:
+  urls:
+    - https://www.morningstar.com.au/Ausearch/SecurityCodeAutoLookup?q=$symbol
+  methods:
+    - aufunds
+    - morningstarau
+  apikey: false
+  notes:
+  testfile: morningstarAU.t
+  testcases:
+    - BFL0002AU
+    - IML0004AU
+    - FID0021AU
 #
 - module: MorningstarCH.pm
   state: working
