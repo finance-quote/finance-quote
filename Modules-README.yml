@@ -217,6 +217,20 @@
     - BRD
     - SNP
 #
+- module: Comdirect.pm
+  state: failing
+  added: TBD
+  changed: ~
+  removed: ~
+  urls: https://www.comdirect.de/inf/search/all.html?SEARCH_VALUE=
+  apikey: false
+  notes: ~
+  testfile: comdirect.t
+  testcases:
+    - VWAGY
+    - Volkswagen
+    - DE0007664039
+#
 - module: CSE.pm
   state: failing
   added: TBD
@@ -752,6 +766,22 @@
   testfile: t/nzx.t
   testcases:
     - MNW
+#
+- module: OnVista.pm
+  state: failing
+  added: TBD
+  changed: ~
+  removed: ~
+  urls: https://www.onvista.de/suche/<symbol>
+  apikey: false
+  notes: |
+    A secondary URL is located in the data. Data for stock
+    quote is retrieved from that URL.
+  testfile: TBD
+  testcases:
+    - MRK
+    - AAPL
+    - SAP
 #
 - module: Oslobors.pm
   state: working
