@@ -29,13 +29,13 @@ use if DEBUG, 'Smart::Comments', '###';
 
 use vars qw($NSE_MAIN_URL $NSE_URL);
 $NSE_MAIN_URL = "https://www.nseindia.com";
-$NSE_URL = "https://archives.nseindia.com";
+$NSE_URL = "https://nsearchives.nseindia.com";
 
 sub methods { return ( 'india' => \&nseindia,
                        'nseindia' => \&nseindia ); }
 
 sub labels {
-    my @labels = qw/close last high low open prevclose exchange/;
+    my @labels = qw/close last high low open prevclose exchange name/;
     return (
     india => \@labels,
     nseindia => \@labels
@@ -58,17 +58,14 @@ sub nseindia {
     # Set the ua to be blank. Server blocks default useragent.
     $ua->agent('');
     
-    my %mnames = ('01' => 'JAN', '02' => 'FEB', '03' => 'MAR', '04' => 'APR', '05' => 'MAY', '06' => 'JUN',
-          '07' => 'JUL', '08' => 'AUG', '09' => 'SEP', '10' => 'OCT', '11' => 'NOV', '12' => 'DEC');
     # Try to fetch last 10 days
     for (my ($days, $now) = (0, time()); $days < 10; $days++) {
-        # Ex: https://archives.nseindia.com/content/historical/EQUITIES/2020/APR/cm23APR2020bhav.csv.zip
+        # Ex: https://nsearchives.nseindia.com/content/cm/BhavCopy_NSE_CM_0_0_0_20240718_F_0000.csv.zip
         my @lt = localtime($now - $days*24*60*60);
-        my ($day, $month, $year, $url, $req, $output);
-        $day = strftime "%d", @lt;
-        $month = $mnames{strftime "%m", @lt}; # Can't use %b as it's locale dependent.
-        $year = strftime "%Y", @lt;
-        $url = $NSE_URL . "/content/historical/EQUITIES/$year/$month/cm$day$month${year}bhav.csv.zip";
+        my ($date, $day, $month, $year, $url, $req, $output);
+
+		$date = strftime "%Y%m%d", @lt;
+        $url = sprintf("https://nsearchives.nseindia.com/content/cm/BhavCopy_NSE_CM_0_0_0_%s_F_0000.csv.zip", $date);
         $req = HTTP::Request->new(GET => $url);     #added for fileless
         $reply = $ua->request($req);
         # print "$url", $reply->is_success, $reply->status_line, "\n"; #DEBUG
@@ -107,7 +104,8 @@ sub nseindia {
     my $csvhead;
     my @headhash;
 
-    # SYMBOL,SERIES,OPEN,HIGH,LOW,CLOSE,LAST,PREVCLOSE,TOTTRDQTY,TOTTRDVAL,TIMESTAMP,TOTALTRADES,ISIN,
+    # TradDt,BizDt,Sgmt,Src,FinInstrmTp,FinInstrmId,ISIN,TckrSymb,SctySrs,XpryDt,FininstrmActlXpryDt,StrkPric,OptnTp,FinInstrmNm,OpnPric,HghPric,LwPric,ClsPric,LastPric,PrvsClsgPric,UndrlygPric,SttlmPric,OpnIntrst,ChngInOpnIntrst,TtlTradgVol,TtlTrfVal,TtlNbOfTxsExctd,SsnId,NewBrdLotQty,Rmks,Rsvd1,Rsvd2,Rsvd3,Rsvd4
+
     $csvhead = $array[0];
 
     @headhash = split /\s*,s*/, $csvhead;
@@ -116,8 +114,8 @@ sub nseindia {
 		my %datahash;
 		my $symbol;
 		@datahash{@headhash} = @data;
-		if (exists $symbolhash{$datahash{"SYMBOL"}}) {
-			$symbol = $datahash{"SYMBOL"};
+		if (exists $symbolhash{$datahash{"TckrSymb"}}) {
+			$symbol = $datahash{"TckrSymb"};
 		}
 		elsif(exists $symbolhash{$datahash{"ISIN"}}) {
 			$symbol = $datahash{"ISIN"};
@@ -126,13 +124,14 @@ sub nseindia {
 			next;
 		}
 		$info{$symbol, 'symbol'} = $symbol;
-		$info{$symbol, 'close'} = $datahash{"CLOSE"};
-		$info{$symbol, 'last'} = $datahash{"LAST"};
-		$info{$symbol, 'high'} = $datahash{"HIGH"};
-		$info{$symbol, 'low'} = $datahash{"LOW"};
-		$info{$symbol, 'open'} = $datahash{"OPEN"};
-		$info{$symbol, 'prevclose'} = $datahash{"PREVCLOSE"};
-		$quoter->store_date(\%info, $symbol, {eurodate => $datahash{"TIMESTAMP"}});
+		$info{$symbol, 'close'} = $datahash{"ClsPric"};
+		$info{$symbol, 'last'} = $datahash{"LastPric"};
+		$info{$symbol, 'high'} = $datahash{"HghPric"};
+		$info{$symbol, 'low'} = $datahash{"LwPric"};
+		$info{$symbol, 'open'} = $datahash{"OpnPric"};
+		$info{$symbol, 'prevclose'} = $datahash{"PrvsClsgPric"};
+		$info{$symbol, 'name'} = $datahash{"FinInstrmNm"};
+		$quoter->store_date(\%info, $symbol, {isodate => $datahash{"TradDt"}});
 		$info{$symbol, 'method'} = 'nseindia';
 		$info{$symbol, 'currency'} = 'INR';
 		$info{$symbol, 'exchange'} = 'NSE';
@@ -176,7 +175,7 @@ This module provides both the "nseindia" and "india" fetch methods. Please use t
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::NSEIndia:
-close, last, high, low, open, prevclose, exchange
+close, last, high, low, open, prevclose, exchange, name
 
 =head1 SEE ALSO
 
