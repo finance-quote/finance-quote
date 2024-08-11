@@ -55,12 +55,12 @@ sub bseindia {
 
     # Try to fetch last 10 days
     for (my ($days, $now) = (0, time()); $days < 10; $days++) {
-        # Ex: https://www.bseindia.com/download/BhavCopy/Equity/BSE_EQ_BHAVCOPY_12112023.ZIP
+        # Ex: https://www.bseindia.com/download/BhavCopy/Equity/BhavCopy_BSE_CM_0_0_0_20240809_F_0000.CSV
         my @lt = localtime($now - $days*24*60*60);
         my ($date, $url, $req, $output);	# added $req, $output for fileless
         
-        $date = strftime "%d%m%Y", @lt;
-        $url = sprintf("https://www.bseindia.com/download/BhavCopy/Equity/BSE_EQ_BHAVCOPY_%s.ZIP", $date);
+        $date = strftime "%Y%m%d", @lt;
+        $url = sprintf("https://www.bseindia.com/download/BhavCopy/Equity/BhavCopy_BSE_CM_0_0_0_%s_F_0000.CSV", $date);
         $req = HTTP::Request->new(GET => $url);     #added for fileless
         $reply = $ua->request($req);
         #print "$url", $reply->is_success, $reply->status_line, "\n"; #DEBUG
@@ -74,12 +74,8 @@ sub bseindia {
     }
 
     if (!$errormsg) {
-		#Does not use temp files. Fileless into variable $output
-        if (! unzip \$reply->content => \$output) {
-            $errormsg = "Unzip error : $UnzipError";
-        } else {
-			@array = split("\n", $output);
-		}
+	#Does not use temp files. Fileless into variable $output
+	@array = split("\n", $reply->content);
     }
 
     if ($errormsg) {
@@ -129,7 +125,7 @@ sub bseindia {
 		$info{$symbol, 'open'} = $datahash{"OpnPric"};
 		$info{$symbol, 'prevclose'} = $datahash{"PrvsClsgPric"};
 		$info{$symbol, 'name'} = $datahash{"FinInstrmNm"};
-		$quoter->store_date(\%info, $symbol, {eurodate => $datahash{"TradDt"}});
+		$quoter->store_date(\%info, $symbol, {isodate => $datahash{"TradDt"}});
 		$info{$symbol, 'method'} = 'bseindia';
 		$info{$symbol, 'currency'} = 'INR';
 		$info{$symbol, 'exchange'} = 'BSE';
