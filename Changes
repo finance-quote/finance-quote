@@ -1,5 +1,7 @@
 {{$NEXT}}
 	* Fixed NZX.pm - Issue #401
+	* BSEIndia.pm - fixed broken url, changed time format to isodate, direct csv download  Issue #410
+	* NSEIndia.pm - fixed broken url, changed column names in response, time format to isodate Issue #410
 
 1.62      2024-05-16 18:19:12-07:00 America/Los_Angeles
 	* Fixed AEX.pm
