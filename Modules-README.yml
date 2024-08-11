@@ -121,10 +121,10 @@
 - module: BSEIndia.pm
   state: working
   added: 2020-06-27
-  changed: 2023-12-27
+  changed: 2024-07-30
   removed:
   urls:
-    - https://www.bseindia.com/download/BhavCopy/Equity/BSE_EQ_BHAVCOPY_{DDMMYYYY}.ZIP
+	- https://www.bseindia.com/download/BhavCopy/Equity/BhavCopy_BSE_CM_0_0_0_{YYYYMMDD}_F_0000.CSV
   methods:
     - india
     - bseindia
@@ -736,10 +736,10 @@
 - module: NSEIndia.pm
   state: working
   added: 2020-06-27
-  changed: 2024-01-12
+  changed: 2024-07-30
   removed:
   urls:
-    - https://archives.nseindia.com/content/historical/EQUITIES/${YYYY}/${MMM}/cm${DDMMMYYYY}bhav.csv.zip
+	- https://nsearchives.nseindia.com/content/cm/BhavCopy_NSE_CM_0_0_0_{YYYYMMDD}_F_0000.csv.zip
   methods:
     - india
     - nseindia
