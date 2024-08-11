@@ -1,7 +1,7 @@
 {{$NEXT}}
-	* Fixed NZX.pm - Issue #401
 	* Fixed BSEIndia.pm - Issue #410 and removed Unzip as quotes file is now a CSV file
 	* Fixed NSEIndia.pm - Issue #410
+	* Fixed NZX.pm - Issue #401
 
 1.62      2024-05-16 18:19:12-07:00 America/Los_Angeles
 	* Fixed AEX.pm
