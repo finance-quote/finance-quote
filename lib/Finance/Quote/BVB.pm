@@ -25,123 +25,141 @@ package Finance::Quote::BVB;
 use strict;
 use warnings;
 
-use Encode qw(decode);
+use POSIX qw(strftime);
+
+use LWP::UserAgent;
+use LWP::Simple;
+use HTTP::Status;
+use IO::String;
 use HTTP::Request::Common;
-use HTML::TreeBuilder;
-use HTML::TableExtract;
 
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments', '###';
 
 # VERSION
 
-my $BVB_URL = 'https://bvb.ro/FinancialInstruments/Details/FinancialInstrumentsDetails.aspx?s=';
+use vars qw($BVB_URL);
+$BVB_URL = "https://bvb.ro/TradingAndStatistics/Trading/HistoricalTradingInfo.ashx?day=";
 
 sub methods {
-  return (bvb        => \&bvb,
-          romania    => \&bvb,
-          tradeville => \&bvb,
-          europe     => \&bvb);
+	return (bvb        => \&bvb,
+			romania    => \&bvb,
+			tradeville => \&bvb,
+			europe     => \&bvb);
 }
 
-our @labels = qw/symbol name open high low last bid ask date currency method/;
-
 sub labels { 
-  return (bvb        => \@labels,
-          romania    => \@labels,
-          tradeville => \@labels,
-          europe     => \@labels); 
+	my @labels = qw/symbol name market trades volume value open low high avg close refprice var date/;
+	
+	return (bvb        => \@labels,
+			romania    => \@labels,
+			tradeville => \@labels,
+			europe     => \@labels); 
 }
 
 sub bvb {
+	my $quoter = shift;
+	my @symbols = @_;
+	return unless @symbols;
 
-  my $quoter = shift;
-  my @stocks = @_;
-  my (%info, $tree, $table, $pricetable, $url, $reply);
-  my $ua = $quoter->user_agent();
+	my (%info, $errormsg, $ua, $req, $date, $reply);
+	my @array;
+	my $meuradate;
 
-  foreach my $stock (@stocks) {
+	$ua = $quoter->user_agent;
+	# Set the ua to be blank. Server blocks default useragent.
+	$ua->agent('');
 
-    $url   = $BVB_URL . $stock;
-    $reply = $ua->request( GET $url);
-
-    my $code    = $reply->code;
-    my $desc    = HTTP::Status::status_message($code);
-    my $headers = $reply->headers_as_string;
-    my $body    = decode('UTF-8', $reply->content);
-
-    ### Body: $body
-
-    my ($name, $bid, $ask, $last, $open, $high, $low, $date);
-
-    $info{ $stock, "symbol" } = $stock;
-
-    if ( $code == 200 ) {
-
-      # Use HTML::TreeBuilder to parse HTML in $body
-      $tree = HTML::TreeBuilder->new;
-      if ($tree->parse($body)) {
-
-        $tree->eof;
-        if ( $tree->look_down(_tag => 'div', id => 'ctl00_body_divNoData') ) {
-          $info{ $stock, "success" } = 0;
-          $info{ $stock, "errormsg" } =
-            "Error retrieving quote for $stock. No data returned";
-          next;
-        }
-        $name = $tree->look_down(_tag => 'h2', class => qr/^mBot0 large textStyled/)->as_text;
-        $info{ $stock, 'success' } = 1;
-        ($info{ $stock, 'name' } = $name) =~ s/^\s+|\s+$//g ;
-        $info{ $stock, 'currency' } = 'RON';
-        $info{ $stock, 'method' } = 'bvb';
-        $table = $tree->look_down(_tag => 'table', id => qr/^ctl00_body_ctl02_PricesControl_dvCPrices/)->as_HTML;
-        $pricetable = HTML::TableExtract->new();
-        $pricetable->parse($table);
-        foreach my $row ($pricetable->rows) {
-          if ( @$row[0] =~ m/Ask$/ ) {
-            ($bid, $ask) = @$row[1] =~ m|^\s+([\d\.]+)\s+\/\s+([\d\.]+)|;
-            $info{ $stock, 'bid' } = $bid;
-            $info{ $stock, 'ask' } = $ask;
-          }
-          elsif ( @$row[0] =~ m|^Date/time| ) {
-            ($date) = @$row[1] =~ m|^([\d/]+)\s|;
-            $quoter->store_date(\%info, $stock, {usdate => $1}) if $date =~ m|([0-9]{1,2}/[0-9]{1,2}/[0-9]{4})|;
-          }
-          elsif ( @$row[0] =~ m|^Last price| ) {
-            ($last) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'last' } = $last;
-          }
-          elsif ( @$row[0] =~ m|^Open price| ) {
-            ($open) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'open' } = $open;
-          }
-          elsif ( @$row[0] =~ m|^High price| ) {
-            ($high) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'high' } = $high;
-          }
-          elsif ( @$row[0] =~ m|^Low price| ) {
-            ($low) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'low' } = $low;
-          }
-        }
-
-      } else {
-        $tree->eof;
-        $info{ $stock, "success" } = 0;
-        $info{ $stock, "errormsg" } =
-          "Error retrieving quote for $stock. Could not parse HTML returned from $url.";
-      }
-
-    } else {       # HTTP Request failed (code != 200)
-      $info{ $stock, "success" } = 0;
-      $info{ $stock, "errormsg" } =
-        "Error retrieving quote for $stock. Attempt to fetch the URL $url resulted in HTTP response $code ($desc)";
+	# Try to fetch last 10 days historical data file
+    for (my ($days, $now) = (0, time()); $days < 10; $days++) {
+        # Ex: https://bvb.ro/TradingAndStatistics/Trading/HistoricalTradingInfo.ashx?day=20240809
+        my @lt = localtime($now - $days*24*60*60);
+        
+        my ($url, $output);	# added $req, $output for fileless
+        
+        $date = strftime "%Y%m%d", @lt;
+		$url = sprintf("https://bvb.ro/TradingAndStatistics/Trading/HistoricalTradingInfo.ashx?day=%s", $date);
+        $req = get($url);     #added for fileless
+        die "Couldn't get data!" unless defined $req;
+        
+        if ($req ne "") {
+			last;
+		}
     }
 
-  }  
+	#Set the date to the date of the last available historical file date
+	$meuradate = $date;
+	
+	#Remove quotation marks around every field in the file.
+	$req =~ s/"//g;
+	#If the file is empty, die with error
+	if ($req eq "") {
+		die "Can't GET data";
+	}
+	
+	@array = split("\n", $req);
 
-  return wantarray() ? %info : \%info;
-  return \%info;
+    if ($errormsg) {
+        foreach my $symbol (@symbols) {
+			$info{$symbol, "success"} = 0;
+			$info{$symbol, "errormsg"} = $errormsg;
+		}
+		return wantarray() ? %info : \%info;
+    }
+
+    # Create a hash of all stocks requested
+    my %symbolhash;
+    foreach my $symbol (@symbols)
+    {
+		$symbolhash{$symbol} = 0;
+    }
+    my $csvhead;
+    my @headhash;
+
+	# "Symbol","Name","Market","Trades","Volume","Value","Open","Low","High","Avg.","Close","Ref. price","Var (%)"
+    
+    $csvhead = $array[0];
+
+    @headhash = split(/\s*,s*/, $csvhead);
+
+	
+    foreach (@array) {
+		my @data = split(",", $_);
+		my %datahash;
+		my $symbol;
+		@datahash{@headhash} = @data;
+    
+		if (exists $symbolhash{$datahash{"Symbol"}}) {
+			$symbol = $datahash{"Symbol"};
+		}
+		else {
+			next;
+		}
+    
+		$info{$symbol, 'symbol'} = $symbol;
+		$info{$symbol, 'close'} = $datahash{"Close"};
+		$info{$symbol, 'last'} = $datahash{"Close"};
+		$info{$symbol, 'high'} = $datahash{"High"};
+		$info{$symbol, 'low'} = $datahash{"Low"};
+		$info{$symbol, 'open'} = $datahash{"Open"};
+		$info{$symbol, 'name'} = $datahash{"Name"};
+		$quoter->store_date(\%info, $symbol, {isodate => $meuradate});
+		$info{$symbol, 'method'} = 'bvb';
+		$info{$symbol, 'currency'} = 'RON';
+		$info{$symbol, 'exchange'} = 'BVB';
+		$info{$symbol, 'success'} = 1;
+    }
+
+    foreach my $symbol (@symbols) {
+        unless (exists $info{$symbol, 'success'}) {
+			### Not Found: $symbol
+			$info{$symbol, 'success'} = 0;
+			$info{$symbol, 'errormsg'} = 'Stock not found on BVB.';
+		}
+    }
+ 
+	return wantarray() ? %info : \%info;
+	return \%info;
 
 }
 
@@ -172,8 +190,8 @@ to load it explicitly by placing "bvb" in the argument list to
 Finance::Quote->new().
 
 This module provides "bvb", "tradeville", "romania", and "europe"
-fetch methods. It was written to replace a non-working Tradeville.pm
-module.
+fetch methods. It was written use historical trade data file posted by BVB
+on their site.
 
 Information obtained by this module may be covered by Bucharest Stock
 Exchange terms and conditions.
