@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Fixed BVB.pm - Issue #409
 	* Fixed BSEIndia.pm - Issue #410 and removed Unzip as quotes file is now a CSV file
 	* Fixed NSEIndia.pm - Issue #410
 	* Fixed NZX.pm - Issue #401
