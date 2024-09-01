@@ -148,6 +148,8 @@ sub financeapi {
 
       # Check for stocks traded in pence instead of pounds
       # Convert GBp or GBX to GBP (divide price by 100).
+      # GBP.L - pence
+      # GBPG.L - pounds
 
       if ( ($info{$stock,"currency"} eq "GBp") ||
          ($info{$stock,"currency"} eq "GBX")) {
