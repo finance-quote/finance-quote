@@ -42,15 +42,15 @@ my $FINANCEAPI_URL = 'https://yfapi.net/v6/finance/quote?region=US&lang=en&symbo
 
 our $DISPLAY    = 'FinanceAPI';
 our $FEATURES   = {'API_KEY' => 'registered user API key'};
-our @LABELS     = qw/symbol name open high low last date volume currency method/;
-our $METHODHASH = {subroutine => \&financeapi>, 
+our @LABELS     = qw/symbol name open high low last price date volume currency method/;
+our $METHODHASH = {subroutine => \&financeapi, 
                    display => $DISPLAY, 
                    labels => \@LABELS,
                    features => $FEATURES};
 
 sub methodinfo {
     return ( 
-        <method> => $METHODHASH,
+        financeapi   => $METHODHASH,
         nyse         => $METHODHASH,
         nasdaq       => $METHODHASH,
         usa          => $METHODHASH,
@@ -73,7 +73,7 @@ sub financeapi {
   # Set token. If not passed in as argument, get from environment.
   my $token = exists $quoter->{module_specific_data}->{stockdata}->{API_KEY} ? 
               $quoter->{module_specific_data}->{stockdata}->{API_KEY}        :
-              $ENV{"FINANCE_API_KEY"};
+              $ENV{"FINANCEAPI_API_KEY"};
 
   # Set headers. API key is sent as a header.
   my @ua_headers = (
@@ -82,6 +82,13 @@ sub financeapi {
   );
 
   foreach my $stock (@stocks) {
+
+    if ( !defined $token ) {
+      $info{ $stock, 'success' } = 0;
+      $info{ $stock, 'errormsg' } =
+        'FINANCEAPI_API_KEY not defined. Get an API key at https://financeapi.net/';
+      next;
+    }
 
     $url   = $FINANCEAPI_URL . $stock;
     $reply = $ua->get( $url, @ua_headers );
@@ -93,65 +100,94 @@ sub financeapi {
 
     ### Body: $body
 
-    my ($name, $bid, $ask, $last, $open, $high, $low, $date);
+    my ($quote, $name, $bid, $ask, $last, $open, $high, $low, $volume, $currency, $date);
+    my ($month, $day, $year);
 
     $info{ $stock, "symbol" } = $stock;
 
     if ( $code == 200 ) {
 
-      # Use HTML::TreeBuilder to parse HTML in $body
-      $tree = HTML::TreeBuilder->new;
-      if ($tree->parse($body)) {
-
-        $tree->eof;
-        if ( $tree->look_down(_tag => 'div', id => 'ctl00_body_divNoData') ) {
-          $info{ $stock, "success" } = 0;
-          $info{ $stock, "errormsg" } =
-            "Error retrieving quote for $stock. No data returned";
-          next;
-        }
-        $name = $tree->look_down(_tag => 'h2', class => qr/^mBot0 large textStyled/)->as_text;
-        $info{ $stock, 'success' } = 1;
-        ($info{ $stock, 'name' } = $name) =~ s/^\s+|\s+$//g ;
-        $info{ $stock, 'currency' } = 'RON';
-        $info{ $stock, 'method' } = 'bvb';
-        $table = $tree->look_down(_tag => 'table', id => qr/^ctl00_body_ctl02_PricesControl_dvCPrices/)->as_HTML;
-        $pricetable = HTML::TableExtract->new();
-        $pricetable->parse($table);
-        foreach my $row ($pricetable->rows) {
-          if ( @$row[0] =~ m/Ask$/ ) {
-            ($bid, $ask) = @$row[1] =~ m|^\s+([\d\.]+)\s+\/\s+([\d\.]+)|;
-            $info{ $stock, 'bid' } = $bid;
-            $info{ $stock, 'ask' } = $ask;
-          }
-          elsif ( @$row[0] =~ m|^Date/time| ) {
-            ($date) = @$row[1] =~ m|^([\d/]+)\s|;
-            $quoter->store_date(\%info, $stock, {usdate => $1}) if $date =~ m|([0-9]{1,2}/[0-9]{2}/[0-9]{4})|;
-          }
-          elsif ( @$row[0] =~ m|^Last price| ) {
-            ($last) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'last' } = $last;
-          }
-          elsif ( @$row[0] =~ m|^Open price| ) {
-            ($open) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'open' } = $open;
-          }
-          elsif ( @$row[0] =~ m|^High price| ) {
-            ($high) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'high' } = $high;
-          }
-          elsif ( @$row[0] =~ m|^Low price| ) {
-            ($low) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'low' } = $low;
-          }
-        }
-
-      } else {
-        $tree->eof;
-        $info{ $stock, "success" } = 0;
-        $info{ $stock, "errormsg" } =
-          "Error retrieving quote for $stock. Could not parse HTML returned from $url.";
+      eval {$quote = JSON::decode_json $body};
+      if ($@) {
+        $info{ $stock, 'success' } = 0;
+        $info{ $stock, 'errormsg' } = $@;
+        next;
       }
+
+      ### [<now>] JSON quote: $quote
+
+      if (!exists $quote->{'quoteResponse'}) {
+        $info{ $stock, 'success' } = 0;
+        $info{ $stock, 'errormsg' } = $@;
+        next;
+      }
+
+      $name     = $quote->{'quoteResponse'}{'result'}[0]{'longName'};
+      $open     = $quote->{'quoteResponse'}{'result'}[0]{'regularMarketOpen'};
+      $high     = $quote->{'quoteResponse'}{'result'}[0]{'regularMarketDayHigh'};
+      $low      = $quote->{'quoteResponse'}{'result'}[0]{'regularMarketDayLow'};
+      $last     = $quote->{'quoteResponse'}{'result'}[0]{'regularMarketPrice'};
+      $volume   = $quote->{'quoteResponse'}{'result'}[0]{'regularMarketVolume'};
+      #$currency = $quote->{'quoteResponse'}{'result'}[0]{'financialCurrency'};
+      $currency = $quote->{'quoteResponse'}{'result'}[0]{'currency'};
+      $date     = $quote->{'quoteResponse'}{'result'}[0]{'regularMarketTime'};
+      ($month, $day, $year) = (localtime($date))[4,3,5];
+      $month++;
+      $year += 1900;
+
+      $info{$stock, 'name'}      = $name;
+      $info{$stock, 'open'}      = $open;
+      $info{$stock, 'high'}      = $high;
+      $info{$stock, 'low'}       = $low;
+      $info{$stock, 'last'}      = $last;
+      $info{$stock, 'price'}     = $last;
+      $info{$stock, 'volume'}    = $volume;
+      $info{$stock, 'currency'}  = $currency;
+      $info{ $stock, 'method' }  = 'financeapi';
+      $quoter->store_date(\%info, $stock, {month => $month, day => $day, year => $year});
+
+      # Check for stocks traded in pence instead of pounds
+      # Convert GBp or GBX to GBP (divide price by 100).
+
+      if ( ($info{$stock,"currency"} eq "GBp") ||
+         ($info{$stock,"currency"} eq "GBX")) {
+        foreach my $field ( $quoter->default_currency_fields ) {
+          next unless ( $info{ $stock, $field } );
+          $info{ $stock, $field }
+            = $quoter->scale_field( $info{ $stock, $field }, 0.01 );
+        }
+        $info{ $stock, "currency"} = "GBP";
+      }
+
+      # Apply the same hack for Johannesburg Stock Exchange
+      # (JSE) prices as they are returned in ZAc (cents)
+      # instead of ZAR (rands). JSE symbols are suffixed
+      # with ".JO" when querying Yahoo e.g. ANG.JO
+
+      if ($info{$stock,"currency"} eq "ZAc") {
+        foreach my $field ( $quoter->default_currency_fields ) {
+          next unless ( $info{ $stock, $field } );
+          $info{ $stock, $field }
+            = $quoter->scale_field( $info{ $stock, $field }, 0.01 );
+        }
+        $info{ $stock, "currency"} = "ZAR";
+      }
+
+      # Apply the same hack for Tel Aviv Stock Exchange
+      # (TASE) prices as they are returned in ILA (Agorot)
+      # instead of ILS (Shekels). TASE symbols are suffixed
+      # with ".TA" when querying Yahoo e.g. POLI.TA
+
+      if ($info{$stock,"currency"} eq "ILA") {
+        foreach my $field ( $quoter->default_currency_fields ) {
+          next unless ( $info{ $stock, $field } );
+          $info{ $stock, $field }
+            = $quoter->scale_field( $info{ $stock, $field }, 0.01 );
+        }
+        $info{ $stock, "currency"} = "ILS";
+      }
+
+      $info{ $stock, 'success' } = 1;
 
     } else {       # HTTP Request failed (code != 200)
       $info{ $stock, "success" } = 0;
@@ -202,6 +238,8 @@ advertises "nyse", "usa", and "nasdaq".
 
 L<https://financeapi.net/> requires users to register for an API Key
 (token).
+The free "Basic" API Key allows 100 queries per day and a 300 per minute
+rate.
 
 The API key may be set by either providing a module specific hash to
 Finance::Quote->new as in the above example, or by setting the environment
@@ -225,12 +263,12 @@ The following labels are returned:
 
 =item price
 
-=item bid
-
-=item ask
-
 =item date
+
+=item volume
 
 =item currency
 
 =back
+
+=cut

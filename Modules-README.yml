@@ -392,6 +392,30 @@
     - DE0008474511
     - LU0051755006
 #
+- module: FinanceAPI.pm
+  state: working
+  added: 2024-09-01
+  changed: ~
+  removed: ~
+  urls:
+    - https://financeapi.net/
+    - https://yfapi.net/v6/finance/quote?
+  methods:
+    - financeapi
+    - nasdaq
+    - nyse
+    - usa
+  apikey: true
+  notes: |
+    The API token can be passed in when the quote object is created
+    or read from the environment variable FINANCEAPI_API_KEY.
+  testfile: financeapi.t
+  testcases:
+    - MSFT
+    - IBM
+    - F
+    - GE
+#
 - module: Fondsweb.pm
   state: working
   added: TBD

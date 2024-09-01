@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Added FinanceAPI.pm - Requires API key from https://financeapi.net/. US and other exchange data available.
 	* Fixed BVB.pm - Issue #409
 	* Fixed BSEIndia.pm - Issue #410 and removed Unzip as quotes file is now a CSV file
 	* Fixed NSEIndia.pm - Issue #410
