@@ -73,10 +73,11 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Currencies
     DWS
     Deka
-    FTfunds
+    FinanceAPI
     Finanzpartner
     Fondsweb
     Fool
+    FTfunds
     GoldMoney
     GoogleWeb
     HU
@@ -1696,10 +1697,11 @@ http://www.gnucash.org/
   Finance::Quote::Currencies,
   Finance::Quote::DWS,
   Finance::Quote::Deka,
-  Finance::Quote::FTfunds,
+  Finance::Quote::FinanceAPI,
   Finance::Quote::Finanzpartner,
   Finance::Quote::Fondsweb,
   Finance::Quote::Fool,
+  Finance::Quote::FTfunds,
   Finance::Quote::GoldMoney,
   Finance::Quote::GoogleWeb,
   Finance::Quote::HU,
