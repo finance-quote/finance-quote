@@ -1086,15 +1086,16 @@
 - module: TesouroDireto.pm
   state: working
   added: 2022-02-06
-  changed: ~
+  changed: 2024-09-11
   removed: ~
   urls:
     - https://www.tesourodireto.com.br/titulos/precos-e-taxas.htm
+    - https://github.com/ghostnetrn/bot-tesouro-direto
   apikey: false
   notes: ~
   testfile: tesouro_direto.t
   testcases:
-    - Tesouro Prefixado 2026
+    - Tesouro Prefixado 2031
     - Tesouro IPCA+ 2045
 #
 - module: TreasuryDirect.pm
