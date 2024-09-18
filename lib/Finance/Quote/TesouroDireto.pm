@@ -44,9 +44,6 @@ sub tesouro
 
   my $ua = $quoter->user_agent;
 
-  # Bad stuff to get around bad cert and ssl confs
-  $ua->ssl_opts(verify_hostname => 0, SSL_verify_mode => 0, SSL_cipher_list => 'DEFAULT:!DH');
-
   my (%fundsymbol, %fundhash, @q, %info);
 
   # create hash of all funds requested
@@ -55,7 +52,7 @@ sub tesouro
       $fundhash{$fund} = 0;
   }
 
-  my $url = "https://www.tesourodireto.com.br/json/br/com/b3/tesourodireto/service/api/treasurybondsinfo.json";
+  my $url = "https://raw.githubusercontent.com/ghostnetrn/bot-tesouro-direto/main/tesouro.json";
   my $response = $ua->request(GET $url);
 
   if ($response->is_success) {
