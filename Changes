@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.63      2024-09-21 12:47:39-07:00 America/Los_Angeles
 	* Fixed TesouroDireto.pm - Using different source URL - PR #424
 	* Added FinanceAPI.pm - Requires API key from https://financeapi.net/. US and other exchange data available.
 	* Fixed BVB.pm - Issue #409
