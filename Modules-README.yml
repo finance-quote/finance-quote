@@ -185,11 +185,12 @@
 - module: Bourso.pm
   state: working
   added:
-  changed: 2023-05-22
+  changed: 2024-09-21
   removed:
   urls: https://www.boursorama.com/cours/$stock
   apikey: false
-  notes: The test file checks for specific values returned and may falsly report errors when the information correctly returned from the URL changes.
+  notes: |
+    The test file checks for specific values returned and may falsely report errors when the information correctly returned from the URL changes. Test file needs to be rewritten.
   testfile: bourso.t
   testcases:
     - MP-802941

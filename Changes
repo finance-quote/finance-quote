@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Fixed Bourso.pm - Issue #417
 	* Allowed Currency Rates modules Fixer.pm and OpenExchange.pm to read their API keys from environment variables - Issue #426
 
 1.63      2024-09-21 12:47:39-07:00 America/Los_Angeles
