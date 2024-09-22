@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=2 sw=2 noai ic showmode showmatch:  
 
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, Smart::Comments, '###';
@@ -47,7 +48,7 @@ sub module_check
   }
 }
 
-plan tests => 7;
+plan tests => 8;
 
 # Check that FQ fails on bogus CurrencyRates method
 my $q = Finance::Quote->new('currency_rates' => {order => ['DoesNotExist']});
@@ -100,6 +101,21 @@ subtest 'Fixer' => sub {
 
   module_check('Fixer', \@valid, \@invalid, {cache => 1, API_KEY => $ENV{TEST_FIXER_API_KEY}});
 };
+
+# Check FinanceAPI
+subtest 'FinanceAPI' => sub {
+  if ( not $ENV{TEST_FINANCEAPI_API_KEY} ) {
+    plan skip_all =>
+        'Set $ENV{TEST_FINANCEAPI_API_KEY} to run this test; get one at https://financeapi.net';
+  }
+
+  my @valid   =
+    ( ['100.00 USD', 'EUR'], ['1.00 GBP', 'IDR'], ['1.23 IDR', 'CAD'] );
+  my @invalid = ( ['20.12 ZZZ', 'GBP'] );
+
+  module_check('FinanceAPI', \@valid, \@invalid, {cache => 1, API_KEY => $ENV{TEST_FINANCEAPI_API_KEY}});
+};
+
 
 # Check YahooJSON
 subtest 'YahooJSON' => sub {

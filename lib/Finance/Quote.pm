@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 #
+#    vi: set ts=2 sw=2 noai ic showmode showmatch:  
+#
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
@@ -52,6 +54,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     AlphaVantage
     CurrencyFreaks
     ECB
+    FinanceAPI
     Fixer
     OpenExchange
     YahooJSON
@@ -1680,6 +1683,7 @@ http://www.gnucash.org/
   Finance::Quote::CurrencyRates::AlphaVantage,
   Finance::Quote::CurrencyRates::CurrencyFreaks,
   Finance::Quote::CurrencyRates::ECB,
+  Finance::Quote::CurrencyRates::FinanceAPI,
   Finance::Quote::CurrencyRates::Fixer,
   Finance::Quote::CurrencyRates::OpenExchange,
   Finance::Quote::CurrencyRates::YahooJSON,
