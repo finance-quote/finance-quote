@@ -43,14 +43,21 @@ sub new
 
   ### OpenExchange->new args : $args
 
-  return unless (ref $args eq 'HASH') and (exists $args->{API_KEY});
+  $this->{API_KEY} = $ENV{'OPENEXCHANGE_API_KEY'};
 
-  $this->{API_KEY} = $args->{API_KEY};
+  $this->{API_KEY} =
+    $args->{API_KEY} if (ref $args eq 'HASH') and (exists $args->{API_KEY});
   $this->{refresh} = 0;
   $this->{refresh} = not $args->{cache} if exists $args->{cache};
 
+  # Return nothing if API_KEY not set
+  return unless ($this->{API_KEY});
+
+  ### API_KEY: $this->{API_KEY}
+
   return $this;
-}
+
+} # end new
 
 sub multipliers
 {
@@ -84,7 +91,7 @@ sub multipliers
   ### At least one code not found: $from, $to
 
   return;
-}
+} # end multipliers
 
 1;
 
@@ -97,8 +104,9 @@ https://openexchangerates.org
 
     use Finance::Quote;
     
-    $q = Finance::Quote->new(currency_rates => {order        => ['OpenExchange'],
-                                                openexchange => {API_KEY => ...}});
+    $q = Finance::Quote->new(currency_rates =>
+           {order => ['OpenExchange'], openexchange => {API_KEY => ...}}
+         );
 
     $value = $q->currency('18.99 EUR', 'USD');
 
@@ -111,11 +119,18 @@ value in the currency indicated by the second argument.
 This module caches the currency rates for the lifetime of the quoter object,
 unless 'cache => 0' is included in the 'openexchange' options hash.
 
+=head1 Currency Module Selection
+
+The Finance::Quote currency method to be used can also be selected by setting
+the environment variable FQ_CURRENCY.
+
+    export FQ_CURRENCY=OpenExchange
+
 =head1 API_KEY
 
-https://openexchangerates.org requires users to register and obtain an API key.  
+https://openexchangerates.org requires users to register and obtain an API key.  Their free plan allows 1000 queries per month.
 
-The API key must be set by providing a 'openexchange' hash inside the
+The API key can be set by setting the environment variable OPENEXCHANGE_API_KEY or by providing a 'openexchange' hash inside the
 'currency_rates' hash to Finance::Quote->new as in the above example.
 
 =head1 Terms & Conditions

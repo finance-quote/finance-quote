@@ -43,11 +43,16 @@ sub new
 
   ### Fixer->new args : $args
 
-  return unless (ref $args eq 'HASH') and (exists $args->{API_KEY});
+  $this->{API_KEY} = $ENV{'FIXER_API_KEY'};
 
-  $this->{API_KEY} = $args->{API_KEY};
+  $this->{API_KEY} = $args->{API_KEY} if (ref $args eq 'HASH') and (exists $args->{API_KEY});
   $this->{refresh} = 0;
   $this->{refresh} = not $args->{cache} if exists $args->{cache};
+
+  # Return nothing if API_KEY not set
+  return unless ($this->{API_KEY});
+
+  ### API_KEY: $this->{API_KEY}
 
   return $this;
 }
@@ -114,7 +119,7 @@ unless 'cache => 0' is included in the 'fixer' options hash.
 
 https://fixer.io requires users to register and obtain an API key.  
 
-The API key must be set by providing a 'fixer' hash inside the 'currency_rates'
+The API key can be set by setting the Environment variable "FIXER_API_KEY" or providing a 'fixer' hash inside the 'currency_rates'
 hash to Finance::Quote->new as in the above example.
 
 =head1 Terms & Conditions

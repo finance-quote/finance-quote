@@ -348,6 +348,41 @@
     - AUD AUD
     - INR INR
 #
+- module: CurrencyRates/Fixer.pm
+  state: working
+  Added: TBD
+  changed: 2024-09-21
+  removed: ~
+  urls: http://data.fixer.io/api/latest?access_key=$this->{API_KEY}
+  apikey: true
+  notes: |
+    Modified to allow FIXER_API_KEY environment variable.
+    Running test file requires TEST_FIXER_API_KEY environment variable
+  testfile: currency.t
+  testcases:
+    - USD EUR
+    - GBP IDR
+    - IDR CAD
+    - AUD AUD
+#
+- module: CurrencyRates/OpenExchange.pm
+  state: working
+  Added: TBD
+  changed: 2024-09-21
+  removed: ~
+  urls: https://openexchangerates.org/api/latest.json?app_id=$this->{API_KEY}
+  apikey: true
+  notes: |
+    Modified to allow OpenExchange_API_KEY environment variable.
+    Running test file requires TEST_OPENEXCHANGE_API_KEY environment variable
+    set.
+  testfile: currency-openexchange.t
+  testcases:
+    - USD EUR
+    - GBP IDR
+    - IDR CAD
+    - AUD AUD
+#
 - module: CurrencyRates/YahooJSON.pm
   state: working
   Added: 2023-04-09
