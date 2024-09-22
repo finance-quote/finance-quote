@@ -349,6 +349,22 @@
     - AUD AUD
     - INR INR
 #
+- module: CurrencyRates/FinanceAPI.pm
+  state: working
+  Added: 2024-09-22
+  changed: ~
+  removed: ~
+  urls: https://yfapi.net/v8/finance/chart/
+  apikey: true
+  notes: |
+    Allows FINANCEAPI_API_KEY environment variable.
+    Running test file requires TEST_FINANCEAPI_API_KEY environment variable
+  testfile: currency.t
+  testcases:
+    - USD EUR
+    - GBP IDR
+    - IDR CAD
+#
 - module: CurrencyRates/Fixer.pm
   state: working
   Added: TBD

@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* New CurrencyRates module, CurrencyRates/FinanceAPI - Issue #427
 	* Fixed Bourso.pm - Issue #417
 	* Allowed Currency Rates modules Fixer.pm and OpenExchange.pm to read their API keys from environment variables - Issue #426
 
