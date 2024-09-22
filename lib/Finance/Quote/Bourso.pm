@@ -88,25 +88,27 @@ use utf8;
 
 my $Bourso_URL = 'https://www.boursorama.com/cours/';
 
-sub methods {
+our $DISPLAY    = 'Bourso';
+our @LABELS     = qw/name last date isodate p_change open high low close volume currency method exchange/;
+our $METHODHASH = {subroutine => \&bourso,
+                   display    => $DISPLAY,
+                   labels     => \@LABELS,
+                  };
+
+sub methodinfo {
     return (
-             europe => \&bourso,
-             france => \&bourso,
-             bourso => \&bourso
+             bourso => $METHODHASH,
+             europe => $METHODHASH,
+             france => $METHODHASH,
     );
 }
 
-{
-    my @labels =
-        qw/name last date isodate p_change open high low close volume currency method exchange/;
+sub labels {
+  my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
 
-    sub labels {
-        return (
-                 europe => \@labels,
-                 france => \@labels,
-                 bourso => \@labels
-        );
-    }
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub bourso_to_number {
@@ -162,6 +164,8 @@ sub bourso {
               $date    = $div->look_down(_tag => 'div', class => qr/^c-faceplate__real-time/)->as_text();
               $last    = $div->look_down(_tag => 'span', class => qr/^c-instrument c-instrument--last/)->as_text();
               $symbol  = $stock;
+              # last here will contain a comma (,) instead of a decimal point
+              $last =~ s/,/./;
           }
 
           $info{$stock, 'symbol'}    = $symbol;
