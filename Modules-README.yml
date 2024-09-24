@@ -1282,13 +1282,13 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2024-05-01
+  changed: 2024-09-23
   removed:
   urls:
     - https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price,summaryDetail,defaultKeyStatistics
   apikey: false
   notes: |
-    Module to get data from Yahoo's API
+    Module to get data from Yahoo's unpublished API
     See issue https://github.com/finance-quote/finance-quote/issues/264
     Dependability of Yahoo REST API has been spotty.
     Code needed to be added to use Cookies and a "crumb" from Yahoo.

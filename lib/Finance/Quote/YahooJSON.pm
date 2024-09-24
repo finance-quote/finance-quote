@@ -137,7 +137,7 @@ sub yahoo_json {
     if ($reply->code != 200) {
         foreach my $symbol (@stocks) {
             $info{$symbol, "success"} = 0;
-            $info{$symbol, "errormsg"} = "Error accessing queary.finance.yahoo.com/v1/test/getcrumb: $@";
+            $info{$symbol, "errormsg"} = "Error accessing query2.finance.yahoo.com/v1/test/getcrumb: $@";
         }     
         return wantarray() ? %info : \%info;
     }
@@ -258,7 +258,9 @@ sub yahoo_json {
                   # in Strawberry perl 5.18.2 in Windows
                   local $^W = 0;
                   $info{ $stocks, "div_yield" } =
-                    $json_resources_summaryDetail->{'trailingAnnualDividendYield'}{'raw'} * 100;
+                    $json_resources_summaryDetail->{'trailingAnnualDividendYield'}{'raw'} =~ m/[\d,\.]+/ ?
+                    $json_resources_summaryDetail->{'trailingAnnualDividendYield'}{'raw'} * 100          :
+                    0.0;
                 }
                 $info{ $stocks, "eps"} =
                     $json_resources_defaultKeyStatistics->{'trailingEps'}{'raw'};
