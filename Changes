@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Minor fix to FinanceAPI decoding JSON - Issue #434
 	* Modified YahooJSON to deal with "nan" as dividend yield in JSON.
 	* New CurrencyRates module, CurrencyRates/FinanceAPI - Issue #427
 	* Fixed Bourso.pm - Issue #417

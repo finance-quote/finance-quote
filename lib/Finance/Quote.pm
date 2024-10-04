@@ -1655,19 +1655,32 @@ Please refer to the sub-modules for further information.
 
 =head1 AUTHORS
 
-  Dj Padzensky <djpadz@padz.net>, PadzNet, Inc.
-  Linas Vepstas <linas@linas.org>
-  Yannick LE NY <y-le-ny@ifrance.com>
-  Paul Fenwick <pjf@cpan.org>
-  Brent Neal <brentn@users.sourceforge.net>
-  Volker Stuerzl <volker.stuerzl@gmx.de>
-  Keith Refson <Keith.Refson#earth.ox.ac.uk>
-  Rob Sessink <rob_ses@users.sourceforge.net>
-  Leigh Wedding <leigh.wedding@telstra.com>
-  Tobias Vancura <tvancura@altavista.net>
-  James Treacy <treacy@debian.org>
-  Bradley Dean <bjdean@bjdean.id.au>
+The following list are those contributors with 5 or more commits in the
+GitHub repository.
+Please see the Git log for all the authors who have helped with
+Finance::Quote.
+
   Erik Colson <eco@ecocode.net>
+  Bruce Schuck <bschuck@asgard-systems.com>
+  Paul Fenwick <pjf@perltraining.com.au>
+  Vincent Lucarelli <vincent.lucarelli@gmail.com>
+  David Hampton <hampton-sf@rainbolthampton.net>
+  jvolkening <jdv@base2bio.com>
+  Pawel Konieczny <konieczp@zonnet.nl>
+  Mike Alexander <mta@umich.edu>
+  AndreJ <Andre-J@users.noreply.github.com>
+  Vinay S Shastry <vinayshastry@gmail.com>
+  Bradley Dean <bjdean@bjdean.id.au>
+  Brent Neal <brent@reindeergraphics.com>
+  Jacinta Richardson <jarich@perltraining.com.au>
+  e-dorigatti <emilio.dorigatti@gmail.com>
+  goodvibes2 <goodchris96@gmail.com>
+  Paul Howarth <paul@city-fan.org>
+  Sam Morris <sam@robots.org.uk>
+  Linas Vepstas <linas@linas.org>
+  Rajan Vaswani <111571283+bgr22112@users.noreply.github.com>
+  Hiranya Samarasekera <hiranyas@gmail.com>
+  Manuel Friedli <manuel@fritteli.ch>
 
 The Finance::Quote home page can be found at
 http://finance-quote.sourceforge.net/

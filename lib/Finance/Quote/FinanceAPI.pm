@@ -96,7 +96,7 @@ sub financeapi {
     my $code    = $reply->code;
     my $desc    = HTTP::Status::status_message($code);
     my $headers = $reply->headers_as_string;
-    my $body    = decode('UTF-8', $reply->content);
+    my $body    = $reply->content;
 
     ### Body: $body
 
