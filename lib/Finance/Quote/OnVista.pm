@@ -73,7 +73,7 @@ sub onvista {
     my $code    = $reply->code;
     my $desc    = HTTP::Status::status_message($code);
     my $headers = $reply->headers_as_string;
-    my $body    = $reply->content;
+    my $body    = $reply->decoded_content;
 
     ### Body: $body
 
@@ -88,30 +88,69 @@ sub onvista {
       if ($tree->parse($body)) {
 
         $tree->eof;
-        unless ( $json = ($tree->look_down(_tag => 'script', id => '__NEXT_DATA__', type => 'application/json')->content_list())[0] ) {
+        unless ( $json = encode_utf8 (($tree->look_down(_tag => 'script', id => '__NEXT_DATA__', type => 'application/json')->content_list())[0]) ) {
           $info{ $stock, "success" } = 0;
           $info{ $stock, "errormsg" } =
             "Error retrieving quote for $stock. No data returned";
           next;
         }
 
-      ### [<now>] JSON: $json
+        ### [<now>] JSON: $json
 
-      $json_decoded = decode_json $json;
-      ### [<now>] JSON Decoded: $json_decoded
+        $json_decoded = decode_json $json;
+        ### [<now>] JSON Decoded: $json_decoded
 
-      my $result_array = $json_decoded->{'props'}{'pageProps'}{'facets'}[0]{'results'};
-      ### [<now>] Result Array: $result_array
+        my $result_array = $json_decoded->{'props'}{'pageProps'}{'facets'}[0]{'results'};
+        ### [<now>] Result Array: $result_array
 
-      foreach my $item( @$result_array ) {
-        ### [<now>] Item: $item
-        if ( $item->{'symbol'} && $item->{'symbol'} eq $stock ) {
-          $url = $item->{'urls'}{'WEBSITE'};
-          last;
+        foreach my $item( @$result_array ) {
+          ### [<now>] Item: $item
+          if ( $item->{'symbol'} && $item->{'symbol'} eq $stock ) {
+            $url = $item->{'urls'}{'WEBSITE'};
+            last;
+          }
         }
-      }
 
-      ### [<now>] New URL: $url
+        ### [<now>] New URL: $url
+        $reply = $ua->request( GET $url);
+
+        $code    = $reply->code;
+        $desc    = HTTP::Status::status_message($code);
+        $headers = $reply->headers_as_string;
+        $body    = $reply->decoded_content;
+
+        unless ( $code == 200 ) {
+          $info{ $stock, "success" } = 0;
+          $info{ $stock, "errormsg" } = "Error accessing $url ($desc).";
+          next;
+        }
+
+        # Create HTML::TreeBuilder object from 2nd URL's body
+        $tree = HTML::TreeBuilder->new;
+        unless ($tree->parse($body)) {
+          $info{ $stock, "success" } = 0;
+          $info{ $stock, "errormsg" } = "Error parsing HTML from $url.";
+          next;
+        }
+        $tree->eof;
+
+        unless ( $json = encode_utf8 (($tree->look_down(_tag => 'script', id => '__NEXT_DATA__', type => 'application/json')->content_list())[0]) ) {
+          $info{ $stock, "success" } = 0;
+          $info{ $stock, "errormsg" } =
+            "Error retrieving quote for $stock. No data returned";
+          next;
+        }
+
+        ### [<now>] 2nd JSON: $json
+
+        eval {$json_decoded = decode_json $json};
+        if($@) {
+          $info{ $stock, 'success' } = 0;
+          $info{ $stock, 'errormsg' } = $@;
+          next;
+        }
+
+        ### [<now>] 2nd JSON Decoded: $json_decoded
 
       } else {
         $tree->eof;
@@ -126,12 +165,12 @@ sub onvista {
         "Error retrieving quote for $stock. Attempt to fetch the URL $url resulted in HTTP response $code ($desc)";
     }
 
-  }  
+  } # end foreach stock
 
   return wantarray() ? %info : \%info;
   return \%info;
 
-}
+} # end onvista subroutine
 
 1;
 
