@@ -25,7 +25,7 @@ package Finance::Quote::OnVista;
 use strict;
 use warnings;
 
-use Encode qw(decode);
+use Encode qw(decode encode_utf8);
 use HTML::TreeBuilder;
 use HTTP::Request::Common;
 use JSON qw( decode_json );
@@ -62,7 +62,7 @@ sub onvista {
 
   my $quoter = shift;
   my @stocks = @_;
-  my (%info, $tree, $url, $reply);
+  my (%info, $tree, $url, $reply, $json, $json_decoded);
   my $ua = $quoter->user_agent();
 
   foreach my $stock (@stocks) {
@@ -73,7 +73,7 @@ sub onvista {
     my $code    = $reply->code;
     my $desc    = HTTP::Status::status_message($code);
     my $headers = $reply->headers_as_string;
-    my $body    = decode('UTF-8', $reply->content);
+    my $body    = $reply->content;
 
     ### Body: $body
 
@@ -88,47 +88,17 @@ sub onvista {
       if ($tree->parse($body)) {
 
         $tree->eof;
-        if ( $tree->look_down(_tag => 'div', id => 'ctl00_body_divNoData') ) {
+        unless ( $json = ($tree->look_down(_tag => 'script', id => '__NEXT_DATA__', type => 'application/json')->content_list())[0] ) {
           $info{ $stock, "success" } = 0;
           $info{ $stock, "errormsg" } =
             "Error retrieving quote for $stock. No data returned";
           next;
         }
-        $name = $tree->look_down(_tag => 'h2', class => qr/^mBot0 large textStyled/)->as_text;
-        $info{ $stock, 'success' } = 1;
-        ($info{ $stock, 'name' } = $name) =~ s/^\s+|\s+$//g ;
-        $info{ $stock, 'currency' } = 'RON';
-        $info{ $stock, 'method' } = 'bvb';
-        $table = $tree->look_down(_tag => 'table', id => qr/^ctl00_body_ctl02_PricesControl_dvCPrices/)->as_HTML;
-        $pricetable = HTML::TableExtract->new();
-        $pricetable->parse($table);
-        foreach my $row ($pricetable->rows) {
-          if ( @$row[0] =~ m/Ask$/ ) {
-            ($bid, $ask) = @$row[1] =~ m|^\s+([\d\.]+)\s+\/\s+([\d\.]+)|;
-            $info{ $stock, 'bid' } = $bid;
-            $info{ $stock, 'ask' } = $ask;
-          }
-          elsif ( @$row[0] =~ m|^Date/time| ) {
-            ($date) = @$row[1] =~ m|^([\d/]+)\s|;
-            $quoter->store_date(\%info, $stock, {usdate => $1}) if $date =~ m|([0-9]{1,2}/[0-9]{2}/[0-9]{4})|;
-          }
-          elsif ( @$row[0] =~ m|^Last price| ) {
-            ($last) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'last' } = $last;
-          }
-          elsif ( @$row[0] =~ m|^Open price| ) {
-            ($open) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'open' } = $open;
-          }
-          elsif ( @$row[0] =~ m|^High price| ) {
-            ($high) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'high' } = $high;
-          }
-          elsif ( @$row[0] =~ m|^Low price| ) {
-            ($low) = @$row[1] =~ m|^([\d\.]+)|;
-            $info{ $stock, 'low' } = $low;
-          }
-        }
+
+      ### [<now>] JSON: $json
+
+      $json_decoded = decode_json $json;
+      ### [<now>] JSON Decoded: $json_decoded
 
       } else {
         $tree->eof;
