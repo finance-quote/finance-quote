@@ -100,6 +100,19 @@ sub onvista {
       $json_decoded = decode_json $json;
       ### [<now>] JSON Decoded: $json_decoded
 
+      my $result_array = $json_decoded->{'props'}{'pageProps'}{'facets'}[0]{'results'};
+      ### [<now>] Result Array: $result_array
+
+      foreach my $item( @$result_array ) {
+        ### [<now>] Item: $item
+        if ( $item->{'symbol'} && $item->{'symbol'} eq $stock ) {
+          $url = $item->{'urls'}{'WEBSITE'};
+          last;
+        }
+      }
+
+      ### [<now>] New URL: $url
+
       } else {
         $tree->eof;
         $info{ $stock, "success" } = 0;
