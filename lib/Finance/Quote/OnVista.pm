@@ -103,6 +103,9 @@ sub onvista {
         my $result_array = $json_decoded->{'props'}{'pageProps'}{'facets'}[0]{'results'};
         ### [<now>] Result Array: $result_array
 
+        # By default set URL to first in array
+        # For US stocks, the symbol may not match stock
+        $url = $json_decoded->{'props'}{'pageProps'}{'facets'}[0]{'results'}[0]{'urls'}{'WEBSITE'};
         foreach my $item( @$result_array ) {
           ### [<now>] Item: $item
           if ( $item->{'symbol'} && $item->{'symbol'} eq $stock ) {
@@ -151,6 +154,19 @@ sub onvista {
         }
 
         ### [<now>] 2nd JSON Decoded: $json_decoded
+
+        $info{ $stock, "success" } = 1;
+        $info{ $stock, 'method' } = 'onvista';
+        $info{ $stock, 'name' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'instrument'}{'name'};
+        $info{ $stock, 'open' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'open'};
+        $info{ $stock, 'high' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'high'};
+        $info{ $stock, 'low' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'low'};
+        $info{ $stock, 'last' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'last'};
+        $info{ $stock, 'price' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'last'};
+        $info{ $stock, 'currency' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'isoCurrency'};
+        $info{ $stock, 'volume' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'volume'};
+        $date = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'datetimeLast'};
+        $quoter->store_date(\%info, $stock, {isodate => substr $date, 0, 10});
 
       } else {
         $tree->eof;
