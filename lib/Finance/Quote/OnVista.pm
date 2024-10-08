@@ -41,7 +41,7 @@ my $ONVISTA_URL = 'https://www.onvista.de/suche/';
 # Modify LABELS to those returned by the method
 
 our $DISPLAY    = 'OnVista - Germany';
-our @LABELS     = qw/symbol name open high low last date volume currency method/;
+our @LABELS     = qw/symbol name open high low last date volume currency exchange method/;
 our $METHODHASH = {subroutine => \&onvista, 
                    display => $DISPLAY, 
                    labels => \@LABELS};
@@ -114,6 +114,12 @@ sub onvista {
           }
         }
 
+        unless ( $url ) {
+          $info{ $stock, "success" } = 0;
+          $info{ $stock, "errormsg" } = "No data found for $stock.";
+          next;
+        }
+
         ### [<now>] New URL: $url
         $reply = $ua->request( GET $url);
 
@@ -158,14 +164,16 @@ sub onvista {
         $info{ $stock, "success" } = 1;
         $info{ $stock, 'method' } = 'onvista';
         $info{ $stock, 'name' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'instrument'}{'name'};
-        $info{ $stock, 'open' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'open'};
-        $info{ $stock, 'high' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'high'};
-        $info{ $stock, 'low' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'low'};
-        $info{ $stock, 'last' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'last'};
-        $info{ $stock, 'price' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'last'};
-        $info{ $stock, 'currency' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'isoCurrency'};
-        $info{ $stock, 'volume' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'volume'};
-        $date = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'}{'datetimeLast'};
+        my $json_quote = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'};
+        $info{ $stock, 'open' } = $json_quote->{'open'};
+        $info{ $stock, 'high' } = $json_quote->{'high'};
+        $info{ $stock, 'low' } = $json_quote->{'low'};
+        $info{ $stock, 'last' } = $json_quote->{'last'};
+        $info{ $stock, 'price' } = $json_quote->{'last'};
+        $info{ $stock, 'currency' } = $json_quote->{'isoCurrency'};
+        $info{ $stock, 'volume' } = $json_quote->{'volume'};
+        $info{ $stock, 'exchange' } = $json_quote->{'market'}{'nameExchange'};
+        $date = $json_quote->{'datetimeLast'};
         $quoter->store_date(\%info, $stock, {isodate => substr $date, 0, 10});
 
       } else {

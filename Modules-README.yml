@@ -844,16 +844,18 @@
     - MNW
 #
 - module: OnVista.pm
-  state: failing
+  state: working
   added: TBD
-  changed: ~
+  changed: 2024-10-07
   removed: ~
-  urls: https://www.onvista.de/suche/<symbol>
+  urls:
+    - https://www.onvista.de/suche/<symbol>
+    - https://www.onvista.de/aktien/<derived from first url>
   apikey: false
   notes: |
-    A secondary URL is located in the data. Data for stock
-    quote is retrieved from that URL.
-  testfile: TBD
+    A secondary URL is located in the data retrieved from the first URL.
+    Data for stock quote is retrieved from that URL.
+  testfile: onvista.t
   testcases:
     - MRK
     - AAPL
