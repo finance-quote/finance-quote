@@ -1754,4 +1754,10 @@ Please read it if you are interested in adding extra methods to this package.
 The latest hacker's guide can also be found on GitHub at
 https://github.com/finance-quote/finance-quote/blob/master/Documentation/Hackers-Guide
 
+=head1 Donations
+
+While the contributors to Finance::Quote are happy to volunteer their time and resources on this project, donations are helpful and great way to say thank you. So far the only real cost to the team is domain registration for finance-quote.org. However, some operating systems and hardware upgrades do have a cost. Access to the latest or current environments is needed for development and testing. Upgrades to the latest MS Windows often includes a cost, and recently Apple's move to ARM/M1/M2 CPUs has stifled some contributors' ability to assist. With that in mind, you can send donations to the email address donations@finance-quote.org through PayPal. If it's for a particular contributor, please indicate in a note while submitting the donation through PayPal.
+
+Additionally, Bitcoin donations can be received at 37Bg4EMAp575j4iL9jHv1ZhDgiropU38jY.
+
 =cut

@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Complete rewrite of OnVista.pm - Issue #414
 	* Minor fix to FinanceAPI decoding JSON - Issue #434
 	* Modified YahooJSON to deal with "nan" as dividend yield in JSON.
 	* New CurrencyRates module, CurrencyRates/FinanceAPI - Issue #427
