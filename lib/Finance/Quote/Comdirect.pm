@@ -1,3 +1,4 @@
+# vi: set ts=2 sw=2 noai ic showmode showmatch: 
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -27,15 +28,26 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/last date isodate/;
+our $DISPLAY    = 'Comdirect - Frankfurt and other exchanges';
+our @LABELS     = qw/symbol name open high low last date currency isin method/;
+our $METHODHASH = {subroutine => \&comdirect,
+                   display => $DISPLAY, 
+                   labels => \@LABELS};
+
+sub methodinfo {
+  return ( 
+    comdirect => $METHODHASH,
+  );
+}
 
 sub labels {
-  return ( comdirect => \@labels );
+  my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
 sub methods {
-  return ( comdirect => \&comdirect );
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
+
 
 sub comdirect {
   my $quoter  = shift;
@@ -48,28 +60,34 @@ sub comdirect {
       my $url   = 'https://www.comdirect.de/inf/search/all.html?SEARCH_VALUE=' . $symbol;
       my $reply = $ua->get($url);
 
+      unless ($reply->is_success) {
+        $info{ $symbol, "success" } = 0;
+        $info{ $symbol, "errormsg" } = join ' ', $reply->code, $reply->message;
+        next; 
+      }
+      my $body = $reply->decoded_content;
+
       ### [<now>] Fetched: $url
       my $data = scraper {
-        process '/html/body/div[3]/div/div[2]/div[6]/div[1]/div/div/div[2]/div/div/table//td', 'table[]' => ['TEXT', sub{trim($_)}];
-        process '/html/body/div[3]/div/div[2]/div[1]/div[1]/div/h1/text()', 'name' => ['TEXT', sub{trim($_)}];
-        process '/html/body/div[3]/div/div[2]/div[1]/div[1]/div/div[2]/h2/text()[2]', 'isin' => ['TEXT', sub{trim($_)}];
+        process '/html/body/div[5]/div/div/div[6]/div[2]/div[1]/div/div/div[2]/div/div/table/tbody//td', 'table[]' => ['TEXT', sub{trim($_)}];
       };
 
-      my $result = $data->scrape($reply);
+      my $result = $data->scrape($body);
       
-      ### Parsed: $result
+      ### [<now>] Parsed: $result
+
+      ### [<now>] Result Table: $result->{table}
 
       # Zeit appears twice as row label, so we need to differentiate them before converting to hash
       my $i      = 0;
       my @table  = map {$_ eq 'Zeit' ? $_ . $i++ : $_} @{$result->{table}};
       my %table  = @table;
       
-      die "Missing expected fields" unless
-        exists $table{Zeit0}   and
-        exists $table{Aktuell} and
-        exists $table{Hoch}    and
-        exists $table{Tief}    and
-        exists $table{"Er\x{f6}ffnung"};
+      unless (exists $table{Zeit0} and exists $table{Aktuell} and exists $table{Hoch} and exists $table{Tief} and exists $table{"Er\x{f6}ffnung"}) {
+        $info{ $symbol, "success" } = 0;
+        $info{ $symbol, "errormsg" } = join ' ', $reply->code, $reply->message;
+        next; 
+      }
       
       $table{Aktuell}          =~ s/,/./;
       $table{Hoch}             =~ s/,/./;
