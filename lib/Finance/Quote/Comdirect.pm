@@ -56,7 +56,6 @@ sub comdirect {
   my %info;
 
   foreach my $symbol (@_) {
-    eval {
       my $url   = 'https://www.comdirect.de/inf/search/all.html?SEARCH_VALUE=' . $symbol;
       my $reply = $ua->get($url);
 
@@ -69,7 +68,7 @@ sub comdirect {
 
       ### [<now>] Fetched: $url
       my $data = scraper {
-        process '/html/body/div[5]/div/div/div[6]/div[2]/div[1]/div/div/div[2]/div/div/table/tbody//td', 'table[]' => ['TEXT', sub{trim($_)}];
+        process '//*[@id="ewf-ajax-replace"]/div[2]/div[1]/div/div/div[2]/div/div/table//td', 'table[]' => 'TEXT';
       };
 
       my $result = $data->scrape($body);
@@ -85,7 +84,7 @@ sub comdirect {
       
       unless (exists $table{Zeit0} and exists $table{Aktuell} and exists $table{Hoch} and exists $table{Tief} and exists $table{"Er\x{f6}ffnung"}) {
         $info{ $symbol, "success" } = 0;
-        $info{ $symbol, "errormsg" } = join ' ', $reply->code, $reply->message;
+        $info{ $symbol, "errormsg" } = 'Parse failed.';
         next; 
       }
       
@@ -106,13 +105,7 @@ sub comdirect {
       
       $info{$symbol, 'method'}    = 'comdirect';
       $info{$symbol, 'success'}   = 1;
-    };
     
-    if ($@) {
-      my $error = "Comdirect failed: $@";
-      $info{$symbol, 'success'}  = 0;
-      $info{$symbol, 'errormsg'} = trim($error);
-    }
   }
 
   return wantarray() ? %info : \%info;
