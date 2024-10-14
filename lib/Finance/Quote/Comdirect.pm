@@ -23,7 +23,7 @@ use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
 
 use LWP::UserAgent;
-use Web::Scraper;
+use Web::Scraper::LibXML;
 use String::Util qw(trim);
 
 # VERSION
@@ -66,9 +66,14 @@ sub comdirect {
       }
       my $body = $reply->decoded_content;
 
+      ### [<now>] Body: $body
+
       ### [<now>] Fetched: $url
+
       my $data = scraper {
         process '//*[@id="ewf-ajax-replace"]/div[2]/div[1]/div/div/div[2]/div/div/table//td', 'table[]' => 'TEXT';
+        process '/html/body/div[5]/div/div/div[2]/div[3]/div/h1/text()', 'name' => ['TEXT', sub{trim($_)}];
+        process '/html/body/div[5]/div/div/div[2]/div[3]/div/div[2]/h2/text()[3]', 'isin' => ['TEXT', sub{trim($_)}];
       };
 
       my $result = $data->scrape($body);
@@ -81,6 +86,8 @@ sub comdirect {
       my $i      = 0;
       my @table  = map {$_ eq 'Zeit' ? $_ . $i++ : $_} @{$result->{table}};
       my %table  = @table;
+
+      ### [<now>] Table Hash: %table
       
       unless (exists $table{Zeit0} and exists $table{Aktuell} and exists $table{Hoch} and exists $table{Tief} and exists $table{"Er\x{f6}ffnung"}) {
         $info{ $symbol, "success" } = 0;

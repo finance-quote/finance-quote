@@ -18,8 +18,8 @@ if (not $ENV{ONLINE_TEST}) {
 }
 
 my %valid    = ('VWAGY'        => 'Volkswagen ADR',
-                'Volkswagen'   => 'Volkswagen VZ',
-                'DE0007664039' => 'Volkswagen VZ'
+                'Volkswagen'   => 'Volkswagen Vorzugsaktie',
+                'DE0007664039' => 'Volkswagen Vorzugsaktie'
                );
 
 my @invalid  = ('BOGUS');
