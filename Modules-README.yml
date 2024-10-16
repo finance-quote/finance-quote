@@ -219,9 +219,9 @@
     - SNP
 #
 - module: Comdirect.pm
-  state: failing
+  state: working
   added: TBD
-  changed: ~
+  changed: 2024-10-14
   removed: ~
   urls: https://www.comdirect.de/inf/search/all.html?SEARCH_VALUE=
   apikey: false

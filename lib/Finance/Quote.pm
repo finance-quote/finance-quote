@@ -787,7 +787,7 @@ sub store_date
       $year += 2000 if $year < 100;
       $year_specified = 1;
 
-      ### format: printf "usdate %s -> Day %d, Month %s, Year %d\n", $piecesref->{usdate}, $day, $month, $year
+      ### format: printf STDERR "usdate %s -> Day %d, Month %s, Year %d\n", $piecesref->{usdate}, $day, $month, $year
     }
 
     if ((defined $piecesref->{eurodate}) && ($piecesref->{eurodate})) {
@@ -795,7 +795,7 @@ sub store_date
       $year += 2000 if $year < 100;
       $year_specified = 1;
 
-      ### format: printf "eurodate %s -> Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year
+      ### format: printf STDERR "eurodate %s -> Day %d, Month %s, Year %d\n", $piecesref->{eurodate}, $day, $month, $year
     }
 
     if (defined ($piecesref->{year})) {
@@ -821,7 +821,7 @@ sub store_date
     $month = $mnames{lc(substr($month,0,3))} if ($month =~ /\D/);
     $year-- if (($year_specified == 0) && ($this_month < $month));
 
-    ### format: printf "Final Year-Month-Day -> %04d-%02d-%02d\n", $year, $month, $day
+    ### format: printf STDERR "Final Year-Month-Day -> %04d-%02d-%02d\n", $year, $month, $day
 
     $inforef->{$symbol, "date"} =  sprintf "%02d/%02d/%04d", $month, $day, $year;
     $inforef->{$symbol, "isodate"} = sprintf "%04d-%02d-%02d", $year, $month, $day;
