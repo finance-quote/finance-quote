@@ -233,15 +233,19 @@
     - DE0007664039
 #
 - module: CSE.pm
-  state: failing
+  state: working
   added: TBD
-  changed: ~
+  changed: 2024-10-17
   removed: ~
-  urls:
+  urls: https://www.cse.lk/api/companyInfoSummery
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: cse.t
   testcases:
+    - LOFC.N0000
+    - COMB.N0000
+    - DIST.N0000
+    - SLTL.N0000
 #
 - module: Cdnfundlibrary.pm
   state: failing
