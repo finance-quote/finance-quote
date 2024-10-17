@@ -124,7 +124,7 @@
   changed: 2024-07-30
   removed:
   urls:
-	- https://www.bseindia.com/download/BhavCopy/Equity/BhavCopy_BSE_CM_0_0_0_{YYYYMMDD}_F_0000.CSV
+    - https://www.bseindia.com/download/BhavCopy/Equity/BhavCopy_BSE_CM_0_0_0_{YYYYMMDD}_F_0000.CSV
   methods:
     - india
     - bseindia
@@ -150,14 +150,14 @@
 #
 - module: Bloomberg.pm
   state: working
-  added: 
+  added:
   changed: 2024-03-18
-  removed: 
+  removed:
   urls: https://www.bloomberg.com/quote/
   apikey: false
-  notes: 
+  notes:
   testfile: bloomberg.t
-  testcases: 
+  testcases:
     - MSFT:US
     - AMZN:US
     - AAPL:US
@@ -504,7 +504,7 @@
     - https://markets.ft.com/data/funds/tearsheet/summary?s=
     - http://funds.ft.com/UnlistedTearsheet/Summary?s=
   apikey: false
-  notes: 
+  notes:
     - Added date is an estimate. According to Git log it first appeared in commit fdd204b.
   testfile: ftfunds.t
   testcases:
@@ -561,9 +561,9 @@
   notes: ~
   testfile: finanzpartner.t
   testcases:
-   - "LU0293315023", 
-   - "LU0856992614", 
-   - "LU1720050803".
+   - "LU0293315023"
+   - "LU0856992614"
+   - "LU1720050803"
 #
 - module: Fool.pm
   state: working
@@ -815,7 +815,7 @@
   changed: 2024-07-30
   removed:
   urls:
-	- https://nsearchives.nseindia.com/content/cm/BhavCopy_NSE_CM_0_0_0_{YYYYMMDD}_F_0000.csv.zip
+    - https://nsearchives.nseindia.com/content/cm/BhavCopy_NSE_CM_0_0_0_{YYYYMMDD}_F_0000.csv.zip
   methods:
     - india
     - nseindia
@@ -862,7 +862,7 @@
     - SAP
 #
 - module: Oslobors.pm
-  state: working
+  state: failing
   added: 2020-02-06
   changed: 2020-02-06
   removed:
@@ -970,7 +970,7 @@
     Get API Key at https://www.stockdata.org/
     100 API requests daily.
   testfile: stockdata.t
-  testcases: 
+  testcases:
     - CSCO
     - F
     - GE
@@ -1123,7 +1123,7 @@
   changed: 2020-10-11
   removed: ~
   urls:
-    - https://www.tiaa.org/public/investment-performance 
+    - https://www.tiaa.org/public/investment-performance
   apikey: false
   notes: ~
   testfile: tiaacref.t
@@ -1349,12 +1349,12 @@
 #
 - module: ZA.pm
   state: working
-  added: 
+  added:
   changed: 2022-05-10
   removed: ~
   urls: https://www.sharenet.co.za/jse/$symbol
   apikey: false
-  notes: 
+  notes:
     - Module to acquire data from https://www.sharenet.co.za, PR #208
   testfile: za.t
   testcases:
