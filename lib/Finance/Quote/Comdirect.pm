@@ -22,8 +22,9 @@ use warnings;
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
 
+use HTML::TableExtract;
+use HTML::TreeBuilder;
 use LWP::UserAgent;
-use Web::Scraper::LibXML;
 use String::Util qw(trim);
 
 # VERSION
@@ -53,7 +54,7 @@ sub comdirect {
   my $quoter  = shift;
   my @symbols = @_;
   my $ua      = $quoter->user_agent();
-  my %info;
+  my (%info, %pricetable, $metatag);
 
   foreach my $symbol (@_) {
       my $url   = 'https://www.comdirect.de/inf/search/all.html?SEARCH_VALUE=' . $symbol;
@@ -68,48 +69,51 @@ sub comdirect {
 
       ### [<now>] Body: $body
 
-      ### [<now>] Fetched: $url
+      my $te = HTML::TableExtract->new( count => 2, attribs => { class => 'simple-table' } );
+      $te->parse($body);
 
-      my $data = scraper {
-        process '//*[@id="ewf-ajax-replace"]/div[2]/div[1]/div/div/div[2]/div/div/table//td', 'table[]' => 'TEXT';
-        process '/html/body/div[5]/div/div/div[2]/div[3]/div/h1/text()', 'name' => ['TEXT', sub{trim($_)}];
-        process '/html/body/div[5]/div/div/div[2]/div[3]/div/div[2]/h2/text()[3]', 'isin' => ['TEXT', sub{trim($_)}];
-      };
+      ### [<now>] TE: $te
 
-      my $result = $data->scrape($body);
-      
-      ### [<now>] Parsed: $result
+      foreach my $row ($te->rows) {
+        ### [<now>] Row: $row
+        if ($row->[0] eq 'Zeit' && $pricetable{'Zeit'}) {next}
+        $pricetable{$row->[0]} = $row->[1];
+      }
+      ### [<now>] Pricetable hash: %pricetable
 
-      ### [<now>] Result Table: $result->{table}
-
-      # Zeit appears twice as row label, so we need to differentiate them before converting to hash
-      my $i      = 0;
-      my @table  = map {$_ eq 'Zeit' ? $_ . $i++ : $_} @{$result->{table}};
-      my %table  = @table;
-
-      ### [<now>] Table Hash: %table
-      
-      unless (exists $table{Zeit0} and exists $table{Aktuell} and exists $table{Hoch} and exists $table{Tief} and exists $table{"Er\x{f6}ffnung"}) {
+      unless (exists $pricetable{Zeit} and exists $pricetable{Aktuell}
+              and exists $pricetable{Hoch} and exists $pricetable{Tief}
+              and exists $pricetable{"Er\x{f6}ffnung"}) {
         $info{ $symbol, "success" } = 0;
         $info{ $symbol, "errormsg" } = 'Parse failed.';
         next; 
       }
       
-      $table{Aktuell}          =~ s/,/./;
-      $table{Hoch}             =~ s/,/./;
-      $table{Tief}             =~ s/,/./;
-      $table{"Er\x{f6}ffnung"} =~ s/,/./;
+      $pricetable{Aktuell}          =~ s/,/./;
+      $pricetable{Hoch}             =~ s/,/./;
+      $pricetable{Tief}             =~ s/,/./;
+      $pricetable{"Er\x{f6}ffnung"} =~ s/,/./;
 
-      $info{$symbol, 'last'}      = $1 if $table{Aktuell} =~ /^([0-9.]+)/;
-      $info{$symbol, 'currency'}  = $1 if $table{Aktuell} =~ /([A-Z]+)$/;
-      $info{$symbol, 'open'}      = $table{"Er\x{f6}ffnung"};
-      $info{$symbol, 'high'}      = $table{Hoch};
-      $info{$symbol, 'low'}       = $table{Tief};
-      $info{$symbol, 'name'}      = $result->{name} if exists $result->{name};
-      $info{$symbol, 'isin'}      = $result->{isin} if exists $result->{isin};
+      $info{$symbol, 'last'}      = $1 if $pricetable{Aktuell} =~ /^([0-9.]+)/;
+      $info{$symbol, 'currency'}  = $1 if $pricetable{Aktuell} =~ /([A-Z]+)$/;
+      $info{$symbol, 'open'}      = $pricetable{"Er\x{f6}ffnung"};
+      $info{$symbol, 'high'}      = $pricetable{Hoch};
+      $info{$symbol, 'low'}       = $pricetable{Tief};
 
-      $quoter->store_date(\%info, $symbol, {eurodate => $1}) if $table{Zeit0} =~ /([0-9]{2}[.][0-9]{2}[.][0-9]{2})/;
-      
+      # Use HTML::TreeBuilder to get Name
+      my $tree = HTML::TreeBuilder->new;
+      if ($tree->parse($body)) {
+        $tree->eof;
+        if ($metatag = $tree->look_down(_tag => 'meta', name => 'description')) {
+          my @list = split(',', $metatag->attr('content'));
+          ### [<now>] List: @list
+          $info{$symbol, 'name'} = $list[0];
+          ($info{$symbol, 'isin'}) = $list[2] =~ /ISIN: ([A-Z0-9]{12}) /;
+        }
+      }
+
+      $quoter->store_date(\%info, $symbol, {eurodate => $1}) if $pricetable{Zeit} =~ /([0-9]{2}[.][0-9]{2}[.][0-9]{2})/;
+
       $info{$symbol, 'method'}    = 'comdirect';
       $info{$symbol, 'success'}   = 1;
     
