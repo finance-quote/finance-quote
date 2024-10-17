@@ -871,6 +871,7 @@
   apikey: false
   notes: |
     Module to fetch mutual fund data from oslobors.no
+    As of 2024-10-15 test case quotes cannot be fetched. The oslobors.no redirects to euronext.com.
   testfile: oslobors.t
   testcases:
     - OD-HORIA.OSE
