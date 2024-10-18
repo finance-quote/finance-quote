@@ -29,15 +29,26 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/isin close last high low cap change p_change name symbol currency method symbol date isodate/;
+our $DISPLAY = 'CSE - Colombo Stock Exchange';
+our @LABELS = qw/isin close last high low cap change p_change name symbol currency method symbol date isodate/;
+our $METHODHASH = {subroutine => \&cse,
+                   display => \$DISPLAY,
+                   labels => \@LABELS};
+
+sub methodinfo {
+    return (
+        cse => $METHODHASH,
+    );
+}
 
 sub labels {
-  return ( cse => \@labels );
+  my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
 sub methods {
-  return ( cse => \&cse );
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
+
 
 sub cse {
   my $quoter  = shift;
