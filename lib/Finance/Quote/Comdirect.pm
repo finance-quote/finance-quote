@@ -70,9 +70,18 @@ sub comdirect {
       ### [<now>] Body: $body
 
       my $te = HTML::TableExtract->new( count => 2, attribs => { class => 'simple-table' } );
-      $te->parse($body);
-
       ### [<now>] TE: $te
+      unless ( $te->parse($body) ) {
+        $info{ $symbol, "success" } = 0;
+        $info{ $symbol, "errormsg" } = 'No price data found';
+        next; 
+      }
+
+      unless ($te->first_table_found) {
+        $info{ $symbol, "success" } = 0;
+        $info{ $symbol, "errormsg" } = 'No price data found';
+        next; 
+      }
 
       foreach my $row ($te->rows) {
         ### [<now>] Row: $row

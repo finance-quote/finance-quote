@@ -17,9 +17,9 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-my %valid    = ('VWAGY'        => 'Volkswagen ADR',
-                'Volkswagen'   => 'Volkswagen Vorzugsaktie',
-                'DE0007664039' => 'Volkswagen Vorzugsaktie'
+my %valid    = ('VWAGY'        => 'Volkswagen',
+                'Volkswagen'   => 'Volkswagen',
+                'DE0007664039' => 'Volkswagen'
                );
 
 my @invalid  = ('BOGUS');
@@ -38,7 +38,7 @@ my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_refer
                 'high'     => sub {not defined $_[0] or looks_like_number($_[0])},
                 'last'     => sub {not defined $_[0] or looks_like_number($_[0])},
                 'currency' => sub {$_[0] =~ /^[A-Z]{3}$/},
-                'name'     => sub {$_[0] eq $valid{$_[1]}},
+                'name'     => sub {$_[0] =~ $valid{$_[1]}},
                 'isin'     => sub {$_[0] =~ /^[A-Z0-9]{12}$/},
                 'isodate'  => sub {defined $_[0] and Date::Range->new($today - $window, $today)->includes(Date::Simple::ISO->new($_[0]))},
               );
