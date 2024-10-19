@@ -29,15 +29,26 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/last date isodate/;
+our $DISPLAY = 'CSE - Colombo Stock Exchange';
+our @LABELS = qw/isin close last high low cap change p_change name symbol currency method symbol date isodate/;
+our $METHODHASH = {subroutine => \&cse,
+                   display => \$DISPLAY,
+                   labels => \@LABELS};
+
+sub methodinfo {
+    return (
+        cse => $METHODHASH,
+    );
+}
 
 sub labels {
-  return ( cse => \@labels );
+  my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
 sub methods {
-  return ( cse => \&cse );
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
+
 
 sub cse {
   my $quoter  = shift;
@@ -48,7 +59,10 @@ sub cse {
   foreach my $symbol (@_) {
     eval {
       my $url      = 'https://www.cse.lk/api/companyInfoSummery';
-      my $form     = {'symbol' => $symbol};
+      my $form     = {
+          'symbol' => $symbol,
+          'MIME Type' => 'application/x-www-form-urlencoded; charset=UTF-8',
+      };
       my $reply    = $ua->post($url, $form);
       my $search   = JSON::decode_json $reply->content;
 
@@ -63,11 +77,16 @@ sub cse {
       $info{$symbol, 'high'}     = $data->{hiTrade};
       $info{$symbol, 'low'}      = $data->{lowTrade};
       $info{$symbol, 'cap'}      = $data->{marketCap};
+      $info{$symbol, 'change'}   = $data->{change};
+      $info{$symbol, 'p_change'} = $data->{changePercentage};
       $info{$symbol, 'name'}     = $data->{name};
+      $info{$symbol, 'symbol'}   = $data->{symbol};
       $info{$symbol, 'currency'} = 'LKR';
+      $info{$symbol, 'method'}   = 'cse';
+      $quoter->store_date(\%info, $symbol, {today => 1});
       $info{$symbol, 'success'} = 1;
     };
-    
+
     if ($@) {
       my $error = "CSE failed: $@";
       $info{$symbol, 'success'}  = 0;
@@ -104,7 +123,7 @@ Finance::Quote->new().
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::CSE :
-isin name currency date isodate ask close high low open volume success
+isin close last high low cap change p_change name symbol currency method symbol date isodate
 
 =head1 TERMS & CONDITIONS
 
@@ -114,4 +133,3 @@ Finance::Quote is released under the GNU General Public License, version 2,
 which explicitly carries a "No Warranty" clause.
 
 =cut
-
