@@ -672,10 +672,10 @@
     - ZOL
 #
 - module: IEXCloud.pm
-  state: working
+  state: removed
   added: 2019-06-16
   changed: 2019-06-16
-  removed:
+  removed: 2024-10-20
   urls:
     - https://cloud.iexapis.com/v1/stock/{$symbol}/quote?token={$token}
   apikey: true
@@ -683,6 +683,9 @@
     Module retrieves data from IEX Trading (https://iextrading.com/).
     For API Key - https://iextrading.com/developer/ and set the
     environment variable IEXCLOUD_API_KEY.
+    All IEX Cloud products and support concluded on August 31, 2024.
+    To help customers with this transition, we have signed a referral
+    agreement with Intrinio, a full service data management company.
   testfile: iexcloud.t
   testcases:
     - MSFT

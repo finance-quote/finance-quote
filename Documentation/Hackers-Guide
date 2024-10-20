@@ -86,7 +86,7 @@ following steps provide a recipe for setup.
 
     # To do an online test for one module 
 
-    $ ONLINE_TEST=1 dzil run prove -lv t/iexcloud.t
+    $ ONLINE_TEST=1 dzil run prove -lv t/financeapi.t
 
 
     # Use prove to during test development - it is fast

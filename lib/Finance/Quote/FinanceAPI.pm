@@ -122,6 +122,15 @@ sub financeapi {
         next;
       }
 
+      # JSON Result Array is sometimes empty
+      my $json_data_count = scalar @{ $quote->{'quoteResponse'}{'result'} };
+      if ( $json_data_count < 1 ) {
+        $info{ $stock, "success" } = 0;
+        $info{ $stock, "errormsg" } =
+          "Error retrieving quote for $stock - no listing for this name found. Please check symbol and the two letter extension (if any)";
+        next;
+      }
+
       $name     = $quote->{'quoteResponse'}{'result'}[0]{'longName'};
       $open     = $quote->{'quoteResponse'}{'result'}[0]{'regularMarketOpen'};
       $high     = $quote->{'quoteResponse'}{'result'}[0]{'regularMarketDayHigh'};
