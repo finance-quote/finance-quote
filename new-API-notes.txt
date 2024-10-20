@@ -17,16 +17,14 @@ Goals
 Example
 -------
 
-$q = Finance::Quote->new(timeout => 30, iex_cloud => {API_KEY => '...'});
+$q = Finance::Quote->new(timeout => 30, alphavantage => {API_KEY => '...'});
  - or -
 $q = Finance::Quote->new('YahooJSON');
- - or -
-$q = Finance::Quote->new('IEXCloud', iex_cloud => {API_KEY => '...'}, timeout => 30);
 
 @symbols =  qw/MSFT AMZN AAPL GOOGL GOOG FB CSCO INTC CMCSA PEP BRK.A SEB NVR BKNG IBKR/;
-%quotes  = $q->iexcloud(@symbols);
+%quotes  = $q->yahoo_json(@symbols);
 
-See 'perldoc lib/Finance/Quote/IEXCloud.pm' for example documentation and t/iexcloud.t for code example.
+See 'perldoc lib/Finance/Quote/AlphaVantage.pm' for example documentation and t/alphavantage.t for code example.
 
 
 

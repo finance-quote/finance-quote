@@ -340,7 +340,7 @@ sub alphavantage {
 
 =head1 NAME
 
-Finance::Quote::AlphaVantage - Obtain quotes from https://iexcloud.io
+Finance::Quote::AlphaVantage - Obtain quotes from https://alphavantage.co
 
 =head1 SYNOPSIS
 

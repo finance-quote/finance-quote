@@ -84,7 +84,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     GoldMoney
     GoogleWeb
     HU
-    IEXCloud
     IndiaMutual
     MarketWatch
     MorningstarAU
@@ -1273,7 +1272,6 @@ methods.
     my $q = Finance::Quote->new(timeout => 30)
     my $q = Finance::Quote->new('YahooJSON', fetch_currency => 'EUR')
     my $q = Finance::Quote->new('alphavantage' => {API_KEY => '...'})
-    my $q = Finance::Quote->new('IEXCloud', 'iexcloud' => {API_KEY => '...'});
     my $q = Finance::Quote->new(currency_rates => {order => ['ECB', 'Fixer'], 'fixer' => {API_KEY => '...'}});
 
 Finance::Quote modules access a wide range of sources to provide quotes.  A
@@ -1722,7 +1720,6 @@ http://www.gnucash.org/
   Finance::Quote::GoldMoney,
   Finance::Quote::GoogleWeb,
   Finance::Quote::HU,
-  Finance::Quote::IEXCloud,
   Finance::Quote::IndiaMutual,
   Finance::Quote::MarketWatch,
   Finance::Quote::MorningstarAU,
