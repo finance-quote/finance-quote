@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=2 sw=2 noai ic showmode showmatch:  
 #
 #	Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #	Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
@@ -29,8 +30,6 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 
-require 5.005;
-
 use strict;
 use warnings;
 
@@ -42,39 +41,32 @@ use JSON qw/decode_json/;
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
 
-use vars qw/$ASX_URL_PRIMARY $ASX_URL_ALTERNATE/;
+use vars qw/$ASX_URL/;
 
 # VERSION
 
-$ASX_URL_PRIMARY = 'https://www.asx.com.au/asx/1/share/';
-$ASX_URL_ALTERNATE = 'https://asx.api.markitdigital.com/asx-research/1.0/companies/';
+our $DISPLAY    = 'ASX - Australian Securities Exchange';
+our @LABELS     = qw/symbol ask bid p_change net type name last price volume currency method/;
+our $METHODHASH = {subroutine => \&asx, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS};
 
-sub methods {return (australia => \&asx,asx => \&asx)}
-
-{
-	my @labels = qw/
-			ask
-			bid
-			cap
-			close
-			date
-			eps
-			high
-			last
-			low
-			name
-			net
-			open
-			p_change
-			pe
-			type
-			volume/;
-
-# Function that lists the data items available from the Australian Securities Exchange (ASX)
-
-	sub labels { return (australia => \@labels,
-						 asx	   => \@labels); }
+sub methodinfo {
+    return ( 
+        asx       => $METHODHASH,
+        australia => $METHODHASH,
+    );
 }
+
+sub labels {
+  my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
+
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
+}
+
+$ASX_URL = 'https://asx.api.markitdigital.com/asx-research/1.0/companies/';
 
 # Australian Stock Exchange (ASX)
 # The ASX provides free delayed quotes through their webpage:
@@ -84,6 +76,7 @@ sub methods {return (australia => \&asx,asx => \&asx)}
 # 5-May-2001 Updated by Leigh Wedding <leigh.wedding@telstra.com>
 # 24-Feb-2014 Updated by Chris Good <chris.good@@ozemail.com.au>
 # 12-Oct-2020 Updated by Jeremy Volkening
+#
 # Jan-2021 Updated by Geoff <cleanoutmyshed@gmail.com>
 #	October 2020 the ASX revamped their website with dynamic content for quotes
 #	which prevented the previous HTML screen scraping from working, but exposed
@@ -95,6 +88,12 @@ sub methods {return (australia => \&asx,asx => \&asx)}
 #	data for all the known exceptions, including indices.
 #	This version will always call the primary source, and call the alternate if
 #	a price is not returned by the primary.
+#
+# 2024-10-21 Updated by Bruce Schuck <bschuck@asgard-systems.com>
+#  The primary URL (https://www.asx.com.au/asx/1/share/) stopped retrieving
+#  data. The website is utilizing the Imperva Incapsula, an anti-webscraping
+#  service. A caveat of using the alternate URL is that only a few
+#  data points are returned and no trade date.
 #
 #	Smart::Comments implemented to conform with the Hackers Guide:
 #		https://github.com/finance-quote/finance-quote/blob/master/Documentation/Hackers-Guide
@@ -108,38 +107,31 @@ sub asx {
 	my @symbols = @_
 		or return;
 
-	my($error, %info, $status, $ua);
+	my($error, %info, $status, $ua, $url);
 
 	$ua = $quoter->user_agent;
 
-	SYMBOL:
 	for my $symbol (@symbols) {
 ### ASX.pm  Processing symbol: $symbol
 		$info{ $symbol, 'symbol'   } = $symbol;
 		$info{ $symbol, 'method'   } = 'asx';
-		$info{ $symbol, 'exchange' } = 'Australian Securities Exchange';
+		$info{ $symbol, 'currency'   } = 'AUD';
 
 		$symbol =~ s/\s+$//;
 		if	($symbol !~ m/^[A-Za-z0-9]{1,6}$/) {
 			$info{ $symbol, 'success'  } = 0;
 			$info{ $symbol, 'errormsg' } = 'Invalid symbol.  ASX symbols must be alpha numeric maximum length 6 characters.';
 ### ASX.pm:  $info{ $symbol, 'errormsg' }
-			next SYMBOL;
+			next;
 		}
 
-		($status, $error) = asx_primary($symbol, $ua, \%info);
-
-		if	(($status != 1) ||
-			 ($info{$symbol, 'last'} eq '')) {
-### ASX.pm  Calling Alternate URL as Primary URL failed or doesn't have a Last Price
-			($status, $error) = asx_alternate($symbol, $ua, \%info);
-		}
+    ($status, $error) = asx_fetch($symbol, $ua, \%info);
 
 		if	($status != 1) {
 			$info{ $symbol, 'success'  } = 0;
 			$info{ $symbol, 'errormsg' } = "$error";
-### ASX.pm  Unsuccessful calls to ASX URLs - symbol cannot be processed: $symbol
-			next SYMBOL;
+### ASX.pm  Unsuccessful call to ASX URL - symbol cannot be processed: $symbol
+			next;
 		}
 
 ### ASX.pm  We have valid data, apply various clean ups and add remaining data for symbol: $symbol
@@ -167,54 +159,17 @@ sub asx {
 	return %info if wantarray;
 	return \%info;
 
-}
+} # end main asx method
 
-# Internal function to handle ASX Alternate data source
+# Internal function to handle ASX data source
 
-sub asx_primary {
-
-	my ($symbol, $ua, $info) = @_;
-
-	my($data, $error, %label_map, $status, $url);
-
-	$url = $ASX_URL_PRIMARY . $symbol;
-	($status, $error, $data) = get_asx_data($url, $ua);
-	return $status, $error unless $status == 1;
-
-# Map the Finance::Quote labels (left) to the corresponding ASX labels (right)
-	%label_map = (
-		'bid'		=> 'bid_price',
-		'p_change'	=> 'change_in_percent',
-		'net'		=> 'change_price',
-		'name'		=> 'desc_full',
-		'high'		=> 'day_high_price',
-		'low'		=> 'day_low_price',
-		'eps'		=> 'eps',
-		'last'		=> 'last_price',
-		'date'		=> 'last_trade_date',
-		'cap'		=> 'market_cap',
-		'ask'		=> 'offer_price',
-		'open'		=> 'open_price',
-		'pe'		=> 'pe',
-		'close'		=> 'previous_close_price',
-		'volume'	=> 'volume',
-	);
-
-	process_asx_data($symbol, $data, \%label_map, $info);
-
-	return 1, '';
-
-}
-
-# Internal function to handle ASX Alternate data source
-
-sub asx_alternate {
+sub asx_fetch {
 
 	my ($symbol, $ua, $info) = @_;
 
 	my($data, $error, %label_map, $status, $url);
 
-	$url = $ASX_URL_ALTERNATE . $symbol . '/header';
+	$url = $ASX_URL . $symbol . '/header';
 	($status, $error, $data) = get_asx_data($url, $ua);
 	return $status, $error unless $status == 1;
 
@@ -248,7 +203,7 @@ sub asx_alternate {
 
 	return 1, '';
 
-}
+} # end asx_fetch
 
 # Internal function to fetch, validate, and decode data from an ASX URL using LWP User Agent
 # Handle any errors
@@ -290,7 +245,7 @@ sub get_asx_data {
 	$status = 1;
 	return $status, $error, $data;
 
-}
+} # end get_asx_data
 
 # Internal function to push the ASX data elements into the Finance::Quote structure (%info)
 
@@ -320,7 +275,7 @@ sub process_asx_data {
 
 	return;
 
-}
+} # end process_asx_data
 
 1;
 __END__
