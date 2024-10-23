@@ -1,5 +1,6 @@
 {{$NEXT}}
-    * Added more fields to CSE.pm and exposed all labels.
+	* Updated ASX.pm - Issue #404
+	* Added more fields to CSE.pm and exposed all labels.
 	* Changed parsing in Comdirect.pm - Issue #413
 	* Complete rewrite of OnVista.pm - Issue #414
 	* Minor fix to FinanceAPI decoding JSON - Issue #434

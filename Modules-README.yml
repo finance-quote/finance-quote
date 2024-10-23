@@ -61,7 +61,7 @@
 - module: ASX.pm
   state: working
   added: TBD
-  changed: 2020-10-12
+  changed: 2024-10-21
   removed: ~
   urls:
   apikey: false
@@ -73,14 +73,24 @@
     does not return a trade date.
   testfile: asx.t
   testcases:
-    - These need to be updated
-    - WES
-    - BOQ
-    - XRO
-    - IAG
-    - TLS
-    - NABHA
+    - ARG
+    - BHP
+    - CBA
+    - RIO
+    - 360
+    - 14D
+    - A2M
+    - XF1
+    - AYUHD
+    - GSBK51
+    - GSIC50
+    - BEAR
+    - ETPMPT
+    - GOLD
+    - IAA
+    - KIJOA
     - XAO
+    - XJO
 #
 - module: AlphaVantage.pm
   state: working
