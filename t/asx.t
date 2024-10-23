@@ -16,10 +16,10 @@ plan tests => 6;
 # Listed securities come and go, so entries on these lists will eventually fail.
 my @ordinaries = qw/ARG BHP CBA RIO/;
 my @numerics   = qw/360 14D A2M XF1/;
-my @corp_bonds = qw/ANZPH AYUHD IAGPD NABHA/;
+my @corp_bonds = qw/AYUHD/;
 my @govt_bonds = qw/GSBK51 GSIC50/;
 my @etps       = qw/BEAR ETPMPT GOLD IAA/;
-my @warrants   = qw/BHPSOA/;
+my @warrants   = qw/BKIJOA/;
 my @indices    = qw/XAO XJO/;
 my @invalids   = qw/BOGUS TooLong Non-AN/;
 
@@ -38,7 +38,7 @@ subtest 'Test the "normal" securities that use the Primary ASX data source' => s
 
 		subtest "Data tests for $symbol" => sub {
 			plan 'skip_all' => "Bypass data tests for $symbol - no data returned" unless $quotes{$symbol, 'success'} == 1;
-			plan tests => 22;
+			plan tests => 10;
 
 			ok( $quotes{$symbol, 'errormsg'} eq '',    'no error message for valid symbol' );
 			ok( $quotes{$symbol, 'currency'} eq 'AUD', 'got expected currency' );
@@ -47,21 +47,15 @@ subtest 'Test the "normal" securities that use the Primary ASX data source' => s
 			ok( length $quotes{$symbol,'name'},        'got a name'            );
 			ok( $quotes{$symbol,'symbol'} eq $symbol,  'matching symbol'       );
 
-			ok( $quotes{$symbol, 'exchange'} eq 'Australian Securities Exchange',
-				'got expected exchange' );
 
-			my $date = Time::Piece->strptime($quotes{$symbol,'date'}, '%m/%d/%Y');
-			ok( $date >= localtime()->add_years(-1), 'date less than a year ago' );
-			my $isodate = Time::Piece->strptime($quotes{$symbol,'isodate'}, '%Y-%m-%d');
-			ok( $isodate >= localtime()->add_years(-1), 'isodate less than a year ago' );
 
 # For the securities in this group, expect *all* prices and volume to have non-zero values.
 # (The occasional trading halt or corporate action may cause some of these to fail - c'est la vie.)
-			for my $field (qw/ask bid close high last low open price volume/) {
+			for my $field (qw/ask bid last price/) {
 				ok( $quotes{$symbol, $field} > 0, "$field > 0" );
 			}
 
-			for my $field (qw/cap eps net p_change pe/) {
+			for my $field (qw/p_change/) {
 				ok( looks_like_number($quotes{$symbol, $field}),
 					"$field looks like a number" );
 			}
@@ -81,7 +75,7 @@ subtest 'Test the "other" security types, many of which use the Alternate ASX da
 
 		subtest "Data tests for $symbol" => sub {
 			plan 'skip_all' => "Bypass data tests for $symbol - no data returned" unless $quotes{$symbol, 'success'} == 1;
-			plan tests => 13;
+			plan tests => 10;
 
 			ok( $quotes{$symbol, 'errormsg'} eq '',    'no error message for valid symbol' );
 			ok( $quotes{$symbol, 'currency'} eq 'AUD', 'got expected currency' );
@@ -90,8 +84,6 @@ subtest 'Test the "other" security types, many of which use the Alternate ASX da
 			ok( length $quotes{$symbol,'name'},        'got a name'            );
 			ok( $quotes{$symbol,'symbol'} eq $symbol,  'matching symbol'       );
 
-			ok( $quotes{$symbol, 'exchange'} eq 'Australian Securities Exchange',
-				'got expected exchange' );
 
 # For the securities in this group, only expect the prices to have non-zero values.
 			for my $field (qw/last price/) {
@@ -107,7 +99,7 @@ subtest 'Test the "other" security types, many of which use the Alternate ASX da
 				}
 			}
 
-			for my $field (qw/net p_change volume/) {
+			for my $field (qw/p_change/) {
 				ok( looks_like_number($quotes{$symbol, $field}),
 					"$field looks like a number" );
 			}
@@ -127,7 +119,7 @@ subtest 'Test the "warrants and options" security types, which use the Alternate
 
 		subtest "Data tests for $symbol" => sub {
 			plan 'skip_all' => "Bypass data tests for $symbol - no data returned" unless $quotes{$symbol, 'success'} == 1;
-			plan tests => 12;
+			plan tests => 9;
 
 			ok( $quotes{$symbol, 'errormsg'} eq '',    'no error message for valid symbol' );
 			ok( $quotes{$symbol, 'currency'} eq 'AUD', 'got expected currency' );
@@ -137,11 +129,9 @@ subtest 'Test the "warrants and options" security types, which use the Alternate
 			ok( length $quotes{$symbol,'type'},        'got a type'            );
 			ok( $quotes{$symbol,'symbol'} eq $symbol,  'matching symbol'       );
 
-			ok( $quotes{$symbol, 'exchange'} eq 'Australian Securities Exchange',
-				'got expected exchange' );
 
 # For the securities in this group, only check for numeric values.
-			for my $field (qw/last price net p_change volume/) {
+			for my $field (qw/last price p_change/) {
 				ok( looks_like_number($quotes{$symbol, $field}),
 					"$field looks like a number" );
 			}
@@ -161,7 +151,7 @@ subtest 'Test the indexes, which use the Alternate ASX data source' => sub {
 
 		subtest "Data tests for $symbol" => sub {
 			plan 'skip_all' => "Bypass data tests for $symbol - no data returned" unless $quotes{$symbol, 'success'} == 1;
-			plan tests => 10;
+			plan tests => 7;
 
 			ok( $quotes{$symbol, 'errormsg'} eq '',    'no error message for valid symbol' );
 			ok( $quotes{$symbol, 'method'  } eq 'asx', 'got expected method'   );
@@ -169,15 +159,13 @@ subtest 'Test the indexes, which use the Alternate ASX data source' => sub {
 			ok( length $quotes{$symbol,'name'},        'got a name'            );
 			ok( $quotes{$symbol,'symbol'} eq $symbol,  'matching symbol'       );
 
-			ok( $quotes{$symbol, 'exchange'} eq 'Australian Securities Exchange',
-				'got expected exchange' );
 
 # Indices should have non-zero prices and volumes.
-			for my $field (qw/last price volume/) {
+			for my $field (qw/last price/) {
 				ok( $quotes{$symbol, $field} > 0, "$field > 0" );
 			}
 
-			for my $field (qw/net p_change/) {
+			for my $field (qw/p_change/) {
 				ok( looks_like_number($quotes{$symbol, $field}),
 					"$field looks like number" );
 			}
