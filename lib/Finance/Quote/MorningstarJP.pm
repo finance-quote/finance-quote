@@ -18,107 +18,124 @@
 #
 
 package Finance::Quote::MorningstarJP;
-require 5.006;
 
 use strict;
 use warnings;
-use base 'Exporter';
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use DateTime;
+use IO::Uncompress::Gunzip;
+use LWP::UserAgent;
+use XML::Parser;
 
-use vars qw( $MORNINGSTAR_JP_URL);
-
-our @EXPORT_OK = qw(morningstarjp methods labels);
 # VERSION
 
-# NAV information (basis price)
-$MORNINGSTAR_JP_URL =
-  ('https://www.wealthadvisor.co.jp/FundData/DownloadStdYmd.do?fnc=');
+our $DISPLAY = 'Morningstar JP';
+our @LABELS = qw/price name symbol currency method date isodate nav/;
+our $METHODHASH = {subroutine => \&morningstarjp,
+                   display => \$DISPLAY,
+                   labels => \@LABELS};
 
-sub methods { return ( morningstarjp => \&morningstarjp ); }
-sub labels  { return ( morningstarjp => [qw/symbol date nav/] ); }
+sub methodinfo {
+    return (
+        morningstarjp => $METHODHASH,
+    );
+}
+
+sub labels {
+  my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
+
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
+}
+
+our $MORNINGSTAR_JP_URL = 'https://www.wealthadvisor.co.jp/xml/';
 
 sub morningstarjp
 {
   my $quoter  = shift;
   my @symbols = @_;
 
-  my (
-       $ua,    $response, %info,   $date,    $nav,   $year,
-       $month, $day,      $fmyear, $fmmonth, $fmday, @data
-  );
+  my ($ua, $response, %info);
 
   $ua = $quoter->user_agent;
+  # Try to make the data transfer a bit smaller
+  $ua->default_header('Accept-Encoding' => 'gzip, deflate, br');
 
-  # calculate beginning and end date
-  # Starting from 10 days prior (to cover any recent holiday gaps)
+  # Iterate over each symbol as site only permits query by single security
+  foreach my $symbol (@symbols) {
+      $response = $ua->get( $MORNINGSTAR_JP_URL . $symbol . ".xml");
+      if ($response->is_success
+          && $response->content_type eq 'text/xml') {
 
-  my $calcDay = DateTime->now();
-  $year  = $calcDay->year();
-  $month = $calcDay->month();
-  $day   = $calcDay->day();
-  $calcDay->subtract( days => 10 );
-  $fmyear  = $calcDay->year();
-  $fmmonth = $calcDay->month();
-  $fmday   = $calcDay->day();
+          my ($name,  $code, $date, $price, $nav);
 
-# Iterate over each symbol as site only permits query by single security
-  foreach my $symbol (@symbols)
-  {
-    # Query the server via a POST request
-    $response = $ua->post(
-      $MORNINGSTAR_JP_URL . $symbol,
-      [
-        selectStdYearFrom  => $fmyear,
-        selectStdMonthFrom => $fmmonth,
-        selectStdDayFrom   => $fmday,
-        selectStdYearTo    => $year,
-        selectStdMonthTo   => $month,
-        selectStdDayTo     => $day,
-        base => '0'  # 0 is daily, 1 is week ends (Friday), 2 is month ends only
-      ],
-    );
+          my $on_start = sub {
+              my ($p, $el, %atts) = @_;
+              if ($el eq "fund") {
+                  ### assert: $atts{"name"}
+                  ### assert: $atts{"code"}
+                  $name = $atts{"name"};
+                  $code = $atts{"code"};
+              }
+              elsif ($el eq "day") {
+                  ### assert: $atts{"year"}
+                  ### assert: $atts{"month"}
+                  ### assert: $atts{"value"}
+                  my $dt = DateTime->new(year => $atts{"year"},
+                                         month => $atts{"month"},
+                                         day => $atts{"value"});
+                  my $px = $atts{"price"};
+                  my $nv = $atts{"volume"};
+                  if ($px && $nv) {
+                      if (!defined($date)
+                          || DateTime->compare($date, $dt) < 0) {
+                          $date = $dt;
+                          $price = $px;
+                          $nav = $nv;
+                      }
+                  }
+              }
+          };
 
-    # Check response, CSV data is in an octet-stream
-    if (    $response->is_success
-         && $response->content_type eq 'application/octet-stream' )
-    {
+          my $xml = IO::Uncompress::Gunzip->new(\$response->content,
+                                                Transparent => 1);
+          ### assert: $xml
 
-      # Parse...
-      # First row (in Shift-JIS) is fixed.  It means "date","basis price"
-      #   日付,基準価額
-      # Subsequent rows are in ascending chronological order
-      #   date(yyyymmdd),nav
-      #
-      # Split the data on CRLF or LF boundaries
-      @data = split( '\015?\012', $response->content );
+          # The XML itself is Shift_JIS encoded, but XML::Encoding doesn't
+          # provide it, since in 1998 it was not clear which mapping to use,
+          # see: https://github.com/steve-m-hay/XML-Encoding/blob/e48f2c7/maps/Japanese_Encodings.msg.
+          # Based on the current registration https://www.iana.org/assignments/charset-reg/shift_jis
+          # and the message above I guess it is x-sjis-unicode. But may be wrong and it can be
+          # one of x-sjis-jisx0221, x-sjis-jdk117, or x-sjis-cp932.
+          # The XML::Encoding need to be installed anyway.
+          my $parser = XML::Parser->new(Handlers => {Start => \&$on_start},
+                                        ProtocolEncoding => 'x-sjis-unicode');
 
-      # We only care about the final row as that has the most recent data
-      ( $date, $nav ) = $quoter->parse_csv( $data[-1] );
+          $parser->parse($xml);
+          ### Extracted: $name, $code, $date->ymd, $price, $nav
 
-      # Store the retrieved data into the hash
-      ( $year, $month, $day ) = ( $date =~ m/(\d{4})(\d{2})(\d{2})/ );
-      $quoter->store_date( \%info, $symbol,
-                           { year => $year, month => $month, day => $day } );
-      $info{ $symbol, 'currency' } = 'JPY';
-      $info{ $symbol, 'method' }   = 'MorningstarJP';
-      $info{ $symbol, 'name' }     = $symbol;
-      $info{ $symbol, 'nav' }      = $nav;
-      $info{ $symbol, 'success' }  = 1;
-      $info{ $symbol, 'symbol' }   = $symbol;
-    } elsif (    $response->is_success
-              && $response->content_type eq 'text/html' )
-    {
+          $quoter->store_date( \%info, $symbol,
+                               { year => $date->year,
+                                 month => $date->month,
+                                 day => $date->day } );
 
-      # HTML response that means POST was invalid and/or rejected.
-      $info{ $symbol, 'errormsg' } = 'Invalid search criteria';
-      $info{ $symbol, 'success' }  = 0;
-    } else
-    {
-
-      # Unknown error encountered.
-      $info{ $symbol, 'errormsg' } = 'Search unavailable';
-      $info{ $symbol, 'success' }  = 0;
-    }
+          $info{ $symbol, 'currency' } = 'JPY';
+          $info{ $symbol, 'method' }   = 'MorningstarJP';
+          $info{ $symbol, 'name' }     = $name;
+          $info{ $symbol, 'price' }    = $price;
+          $info{ $symbol, 'nav' }      = $nav;
+          $info{ $symbol, 'symbol' }   = $code;
+          $info{ $symbol, 'success' }  = 1;
+      }
+      else {
+          ### Error occurred: $symbol, $response
+          $info{ $symbol, 'errormsg' } = 'Search unavailable';
+          $info{ $symbol, 'success' }  = 0;
+      }
   }
 
   return wantarray() ? %info : \%info;
