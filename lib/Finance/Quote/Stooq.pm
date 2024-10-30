@@ -24,7 +24,7 @@ package Finance::Quote::Stooq;
 use strict;
 use warnings;
 
-use Encode qw(decode);
+use Encode qw(decode encode);
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTTP::CookieJar::LWP ();
@@ -35,15 +35,27 @@ use if DEBUG, 'Smart::Comments', '###';
 
 # VERSION
 
-my $STOOQ_URL = 'https://stooq.com/q/?s=';
+our $DISPLAY    = 'Stooq - Warsaw Stock Exchange';
+our @LABELS     = qw/symbol name open high low last bid ask date currency method/;
+our $METHODHASH = {subroutine => \&stooq, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS};
 
-sub methods {
-  return (stooq  => \&stooq,
-          europe => \&stooq,
-          poland => \&stooq);
+sub methodinfo {
+    return ( 
+        stooq   => $METHODHASH,
+        europe  => $METHODHASH,
+        poland  => $METHODHASH,
+    );
 }
 
-our @labels = qw/symbol name open high low last bid ask date currency method/;
+sub labels { my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
+}
+
+my $STOOQ_URL = 'https://stooq.com/q/?s=';
 
 my %currencies_by_link = (
   '?i=21' => "EUR", # Europe (€)
@@ -59,19 +71,15 @@ my %currencies_by_symbol = (
   '&pound;'  => "GBP", # United Kingdom (£)
   'p.'       => "GBX", # United Kingdom (penny)
   '&euro;'   => "EUR", # Europe (€)
-  'z\x{142}' => "PLN", # Poland (zł)
-  '$'       => "USD", # United States ($)
+  "z\x{142}" => "PLN", # Poland (zł)
+  '$'        => "USD", # United States ($)
   '&cent;'   => "USX", # United States (¢)
-  'HK$'     => "HKD", # Hong Kong (HK$)
+  'HK$'      => "HKD", # Hong Kong (HK$)
   '&yen;'    => "JPY", # Japan (¥)
   'Ft'       => "HUF", # Hungary (Ft)
 );
 
-sub labels { 
-  return (stooq  => \@labels,
-          europe => \@labels, 
-          poland => \@labels);
-}
+### [<now>] Currencies by Symbol: %currencies_by_symbol
 
 sub stooq {
 
@@ -128,16 +136,20 @@ sub stooq {
         #   curency USD/HUF: td > b > _a_linking_to_currency + "&nbsp;" + span_with_price
         # except for commodities there's no A tag:
         #   commodities:     td > b[> span_with_price] + "&nbsp;_currency_without_link_"
+        ### [<now>] Cell 0,0: $table->cell(0,0)
         (my $currlink) = $table->cell(0,0) =~ m|<a href=t/(\?i=\d+)>|;
         if ( ($currlink) && ($currencies_by_link{$currlink}) ) {
           $currency = $currencies_by_link{$currlink};
         } else {
           (my $currsymbol) = $table->cell(0,0)
-            =~ m|[\d\.]+</span></b>&nbsp;([^/]+)/(ozt\|lb\|t\|gal\|bbl\|bu\|mmBtu)|;
+            =~ m#[\d\.]+</span></b>&nbsp;(.+)/(ozt|lb|t|gal|bbl|bu|mmBtu)#;
+          ### [<now>] CurrSymbol: $currsymbol
           if ( ($currsymbol) && ($currencies_by_symbol{$currsymbol}) ) {
             $currency = $currencies_by_symbol{$currsymbol};
           }
         }
+
+        ### [<now>] Currency: $currency
 	
         (my $date) = $table->cell(0,1) =~ m|Date.+>(\d{4}-\d{2}-\d{2})<|;
         (my $high, my $low) = $table->cell(1,1)
@@ -171,6 +183,10 @@ sub stooq {
               $info{ $stock, 'currency' } = 'USD';
             }
           }
+        } else {
+          $info{ $stock, "success" } = 0;
+          $info{ $stock, "errormsg" } =
+            "Error retrieving quote for $stock. Could not parse HTML returned from $url.";
         }
       } else {
         $te->eof;

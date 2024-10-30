@@ -1009,7 +1009,7 @@
 - module: Stooq.pm
   state: working
   added: 2023-08-04
-  changed: 2023-08-15
+  changed: 2024-10-29
   removed: ~
   urls:
     - https://stooq.com/q/?s=
