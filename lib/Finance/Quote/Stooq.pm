@@ -71,7 +71,7 @@ my %currencies_by_symbol = (
   '&pound;'  => "GBP", # United Kingdom (£)
   'p.'       => "GBX", # United Kingdom (penny)
   '&euro;'   => "EUR", # Europe (€)
-  'zł'       => "PLN", # Poland (zł)
+  "z\x{142}" => "PLN", # Poland (zł)
   '$'        => "USD", # United States ($)
   '&cent;'   => "USX", # United States (¢)
   'HK$'      => "HKD", # Hong Kong (HK$)
@@ -143,7 +143,6 @@ sub stooq {
         } else {
           (my $currsymbol) = $table->cell(0,0)
             =~ m#[\d\.]+</span></b>&nbsp;(.+)/(ozt|lb|t|gal|bbl|bu|mmBtu)#;
-          $currsymbol = encode('UTF-8', $currsymbol);
           ### [<now>] CurrSymbol: $currsymbol
           if ( ($currsymbol) && ($currencies_by_symbol{$currsymbol}) ) {
             $currency = $currencies_by_symbol{$currsymbol};
