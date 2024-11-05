@@ -120,26 +120,30 @@ my %currencies_by_suffix = (
     '.SW'  => "CHF",    # Switzerland
 );
 
+our $DISPLAY    = 'AlphaVantage';
+our $FEATURES   = {'API_KEY' => 'registered user API key'};
+our @LABELS     = qw/date isodate open high low close volume last net p_change/;
+our $METHODHASH = {subroutine => \&alphavantage, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS,
+                   features => $FEATURES};
 
-sub methods {
-    return ( alphavantage => \&alphavantage,
-             canada       => \&alphavantage,
-             usa          => \&alphavantage,
-             nyse         => \&alphavantage,
-             nasdaq       => \&alphavantage,
+sub labels {
+  my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
+
+sub methodinfo {
+    return ( 
+        alphavantage => $METHODHASH,
+        canada       => $METHODHASH,
+        usa          => $METHODHASH,
+        nyse         => $METHODHASH,
+        nasdaq       => $METHODHASH,
     );
 }
 
-sub parameters {
-  return ('API_KEY');
-}
-
-{
-    my @labels = qw/date isodate open high low close volume last net p_change/;
-
-    sub labels {
-        return ( alphavantage => \@labels, );
-    }
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub sleep_before_query {
@@ -261,7 +265,7 @@ sub alphavantage {
         }
 
         my $quote = $json_data->{'Global Quote'};
-        if ( ! %{$quote} ) {
+        if ( ! $quote ) {
             $info{ $stock, 'success' } = 0;
             $info{ $stock, 'errormsg' } = "json_data does not contain Global Quote";
             next;
