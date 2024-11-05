@@ -95,10 +95,16 @@
 - module: AlphaVantage.pm
   state: working
   added:
-  changed: 2024-04-07
+  changed: 2024-11-05
   removed:
   urls:
     - https://www.alphavantage.co/query?function=GLOBAL_QUOTE&apikey=$ALPHAVANTAGE_API_KEY&symbol=
+  methods:
+    - alphavantage
+    - canada
+    - usa
+    - nyse
+    - nasdaq
   apikey: true
   notes: |
     Module to acquire data from https://www.alphavantage.co/.

@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Update AlphaVantage.pm - Issue #447
 	* Fix to Stooq.pm - Issue #445
 	* Updated ASX.pm - Issue #404
 	* Added more fields to CSE.pm and exposed all labels.
