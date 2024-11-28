@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.64      2024-11-27 18:11:09-08:00 America/Los_Angeles
 	* Update AlphaVantage.pm - Issue #447
 	* Fix to Stooq.pm - Issue #445
 	* Updated ASX.pm - Issue #404

@@ -136,7 +136,6 @@ methods.
     my $q = Finance::Quote->new(timeout => 30)
     my $q = Finance::Quote->new('YahooJSON', fetch_currency => 'EUR')
     my $q = Finance::Quote->new('alphavantage' => {API_KEY => '...'})
-    my $q = Finance::Quote->new('IEXCloud', 'iexcloud' => {API_KEY => '...'});
     my $q = Finance::Quote->new(currency_rates => {order => ['ECB', 'Fixer'], 'fixer' => {API_KEY => '...'}});
 
 Finance::Quote modules access a wide range of sources to provide quotes.  A
@@ -507,19 +506,32 @@ Please refer to the sub-modules for further information.
 
 # AUTHORS
 
-    Dj Padzensky <djpadz@padz.net>, PadzNet, Inc.
-    Linas Vepstas <linas@linas.org>
-    Yannick LE NY <y-le-ny@ifrance.com>
-    Paul Fenwick <pjf@cpan.org>
-    Brent Neal <brentn@users.sourceforge.net>
-    Volker Stuerzl <volker.stuerzl@gmx.de>
-    Keith Refson <Keith.Refson#earth.ox.ac.uk>
-    Rob Sessink <rob_ses@users.sourceforge.net>
-    Leigh Wedding <leigh.wedding@telstra.com>
-    Tobias Vancura <tvancura@altavista.net>
-    James Treacy <treacy@debian.org>
-    Bradley Dean <bjdean@bjdean.id.au>
+The following list are those contributors with 5 or more commits in the
+GitHub repository.
+Please see the Git log for all the authors who have helped with
+Finance::Quote.
+
     Erik Colson <eco@ecocode.net>
+    Bruce Schuck <bschuck@asgard-systems.com>
+    Paul Fenwick <pjf@perltraining.com.au>
+    Vincent Lucarelli <vincent.lucarelli@gmail.com>
+    David Hampton <hampton-sf@rainbolthampton.net>
+    jvolkening <jdv@base2bio.com>
+    Pawel Konieczny <konieczp@zonnet.nl>
+    Mike Alexander <mta@umich.edu>
+    AndreJ <Andre-J@users.noreply.github.com>
+    Vinay S Shastry <vinayshastry@gmail.com>
+    Bradley Dean <bjdean@bjdean.id.au>
+    Brent Neal <brent@reindeergraphics.com>
+    Jacinta Richardson <jarich@perltraining.com.au>
+    e-dorigatti <emilio.dorigatti@gmail.com>
+    goodvibes2 <goodchris96@gmail.com>
+    Paul Howarth <paul@city-fan.org>
+    Sam Morris <sam@robots.org.uk>
+    Linas Vepstas <linas@linas.org>
+    Rajan Vaswani <111571283+bgr22112@users.noreply.github.com>
+    Hiranya Samarasekera <hiranyas@gmail.com>
+    Manuel Friedli <manuel@fritteli.ch>
 
 The Finance::Quote home page can be found at
 http://finance-quote.sourceforge.net/
@@ -535,6 +547,7 @@ http://www.gnucash.org/
     Finance::Quote::CurrencyRates::AlphaVantage,
     Finance::Quote::CurrencyRates::CurrencyFreaks,
     Finance::Quote::CurrencyRates::ECB,
+    Finance::Quote::CurrencyRates::FinanceAPI,
     Finance::Quote::CurrencyRates::Fixer,
     Finance::Quote::CurrencyRates::OpenExchange,
     Finance::Quote::CurrencyRates::YahooJSON,
@@ -560,7 +573,6 @@ http://www.gnucash.org/
     Finance::Quote::GoldMoney,
     Finance::Quote::GoogleWeb,
     Finance::Quote::HU,
-    Finance::Quote::IEXCloud,
     Finance::Quote::IndiaMutual,
     Finance::Quote::MarketWatch,
     Finance::Quote::MorningstarAU,
@@ -591,3 +603,9 @@ You should have received the Finance::Quote hacker's guide with this package.
 Please read it if you are interested in adding extra methods to this package.
 The latest hacker's guide can also be found on GitHub at
 https://github.com/finance-quote/finance-quote/blob/master/Documentation/Hackers-Guide
+
+# Donations
+
+While the contributors to Finance::Quote are happy to volunteer their time and resources on this project, donations are helpful and great way to say thank you. So far the only real cost to the team is domain registration for finance-quote.org. However, some operating systems and hardware upgrades do have a cost. Access to the latest or current environments is needed for development and testing. Upgrades to the latest MS Windows often includes a cost, and recently Apple's move to ARM/M1/M2 CPUs has stifled some contributors' ability to assist. With that in mind, you can send donations to the email address donations@finance-quote.org through PayPal. If it's for a particular contributor, please indicate in a note while submitting the donation through PayPal.
+
+Additionally, Bitcoin donations can be received at 37Bg4EMAp575j4iL9jHv1ZhDgiropU38jY.
