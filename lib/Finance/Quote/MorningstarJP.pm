@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012, Christopher Hill
+# Copyright (C) 2024, Przemyslaw Kryger
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,110 +18,90 @@
 #
 
 package Finance::Quote::MorningstarJP;
-require 5.006;
-
 use strict;
 use warnings;
-use base 'Exporter';
-use DateTime;
 
-use vars qw( $MORNINGSTAR_JP_URL);
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
 
-our @EXPORT_OK = qw(morningstarjp methods labels);
+use XML::LibXML;
+use LWP::UserAgent;
+use String::Util qw(trim);
+
 # VERSION
 
-# NAV information (basis price)
-$MORNINGSTAR_JP_URL =
-  ('https://www.wealthadvisor.co.jp/FundData/DownloadStdYmd.do?fnc=');
+our $DISPLAY    = 'Morningstar JP';
+our @LABELS     = qw/nav isin symbol name currency date isodate/;
+our $METHODHASH = {subroutine => \&morningstarjp,
+                   display => $DISPLAY,
+                   labels => \@LABELS};
 
-sub methods { return ( morningstarjp => \&morningstarjp ); }
-sub labels  { return ( morningstarjp => [qw/symbol date nav/] ); }
-
-sub morningstarjp
-{
-  my $quoter  = shift;
-  my @symbols = @_;
-
-  my (
-       $ua,    $response, %info,   $date,    $nav,   $year,
-       $month, $day,      $fmyear, $fmmonth, $fmday, @data
-  );
-
-  $ua = $quoter->user_agent;
-
-  # calculate beginning and end date
-  # Starting from 10 days prior (to cover any recent holiday gaps)
-
-  my $calcDay = DateTime->now();
-  $year  = $calcDay->year();
-  $month = $calcDay->month();
-  $day   = $calcDay->day();
-  $calcDay->subtract( days => 10 );
-  $fmyear  = $calcDay->year();
-  $fmmonth = $calcDay->month();
-  $fmday   = $calcDay->day();
-
-# Iterate over each symbol as site only permits query by single security
-  foreach my $symbol (@symbols)
-  {
-    # Query the server via a POST request
-    $response = $ua->post(
-      $MORNINGSTAR_JP_URL . $symbol,
-      [
-        selectStdYearFrom  => $fmyear,
-        selectStdMonthFrom => $fmmonth,
-        selectStdDayFrom   => $fmday,
-        selectStdYearTo    => $year,
-        selectStdMonthTo   => $month,
-        selectStdDayTo     => $day,
-        base => '0'  # 0 is daily, 1 is week ends (Friday), 2 is month ends only
-      ],
+sub methodinfo {
+    return (
+        morningstarjp => $METHODHASH,
     );
+}
 
-    # Check response, CSV data is in an octet-stream
-    if (    $response->is_success
-         && $response->content_type eq 'application/octet-stream' )
-    {
+sub labels { my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
 
-      # Parse...
-      # First row (in Shift-JIS) is fixed.  It means "date","basis price"
-      #   日付,基準価額
-      # Subsequent rows are in ascending chronological order
-      #   date(yyyymmdd),nav
-      #
-      # Split the data on CRLF or LF boundaries
-      @data = split( '\015?\012', $response->content );
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
+}
 
-      # We only care about the final row as that has the most recent data
-      ( $date, $nav ) = $quoter->parse_csv( $data[-1] );
+sub morningstarjp {
+    my $quoter  = shift;
+    my @symbols = @_;
+    my $ua      = $quoter->user_agent();
+    my %info;
 
-      # Store the retrieved data into the hash
-      ( $year, $month, $day ) = ( $date =~ m/(\d{4})(\d{2})(\d{2})/ );
-      $quoter->store_date( \%info, $symbol,
-                           { year => $year, month => $month, day => $day } );
-      $info{ $symbol, 'currency' } = 'JPY';
-      $info{ $symbol, 'method' }   = 'MorningstarJP';
-      $info{ $symbol, 'name' }     = $symbol;
-      $info{ $symbol, 'nav' }      = $nav;
-      $info{ $symbol, 'success' }  = 1;
-      $info{ $symbol, 'symbol' }   = $symbol;
-    } elsif (    $response->is_success
-              && $response->content_type eq 'text/html' )
-    {
+    foreach my $symbol (@_) {
+      eval {
+        my $url   = "https://apl.wealthadvisor.jp/webasp/funddataxml/basic/basic_$symbol.xml";
+        my $reply = $ua->get($url);
 
-      # HTML response that means POST was invalid and/or rejected.
-      $info{ $symbol, 'errormsg' } = 'Invalid search criteria';
-      $info{ $symbol, 'success' }  = 0;
-    } else
-    {
+        my $dom;
+        eval {$dom = XML::LibXML->load_xml(string => $reply->decoded_content)};
+        if ($@) {
+          $info{$symbol, 'success' }  = 0;
+          $info{$symbol, 'errormsg' } = $@;
+          next;
+        }
+        ### [<now>] DOM: $dom->toString()
 
-      # Unknown error encountered.
-      $info{ $symbol, 'errormsg' } = 'Search unavailable';
-      $info{ $symbol, 'success' }  = 0;
+        unless ($dom->findnodes('//Fund/@MS_FUND_CODE')->[0]->to_literal() eq $symbol) {
+          $info{$symbol, 'success'}  = 0;
+          $info{$symbol, 'errormsg'} = 'Symbol not found';
+          next;
+        }
+
+        my $nav = $dom->findnodes('//Fund/Price/@KIJYUNKAGAKU')->[0]->to_literal();
+        $nav =~ s/,//;
+        my $date = $dom->findnodes('//Fund/Price/@KIJYUN_YMD')->[0]->to_literal();
+        $date =~ s/[^0-9]/-/g;
+        my $isin = $dom->findnodes('//Fund/@ISIN')->[0]->to_literal();
+        my $name = $dom->findnodes('//Fund/@FUND_NAME')->[0]->to_literal();
+
+        $info{$symbol, 'success'}  = 1;
+        $info{$symbol, 'method'}   = 'MorningstarJP';
+        $info{$symbol, 'currency'} = 'JPY';
+        $info{$symbol, 'symbol'}   = $symbol;
+        $info{$symbol, 'nav'}      = $nav;
+        $info{$symbol, 'isin'}     = $isin;
+        $info{$symbol, 'name'}     = $name;
+
+        $quoter->store_date(\%info, $symbol, {isodate => $date});
+      };
+
+      if ($@) {
+        my $error = "Search failed: $@";
+        $info{$symbol, 'success'}  = 0;
+        $info{$symbol, 'errormsg'} = trim($error);
+      }
     }
-  }
 
-  return wantarray() ? %info : \%info;
+    ### info : %info
+
+    return wantarray() ? %info : \%info;
 }
 
 1;
@@ -130,11 +110,7 @@ __END__
 
 =head1 NAME
 
-Finance::Quote::MorningstarJP - Obtain price data from Morningstar (Japan).
-
-=head1 VERSION
-
-This documentation describes version 1.00 of MorningstarJP.pm, October 13, 2012.
+Finance::Quote::MorninstarJP - Obtain quotes from from Morningstar (Japan)
 
 =head1 SYNOPSIS
 
@@ -142,7 +118,7 @@ This documentation describes version 1.00 of MorningstarJP.pm, October 13, 2012.
 
     $q = Finance::Quote->new;
 
-    %info = $q->fetch("morningstarjp", "2009100101");
+    %stockinfo = $q->fetch("morningstarjp", "2009100101");
 
 =head1 DESCRIPTION
 
@@ -157,43 +133,20 @@ Information returned by this module is governed by Morningstar
 Use the numeric symbol shown in the URL on the "SnapShot" page
 of the security of interest.
 
-e.g. For L<http://www.wealthadvisor.co.jp/FundData/SnapShot.do?fnc=2009100101>,
+e.g. For L<https://www.wealthadvisor.co.jp/snapshot/2009100101>,
 one would supply 2009100101 as the symbol argument on the fetch API call.
 
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::MorningstarJP:
-symbol, date, nav.
+nav, isin, symbol, name, currency.
 
-=head1 REQUIREMENTS
+=head1 Terms & Conditions
 
- Perl 5.006
- Date/Calc.pm
- Exporter.pm (included with Perl)
+Use of apl.wealthadvisor.jp is governed by any terms & conditions of that site.
 
-=head1 ACKNOWLEDGEMENTS
-
-Inspired by other modules already present with Finance::Quote
-
-=head1 AUTHOR
-
-Christopher Hill
-
-=head1 LICENSE AND COPYRIGHT
-
-Copyright (C) 2012, Christopher Hill.
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-=head1 DISCLAIMER
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+Finance::Quote is released under the GNU General Public License, version 2,
+which explicitly carries a "No Warranty" clause.
 
 =head1 SEE ALSO
 

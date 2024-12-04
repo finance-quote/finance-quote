@@ -1,4 +1,8 @@
 #!/usr/bin/perl -w
+
+use utf8;
+use open ":std", ":encoding(UTF-8)";
+
 use strict;
 use Test::More;
 use DateTime;
@@ -19,8 +23,10 @@ my $day   = $calcDay->day();
 # Test Morningstar JP functions.
 
 my $q = Finance::Quote->new();
-my @funds = ( "2009100101", "2002013108" );
+my %valid = ( "2009100101" => "HSBC インド･インフラ株式オープン",
+              "2002013108" => "HSBC チャイナオープン");
 
+my @funds  = keys %valid;
 my %info = $q->morningstarjp(@funds);
 ok(%info);
 
@@ -42,7 +48,7 @@ foreach my $fund (@funds)
 
   cmp_ok( $info{ $fund, 'currency' }, 'eq', 'JPY',           'currency' );
   cmp_ok( $info{ $fund, 'method' },   'eq', 'MorningstarJP', 'method' );
-  cmp_ok( $info{ $fund, 'name' },     'eq', $fund,           'name' );
+  cmp_ok( $info{ $fund, 'name' },     'eq', $valid{$fund},   'name' );
   cmp_ok( $info{ $fund, "nav" },      '>',  0,               'nav' );
   ok( $info{ $fund, "success" }, 'success' );
   cmp_ok( $info{ $fund, 'symbol' }, 'eq', $fund, 'symbol' );
