@@ -811,9 +811,9 @@
 - module: MorningstarJP.pm
   state: working
   added: TBD
-  changed: 2023-04-08
+  changed: 2024-12-04
   removed: ~
-  urls: https://www.wealthadvisor.co.jp/FundData/DownloadStdYmd.do?fnc=
+  urls: https://apl.wealthadvisor.jp/webasp/funddataxml/basic/basic_$symbol.xml
   apikey: false
   notes: ~
   testfile: morningstarJP.t
