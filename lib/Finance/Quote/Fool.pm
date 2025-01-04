@@ -51,16 +51,28 @@ my %currencies_by_id = (
   '1' => 'USD',
 );
 
-sub methods { 
-  return ( fool   => \&fool,
-           usa    => \&fool,
-           nasdaq => \&fool,
-           nyse   => \&fool);
+our $DISPLAY    = 'Fool - Motley Fool Website Scrape';
+our @LABELS     = qw/date isodate open high low close volume last currency method/;
+our $METHODHASH = {subroutine => \&fool,
+                   display => $DISPLAY, 
+                   labels => \@LABELS};
+
+sub methodinfo {
+    return ( 
+        fool   => $METHODHASH,
+        nyse   => $METHODHASH,
+        nasdaq => $METHODHASH,
+        usa    => $METHODHASH,
+    );
 }
 
-my @labels = qw/date isodate open high low close volume last currency/;
 sub labels {
-  return ( iexcloud => \@labels, );
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
+
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub fool {
@@ -225,6 +237,7 @@ sub fool {
         $info{ $symbol, 'high' } = $high;
         $info{ $symbol, 'low' } = $low;
         $info{ $symbol, 'volume' } = $volume;
+        $info{ $symbol, 'method' } = 'fool';
         $quoter->store_date(\%info, $symbol, {isodate => $date});
 
         sleep 1;
