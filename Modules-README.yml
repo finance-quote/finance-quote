@@ -588,11 +588,16 @@
 - module: Fool.pm
   state: working
   added: 2001-05-08
-  changed: 2024-04-30
+  changed: 2025-01-04
   removed: ~
   urls:
     - https://api.fool.com/quotes/v4/instruments/search/?maxResults=10&apikey=public&domain=fool.com&query={$symbol}
     - https://api.fool.com/quotes/v4/historical/charts/{$symbol}
+  methods:
+    - fool
+    - nasdaq
+    - nyse
+    - usa
   apikey: false
   notes: Needed to set "user-agent" to something other than the default
   testfile: fool.t
