@@ -91,7 +91,7 @@ sub multipliers
 
   my $json_data = decode_json ($body);
 
-  if ( !$json_data->{'rates'}->{$from} || !$json_data->{'rates'}->{$to} ) {
+  if ( !$json_data->{'rates'}->{${from}} || !$json_data->{'rates'}->{${to}} ) {
     return;
   }
 
