@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Updated CurrencyFreaks.pm to return actual multipliers for base currency rather then computed conversion rate
 	* Added methodinfo hash to Fool.pm
 	* Fixed MorningstarJP.pm - Issue #443 - PR #451
 
