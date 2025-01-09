@@ -52,10 +52,12 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
 
 @CURRENCY_RATES_MODULES = qw/
     AlphaVantage
+    BankofItaly
     CurrencyFreaks
     ECB
     FinanceAPI
     Fixer
+    FXRatesAPI
     OpenExchange
     YahooJSON
 /;
@@ -81,6 +83,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Fondsweb
     Fool
     FTfunds
+    GenericExecutor
     GoldMoney
     GoogleWeb
     HU
@@ -109,6 +112,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     TwelveData
     Union
     XETRA
+    YahooChart
     YahooJSON
     YahooWeb
     ZA
