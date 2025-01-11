@@ -50,12 +50,18 @@ sub new
 
   # CurrencyFreaks is permitted to use an environment variable for API key 
   # (for backwards compatibility).
-  # New modules should use the API_KEY from args.
+  # New modules can use the API_KEY from args.
 
-  $this->{API_KEY} = $ENV{'CURRENCYFREAKS_API_KEY'};
-  $this->{API_KEY} = $args->{API_KEY} if (ref $args eq 'HASH') and (exists $args->{API_KEY});
+  $this->{API_KEY} =
+    $args->{API_KEY} if (ref $args eq 'HASH') and (exists $args->{API_KEY});
+  $this->{API_KEY} =
+    $ENV{'CURRENCYFREAKS_API_KEY'} if exists $ENV{'CURRENCYFREAKS_API_KEY'};
+
+  # Return nothing if API_KEY not set
+  return unless ($this->{API_KEY});
 
   return $this;
+
 }
 
 sub multipliers

@@ -360,7 +360,10 @@
   urls: https://api.currencyfreaks.com/v2.0/rates/latest?apikey=YOUR_APIKEY&symbols={CURRENCYCODE},{CURRENCYCODE},...
   apikey: true
   notes: |
-    Newly module as of 5/9/2024
+    Allows CURRENCYFREAKS_API_KEY environment variable.
+    Running test file requires TEST_CURRENCYFREAKS_API_KEY environment variable
+    Return actual multipliers for a base currency
+    New module as of 5/9/2024 and validated working as of 1/10/2025
   testfile: currency.t
   testcases:
     - USD EUR
