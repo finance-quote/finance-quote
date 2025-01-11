@@ -355,12 +355,12 @@
 - module: CurrencyRates/CurrencyFreaks.pm
   state: working
   Added: 2024-05-09
-  changed: ~
+  changed: 2025-01-09
   removed: ~
   urls: https://api.currencyfreaks.com/v2.0/rates/latest?apikey=YOUR_APIKEY&symbols={CURRENCYCODE},{CURRENCYCODE},...
   apikey: true
   notes: |
-    Newly module as of 5/9/2024
+    New module as of 5/9/2024
   testfile: currency.t
   testcases:
     - USD EUR
