@@ -1,3 +1,45 @@
+# NOTE:
+
+This repo includes updates that also adds personally developed modules
+for retriving prices for securities and for currency conversion.
+
+For retrieving prices, GenericExecutor and YahooChart are available and
+for currency conversion BankOfItaly and FXRatesAPI modules.
+
+GenericExecutor module is technically a bridge between GNUCash and OS via
+Finance::Quote. This module will invoke an executor at the operating system
+level, such as python, ruby, go, or any other interpreter, along with a
+fetcher, such as a script passed to the executor, and read the output from
+it. The external program needs to return data in a stream format. The format
+of the stream is concatenation of one or more pairs with ‘!’ mark (exclamation)
+and the two parts of each pair separated by a ‘:’ mark (colon). When the first
+part of a pair has word 'ticker', the second part of the pair denotes commodity
+name for which subsequent data pair is associated to.
+
+See extra folder for a working example of its invocation that calls a Python
+script that uses yfinance library to retrieve data.
+
+YahooChart employs multi-threading to fetch data when available and the
+module does not need to ascertain whether day is a trading day, holiday
+or anything else that may not be a trading day. Currently it downloads
+last seven days of quotes and returns last valid data set as the valid pricing.
+The return pricing is always the adjusted pricing that accounts for splits
+and dividends.
+
+YahooChart module can also retrieve currency but this seems to be very limited
+as to what Yahoo's Chart API will return.
+
+BankOfItaly module provides currency conversion rate provided by Bank of
+Italy's Exchange Rates REST API v1.0.
+
+FXRateAPI uses Currency Conversion & Exchange Rates API provided as FXRatesAPI,
+a service by Saritra GmbH.
+
+For currency conversion, in order to use any module other than the default
+Alphavanatage for GNUCash, a environment variable named FQ_CURRENCY must be set
+at the OS level.
+
+
 # NAME
 
 Finance::Quote - Get stock and mutual fund quotes from various exchanges
