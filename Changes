@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Contains my personal modules: GenericExecutor, YahooChart, BankOfItaly and FXRatesAPI
 	* Added methodinfo hash to Fool.pm
 	* Fixed MorningstarJP.pm - Issue #443 - PR #451
 

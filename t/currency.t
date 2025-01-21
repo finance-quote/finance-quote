@@ -67,6 +67,13 @@ subtest 'AlphaVantage' => sub {
   module_check('AlphaVantage', \@valid, \@invalid, {API_KEY => $ENV{TEST_ALPHAVANTAGE_API_KEY}});
 };
 
+# Check BankOfItaly
+subtest 'BankOfItaly' => sub {
+  my @valid   = (['100.00 USD', 'EUR'], ['1.00 GBP', 'IDR'], ['1.23 IDR', 'CAD'], ['10.00 AUD', 'AUD'], ['1.0 INR', 'INR']);
+  my @invalid = (['20.12 ZZZ', 'GBP']);
+
+  module_check('BankOfItaly', \@valid, \@invalid);
+};
 
 # Check CurrencyFreaks
 subtest 'CurrencyFreaks' => sub {
@@ -116,6 +123,13 @@ subtest 'FinanceAPI' => sub {
   module_check('FinanceAPI', \@valid, \@invalid, {cache => 1, API_KEY => $ENV{TEST_FINANCEAPI_API_KEY}});
 };
 
+# Check FXRatesAPI
+subtest 'FXRatesAPI' => sub {
+  my @valid   = (['100.00 USD', 'EUR'], ['1.00 GBP', 'IDR'], ['1.23 IDR', 'CAD'], ['10.00 AUD', 'AUD'], ['1.0 INR', 'INR']);
+  my @invalid = (['20.12 ZZZ', 'GBP']);
+
+  module_check('FXRatesAPI', \@valid, \@invalid );
+};
 
 # Check YahooJSON
 subtest 'YahooJSON' => sub {

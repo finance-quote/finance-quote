@@ -352,6 +352,23 @@
     - GBP IQD
     - AUD AUD
 #
+- module: CurrencyRates/BankOfItaly.pm
+  state: working
+  Added: 2025-01-20
+  changed: ~
+  removed: ~
+  urls: https://tassidicambio.bancaditalia.it/terzevalute-wf-web/rest/v1.0/latestRates?lang=en
+  apikey: false
+  notes: |
+    Newly module as of 1/20/2025
+  testfile: currency.t
+  testcases:
+    - USD EUR
+    - GBP IDR
+    - IDR CAD
+    - AUD AUD
+    - INR INR
+#
 - module: CurrencyRates/CurrencyFreaks.pm
   state: working
   Added: 2024-05-09
@@ -401,6 +418,23 @@
     - GBP IDR
     - IDR CAD
     - AUD AUD
+#
+- module: CurrencyRates/FXRatesAPI.pm
+  state: working
+  Added: 2025-01-20
+  changed: ~
+  removed: ~
+  urls: https://api.fxratesapi.com/convert?from=<FROM>&to=<TO>&format=JSON&places=8&amount=1
+  apikey: false
+  notes: |
+    Newly module as of 1/20/2025
+  testfile: currency.t
+  testcases:
+    - USD EUR
+    - GBP IDR
+    - IDR CAD
+    - AUD AUD
+    - INR INR
 #
 - module: CurrencyRates/OpenExchange.pm
   state: working
@@ -626,6 +660,28 @@
   testcases:
     - 301871
     - 234263
+#
+- module: GenericExecutor.pm
+  state: working
+  added:
+  changed:
+  removed:
+  urls:
+    - 
+  apikey: false
+  notes: |
+    This module interfaces with OS to execute a script through a given interpreter.
+  testfile: genericexecutor.t
+  testcases:
+    - SUZLON.BO
+    - RECLTD.NS
+    - AMZN
+    - SOLB.BR
+    - ^DJI
+    - BEL20.BR
+    - INGDIRECTFNE.BC
+    - AENA.MC
+    - CFR.JO
 #
 - module: GoldMoney.pm
   state: TBD
@@ -1309,6 +1365,27 @@
     - FR0000120628
     - XS0937858271
     - NL0000009165
+#
+- module: YahooChart.pm
+  state: working
+  added:
+  changed:
+  removed:
+  urls:
+    - https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price,summaryDetail,defaultKeyStatistics
+  apikey: false
+  notes:
+  testfile: yahoochart.t
+  testcases:
+    - SUZLON.BO
+    - RECLTD.NS
+    - AMZN
+    - SOLB.BR
+    - ^DJI
+    - BEL20.BR
+    - INGDIRECTFNE.BC
+    - AENA.MC
+    - CFR.JO
 #
 - module: YahooJSON.pm
   state: working
