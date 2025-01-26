@@ -1292,8 +1292,8 @@
 #
 - module: XETRA.pm
   state: working
-  added: ~
-  changed: 2023-11-27
+  added: 2020-09-29
+  changed: 2025-01-25
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057

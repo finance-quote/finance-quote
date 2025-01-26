@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+#    vi: set ts=2 sw=2 noai ic showmode showmatch:  
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -30,20 +31,29 @@ use Web::Scraper;
 
 my $xetra_URL = 'https://web.s-investor.de/app/detail.htm?boerse=GER&isin=';
 
+our $DISPLAY    = 'XETRA - German Sparkasse banking group';
+our $FEATURES   = {'INST_ID' => 'Required Institution ID'};
+our @LABELS     = qw/symbol last close exchange volume open price change p_change/;
+our $METHODHASH = {subroutine => \&xetra,
+                   display => $DISPLAY, 
+                   labels => \@LABELS,
+                   features => $FEATURES};
+
+sub methodinfo {
+    return ( 
+        xetra   => $METHODHASH,
+        europe  => $METHODHASH,
+    );
+}
+
+sub labels { my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
-  return (xetra   => \&xetra,
-          europe  => \&xetra);
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub parameters {
   return ('INST_ID');
-}
-
-our @labels = qw/symbol last close exchange volume open price change p_change/;
-
-sub labels {
-  return (xetra   => \@labels,
-          europe  => \@labels);
 }
 
 sub xetra {
@@ -116,6 +126,10 @@ sub xetra {
         my $isFound = 0;
         foreach (@searchvalue)
         {
+          # Get number of child elements.
+          # Skip this tree member
+          my $num_elements = $_->content_list();
+          next unless $num_elements > 1;
           if (($_->content_list)[0]{'_content'}[0]{'_content'}[0] eq 'Aktuelle Vergleichszahlen')
           {
             $isFound = 1;
@@ -161,6 +175,8 @@ sub xetra {
             $info{$symbol, 'currency'}  = $currency;
             #$info{$symbol, 'date'}     = $date;
             $quoter->store_date(\%info, $symbol, {eurodate => $date});
+            # leave foreach loop since we have the data
+            last;
           }
         }
 
