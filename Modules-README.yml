@@ -1292,7 +1292,7 @@
 #
 - module: XETRA.pm
   state: working
-  added: ~
+  added: 2020-09-29
   changed: 2025-01-25
   removed: ~
   urls:
