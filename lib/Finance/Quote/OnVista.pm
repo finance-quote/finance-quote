@@ -181,7 +181,7 @@ sub onvista {
         $info{ $stock, 'price' } = $json_quote->{'last'};
         $info{ $stock, 'currency' } = $json_quote->{'isoCurrency'};
         $info{ $stock, 'volume' } = $json_quote->{'volume'};
-        $info{ $stock, 'exchange' } = $json_quote->{'market'}{'nameExchange'};
+        $info{ $stock, 'exchange' } = $json_quote->{'market'}{'name'};
         $date = $json_quote->{'datetimeLast'};
         $quoter->store_date(\%info, $stock, {isodate => substr $date, 0, 10});
 
