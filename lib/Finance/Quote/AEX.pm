@@ -55,7 +55,7 @@ sub aex {
   my $reply;
 
   foreach my $symbol (@_) {
-    my $isin = undef;
+    my ($isin, $exchange);
 
 #    eval {
       my $search = "https://live.euronext.com/en/search_instruments/$symbol";
@@ -90,12 +90,37 @@ sub aex {
         }
 
         # die "Failed to find isin" unless $url->as_string =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)/|;
-        unless (defined($url) && $url->as_string =~ m|(/[A-Za-z0-9]{12}-[A-Za-z]+\b)|) {
+        unless (defined($url) && $url->as_string =~ m|(/[A-Za-z0-9]{12}-([A-Za-z]+)\b)|) {
             $info{$symbol, 'success'} = 0;
             $info{$symbol, 'errormsg'} = 'Cannot find ISIN for ' . $symbol;
             next;
         } else {
             $isin = uc($1);
+
+            # see https://www.tradinghours.com/mic/s/<MIC>
+            my %mic2location = (
+                "XAMS" => "Amsterdam",  # EURONEXT AMSTERDAM
+                "XBRU" => "Brussels",   # EURONEXT BRUSSELS
+                "ALXB" => "Brussels",   # EURONEXT GROWTH BRUSSELS
+                "MLXB" => "Brussels",   # EURONEXT ACCESS BRUSSELS
+                "XMSM" => "Dublin",     # EURONEXT DUBLIN
+                "XESM" => "Dublin",     # EURONEXT GROWTH DUBLIN
+                "XLIS" => "Lissabon",   # EURONEXT LISBON
+                "ENXL" => "Lissabon",   # EURONEXT ACCESS LISBON
+                "ALXL" => "Lissabon",   # EURONEXT GROWTH LISBON
+                "MTAA" => "Mailand",    # EURONEXT MILAN
+                "BGEM" => "Mailand",    # GLOBAL EQUITY MARKET
+                "MTAH" => "Mailand",    # TRADING AFTER HOURS
+                "ETLX" => "Mailand",    # EUROTLX
+                "ETFP" => "Mailand",    # ELECTRONIC ETF, ETC/ETN AND OPEN-END FUNDS MARKET
+                "XOSL" => "Oslo",       # OSLO BØRS
+                "XOAS" => "Oslo",       # EURONEXT EXPAND OSLO
+                "MERK" => "Oslo",       # EURONEXT GROWTH OSLO
+                "XPAR" => "Paris",      # EURONEXT PARIS
+                "ALXP" => "Paris",      # EURONEXT GROWTH PARIS
+                "XMLI" => "Paris",      # EURONEXT ACCESS PARIS
+                );
+            $exchange = $mic2location{uc($2)} if (exists($mic2location{uc($2)}));
         }
         
       }
@@ -190,14 +215,17 @@ sub aex {
       $info{$symbol, 'volume'}   = $table{Volume};
       $info{$symbol, 'volume'}   =~ s/,//g;
       $info{$symbol, 'open'}     = $table{Open};
+      $info{$symbol, 'close'}    = $table{"Previous Close"};
       $info{$symbol, 'high'}     = $table{High};
       $info{$symbol, 'low'}      = $table{Low};
 
       $info{$symbol, 'name'}     = $header->{name};
       $info{$symbol, 'isin'}     = $1 if $isin =~ /([A-Z0-9]{12})/;
+      $info{$symbol, 'exchange'} = $exchange if defined($exchange);
       $info{$symbol, 'last'}     = $header->{last};
 
-      $quoter->store_date(\%info, $symbol, {eurodate => $1}) if  $header->{date} =~ m|([0-9]{2}/[0-9]{2}/[0-9]{4})|;
+      $quoter->store_date(\%info, $symbol, {eurodate => $1}) if  $header->{date} =~ m|([0-9]{2}/[0-9]{2}/[0-9]{4}) - ([0-2][0-9]:[0-5][0-9])|;
+      $info{$symbol, 'time'}     = $2 if $2; # CE(S)T
 #    };	# End eval
 
     if ($@) {
@@ -217,7 +245,7 @@ sub aex {
 
 =head1 NAME
 
-Finance::Quote::AEX - Obtain quotes from Amsterdam Euronext eXchange
+Finance::Quote::AEX - Obtain quotes from Euronext Amsterdam/Paris/... eXchange
 
 =head1 SYNOPSIS
 
@@ -239,8 +267,8 @@ Finance::Quote->new().
 
 =head1 LABELS RETURNED
 
-The following labels may be returned: currency date high isin isodate last low
-name open success symbol volume. 
+The following labels may be returned: currency, date, time, high, isin, isodate,
+last, low, name, open, close, success, symbol, volume, exchange.
 
 =head1 Terms & Conditions
 
