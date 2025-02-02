@@ -177,7 +177,7 @@ sub onvista {
         map { $info{ $stock, $_ } = $json_quote->{$_} } qw(open high low last volume ask bid);
         $info{ $stock, 'price' } = $json_quote->{'last'};
         $info{ $stock, 'currency' } = $json_quote->{'isoCurrency'};
-        $info{ $stock, 'exchange' } = $json_quote->{'market'}{'nameExchange'};
+        $info{ $stock, 'exchange' } = $json_quote->{'market'}{'name'};
         $info{ $stock, 'close' } = $json_quote->{'previousLast'};
         $info{ $stock, 'p_change' } = $json_quote->{'performancePct'};
         $quoter->store_date(\%info, $stock, {isodate => substr $json_quote->{'datetimeLast'}, 0, 10});
