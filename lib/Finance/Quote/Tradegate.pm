@@ -39,7 +39,7 @@ sub parameters {
   return ('INST_ID');
 }
 
-our @labels = qw/symbol last close exchange volume open price change p_change/;
+our @labels = qw/symbol isin last close exchange volume open price change p_change date time ask bid/;
 
 sub labels {
   return (tradegate => \@labels,
@@ -93,6 +93,7 @@ sub tradegate {
         $td1 = ($lastvalue->look_down('_tag'=>'td'))[7];
         @child = $td1->content_list;
         my $date = substr($child[0], 0, 8);
+        my $time = substr($child[0], 9, 5); # CE(S)T
 
         $td1 = ($lastvalue->look_down('_tag'=>'td'))[9];
         @child = $td1->content_list;
@@ -112,16 +113,37 @@ sub tradegate {
         @child = $td1->content_list;
         my $volume = $child[0];
 
+        my $table = ($lastvalue->look_down('_tag'=>'table'))[1];
+
+        $td1 = ($table->look_down('_tag'=>'td'))[1];
+        @child = $td1->content_list;
+        my $ask = $child[0];
+        $ask =~ s/\.//g;
+        $ask =~ s/,/\./;
+
+        $td1 = ($table->look_down('_tag'=>'td'))[2];
+        @child = $td1->content_list;
+        my $bid = $child[0];
+        $bid =~ s/\.//g;
+        $bid =~ s/,/\./;
+
         my @searchvalue = $tree->look_down('class'=>'contentBox oneColum');
         my $isFound = 0;
-        foreach (@searchvalue)
+        foreach my $html (@searchvalue)
         {
-          if (($_->content_list)[0]{'_content'}[0]{'_content'}[0] eq 'Aktuelle Vergleichszahlen')
+          if (ref(($html->content_list)[0]) eq "HTML::Element" and ($html->content_list)[0]{'_content'}[0]{'_content'}[0] eq 'Aktuelle Vergleichszahlen')
           {
             $isFound = 1;
 
+            #-- open
+            $td1 = ($html->look_down('_tag'=>'td'))[4];
+            @child = $td1->content_list;
+            my $open = $child[0];
+            $open =~ s/\.//g;
+            $open =~ s/,/\./;
+
             #-- change (absolute change)
-            $td1 = ($_->look_down('_tag'=>'td'))[13];
+            $td1 = ($html->look_down('_tag'=>'td'))[13];
             @child = $td1->content_list;
             my $change = $child[0];
             $change =~ s/\.//g;
@@ -131,14 +153,14 @@ sub tradegate {
             $change = $splitcchange[0];
 
             #-- p_change (relative change)
-            $td1 = ($_->look_down('_tag'=>'td'))[16];
+            $td1 = ($html->look_down('_tag'=>'td'))[16];
             @child = $td1->content_list;
             my $p_change =$child[0];
             $p_change =~ s/[\.|%]//g;
             $p_change =~ s/,/\./;
 
             #-- close
-            $td1 = ($_->look_down('_tag'=>'td'))[34];
+            $td1 = ($html->look_down('_tag'=>'td'))[34];
             @child = $td1->content_list;
             my $close = $child[0];
             $close =~ s/\.//g;
@@ -150,6 +172,7 @@ sub tradegate {
             $info{$symbol, 'success'}   = 1;
             $info{$symbol, 'method'}    = 'Tradegate';
             $info{$symbol, 'symbol'}    = $isin;
+            $info{$symbol, 'isin'}      = $isin;
             $info{$symbol, 'name'}      = $sharename;
             $info{$symbol, 'exchange'}  = $exchange;
             $info{$symbol, 'last'}      = $price;
@@ -161,6 +184,10 @@ sub tradegate {
             $info{$symbol, 'currency'}  = $currency;
             #$info{$symbol, 'date'}     = $date;
             $quoter->store_date(\%info, $symbol, {eurodate => $date});
+            $info{$symbol, 'time'}     = $time;
+            $info{$symbol, 'open'}     = $open;
+            $info{$symbol, 'ask'}      = $ask;
+            $info{$symbol, 'bid'}      = $bid;
           }
         }
 
@@ -235,8 +262,12 @@ last
 method
 success
 symbol
+isin
 volume
 price
 close
+open
+ask
+bid
 change
 p_change
