@@ -116,7 +116,7 @@ sub tradegate {
         my $isFound = 0;
         foreach (@searchvalue)
         {
-          if (($_->content_list)[0]{'_content'}[0]{'_content'}[0] eq 'Aktuelle Vergleichszahlen')
+          if (ref(($_->content_list)[0]) eq "HTML::Element" and ($_->content_list)[0]{'_content'}[0]{'_content'}[0] eq 'Aktuelle Vergleichszahlen')
           {
             $isFound = 1;
 
