@@ -100,19 +100,28 @@ sub onvista {
         $json_decoded = decode_json $json;
         ### [<now>] JSON Decoded: $json_decoded
 
-        my $result_array = $json_decoded->{'props'}{'pageProps'}{'facets'}[0]{'results'};
+        my $result_array;
+        if ($json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'instrument'}) {
+            $result_array = [ $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'instrument'} ];
+        } else {
+            $result_array = $json_decoded->{'props'}{'pageProps'}{'facets'}[0]{'results'};
+        }
         ### [<now>] Result Array: $result_array
-
-        # By default set URL to first in array
-        # For US stocks, the symbol may not match stock
-        $url = $json_decoded->{'props'}{'pageProps'}{'facets'}[0]{'results'}[0]{'urls'}{'WEBSITE'};
-        foreach my $item( @$result_array ) {
+        my $item;
+        foreach $item ( @$result_array ) {
           ### [<now>] Item: $item
-          if ( $item->{'symbol'} && $item->{'symbol'} eq $stock ) {
-            $url = $item->{'urls'}{'WEBSITE'};
+          if ( ($item->{'symbol'} && $item->{'symbol'} eq $stock)
+             or ($item->{'wkn'} && $item->{'wkn'} eq $stock)
+             or ($item->{'isin'} && $item->{'isin'} eq $stock)
+             ) {
             last;
           }
         }
+
+        # By default set URL to first in array
+        # For US stocks, the symbol may not match stock
+        $item ||= $result_array->[0];
+        $url = $item->{'urls'}{'WEBSITE'};
 
         unless ( $url ) {
           $info{ $stock, "success" } = 0;

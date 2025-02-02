@@ -9,7 +9,7 @@ if (not $ENV{'ONLINE_TEST'}) {
 }
 
 my $q        = Finance::Quote->new('OnVista');
-my @valid    = qw/MRK AAPL SAP/;
+my @valid    = qw/MRK AAPL SAP FR0010510800 A3GQ2N/;
 my @invalid  = qw/BOGUS/;
 my @symbols  = (@valid, @invalid);
 my $year     = (localtime())[5] + 1900;
