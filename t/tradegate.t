@@ -24,6 +24,7 @@ my $window   = 32;   # XS2630111719 quotes are only updates 1-2 a month
 
 my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_reference)
                 'success'  => sub {$_[0]},
+                'name'     => sub {defined($_[0])},
                 'last'     => sub {looks_like_number($_[0])},
                 'volume'   => sub {looks_like_number($_[0])},
                 'price'    => sub {looks_like_number($_[0])},
