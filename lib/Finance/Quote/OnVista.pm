@@ -29,6 +29,8 @@ use Encode qw(decode encode_utf8);
 use HTML::TreeBuilder;
 use HTTP::Request::Common;
 use JSON qw( decode_json );
+use Date::Parse qw(str2time);
+use POSIX qw(strftime);
 
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments', '###';
@@ -41,7 +43,7 @@ my $ONVISTA_URL = 'https://www.onvista.de/suche/';
 # Modify LABELS to those returned by the method
 
 our $DISPLAY    = 'OnVista - Germany';
-our @LABELS     = qw/symbol name open high low last date volume currency exchange method/;
+our @LABELS     = qw/symbol isin wkn name open close high low last date volume currency exchange method ask bid p_change time/;
 our $METHODHASH = {subroutine => \&onvista, 
                    display => $DISPLAY, 
                    labels => \@LABELS};
@@ -76,10 +78,6 @@ sub onvista {
     my $body    = $reply->decoded_content;
 
     ### Body: $body
-
-    my ($name, $bid, $ask, $last, $open, $high, $low, $date);
-
-    $info{ $stock, "symbol" } = $stock;
 
     if ( $code == 200 ) {
 
@@ -121,6 +119,7 @@ sub onvista {
         # By default set URL to first in array
         # For US stocks, the symbol may not match stock
         $item ||= $result_array->[0];
+        map { $info{ $stock, $_ } = $item->{$_} } qw(symbol wkn isin);
         $url = $item->{'urls'}{'WEBSITE'};
 
         unless ( $url ) {
@@ -174,17 +173,17 @@ sub onvista {
         $info{ $stock, 'method' } = 'onvista';
         $info{ $stock, 'name' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'instrument'}{'name'};
         my $json_quote = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'};
-        $info{ $stock, 'open' } = $json_quote->{'open'};
-        $info{ $stock, 'high' } = $json_quote->{'high'};
-        $info{ $stock, 'low' } = $json_quote->{'low'};
-        $info{ $stock, 'last' } = $json_quote->{'last'};
+        map { $info{ $stock, $_ } = $json_quote->{$_} } qw(open high low last volume ask bid);
         $info{ $stock, 'price' } = $json_quote->{'last'};
         $info{ $stock, 'currency' } = $json_quote->{'isoCurrency'};
-        $info{ $stock, 'volume' } = $json_quote->{'volume'};
         $info{ $stock, 'exchange' } = $json_quote->{'market'}{'name'};
-        $date = $json_quote->{'datetimeLast'};
-        $quoter->store_date(\%info, $stock, {isodate => substr $date, 0, 10});
+        $info{ $stock, 'close' } = $json_quote->{'previousLast'};
+        $info{ $stock, 'p_change' } = $json_quote->{'performancePct'};
+        $quoter->store_date(\%info, $stock, {isodate => substr $json_quote->{'datetimeLast'}, 0, 10});
 
+        #$info{ $stock, 'time' } = substr $date, 11, 5; # UTC
+        my $utc_timestamp = str2time($json_quote->{'datetimeLast'});
+        $info{ $stock, 'time' } = strftime("%H:%M", localtime($utc_timestamp)); # local time zone
       } else {
         $tree->eof;
         $info{ $stock, "success" } = 0;
@@ -245,7 +244,13 @@ The following labels are returned:
 
 =item symbol
 
+=item isin
+
+=item wkn
+
 =item open
+
+=item close
 
 =item high
 
@@ -259,6 +264,10 @@ The following labels are returned:
 
 =item date
 
+=item time
+
 =item currency
+
+=item p_change
 
 =back
