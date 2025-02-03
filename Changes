@@ -1,4 +1,6 @@
 {{$NEXT}}
+	* Added label wkn, ìsin, close, ask, bid, p_change, time to OnVista.pm
+	* Modified OnVista.pm to enable search by ISIN and WKN and search for ETFs
 	* Fixed XETRA.pm - Issue #460
 	* Added methodinfo hash to Fool.pm
 	* Fixed MorningstarJP.pm - Issue #443 - PR #451
