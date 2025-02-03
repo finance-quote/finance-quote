@@ -1,5 +1,6 @@
 {{$NEXT}}
-	* Added label exchange, close, time to AEX.pm - PR #465
+	* Added methodinfo hash to AEX.pm - PR #466
+	* Added label exchange, close, time to AEX.pm - PR #466
 	* Fixed XETRA.pm - Issue #460
 	* Added methodinfo hash to Fool.pm
 	* Fixed MorningstarJP.pm - Issue #443 - PR #451

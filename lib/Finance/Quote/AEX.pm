@@ -24,24 +24,35 @@ use warnings;
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
 
-use vars qw( $AEX_URL);
-
 use LWP::UserAgent;
 use Web::Scraper;
 use String::Util qw(trim);
 
 # VERSION
 
-sub methods { 
-  return (dutch => \&aex,
-          aex   => \&aex);
+my $EURONEXT_URL = "https://live.euronext.com/en/search_instruments/";
+
+our $DISPLAY    = 'Euronext';
+our @LABELS = qw/name symbol price last date time p_change bid ask offer open high low close volume currency method exchange/;
+our $METHODHASH = {subroutine => \&aex,
+                   display => $DISPLAY,
+                   labels => \@LABELS};
+
+sub labels {
+  my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
-our @labels = qw/name symbol price last date time p_change bid ask offer open high low close volume currency method exchange/;
+sub methodinfo {
+    return (
+        euronext => $METHODHASH,
+        # for compatibility of older versions
+        dutch    => $METHODHASH,
+        aex      => $METHODHASH,
+    );
+}
 
-sub labels { 
-  return (dutch => \@labels,
-          aex   => \@labels);
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub aex {
@@ -58,7 +69,7 @@ sub aex {
     my ($isin, $exchange);
 
 #    eval {
-      my $search = "https://live.euronext.com/en/search_instruments/$symbol";
+      my $search = $EURONEXT_URL . $symbol;
       $reply  = $ua->get($search);
 
       ### Search: $search, $reply->code
