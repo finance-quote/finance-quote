@@ -5,7 +5,7 @@
 - module: AEX.pm
   state: working
   added: TBD
-  changed: 2024-05-11
+  changed: 2025-02-02
   removed: ~
   urls:
     - https://live.euronext.com/en/search_instruments/
@@ -21,6 +21,8 @@
     - AMG
     - LVMH
     - NL0000009165
+    - BE0974293251
+    - IE0002MXIF34
 #
 - module: AIAHK.pm
   state: removed
