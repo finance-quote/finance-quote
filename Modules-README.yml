@@ -874,7 +874,7 @@
 - module: OnVista.pm
   state: working
   added: TBD
-  changed: 2024-10-07
+  changed: 2025-02-02
   removed: ~
   urls:
     - https://www.onvista.de/suche/<symbol>
@@ -888,6 +888,8 @@
     - MRK
     - AAPL
     - SAP
+    - FR0010510800
+    - A3GQ2N
 #
 - module: Oslobors.pm
   state: failing
