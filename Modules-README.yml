@@ -1063,7 +1063,7 @@
 - module: Tradegate.pm
   state: working
   added: 2022-10-19
-  changed: 2023-11-27
+  changed: 2025-02-02
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
@@ -1079,6 +1079,8 @@
     - FR0000120628
     - XS0937858271
     - NL0000009165
+    - GB00BLD4ZM24
+    - FR0010510800
 #
 - module: Tradeville.pm
   state: failing
