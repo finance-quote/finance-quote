@@ -33,7 +33,7 @@ my $TRADEGATE_URL = 'https://web.s-investor.de/app/detail.htm?boerse=TDG&isin=';
 our $DISPLAY    = 'Euronext';
 # see https://web.s-investor.de/app/webauswahl.jsp for "Institutsliste"
 our $FEATURES   = {'INST_ID' => 'Institut Id (default: 0000057 for "Sparkasse Krefeld")' };
-our @LABELS     = qw/symbol isin last close exchange volume open price change p_change date time ask bid/;
+our @LABELS     = qw/symbol isin last close exchange volume open price change p_change date time low high/;
 our $METHODHASH = {subroutine => \&tradegate,
                    display => $DISPLAY,
                    labels => \@LABELS,
@@ -125,15 +125,15 @@ sub tradegate {
 
         $td1 = ($table->look_down('_tag'=>'td'))[1];
         @child = $td1->content_list;
-        my $ask = $child[0];
-        $ask =~ s/\.//g;
-        $ask =~ s/,/\./;
+        my $low = $child[0];
+        $low =~ s/\.//g;
+        $low =~ s/,/\./;
 
         $td1 = ($table->look_down('_tag'=>'td'))[2];
         @child = $td1->content_list;
-        my $bid = $child[0];
-        $bid =~ s/\.//g;
-        $bid =~ s/,/\./;
+        my $high = $child[0];
+        $high =~ s/\.//g;
+        $high =~ s/,/\./;
 
         my @searchvalue = $tree->look_down('class'=>'contentBox oneColum');
         my $isFound = 0;
@@ -194,8 +194,8 @@ sub tradegate {
             $quoter->store_date(\%info, $symbol, {eurodate => $date});
             $info{$symbol, 'time'}     = $time;
             $info{$symbol, 'open'}     = $open;
-            $info{$symbol, 'ask'}      = $ask;
-            $info{$symbol, 'bid'}      = $bid;
+            $info{$symbol, 'low'}      = $low;
+            $info{$symbol, 'high'}     = $high;
           }
         }
 
@@ -277,7 +277,7 @@ volume
 price
 close
 open
-ask
-bid
+low
+high
 change
 p_change
