@@ -24,24 +24,35 @@ use warnings;
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
 
-use vars qw( $AEX_URL);
-
 use LWP::UserAgent;
 use Web::Scraper;
 use String::Util qw(trim);
 
 # VERSION
 
-sub methods { 
-  return (dutch => \&aex,
-          aex   => \&aex);
+my $EURONEXT_URL = "https://live.euronext.com/en/search_instruments/";
+
+our $DISPLAY    = 'Euronext';
+our @LABELS = qw/name symbol price last date time p_change bid ask offer open high low close volume currency method exchange/;
+our $METHODHASH = {subroutine => \&aex,
+                   display => $DISPLAY,
+                   labels => \@LABELS};
+
+sub labels {
+  my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
-our @labels = qw/name symbol price last date time p_change bid ask offer open high low close volume currency method exchange/;
+sub methodinfo {
+    return (
+        euronext => $METHODHASH,
+        # for compatibility of older versions
+        dutch    => $METHODHASH,
+        aex      => $METHODHASH,
+    );
+}
 
-sub labels { 
-  return (dutch => \@labels,
-          aex   => \@labels);
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub aex {
@@ -55,10 +66,10 @@ sub aex {
   my $reply;
 
   foreach my $symbol (@_) {
-    my $isin = undef;
+    my ($isin, $mic);
 
 #    eval {
-      my $search = "https://live.euronext.com/en/search_instruments/$symbol";
+      my $search = $EURONEXT_URL . $symbol;
       $reply  = $ua->get($search);
 
       ### Search: $search, $reply->code
@@ -90,14 +101,14 @@ sub aex {
         }
 
         # die "Failed to find isin" unless $url->as_string =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)/|;
-        unless (defined($url) && $url->as_string =~ m|(/[A-Za-z0-9]{12}-[A-Za-z]+\b)|) {
+        unless (defined($url) && $url->as_string =~ m|/([A-Za-z0-9]{12})-([A-Za-z]+\b)|) {
             $info{$symbol, 'success'} = 0;
             $info{$symbol, 'errormsg'} = 'Cannot find ISIN for ' . $symbol;
             next;
         } else {
             $isin = uc($1);
+            $mic  = uc($2);
         }
-        
       }
       else {
         # Redirected
@@ -118,7 +129,7 @@ sub aex {
         my $url = $result->{redirect};
         
         # die "Failed to find isin in redirect" unless $url =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)|;
-        unless ($url =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)|) {
+        unless ($url =~ m|/([A-Za-z0-9]{12})-([A-Za-z]+\b)|) {
             $info{$symbol, 'success'} = 0;
             $info{$symbol, 'errormsg'} =
                 'Cannot find ISIN for ' . $symbol . ' in redirect';
@@ -126,8 +137,8 @@ sub aex {
         }
         
         $isin = uc($1);
+        $mic  = uc($2);
         ### ISIN: $isin
-
       }
   
       # die "No isin set" unless defined $isin;
@@ -147,7 +158,7 @@ sub aex {
     }
 
 #    eval {
-      my $url   = "https://live.euronext.com/en/ajax/getDetailedQuote/$isin";
+      my $url   = "https://live.euronext.com/en/ajax/getDetailedQuote/$isin-$mic";
       my %form  = (theme_name => 'euronext_live');
       $reply = $ua->post($url, \%form);
 
@@ -165,7 +176,7 @@ sub aex {
       my $header = $widget->scrape($reply);
       ### Header getDetailedQuote: $header
 
-      $url = "https://live.euronext.com/en/intraday_chart/getDetailedQuoteAjax/$isin/full";
+      $url = "https://live.euronext.com/en/intraday_chart/getDetailedQuoteAjax/$isin-$mic/full";
 
       $reply  = $ua->get($url);
       $widget = scraper {
@@ -190,14 +201,41 @@ sub aex {
       $info{$symbol, 'volume'}   = $table{Volume};
       $info{$symbol, 'volume'}   =~ s/,//g;
       $info{$symbol, 'open'}     = $table{Open};
+      $info{$symbol, 'close'}    = $table{"Previous Close"};
       $info{$symbol, 'high'}     = $table{High};
       $info{$symbol, 'low'}      = $table{Low};
 
       $info{$symbol, 'name'}     = $header->{name};
-      $info{$symbol, 'isin'}     = $1 if $isin =~ /([A-Z0-9]{12})/;
+      $info{$symbol, 'isin'}     = $isin;
       $info{$symbol, 'last'}     = $header->{last};
 
-      $quoter->store_date(\%info, $symbol, {eurodate => $1}) if  $header->{date} =~ m|([0-9]{2}/[0-9]{2}/[0-9]{4})|;
+      $quoter->store_date(\%info, $symbol, {eurodate => $1}) if  $header->{date} =~ m|([0-9]{2}/[0-9]{2}/[0-9]{4}) - ([0-2][0-9]:[0-5][0-9])|;
+      $info{$symbol, 'time'}     = $2 if $2; # CE(S)T
+
+      # see https://www.tradinghours.com/mic/s/<MIC>
+      my %mic2location = (
+        "XAMS" => "Amsterdam",  # EURONEXT AMSTERDAM
+        "XBRU" => "Brussels",   # EURONEXT BRUSSELS
+        "ALXB" => "Brussels",   # EURONEXT GROWTH BRUSSELS
+        "MLXB" => "Brussels",   # EURONEXT ACCESS BRUSSELS
+        "XMSM" => "Dublin",     # EURONEXT DUBLIN
+        "XESM" => "Dublin",     # EURONEXT GROWTH DUBLIN
+        "XLIS" => "Lisbon",     # EURONEXT LISBON
+        "ENXL" => "Lisbon",     # EURONEXT ACCESS LISBON
+        "ALXL" => "Lisbon",     # EURONEXT GROWTH LISBON
+        "MTAA" => "Milan",      # EURONEXT MILAN
+        "BGEM" => "Milan",      # GLOBAL EQUITY MARKET
+        "MTAH" => "Milan",      # TRADING AFTER HOURS
+        "ETLX" => "Milan",      # EUROTLX
+        "ETFP" => "Milan",      # ELECTRONIC ETF, ETC/ETN AND OPEN-END FUNDS MARKET
+        "XOSL" => "Oslo",       # OSLO BØRS
+        "XOAS" => "Oslo",       # EURONEXT EXPAND OSLO
+        "MERK" => "Oslo",       # EURONEXT GROWTH OSLO
+        "XPAR" => "Paris",      # EURONEXT PARIS
+        "ALXP" => "Paris",      # EURONEXT GROWTH PARIS
+        "XMLI" => "Paris",      # EURONEXT ACCESS PARIS
+        );
+      $info{$symbol, 'exchange'} = exists($mic2location{$mic}) ? $mic2location{$mic} : $mic;
 #    };	# End eval
 
     if ($@) {
@@ -217,7 +255,7 @@ sub aex {
 
 =head1 NAME
 
-Finance::Quote::AEX - Obtain quotes from Amsterdam Euronext eXchange
+Finance::Quote::AEX - Obtain quotes from Euronext Amsterdam/Paris/... eXchange
 
 =head1 SYNOPSIS
 
@@ -239,8 +277,8 @@ Finance::Quote->new().
 
 =head1 LABELS RETURNED
 
-The following labels may be returned: currency date high isin isodate last low
-name open success symbol volume. 
+The following labels may be returned: currency, date, time, high, isin, isodate,
+last, low, name, open, close, success, symbol, volume, exchange.
 
 =head1 Terms & Conditions
 
