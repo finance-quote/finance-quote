@@ -30,7 +30,7 @@ use String::Util qw(trim);
 # VERSION
 
 our $DISPLAY    = 'Comdirect - Frankfurt and other exchanges';
-our @LABELS     = qw/symbol name open high low last date currency isin method/;
+our @LABELS     = qw/symbol name open high low last date time p_change ask bid currency isin wkn method exchange/;
 our $METHODHASH = {subroutine => \&comdirect,
                    display => $DISPLAY, 
                    labels => \@LABELS};
@@ -54,7 +54,7 @@ sub comdirect {
   my $quoter  = shift;
   my @symbols = @_;
   my $ua      = $quoter->user_agent();
-  my (%info, %pricetable, $metatag);
+  my (%info, %pricetable, %infotable, $metatag);
 
   foreach my $symbol (@_) {
       my $url   = 'https://www.comdirect.de/inf/search/all.html?SEARCH_VALUE=' . $symbol;
@@ -69,15 +69,24 @@ sub comdirect {
 
       ### [<now>] Body: $body
 
-      my $te = HTML::TableExtract->new( count => 2, attribs => { class => 'simple-table' } );
+      my $te = HTML::TableExtract->new( count => 4, attribs => { class => 'simple-table' } );
       ### [<now>] TE: $te
-      unless ( $te->parse($body) ) {
+      unless ( $te->parse($body) and $te->first_table_found) {
         $info{ $symbol, "success" } = 0;
         $info{ $symbol, "errormsg" } = 'No price data found';
         next; 
       }
 
-      unless ($te->first_table_found) {
+      foreach my $row ($te->rows) {
+        ### [<now>] Row: $row
+        if (defined($row->[0])) {
+          $infotable{$row->[0]} = $row->[1];
+        }
+      }
+
+      $te = HTML::TableExtract->new( count => 2, attribs => { class => 'simple-table' } );
+      ### [<now>] TE: $te
+      unless ( $te->parse($body) and $te->first_table_found) {
         $info{ $symbol, "success" } = 0;
         $info{ $symbol, "errormsg" } = 'No price data found';
         next; 
@@ -90,24 +99,35 @@ sub comdirect {
       }
       ### [<now>] Pricetable hash: %pricetable
 
-      unless (exists $pricetable{Zeit} and exists $pricetable{Aktuell}
-              and exists $pricetable{Hoch} and exists $pricetable{Tief}
-              and exists $pricetable{"Er\x{f6}ffnung"}) {
+      unless (exists $pricetable{Zeit} and exists $pricetable{Aktuell}) {
         $info{ $symbol, "success" } = 0;
         $info{ $symbol, "errormsg" } = 'Parse failed.';
         next; 
       }
-      
-      $pricetable{Aktuell}          =~ s/,/./;
-      $pricetable{Hoch}             =~ s/,/./;
-      $pricetable{Tief}             =~ s/,/./;
-      $pricetable{"Er\x{f6}ffnung"} =~ s/,/./;
+
+      foreach (qw(Aktuell Hoch Tief Geld Brief), "Er\x{f6}ffnung", "Schluss Vortag", "Diff. Vortag") {
+        if (defined $pricetable{$_}) {
+          $pricetable{$_} =~ s/^\s+|\s+$//g;
+          $pricetable{$_} =~ s/^Realtime Kurs//;
+          $pricetable{$_} =~ s/,/./;
+        }
+      }
 
       $info{$symbol, 'last'}      = $1 if $pricetable{Aktuell} =~ /^([0-9.]+)/;
-      $info{$symbol, 'currency'}  = $1 if $pricetable{Aktuell} =~ /([A-Z]+)$/;
+      $info{$symbol, 'currency'}  = $1 if $pricetable{Aktuell} =~ /([A-Z]+)$/ or $infotable{"W\x{e4}hrung"} =~ /([A-Z]+)$/;
+      $info{$symbol, 'exchange'}  = $pricetable{"B\x{f6}rse"};
       $info{$symbol, 'open'}      = $pricetable{"Er\x{f6}ffnung"};
+      $info{$symbol, 'close'}     = $pricetable{"Schluss Vortag"};
       $info{$symbol, 'high'}      = $pricetable{Hoch};
       $info{$symbol, 'low'}       = $pricetable{Tief};
+      $info{$symbol, 'ask'}       = $pricetable{Brief};
+      $info{$symbol, 'bid'}       = $pricetable{Geld};
+
+      $info{$symbol, 'p_change'}  = $1 if $pricetable{"Diff. Vortag"} =~ /([+-][0-9]+\.[0-9]+)\x{a0}%/;
+
+      $info{$symbol, 'isin'}      = $infotable{ISIN};
+      $info{$symbol, 'wkn'}       = $infotable{WKN};
+      $info{$symbol, 'symbol'}    = $infotable{Symbol};
 
       # Use HTML::TreeBuilder to get Name
       my $tree = HTML::TreeBuilder->new;
@@ -117,15 +137,16 @@ sub comdirect {
           my @list = split(',', $metatag->attr('content'));
           ### [<now>] List: @list
           $info{$symbol, 'name'} = $list[0];
-          ($info{$symbol, 'isin'}) = $list[2] =~ /ISIN: ([A-Z0-9]{12}) /;
         }
       }
 
-      $quoter->store_date(\%info, $symbol, {eurodate => $1}) if $pricetable{Zeit} =~ /([0-9]{2}[.][0-9]{2}[.][0-9]{2})/;
+      if ($pricetable{Zeit} =~ /([0-9]{2}[.][0-9]{2}[.][0-9]{2}) ([ 0-9][0-9]:[0-9][0-9])/) {
+        $quoter->store_date(\%info, $symbol, {eurodate => $1});
+        $info{$symbol, 'time'} = $2;
+      }
 
       $info{$symbol, 'method'}    = 'comdirect';
       $info{$symbol, 'success'}   = 1;
-    
   }
 
   return wantarray() ? %info : \%info;
