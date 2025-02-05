@@ -69,6 +69,22 @@ sub comdirect {
 
       ### [<now>] Body: $body
 
+      my $tree = HTML::TreeBuilder->new;
+      unless ($tree->parse($body)) {
+        $info{ $symbol, "success" } = 0;
+        $info{ $symbol, "errormsg" } = 'Parse body failed';
+        next;
+      }
+
+      my $select = $tree->look_down(_tag => 'select', name=> 'ID_NOTATION', id=> "marketSelect");
+      if ($select) {
+        my $option = $select->look_down(_tag => 'option', selected => 'selected');
+        if ($option) {
+          $info{$symbol, 'exchange'} = $option->as_text;
+          #$info{$symbol, 'notation_id'} = $option->attr('value');
+        }
+      }
+
       my $te = HTML::TableExtract->new( count => 4, attribs => { class => 'simple-table' } );
       ### [<now>] TE: $te
       unless ( $te->parse($body) and $te->first_table_found) {
@@ -115,7 +131,7 @@ sub comdirect {
 
       $info{$symbol, 'last'}      = $1 if $pricetable{Aktuell} =~ /^([0-9.]+)/;
       $info{$symbol, 'currency'}  = $1 if $pricetable{Aktuell} =~ /([A-Z]+)$/ or $infotable{"W\x{e4}hrung"} =~ /([A-Z]+)$/;
-      $info{$symbol, 'exchange'}  = $pricetable{"B\x{f6}rse"};
+      #$info{$symbol, 'exchange'}  = $pricetable{"B\x{f6}rse"};
       $info{$symbol, 'open'}      = $pricetable{"Er\x{f6}ffnung"};
       $info{$symbol, 'close'}     = $pricetable{"Schluss Vortag"};
       $info{$symbol, 'high'}      = $pricetable{Hoch};
@@ -129,15 +145,10 @@ sub comdirect {
       $info{$symbol, 'wkn'}       = $infotable{WKN};
       $info{$symbol, 'symbol'}    = $infotable{Symbol};
 
-      # Use HTML::TreeBuilder to get Name
-      my $tree = HTML::TreeBuilder->new;
-      if ($tree->parse($body)) {
-        $tree->eof;
-        if ($metatag = $tree->look_down(_tag => 'meta', name => 'description')) {
-          my @list = split(',', $metatag->attr('content'));
-          ### [<now>] List: @list
-          $info{$symbol, 'name'} = $list[0];
-        }
+      if ($metatag = $tree->look_down(_tag => 'meta', name => 'description')) {
+        my @list = split(',', $metatag->attr('content'));
+        ### [<now>] List: @list
+        $info{$symbol, 'name'} = $list[0];
       }
 
       if ($pricetable{Zeit} =~ /([0-9]{2}[.][0-9]{2}[.][0-9]{2}) ([ 0-9][0-9]:[0-9][0-9])/) {
