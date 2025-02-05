@@ -5,7 +5,7 @@
 - module: AEX.pm
   state: working
   added: TBD
-  changed: 2025-02-02
+  changed: 2025-02-05
   removed: ~
   urls:
     - https://live.euronext.com/en/search_instruments/

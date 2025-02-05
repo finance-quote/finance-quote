@@ -66,7 +66,7 @@ sub aex {
   my $reply;
 
   foreach my $symbol (@_) {
-    my ($isin, $exchange);
+    my ($isin, $mic);
 
 #    eval {
       my $search = $EURONEXT_URL . $symbol;
@@ -101,39 +101,14 @@ sub aex {
         }
 
         # die "Failed to find isin" unless $url->as_string =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)/|;
-        unless (defined($url) && $url->as_string =~ m|(/[A-Za-z0-9]{12}-([A-Za-z]+)\b)|) {
+        unless (defined($url) && $url->as_string =~ m|/([A-Za-z0-9]{12})-([A-Za-z]+\b)|) {
             $info{$symbol, 'success'} = 0;
             $info{$symbol, 'errormsg'} = 'Cannot find ISIN for ' . $symbol;
             next;
         } else {
             $isin = uc($1);
-
-            # see https://www.tradinghours.com/mic/s/<MIC>
-            my %mic2location = (
-                "XAMS" => "Amsterdam",  # EURONEXT AMSTERDAM
-                "XBRU" => "Brussels",   # EURONEXT BRUSSELS
-                "ALXB" => "Brussels",   # EURONEXT GROWTH BRUSSELS
-                "MLXB" => "Brussels",   # EURONEXT ACCESS BRUSSELS
-                "XMSM" => "Dublin",     # EURONEXT DUBLIN
-                "XESM" => "Dublin",     # EURONEXT GROWTH DUBLIN
-                "XLIS" => "Lissabon",   # EURONEXT LISBON
-                "ENXL" => "Lissabon",   # EURONEXT ACCESS LISBON
-                "ALXL" => "Lissabon",   # EURONEXT GROWTH LISBON
-                "MTAA" => "Mailand",    # EURONEXT MILAN
-                "BGEM" => "Mailand",    # GLOBAL EQUITY MARKET
-                "MTAH" => "Mailand",    # TRADING AFTER HOURS
-                "ETLX" => "Mailand",    # EUROTLX
-                "ETFP" => "Mailand",    # ELECTRONIC ETF, ETC/ETN AND OPEN-END FUNDS MARKET
-                "XOSL" => "Oslo",       # OSLO BØRS
-                "XOAS" => "Oslo",       # EURONEXT EXPAND OSLO
-                "MERK" => "Oslo",       # EURONEXT GROWTH OSLO
-                "XPAR" => "Paris",      # EURONEXT PARIS
-                "ALXP" => "Paris",      # EURONEXT GROWTH PARIS
-                "XMLI" => "Paris",      # EURONEXT ACCESS PARIS
-                );
-            $exchange = $mic2location{uc($2)} if (exists($mic2location{uc($2)}));
+            $mic  = uc($2);
         }
-        
       }
       else {
         # Redirected
@@ -154,7 +129,7 @@ sub aex {
         my $url = $result->{redirect};
         
         # die "Failed to find isin in redirect" unless $url =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)|;
-        unless ($url =~ m|/([A-Za-z0-9]{12}-[A-Za-z]+)|) {
+        unless ($url =~ m|/([A-Za-z0-9]{12})-([A-Za-z]+\b)|) {
             $info{$symbol, 'success'} = 0;
             $info{$symbol, 'errormsg'} =
                 'Cannot find ISIN for ' . $symbol . ' in redirect';
@@ -162,8 +137,8 @@ sub aex {
         }
         
         $isin = uc($1);
+        $mic  = uc($2);
         ### ISIN: $isin
-
       }
   
       # die "No isin set" unless defined $isin;
@@ -183,7 +158,7 @@ sub aex {
     }
 
 #    eval {
-      my $url   = "https://live.euronext.com/en/ajax/getDetailedQuote/$isin";
+      my $url   = "https://live.euronext.com/en/ajax/getDetailedQuote/$isin-$mic";
       my %form  = (theme_name => 'euronext_live');
       $reply = $ua->post($url, \%form);
 
@@ -201,7 +176,7 @@ sub aex {
       my $header = $widget->scrape($reply);
       ### Header getDetailedQuote: $header
 
-      $url = "https://live.euronext.com/en/intraday_chart/getDetailedQuoteAjax/$isin/full";
+      $url = "https://live.euronext.com/en/intraday_chart/getDetailedQuoteAjax/$isin-$mic/full";
 
       $reply  = $ua->get($url);
       $widget = scraper {
@@ -231,12 +206,36 @@ sub aex {
       $info{$symbol, 'low'}      = $table{Low};
 
       $info{$symbol, 'name'}     = $header->{name};
-      $info{$symbol, 'isin'}     = $1 if $isin =~ /([A-Z0-9]{12})/;
-      $info{$symbol, 'exchange'} = $exchange if defined($exchange);
+      $info{$symbol, 'isin'}     = $isin;
       $info{$symbol, 'last'}     = $header->{last};
 
       $quoter->store_date(\%info, $symbol, {eurodate => $1}) if  $header->{date} =~ m|([0-9]{2}/[0-9]{2}/[0-9]{4}) - ([0-2][0-9]:[0-5][0-9])|;
       $info{$symbol, 'time'}     = $2 if $2; # CE(S)T
+
+      # see https://www.tradinghours.com/mic/s/<MIC>
+      my %mic2location = (
+        "XAMS" => "Amsterdam",  # EURONEXT AMSTERDAM
+        "XBRU" => "Brussels",   # EURONEXT BRUSSELS
+        "ALXB" => "Brussels",   # EURONEXT GROWTH BRUSSELS
+        "MLXB" => "Brussels",   # EURONEXT ACCESS BRUSSELS
+        "XMSM" => "Dublin",     # EURONEXT DUBLIN
+        "XESM" => "Dublin",     # EURONEXT GROWTH DUBLIN
+        "XLIS" => "Lisbon",     # EURONEXT LISBON
+        "ENXL" => "Lisbon",     # EURONEXT ACCESS LISBON
+        "ALXL" => "Lisbon",     # EURONEXT GROWTH LISBON
+        "MTAA" => "Milan",      # EURONEXT MILAN
+        "BGEM" => "Milan",      # GLOBAL EQUITY MARKET
+        "MTAH" => "Milan",      # TRADING AFTER HOURS
+        "ETLX" => "Milan",      # EUROTLX
+        "ETFP" => "Milan",      # ELECTRONIC ETF, ETC/ETN AND OPEN-END FUNDS MARKET
+        "XOSL" => "Oslo",       # OSLO BØRS
+        "XOAS" => "Oslo",       # EURONEXT EXPAND OSLO
+        "MERK" => "Oslo",       # EURONEXT GROWTH OSLO
+        "XPAR" => "Paris",      # EURONEXT PARIS
+        "ALXP" => "Paris",      # EURONEXT GROWTH PARIS
+        "XMLI" => "Paris",      # EURONEXT ACCESS PARIS
+        );
+      $info{$symbol, 'exchange'} = exists($mic2location{$mic}) ? $mic2location{$mic} : $mic;
 #    };	# End eval
 
     if ($@) {
