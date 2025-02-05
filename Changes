@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Added methodinfo hash to Tradegate.pm - PR #465
 	* Added label isin, open, ask, bid, time to Tradegate.pm - PR #465
 	* Fixed Tradegate.pm - Search for ETFs - PR #465
 	* Fixed XETRA.pm - Issue #460

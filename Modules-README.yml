@@ -1063,10 +1063,11 @@
 - module: Tradegate.pm
   state: working
   added: 2022-10-19
-  changed: 2025-02-02
+  changed: 2025-02-05
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+    - https://web.s-investor.de/app/fonds.htm?INST_ID=0000057
     - https://web.s-investor.de/app/webauswahl.jsp
   notes: |
     INST_ID is an optional parameter.

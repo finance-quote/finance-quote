@@ -28,22 +28,30 @@ use Web::Scraper;
 
 # VERSION
 
-my $Tradegate_URL = 'https://web.s-investor.de/app/detail.htm?boerse=TDG&isin=';
+my $TRADEGATE_URL = 'https://web.s-investor.de/app/detail.htm?boerse=TDG&isin=';
 
-sub methods {
-  return (tradegate => \&tradegate,
-          europe    => \&tradegate);
-}
-
-sub parameters {
-  return ('INST_ID');
-}
-
-our @labels = qw/symbol isin last close exchange volume open price change p_change date time ask bid/;
+our $DISPLAY    = 'Euronext';
+# see https://web.s-investor.de/app/webauswahl.jsp for "Institutsliste"
+our $FEATURES   = {'INST_ID' => 'Institut Id (default: 0000057 for "Sparkasse Krefeld")' };
+our @LABELS     = qw/symbol isin last close exchange volume open price change p_change date time ask bid/;
+our $METHODHASH = {subroutine => \&tradegate,
+                   display => $DISPLAY,
+                   labels => \@LABELS,
+                   features => $FEATURES};
 
 sub labels {
-  return (tradegate => \@labels,
-          europe    => \@labels);
+  my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
+
+sub methodinfo {
+    return (
+        tradegate => $METHODHASH,
+        europe    => $METHODHASH,
+    );
+}
+
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub tradegate {
@@ -61,7 +69,7 @@ sub tradegate {
 
   foreach my $symbol (@_) {
     eval {
-      my $url = $Tradegate_URL
+      my $url = $TRADEGATE_URL
                 . $symbol
                 . '&INST_ID='
                 . $inst_id;
