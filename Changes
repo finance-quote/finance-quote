@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Changed useragent in YahooJSON.pm - Issue #467
 	* Added methodinfo hash to AEX.pm - PR #466
 	* Added label exchange, close, time to AEX.pm - PR #466
 	* Fixed XETRA.pm - Issue #460

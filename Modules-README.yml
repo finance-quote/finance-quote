@@ -22,7 +22,6 @@
     - LVMH
     - NL0000009165
     - BE0974293251
-    - IE0002MXIF34
 #
 - module: AIAHK.pm
   state: removed
@@ -1315,7 +1314,7 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2024-09-23
+  changed: 2025-02-19
   removed:
   urls:
     - https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price,summaryDetail,defaultKeyStatistics
