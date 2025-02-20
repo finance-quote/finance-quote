@@ -22,7 +22,6 @@
     - LVMH
     - NL0000009165
     - BE0974293251
-    - IE0002MXIF34
 #
 - module: AIAHK.pm
   state: removed
