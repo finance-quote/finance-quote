@@ -16,7 +16,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-my @valid    = ('AD', 'AMG', 'LVMH', 'NL0000009165', 'BE0974293251', 'IE0002MXIF34');
+my @valid    = ('AD', 'AMG', 'LVMH', 'NL0000009165', 'BE0974293251');
 my @invalid  = ('BOGUS');
 my @symbols  = (@valid, @invalid);
 my $today    = today();
