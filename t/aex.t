@@ -16,7 +16,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-my @valid    = ('AD', 'AMG', 'LVMH', 'NL0000009165');
+my @valid    = ('AD', 'AMG', 'LVMH', 'NL0000009165', 'BE0974293251');
 my @invalid  = ('BOGUS');
 my @symbols  = (@valid, @invalid);
 my $today    = today();
@@ -30,6 +30,7 @@ my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_refer
                 'date'    => sub {my $a = Date::Manip::Date->new(); $a->parse_format('%m/%d/%Y', $_[0]);
                                   my $b = Date::Manip::Date->new(); $b->parse_format('%Y-%m-%d', $_[2]->{$_[1], 'isodate'});
                                   return $a->cmp($b) == 0;},
+                'exchange' => sub {defined($_[0])},
                );
 my $q        = Finance::Quote->new();
 

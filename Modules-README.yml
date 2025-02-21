@@ -5,7 +5,7 @@
 - module: AEX.pm
   state: working
   added: TBD
-  changed: 2024-05-11
+  changed: 2025-02-05
   removed: ~
   urls:
     - https://live.euronext.com/en/search_instruments/
@@ -21,6 +21,7 @@
     - AMG
     - LVMH
     - NL0000009165
+    - BE0974293251
 #
 - module: AIAHK.pm
   state: removed
@@ -1316,7 +1317,7 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2024-09-23
+  changed: 2025-02-19
   removed:
   urls:
     - https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price,summaryDetail,defaultKeyStatistics
@@ -1343,7 +1344,7 @@
 - module: YahooWeb.pm
   state: working
   added: 2023-05-31
-  changed: 2024-04-21
+  changed: 2025-02-20
   removed:
   urls:
     - https://finance.yahoo.com/quote/{$symbol}?p={$symbol}

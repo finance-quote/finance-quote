@@ -17,6 +17,7 @@ package Finance::Quote::YahooWeb;
 use warnings;
 use strict;
 
+use Encode qw( encode_utf8 );
 use HTTP::Request::Common;
 use HTML::TreeBuilder::XPath;
 use JSON qw( decode_json );
@@ -35,20 +36,28 @@ use constant JSONBODY => "body";
 push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, MaxLineLength => 0);
 
 my $URL   = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://finance.yahoo.com/quote/{$symbol}/history?p={$symbol}');
-my $AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36';
+my $AGENT = 'Mozilla/5.0';
 my $XPATH = Text::Template->new(TYPE => 'STRING', SOURCE => '//*[@data-symbol=~"^{$symbol}$"][@data-field=~"regularMarketPrice"]');
 
-sub methods { 
-    return ( yahooweb => \&yahooweb );
+our $DISPLAY    = '<Module Name + Brief Info>';
+our @LABELS     = qw/symbol name exchange currency isodate last open high low volume/;
+our $METHODHASH = {subroutine => \&yahooweb, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS};
+
+sub methodinfo {
+    return ( 
+        yahooweb => $METHODHASH,
+    );
 }
 
-{
-    our @labels =
-        qw/symbol name exchange currency isodate last open high low volume/;
+sub labels {
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
 
-    sub labels {
-        return ( yahooweb => \@labels );
-    }
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub yahooweb {
@@ -93,7 +102,7 @@ sub yahooweb {
         ### [<now>] numfound: @numfound
 
         my $json_data;
-        eval {$json_data = JSON::decode_json $numfound[0]};
+        eval {$json_data = decode_json encode_utf8( $numfound[0] )};
         if($@) {
             $info{ $symbol, 'success' } = 0;
             $info{ $symbol, 'errormsg' } = $@;
@@ -103,10 +112,10 @@ sub yahooweb {
         ### [<now>] json_data: $json_data
 
         my $json_body =
-            $json_data->{'body'};
+            encode_utf8($json_data->{'body'});
         ### [<now>] json_body: $json_body;
 
-        eval {$json_data = JSON::decode_json $json_body};
+        eval {$json_data = decode_json $json_body};
         if($@) {
             $info{ $symbol, 'success' } = 0;
             $info{ $symbol, 'errormsg' } = $@;
@@ -146,25 +155,31 @@ sub yahooweb {
         }
 
         my $open = $json_data->{'quoteResponse'}{'result'}[0]{'regularMarketOpen'}{'fmt'};
-        $open =~ s/,//g;
-        if ($currency =~ /^GBp/) {
-            $open = $open / 100;
+        if ($open) {
+            $open =~ s/,//g;
+            if ($currency =~ /^GBp/) {
+                $open = $open / 100;
+            }
         }
 
         my $high = $json_data->{'quoteResponse'}{'result'}[0]{'regularMarketDayHigh'}{'fmt'};
-        $high =~ s/,//g;
-        if ($currency =~ /^GBp/) {
-            $high = $high / 100;
+        if ($high) {
+            $high =~ s/,//g;
+            if ($currency =~ /^GBp/) {
+                $high = $high / 100;
+            }
         }
 
         my $low = $json_data->{'quoteResponse'}{'result'}[0]{'regularMarketDayLow'}{'fmt'};
-        $low =~ s/,//g;
-        if ($currency =~ /^GBp/) {
-            $low = $low / 100;
+        if ($low) {
+            $low =~ s/,//g;
+            if ($currency =~ /^GBp/) {
+                $low = $low / 100;
+            }
         }
 
         my $volume = $json_data->{'quoteResponse'}{'result'}[0]{'regularMarketVolume'}{'raw'};
-        $volume =~ s/,//g;
+        $volume =~ s/,//g if $volume;
 
         # regularMarketTime in JSON is seconds since epoch
         my $tradedate = $json_data->{'quoteResponse'}{'result'}[0]{'regularMarketTime'}{'raw'};
