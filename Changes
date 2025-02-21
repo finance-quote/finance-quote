@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Fixed malformed character in YahooWeb.pm - Issue #468
 	* Changed useragent in YahooJSON.pm - Issue #467
 	* Added methodinfo hash to AEX.pm - PR #466
 	* Added label exchange, close, time to AEX.pm - PR #466
