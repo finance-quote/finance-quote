@@ -86,7 +86,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     HU
     IndiaMutual
     MarketWatch
-    MorningstarAU
     MorningstarCH
     MorningstarJP
     MorningstarUK
@@ -1722,7 +1721,6 @@ http://www.gnucash.org/
   Finance::Quote::HU,
   Finance::Quote::IndiaMutual,
   Finance::Quote::MarketWatch,
-  Finance::Quote::MorningstarAU,
   Finance::Quote::MorningstarCH,
   Finance::Quote::MorningstarJP,
   Finance::Quote::MorningstarUK,

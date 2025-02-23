@@ -783,7 +783,7 @@
   state: failing
   added: TBD
   changed:
-  removed:
+  removed: 2025-02-23
   urls:
     - https://www.morningstar.com.au/Ausearch/SecurityCodeAutoLookup?q=$symbol
   methods:
