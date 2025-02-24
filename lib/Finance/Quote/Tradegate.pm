@@ -28,22 +28,30 @@ use Web::Scraper;
 
 # VERSION
 
-my $Tradegate_URL = 'https://web.s-investor.de/app/detail.htm?boerse=TDG&isin=';
+my $TRADEGATE_URL = 'https://web.s-investor.de/app/detail.htm?boerse=TDG&isin=';
 
-sub methods {
-  return (tradegate => \&tradegate,
-          europe    => \&tradegate);
-}
-
-sub parameters {
-  return ('INST_ID');
-}
-
-our @labels = qw/symbol last close exchange volume open price change p_change/;
+our $DISPLAY    = 'Tradegate';
+# see https://web.s-investor.de/app/webauswahl.jsp for "Institutsliste"
+our $FEATURES   = {'INST_ID' => 'Institut Id (default: 0000057 for "Sparkasse Krefeld")' };
+our @LABELS     = qw/symbol isin last close exchange volume open price change p_change date time low high/;
+our $METHODHASH = {subroutine => \&tradegate,
+                   display => $DISPLAY,
+                   labels => \@LABELS,
+                   features => $FEATURES};
 
 sub labels {
-  return (tradegate => \@labels,
-          europe    => \@labels);
+  my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
+
+sub methodinfo {
+    return (
+        tradegate => $METHODHASH,
+        europe    => $METHODHASH,
+    );
+}
+
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub tradegate {
@@ -61,7 +69,7 @@ sub tradegate {
 
   foreach my $symbol (@_) {
     eval {
-      my $url = $Tradegate_URL
+      my $url = $TRADEGATE_URL
                 . $symbol
                 . '&INST_ID='
                 . $inst_id;
@@ -93,6 +101,7 @@ sub tradegate {
         $td1 = ($lastvalue->look_down('_tag'=>'td'))[7];
         @child = $td1->content_list;
         my $date = substr($child[0], 0, 8);
+        my $time = substr($child[0], 9, 5); # CE(S)T
 
         $td1 = ($lastvalue->look_down('_tag'=>'td'))[9];
         @child = $td1->content_list;
@@ -112,13 +121,34 @@ sub tradegate {
         @child = $td1->content_list;
         my $volume = $child[0];
 
+        my $table = ($lastvalue->look_down('_tag'=>'table'))[1];
+
+        $td1 = ($table->look_down('_tag'=>'td'))[1];
+        @child = $td1->content_list;
+        my $low = $child[0];
+        $low =~ s/\.//g;
+        $low =~ s/,/\./;
+
+        $td1 = ($table->look_down('_tag'=>'td'))[2];
+        @child = $td1->content_list;
+        my $high = $child[0];
+        $high =~ s/\.//g;
+        $high =~ s/,/\./;
+
         my @searchvalue = $tree->look_down('class'=>'contentBox oneColum');
         my $isFound = 0;
         foreach (@searchvalue)
         {
-          if (($_->content_list)[0]{'_content'}[0]{'_content'}[0] eq 'Aktuelle Vergleichszahlen')
+          if (ref(($_->content_list)[0]) eq "HTML::Element" and ($_->content_list)[0]{'_content'}[0]{'_content'}[0] eq 'Aktuelle Vergleichszahlen')
           {
             $isFound = 1;
+
+            #-- open
+            $td1 = ($_->look_down('_tag'=>'td'))[4];
+            @child = $td1->content_list;
+            my $open = $child[0];
+            $open =~ s/\.//g;
+            $open =~ s/,/\./;
 
             #-- change (absolute change)
             $td1 = ($_->look_down('_tag'=>'td'))[13];
@@ -150,6 +180,7 @@ sub tradegate {
             $info{$symbol, 'success'}   = 1;
             $info{$symbol, 'method'}    = 'Tradegate';
             $info{$symbol, 'symbol'}    = $isin;
+            $info{$symbol, 'isin'}      = $isin;
             $info{$symbol, 'name'}      = $sharename;
             $info{$symbol, 'exchange'}  = $exchange;
             $info{$symbol, 'last'}      = $price;
@@ -161,6 +192,10 @@ sub tradegate {
             $info{$symbol, 'currency'}  = $currency;
             #$info{$symbol, 'date'}     = $date;
             $quoter->store_date(\%info, $symbol, {eurodate => $date});
+            $info{$symbol, 'time'}     = $time;
+            $info{$symbol, 'open'}     = $open;
+            $info{$symbol, 'low'}      = $low;
+            $info{$symbol, 'high'}     = $high;
           }
         }
 
@@ -235,8 +270,14 @@ last
 method
 success
 symbol
+isin
+date
+time
 volume
 price
 close
+open
+low
+high
 change
 p_change
