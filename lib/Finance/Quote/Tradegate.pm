@@ -30,7 +30,7 @@ use Web::Scraper;
 
 my $TRADEGATE_URL = 'https://web.s-investor.de/app/detail.htm?boerse=TDG&isin=';
 
-our $DISPLAY    = 'Euronext';
+our $DISPLAY    = 'Tradegate';
 # see https://web.s-investor.de/app/webauswahl.jsp for "Institutsliste"
 our $FEATURES   = {'INST_ID' => 'Institut Id (default: 0000057 for "Sparkasse Krefeld")' };
 our @LABELS     = qw/symbol isin last close exchange volume open price change p_change date time low high/;
