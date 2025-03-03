@@ -219,39 +219,6 @@ sub yahoo_json {
                 $info{ $stocks, "currency"} = $json_resources_price->{'currency'};
                 $info{ $stocks, "volume" }   = $json_volume;
 
-                # The Yahoo JSON interface returns London prices in GBp (pence) instead of GBP (pounds)
-                # and the Yahoo Base had a hack to convert them to GBP.  In theory all the callers
-                # would correctly handle GBp as not the same as GBP, but they don't, and since
-                # we had the hack before, let's add it back now.
-                #
-                # Convert GBp or GBX to GBP (divide price by 100).
-
-                if ( ($info{$stocks,"currency"} eq "GBp") ||
-                     ($info{$stocks,"currency"} eq "GBX")) {
-                    $info{$stocks,"last"}=$info{$stocks,"last"}/100;
-                    $info{ $stocks, "currency"} = "GBP";
-                }
-
-                # Apply the same hack for Johannesburg Stock Exchange
-                # (JSE) prices as they are returned in ZAc (cents)
-                # instead of ZAR (rands). JSE symbols are suffixed
-                # with ".JO" when querying Yahoo e.g. ANG.JO
-
-                if ($info{$stocks,"currency"} eq "ZAc") {
-                    $info{$stocks,"last"}=$info{$stocks,"last"}/100;
-                    $info{ $stocks, "currency"} = "ZAR";
-                }
-
-                # Apply the same hack for Tel Aviv Stock Exchange
-                # (TASE) prices as they are returned in ILA (Agorot)
-                # instead of ILS (Shekels). TASE symbols are suffixed
-                # with ".TA" when querying Yahoo e.g. POLI.TA
-
-                if ($info{$stocks,"currency"} eq "ILA") {
-                    $info{$stocks,"last"}=$info{$stocks,"last"}/100;
-                    $info{ $stocks, "currency"} = "ILS";
-                }
-
             # Add extra fields using names as per yahoo to make it easier
             #  to switch from yahoo to yahooJSON
             # Code added by goodvibes
@@ -281,6 +248,50 @@ sub yahoo_json {
                     $json_resources_price->{'regularMarketDayLow'}{'raw'};
                 $info{ $stocks, "close"} =
                     $json_resources_summaryDetail->{'regularMarketPreviousClose'}{'raw'};
+
+                # The Yahoo JSON interface can London prices in
+                # GBp (pence) instead of GBP (pounds) and the Yahoo Base
+                # had a hack to convert them to GBP. In theory all the
+                # callers would correctly handle GBp as not the same as GBP,
+                # but they don't, and since we had the hack before,
+                # let's add it back now.
+                # Convert GBp or GBX to GBP (divide price by 100).
+
+                if ( ($info{$stocks,"currency"} eq "GBp") ||
+                     ($info{$stocks,"currency"} eq "GBX")) {
+                    foreach my $field ($quoter->get_default_currency_fields) {
+                        next unless ( $info{ $stocks, $field } );
+                        $info{$stocks, $field} =
+                          $quoter->scale_field($info{ $stocks, $field }, 0.01);
+                    }
+                    $info{ $stocks, "currency"} = "GBP";
+                }
+
+                # Apply the same hack for Johannesburg Stock Exchange
+                # (JSE) prices as they are returned in ZAc (cents)
+                # instead of ZAR (rands). JSE symbols are suffixed
+                # with ".JO" when querying Yahoo e.g. ANG.JO
+                if ( $info{$stocks,"currency"} eq "ZAc") {
+                    foreach my $field ($quoter->get_default_currency_fields) {
+                        next unless ( $info{ $stocks, $field } );
+                        $info{$stocks, $field} =
+                          $quoter->scale_field($info{ $stocks, $field }, 0.01);
+                    }
+                    $info{ $stocks, "currency"} = "ZAR";
+                }
+
+                # Apply the same hack for Tel Aviv Stock Exchange
+                # (TASE) prices as they are returned in ILA (Agorot)
+                # instead of ILS (Shekels). TASE symbols are suffixed
+                # with ".TA" when querying Yahoo e.g. POLI.TA
+                if ( $info{$stocks,"currency"} eq "ILA") {
+                    foreach my $field ($quoter->get_default_currency_fields) {
+                        next unless ( $info{ $stocks, $field } );
+                        $info{$stocks, $field} =
+                          $quoter->scale_field($info{ $stocks, $field }, 0.01);
+                    }
+                    $info{ $stocks, "currency"} = "ILS";
+                }
 
                 # MS Windows strftime() does not support %T so use %H:%M:%S
                 #  instead.

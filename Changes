@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* YahooJSON - Adjust other currency fields when data is returned in GBp, ZAc, or ILA.
 	* Removed MorningstarAU - Issue #405
 	* Fixed malformed character in YahooWeb.pm - Issue #468
 	* Changed useragent in YahooJSON.pm - Issue #467
