@@ -875,7 +875,7 @@
 - module: OnVista.pm
   state: working
   added: TBD
-  changed: 2024-10-07
+  changed: 2025-02-02
   removed: ~
   urls:
     - https://www.onvista.de/suche/<symbol>
@@ -889,6 +889,8 @@
     - MRK
     - AAPL
     - SAP
+    - FR0010510800
+    - A3GQ2N
 #
 - module: Oslobors.pm
   state: failing
@@ -1064,10 +1066,11 @@
 - module: Tradegate.pm
   state: working
   added: 2022-10-19
-  changed: 2023-11-27
+  changed: 2025-02-05
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+    - https://web.s-investor.de/app/fonds.htm?INST_ID=0000057
     - https://web.s-investor.de/app/webauswahl.jsp
   notes: |
     INST_ID is an optional parameter.
@@ -1080,6 +1083,8 @@
     - FR0000120628
     - XS0937858271
     - NL0000009165
+    - GB00BLD4ZM24
+    - FR0010510800
 #
 - module: Tradeville.pm
   state: failing
