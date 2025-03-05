@@ -5,7 +5,7 @@
 - module: AEX.pm
   state: working
   added: TBD
-  changed: 2024-05-11
+  changed: 2025-02-05
   removed: ~
   urls:
     - https://live.euronext.com/en/search_instruments/
@@ -21,6 +21,7 @@
     - AMG
     - LVMH
     - NL0000009165
+    - BE0974293251
 #
 - module: AIAHK.pm
   state: removed
@@ -782,7 +783,7 @@
   state: failing
   added: TBD
   changed:
-  removed:
+  removed: 2025-02-23
   urls:
     - https://www.morningstar.com.au/Ausearch/SecurityCodeAutoLookup?q=$symbol
   methods:
@@ -1065,10 +1066,11 @@
 - module: Tradegate.pm
   state: working
   added: 2022-10-19
-  changed: 2023-11-27
+  changed: 2025-02-05
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
+    - https://web.s-investor.de/app/fonds.htm?INST_ID=0000057
     - https://web.s-investor.de/app/webauswahl.jsp
   notes: |
     INST_ID is an optional parameter.
@@ -1081,6 +1083,8 @@
     - FR0000120628
     - XS0937858271
     - NL0000009165
+    - GB00BLD4ZM24
+    - FR0010510800
 #
 - module: Tradeville.pm
   state: failing
@@ -1315,7 +1319,7 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2024-09-23
+  changed: 2025-02-19
   removed:
   urls:
     - https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price,summaryDetail,defaultKeyStatistics
@@ -1342,7 +1346,7 @@
 - module: YahooWeb.pm
   state: working
   added: 2023-05-31
-  changed: 2024-04-21
+  changed: 2025-02-20
   removed:
   urls:
     - https://finance.yahoo.com/quote/{$symbol}?p={$symbol}

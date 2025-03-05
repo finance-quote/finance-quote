@@ -45,30 +45,33 @@ $OPTS{MaxLineLength} = 16384;
 
 my $YIND_URL_HEAD = 'https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbols=';
 my $YIND_URL_TAIL = '&modules=price,summaryDetail,defaultKeyStatistics';
-my $browser = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36';
+#my $browser = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36';
+my $browser = 'Mozilla/5.0';
 
-sub methods {
-    return (
-      yahoo_json => \&yahoo_json,
-      yahoojson  => \&yahoo_json,
-      usa        => \&yahoo_json,
-      nyse       => \&yahoo_json,
-      nasdaq     => \&yahoo_json,
+our $DISPLAY    = 'YahooJSON';
+our @LABELS     = qw/name last date isodate volume currency method exchange type
+        div_yield eps pe year_range open high low close/;
+our $METHODHASH = {subroutine => \&yahoo_json, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS};
+
+sub methodinfo {
+    return ( 
+        yahoo_json  => $METHODHASH,
+        yahoojson   => $METHODHASH,
+        nyse        => $METHODHASH,
+        nasdaq      => $METHODHASH,
+        usa         => $METHODHASH,
     );
 }
-{
-    my @labels = qw/name last date isodate volume currency method exchange type
-        div_yield eps pe year_range open high low close/;
 
-    sub labels {
-        return (
-          yahoo_json => \@labels,
-          yahoojson  => \@labels,
-          usa        => \@labels,
-          nyse       => \@labels,
-          nasdaq     => \@labels,
-        );
-    }
+sub labels {
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
+
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub yahoo_json {

@@ -1,6 +1,14 @@
 {{$NEXT}}
 	* Added label wkn, ìsin, close, ask, bid, p_change, time to OnVista.pm
 	* Modified OnVista.pm to enable search by ISIN and WKN and search for ETFs
+	* Added methodinfo hash to Tradegate.pm - PR #465
+	* Added label isin, open, ask, bid, time to Tradegate.pm - PR #465
+	* Fixed Tradegate.pm - Search for ETFs - PR #465
+	* Removed MorningstarAU - Issue #405
+	* Fixed malformed character in YahooWeb.pm - Issue #468
+	* Changed useragent in YahooJSON.pm - Issue #467
+	* Added methodinfo hash to AEX.pm - PR #466
+	* Added label exchange, close, time to AEX.pm - PR #466
 	* Fixed XETRA.pm - Issue #460
 	* Added methodinfo hash to Fool.pm
 	* Fixed MorningstarJP.pm - Issue #443 - PR #451
