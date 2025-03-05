@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* YahooJSON - Adjust other currency fields when data is returned in GBp, ZAc, or ILA.
 	* Added label wkn, ìsin, close, ask, bid, p_change, time to OnVista.pm
 	* Modified OnVista.pm to enable search by ISIN and WKN and search for ETFs
 	* Added methodinfo hash to Tradegate.pm - PR #465
