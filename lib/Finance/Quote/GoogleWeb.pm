@@ -84,8 +84,8 @@ sub googleweb {
       $tree = HTML::TreeBuilder->new;
       if ($tree->parse_content($body)) {
         #
-        # Get link with exchange appended (MUTF|NYSE|NASDAQ|NYSEAMERICAN|BATS)
-        $taglink = $tree->look_down(_tag => 'a', href => qr!^./quote/$ucstock:(MUTF|NYSE|NASDAQ|NYSEAMERICAN|BATS)!);
+        # Get link with exchange appended (MUTF|NYSE|NASDAQ|NYSEAMERICAN|BATS|HKG)
+        $taglink = $tree->look_down(_tag => 'a', href => qr!^./quote/$ucstock:(MUTF|NYSE|NASDAQ|NYSEAMERICAN|BATS|HKG)!);
         if ($taglink) {
           $link = $taglink->attr('href');
           $link =~ s|\./quote|quote|;
