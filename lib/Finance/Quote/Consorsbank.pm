@@ -24,7 +24,8 @@ package Finance::Quote::Consorsbank;
 
 use LWP::UserAgent;
 use JSON qw( decode_json );
-use DateTime;
+use Date::Parse qw(str2time);
+use POSIX qw(strftime);
 
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
@@ -200,9 +201,11 @@ sub consorsbank {
             $info{ $symbol, $fqkey } = $quote->{$cbkey} if (defined $quote->{$cbkey});
         }
 
-        $quote->{'DATETIME_PRICE'} = DateTime->now->iso8601 unless defined $quote->{'DATETIME_PRICE'};
-        ($info{ $symbol, 'date' }, $info{ $symbol, 'time' }) = split /T/, $quote->{'DATETIME_PRICE'};
-        $quoter->store_date(\%info, $symbol, { isodate => $info{ $symbol, 'date' } });
+        my $utc_timestamp = str2time($quote->{'DATETIME_PRICE'});
+        if (defined($utc_timestamp)) {
+            $info{ $symbol, 'time' } = strftime("%H:%M", localtime($utc_timestamp)); # local time zone
+            $quoter->store_date(\%info, $symbol, {isodate => strftime("%Y-%m-%d", localtime($utc_timestamp))});
+        }
 
         unless (defined $info{ $symbol, 'last'} ) {
             $info{ $symbol, 'success' } = 0;
