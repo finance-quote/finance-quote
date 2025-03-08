@@ -135,7 +135,7 @@ sub consorsbank {
         my $query = $CONSORS_URL . "id=$symbol&field=QuotesV1&field=BasicV1";
         my $response = $ua->get($query);
 
-        unless	($response->is_success) {
+        unless ($response->is_success) {
             $info{ $symbol, 'success' } = 0;
             $info{ $symbol, 'errormsg' } = "Unable to fetch data from the Consorsbank server for $symbol.  Error: " . $response->status_line;
             next;
@@ -201,8 +201,8 @@ sub consorsbank {
             $info{ $symbol, $fqkey } = $quote->{$cbkey} if (defined $quote->{$cbkey});
         }
 
-        my $utc_timestamp = str2time($quote->{'DATETIME_PRICE'});
-        if (defined($utc_timestamp)) {
+        if (defined($quote->{'DATETIME_PRICE'})) {
+            my $utc_timestamp = str2time($quote->{'DATETIME_PRICE'});
             $info{ $symbol, 'time' } = strftime("%H:%M", localtime($utc_timestamp)); # local time zone
             $quoter->store_date(\%info, $symbol, {isodate => strftime("%Y-%m-%d", localtime($utc_timestamp))});
         }
@@ -229,11 +229,11 @@ Finance::Quote::Consorsbank - Obtain quotes from Consorsbank.
 
 =head1 SYNOPSIS
 
-	use Finance::Quote;
-	$q = Finance::Quote->new;
-	%stockinfo = $q->fetch("consorsbank","DE0007664005"); # Only query consorsbank using ISIN.
-	%stockinfo = $q->fetch("consorsbank","766400");       # Only query consorsbank using WKN.
-	%stockinfo = $q->fetch("europe","DE0007664005");      # Failover to other sources OK.
+        use Finance::Quote;
+        $q = Finance::Quote->new;
+        %stockinfo = $q->fetch("consorsbank","DE0007664005"); # Only query consorsbank using ISIN.
+        %stockinfo = $q->fetch("consorsbank","766400");       # Only query consorsbank using WKN.
+        %stockinfo = $q->fetch("europe","DE0007664005");      # Failover to other sources OK.
 
 =head1 DESCRIPTION
 
