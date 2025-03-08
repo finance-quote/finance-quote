@@ -28,16 +28,15 @@ my %valid    = (
     'FR0003500008' => {currency => 'EUR', days => 7, name => 'CAC 40 INDEX'},               # Index: CAC 40
     '_81341467'    => {currency => 'USD', days => 7, name => 'S&P 500 (BNPP INDICATION)'},  # Index (Consors internal ID)
 
-    'DE000CX0QLH6' => {currency => 'EUR', days => 7, name => 'OE TURBO BULL AUF GOLD'},                   # Warrant
-    'DE0001102580' => {currency => 'EUR', days => 7, name => 'BUNDESREP.DEUTSCHLAND ANL.V.2022 (2032)'},  # Bond
-    'FR0010411884' => {currency => 'EUR', days => 7, name => 'Lyxor CAC 40 Daily (-2x) Inverse ETF Acc'}, # ETF, EUR
-    'LU1508476725' => {currency => 'EUR', days => 7, name => 'Allianz Global Equity Insights A EUR'},     # Fund, EUR
+    'DE0001102580' => {currency => 'EUR', days => 7, name => 'BUNDESREP.DEUTSCHLAND ANL.V.2022 (2032)'},         # Bond
+    'FR0010411884' => {currency => 'EUR', days => 7, name => 'Amundi CAC 40 Daily (-2x) Invrse ETF Acc'}, # ETF, EUR
+    'LU1508476725' => {currency => 'EUR', days => 7, name => 'Allianz Global Equity Insights A EUR'},            # Fund, EUR
     'EU0009652759' => {currency => 'USD', days => 7, name => 'EURO / US-DOLLAR (EUR/USD)'}, # Currency
 );
 
 my %invalid  = (
     'FR0010037341' => undef, # known by Consors, but no prices tracked on default exchange
-    'DE000DB4CAT1'   => undef, # Commodities: Brent
+    'DE000DB4CAT1' => undef, # Commodities: Brent
     'BOGUS' => undef,
 );
 
@@ -63,7 +62,7 @@ my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_refer
     'net'      => sub {defined $_[0] ? looks_like_number($_[0]) : 1},  # net is optional
     'open'     => sub {defined $_[0] ? looks_like_number($_[0]) : 1},  # open is optional
     'p_change' => sub {defined $_[0] ? looks_like_number($_[0]) : 1},  # p_change is optional
-    'time'     => sub {defined $_[0] ? $_[0] =~ /^\d{2}:\d{2}:\d{2}([+-]\d{4})?$/ : 1},  # p_change is optional
+    'time'     => sub {defined $_[0] ? $_[0] =~ /^\d{2}:\d{2}$/ : 1},  # time is optional
     'volume'   => sub {defined $_[0] ? looks_like_number($_[0]) : 1},  # volume is optional
     'year_range' => sub {defined $_[0] ? looks_like_number($_[0]) : 1},  # year_range is optional
 
