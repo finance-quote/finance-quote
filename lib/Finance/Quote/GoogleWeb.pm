@@ -35,20 +35,28 @@ use if DEBUG, 'Smart::Comments', '###';
 
 my $GOOGLE_URL = 'https://www.google.com/finance/';
 
-sub methods {
-  return (googleweb => \&googleweb,
-          bats      => \&googleweb,
-          nyse      => \&googleweb,
-          nasdaq    => \&googleweb);
+our $DISPLAY    = 'GoogleWeb - Scrapes www.google.com/finance/';
+our @LABELS     = qw/symbol name last date currency method/;
+our $METHODHASH = {subroutine => \&googleweb,
+                   display    => $DISPLAY, 
+                   labels     => \@LABELS};
+
+sub methodinfo {
+    return ( 
+        googleweb => $METHODHASH,
+        bats      => $METHODHASH,
+        nyse      => $METHODHASH,
+        nasdaq    => $METHODHASH,
+    );
 }
 
-our @labels = qw/symbol name last date currency method/;
+sub labels {
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
 
-sub labels { 
-  return (googleweb => \@labels,
-          bats      => \@labels,
-          nyse      => \@labels,
-          nasdaq    => \@labels); 
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub googleweb {
@@ -84,8 +92,8 @@ sub googleweb {
       $tree = HTML::TreeBuilder->new;
       if ($tree->parse_content($body)) {
         #
-        # Get link with exchange appended (MUTF|NYSE|NASDAQ|NYSEAMERICAN|BATS)
-        $taglink = $tree->look_down(_tag => 'a', href => qr!^./quote/$ucstock:(MUTF|NYSE|NASDAQ|NYSEAMERICAN|BATS)!);
+        # Get link with exchange appended (MUTF|NYSE|NASDAQ|NYSEAMERICAN|BATS|HKG)
+        $taglink = $tree->look_down(_tag => 'a', href => qr!^./quote/$ucstock:(MUTF|NYSE|NASDAQ|NYSEAMERICAN|BATS|HKG)!);
         if ($taglink) {
           $link = $taglink->attr('href');
           $link =~ s|\./quote|quote|;
