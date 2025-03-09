@@ -54,7 +54,7 @@ sub comdirect {
   my $quoter  = shift;
   my @symbols = @_;
   my $ua      = $quoter->user_agent();
-  my (%info, %pricetable, %infotable, $metatag);
+  my (%info, %pricetable, %infotable);
 
   foreach my $symbol (@_) {
       my $url   = 'https://www.comdirect.de/inf/search/all.html?SEARCH_VALUE=' . $symbol;
@@ -76,12 +76,26 @@ sub comdirect {
         next;
       }
 
+      my $h1 = $tree->look_down(_tag => 'h1');
+      if ($h1) {
+        $info{$symbol, 'name'} = trim($h1->as_text);
+      }
+
+      my $div = $tree->look_down(_tag => 'div', class => "realtime-indicator");
+      if ($div) {
+        my @span = $div->look_down(_tag => 'span');
+        if (scalar(@span) >= 2) {
+          $info{$symbol, 'last'}     = $1 if trim($span[-2]->as_text) =~ /^([0-9.]+)/;
+          $info{$symbol, 'currency'} = $1 if trim($span[-1]->as_text) =~ /^([A-Z]+)/;
+        }
+      }
+
       my $select = $tree->look_down(_tag => 'select', name=> 'ID_NOTATION', id=> "marketSelect");
       if ($select) {
         my $option = $select->look_down(_tag => 'option', selected => 'selected');
         if ($option) {
           $info{$symbol, 'exchange'} = $option->as_text;
-          #$info{$symbol, 'notation_id'} = $option->attr('value');
+          $info{$symbol, 'notation_id'} = $option->attr('value');
         }
       }
 
@@ -129,9 +143,6 @@ sub comdirect {
         }
       }
 
-      $info{$symbol, 'last'}      = $1 if $pricetable{Aktuell} =~ /^([0-9.]+)/;
-      $info{$symbol, 'currency'}  = $1 if $pricetable{Aktuell} =~ /([A-Z]+)$/ or $infotable{"W\x{e4}hrung"} =~ /([A-Z]+)$/;
-      #$info{$symbol, 'exchange'}  = $pricetable{"B\x{f6}rse"};
       $info{$symbol, 'open'}      = $pricetable{"Er\x{f6}ffnung"};
       $info{$symbol, 'close'}     = $pricetable{"Schluss Vortag"};
       $info{$symbol, 'high'}      = $pricetable{Hoch};
@@ -144,12 +155,6 @@ sub comdirect {
       $info{$symbol, 'isin'}      = $infotable{ISIN};
       $info{$symbol, 'wkn'}       = $infotable{WKN};
       $info{$symbol, 'symbol'}    = $infotable{Symbol};
-
-      if ($metatag = $tree->look_down(_tag => 'meta', name => 'description')) {
-        my @list = split(',', $metatag->attr('content'));
-        ### [<now>] List: @list
-        $info{$symbol, 'name'} = $list[0];
-      }
 
       if ($pricetable{Zeit} =~ /([0-9]{2}[.][0-9]{2}[.][0-9]{2}) ([ 0-9][0-9]:[0-9][0-9])/) {
         $quoter->store_date(\%info, $symbol, {eurodate => $1});
