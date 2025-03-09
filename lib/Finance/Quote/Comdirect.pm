@@ -195,7 +195,8 @@ Finance::Quote->new().
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::Comdirect:
-isodate, last, currency, open, high, low, name, isin, method, success
+isodate, time, last, currency, open, high, low, name, isin, wkn,
+p_change, ask, bid, method, exchange, success
 
 =head1 TERMS & CONDITIONS
 
