@@ -43,7 +43,8 @@ my $ONVISTA_URL = 'https://www.onvista.de/suche/';
 # Modify LABELS to those returned by the method
 
 our $DISPLAY    = 'OnVista - Germany';
-our @LABELS     = qw/symbol isin wkn name open close high low last date volume currency exchange method ask bid p_change time/;
+our $FEATURES   = { 'EXCHANGE' => 'select market place (i.e. "GER", "Xetra", "Tradegate")' };
+our @LABELS     = qw/symbol isin wkn name open close high low last date volume currency exchange method ask bid p_change time exchanges/;
 our $METHODHASH = {subroutine => \&onvista, 
                    display => $DISPLAY, 
                    labels => \@LABELS};
@@ -167,12 +168,33 @@ sub onvista {
           next;
         }
 
+        my $exchange = exists $quoter->{module_specific_data}->{onvista}->{EXCHANGE} ?
+                              $quoter->{module_specific_data}->{onvista}->{EXCHANGE} : undef;
+
+        my $markets = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quoteList'}{'list'};
+        $info{ $stock, 'exchanges' } = [ map { $_->{'market'}{'name'} } @$markets ];
+
+        my $json_quote;
+        if ($exchange) {
+          ($json_quote) = grep { $_->{'market'}{'name'} eq $exchange
+                              or $_->{'market'}{'codeExchange'} eq $exchange
+                               } @$markets;
+          unless($json_quote) {
+            $info{ $stock, "success" } = 0;
+            $info{ $stock, "errormsg" } =
+                "Error retrieving quote for $stock. No data returned for $exchange";
+            next;
+          }
+        } else {
+          $json_quote = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'};
+        }
+
         ### [<now>] 2nd JSON Decoded: $json_decoded
 
         $info{ $stock, "success" } = 1;
         $info{ $stock, 'method' } = 'onvista';
         $info{ $stock, 'name' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'instrument'}{'name'};
-        my $json_quote = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'quote'};
+
         map { $info{ $stock, $_ } = $json_quote->{$_} } qw(open high low last volume ask bid);
         $info{ $stock, 'price' } = $json_quote->{'last'};
         $info{ $stock, 'currency' } = $json_quote->{'isoCurrency'};
@@ -217,8 +239,12 @@ Finance::Quote::OnVista - Obtain quotes from Frankfurt Stock Exchange.
     use Finance::Quote;
 
     $q = Finance::Quote->new;
+    or
+    $q = Finance::Quote->new("OnVista", "onvista" => { "EXCHANGE" => "Xetra" });
 
     %info = $q->fetch("onvista", "sap");  # Only query onvista
+
+    @exchanges = @{ $info{ "sap", "exchanges" } }; # List of available marketplaces
 
 =head1 DESCRIPTION
 
@@ -233,6 +259,19 @@ to replace a non-working Tradeville.pm module.
 
 Information obtained by this module may be covered by Frankfurt Stock
 Exchange terms and conditions.
+
+=head1 EXCHANGE
+
+https://onvista.de/ supports different market places. A default is not specified.
+
+  "Xetra" alias "GER"
+  "Tradegate" alias "GAT"
+  "gettex" alias "TRO"
+  "London Stock Exchange" alias "LSE"
+  ... any many more ...
+
+The EXCHANGE may be set by providing a module specific hash to
+Finance::Quote->new as in the above example (optional).
 
 =head1 LABELS RETURNED
 
