@@ -302,7 +302,7 @@
 #
 - module: Consorsbank.pm
   state: working
-  added: 2023-07-20
+  added: 2025-03-13
   changed: ~
   removed: ~
   urls:
