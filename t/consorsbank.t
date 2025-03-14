@@ -45,7 +45,7 @@ my $today    = today();
 
 my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_reference)
     'success'  => sub {$_[0]},
-    'symbol'   => sub {$_[0] eq $_[1]},
+    'symbol'   => sub {$_[0] =~ /^_?[A-Z0-9]+$/},
     'name'     => sub {$_[0] eq $valid{$_[1]}{name}},
     'method'   => sub {$_[0] eq 'consorsbank'},
     'source'   => sub {$_[0] eq $CONSORS_SOURCE_BASE_URL . $_[1]},
@@ -56,7 +56,7 @@ my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_refer
     'ask'      => sub {defined $_[0] ? looks_like_number($_[0]) : 1},  # ask is optional
     'bid'      => sub {defined $_[0] ? looks_like_number($_[0]) : 1},  # bid is optional
     'close'    => sub {defined $_[0] ? looks_like_number($_[0]) : 1},  # close is optional
-    'day_range' => sub {defined $_[0] ? looks_like_number($_[0]) : 1}, # day_range is optional
+    'day_range' => sub {defined $_[0] ? $_[0] =~ /[0-9.]+ - [0-9.]+/ : 1}, # day_range is optional
     'high'     => sub {defined $_[0] ? looks_like_number($_[0]) : 1},  # high is optional
     'low'      => sub {defined $_[0] ? looks_like_number($_[0]) : 1},  # low is optional
     'net'      => sub {defined $_[0] ? looks_like_number($_[0]) : 1},  # net is optional
@@ -64,7 +64,7 @@ my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_refer
     'p_change' => sub {defined $_[0] ? looks_like_number($_[0]) : 1},  # p_change is optional
     'time'     => sub {defined $_[0] ? $_[0] =~ /^\d{2}:\d{2}$/ : 1},  # time is optional
     'volume'   => sub {defined $_[0] ? looks_like_number($_[0]) : 1},  # volume is optional
-    'year_range' => sub {defined $_[0] ? looks_like_number($_[0]) : 1},  # year_range is optional
+    'year_range' => sub {defined $_[0] ? $_[0] =~ /[0-9.]+ - [0-9.]+/ : 1}, # year_range is optional
 
     'date'     => sub {
         my $a = Date::Manip::Date->new(); $a->parse_format('%m/%d/%Y', $_[0]);
