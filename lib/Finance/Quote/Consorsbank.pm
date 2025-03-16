@@ -26,6 +26,7 @@ use LWP::UserAgent;
 use JSON qw( decode_json );
 use Date::Parse qw(str2time);
 use POSIX qw(strftime);
+use Encode qw(encode_utf8);
 
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
@@ -205,7 +206,7 @@ sub consorsbank {
                 return;
             }
 
-            my $json = $response->content;
+            my $json = encode_utf8($response->content);
 
             ### [<here>] $json:
             ### $json
