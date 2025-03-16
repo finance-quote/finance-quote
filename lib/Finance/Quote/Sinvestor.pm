@@ -73,6 +73,15 @@ sub get_de_number {
     return ($number =~ /^([-+]?[0-9]+(\.[0-9]+)?)/) ? $1 : undef;
 }
 
+sub get_iso_currency {
+    my ($currency) = @_;
+    $currency =~ s/Euro/EUR/ and return $currency;
+    $currency =~ s/Schweizer Franken/CHF/ and return $currency;
+    $currency =~ s/US Dollar/USD/ and return $currency;
+    $currency =~ s/^Taiwan-Dollar.*/TWD/ and return $currency;
+    # TODO: add more currencies ..
+}
+
 sub td_search {
     my ($tree, $text) = @_;
     my $td = $tree->look_down('_tag'=>'td', sub { $_[0]->as_text eq $text }) or return;
@@ -154,8 +163,7 @@ sub sinvestor {
 
         my $price = get_de_number(td_search($lastvalue, 'Letzter Kurs'));
 
-        my $currency = get_utf8_string(td_search($lastvalue, "W\xe4hrung"));
-        $currency =~ s/Euro/EUR/;
+        my $currency = get_iso_currency(td_search($lastvalue, "W\xe4hrung"));
 
         # TODO: per trade or day?
         my $volume = get_de_number(td_search($lastvalue, 'Volumen/Trade'));
