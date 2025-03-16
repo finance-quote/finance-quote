@@ -642,7 +642,7 @@
 - module: GoogleWeb.pm
   state: working
   added: 2023-09-16
-  changed: 2023-12-16
+  changed: 2025-03-06
   removed: ~
   urls: https://www.google.com/finance/
   apikey: false
