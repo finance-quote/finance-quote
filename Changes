@@ -1,4 +1,7 @@
 {{$NEXT}}
+	* Added EXCHANGE feature to Sinvestor.pm and some fixes - PR #481
+	* Tradegate now uses Sinvestor.pm via EXCHANGE feature - PR #481
+	* XETRA now uses Sinvestor.pm via EXCHANGE feature - PR #481
 	* YahooJSON - Adjust other currency fields when data is returned in GBp, ZAc, or ILA.
 	* Added label wkn, ìsin, close, ask, bid, p_change, time to OnVista.pm
 	* Modified OnVista.pm to enable search by ISIN and WKN and search for ETFs
