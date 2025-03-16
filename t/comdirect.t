@@ -19,7 +19,8 @@ if (not $ENV{ONLINE_TEST}) {
 
 my %valid    = ('VWAGY'        => 'Volkswagen',
                 'Volkswagen'   => 'Volkswagen',
-                'DE0007664039' => 'Volkswagen'
+                'DE0007664039' => 'Volkswagen',
+                'FR0010510800' => 'Amundi EUR Overnight Return UCITS ETF'
                );
 
 my @invalid  = ('BOGUS');
