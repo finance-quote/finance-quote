@@ -936,7 +936,7 @@
 - module: Sinvestor.pm
   state: working
   added: 2022-10-19
-  changed: 2023-11-27
+  changed: 2025-03-16
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
@@ -1068,7 +1068,7 @@
 - module: Tradegate.pm
   state: working
   added: 2022-10-19
-  changed: 2025-02-05
+  changed: 2025-03-16
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
@@ -1301,7 +1301,7 @@
 - module: XETRA.pm
   state: working
   added: 2020-09-29
-  changed: 2025-01-25
+  changed: 2025-03-16
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
