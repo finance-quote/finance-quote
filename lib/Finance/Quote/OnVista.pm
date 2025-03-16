@@ -25,7 +25,7 @@ package Finance::Quote::OnVista;
 use strict;
 use warnings;
 
-use Encode qw(decode encode_utf8);
+use Encode qw(encode_utf8);
 use HTML::TreeBuilder;
 use HTTP::Request::Common;
 use JSON qw( decode_json );
@@ -152,7 +152,7 @@ sub onvista {
         }
         $tree->eof;
 
-        unless ( $json = encode_utf8 (($tree->look_down(_tag => 'script', id => '__NEXT_DATA__', type => 'application/json')->content_list())[0]) ) {
+        unless ( $json = encode_utf8(($tree->look_down(_tag => 'script', id => '__NEXT_DATA__', type => 'application/json')->content_list())[0]) ) {
           $info{ $stock, "success" } = 0;
           $info{ $stock, "errormsg" } =
             "Error retrieving quote for $stock. No data returned";
@@ -161,7 +161,7 @@ sub onvista {
 
         ### [<now>] 2nd JSON: $json
 
-        eval {$json_decoded = decode_json $json};
+        eval {$json_decoded = decode_json encode_utf8 $json};
         if($@) {
           $info{ $stock, 'success' } = 0;
           $info{ $stock, 'errormsg' } = $@;
