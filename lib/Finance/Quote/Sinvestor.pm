@@ -73,6 +73,13 @@ sub get_de_number {
     return ($number =~ /^([-+]?[0-9]+(\.[0-9]+)?)/) ? $1 : undef;
 }
 
+sub td_search {
+    my ($tree, $text) = @_;
+    my $td = $tree->look_down('_tag'=>'td', sub { $_[0]->as_text eq $text }) or return;
+    my @tds = $td->parent->look_down('_tag'=>'td');
+    return map { $tds[$_]->as_text } (1..$#tds);
+}
+
 sub sinvestor {
   my $quoter  = shift;
   my $inst_id = exists $quoter->{module_specific_data}->{sinvestor}->{INST_ID} ?
@@ -141,28 +148,22 @@ sub sinvestor {
       } else {
         $lastvalue = $tree->look_down('id'=>'kursdaten') or die("Not found");
 
-        my $isin      = get_utf8_string(($lastvalue->look_down('_tag'=>'td'))[1]->as_text);
-        my $sharename = get_utf8_string(($lastvalue->look_down('_tag'=>'td'))[3]->as_text);
-        my $exchange  = get_utf8_string(($lastvalue->look_down('_tag'=>'td'))[5]->as_text);
+        my $isin      = get_utf8_string(td_search($lastvalue, 'ISIN'));
+        my $sharename = get_utf8_string(td_search($lastvalue, 'Bezeichnung'));
+        my $exchange  = get_utf8_string(td_search($lastvalue, "B\xf6rse/Contributor"));
 
-        my ($child) = ($lastvalue->look_down('_tag'=>'td'))[7]->as_text;
-        my $date = substr($child, 0, 8);
-        my $time = substr($child, 9, 5); # CE(S)T
+        my $price = get_de_number(td_search($lastvalue, 'Letzter Kurs'));
 
-        my $price = get_de_number(($lastvalue->look_down('_tag'=>'td'))[9]->as_text);
-
-        my $currency = (($lastvalue->look_down('_tag'=>'td'))[11])->as_text;
+        my $currency = get_utf8_string(td_search($lastvalue, "W\xe4hrung"));
         $currency =~ s/Euro/EUR/;
 
-        my $volume = get_de_number(($lastvalue->look_down('_tag'=>'td'))[13]->as_text);
+        # TODO: per trade or day?
+        my $volume = get_de_number(td_search($lastvalue, 'Volumen/Trade'));
+        #my $volume = get_de_number(td_search($lastvalue, 'Volumen/Tag'));
 
-        my $table = ($lastvalue->look_down('_tag'=>'table'))[1];
-        my $low  = get_de_number(($table->look_down('_tag'=>'td'))[1]->as_text);
-        my $high = get_de_number(($table->look_down('_tag'=>'td'))[2]->as_text);
-
-        my $t = $tree->look_down('_tag'=>'table', 'id'=>'detailHandelsplatz');
+        my $table = $tree->look_down('_tag'=>'table', 'id'=>'detailHandelsplatz');
         my %exchanges = ();
-        foreach ($t->look_down('_tag'=>'tr', 'class'=>'si_click_nav rowLink')) {
+        foreach ($table->look_down('_tag'=>'tr', 'class'=>'si_click_nav rowLink')) {
             my $a = $_->attr('data-dest');
             if ($a and $a =~ /boerse=([^&"]+)/) {
                 my $code = $1;
@@ -181,38 +182,36 @@ sub sinvestor {
 
         my @searchvalue = $tree->look_down('class'=>'contentBox oneColum');
         my $isFound = 0;
-        foreach (@searchvalue)
+        foreach my $t (@searchvalue)
         {
-          if (ref(($_->content_list)[0]) eq "HTML::Element" and ($_->content_list)[0]{'_content'}[0]{'_content'}[0] eq 'Aktuelle Vergleichszahlen')
+          if (ref(($t->content_list)[0]) eq "HTML::Element" and ($t->content_list)[0]{'_content'}[0]{'_content'}[0] eq 'Aktuelle Vergleichszahlen')
           {
             $isFound = 1;
-
-            my $open     = get_de_number(($_->look_down('_tag'=>'td'))[4]->as_text);
-            my $change   = get_de_number(($_->look_down('_tag'=>'td'))[13]->as_text);
-            my $p_change = get_de_number(($_->look_down('_tag'=>'td'))[16]->as_text);
-            my $close    = get_de_number(($_->look_down('_tag'=>'td'))[34]->as_text);
-
             $info{$symbol, 'success'}   = 1;
             $info{$symbol, 'method'}    = 'Sinvestor';
             $info{$symbol, 'symbol'}    = $isin;
             $info{$symbol, 'isin'}      = $isin;
             $info{$symbol, 'name'}      = $sharename;
+            $info{$symbol, 'volume'}    = $volume;
+            $info{$symbol, 'currency'}  = $currency;
             $info{$symbol, 'exchange'}  = $exchange;
             $info{$symbol, 'exchanges'} = [ grep { exists $exchange2code_uc{uc($_)}
                                               and defined $exchange2code_uc{uc($_)}
                                                  } sort keys %exchanges ];
             $info{$symbol, 'last'}      = $price;
-            $info{$symbol, 'price'}     = $price;
-            $info{$symbol, 'close'}     = $close;
-            $info{$symbol, 'change'}    = $change;
-            $info{$symbol, 'p_change'}  = $p_change;
-            $info{$symbol, 'volume'}    = $volume;
-            $info{$symbol, 'currency'}  = $currency;
+            $info{$symbol, 'price'}     = $price; # TODO: useless label (and not specified in README.md)
+            $info{$symbol, 'close'}     = get_de_number(td_search($t, 'VT-Schluss'));
+            $info{$symbol, 'change'}    = get_de_number(td_search($t, 'Diff.'));
+            $info{$symbol, 'p_change'}  = get_de_number(td_search($t, 'Diff.%'));
+            $info{$symbol, 'open'}      = get_de_number(td_search($t, "Er\xf6ffnung"));
+            $info{$symbol, 'low'}       = get_de_number(td_search($t, 'Tief'));
+            $info{$symbol, 'high'}      = get_de_number(td_search($t, 'Hoch'));
+
+            my ($child) = td_search($t, 'Datum/Zeit');
+            my $date = substr($child, 0, 8);
+            my $time = substr($child, 9, 5); # CE(S)T
             $quoter->store_date(\%info, $symbol, {eurodate => $date});
             $info{$symbol, 'time'}     = $1 if $time =~ /^([0-9]{2}:[0-9]{2})/;
-            $info{$symbol, 'open'}     = $open;
-            $info{$symbol, 'low'}      = $low;
-            $info{$symbol, 'high'}     = $high;
 
             if (DEBUG) {
                 my %unknown_exchanges = map { $_ => $exchanges{$_} }
