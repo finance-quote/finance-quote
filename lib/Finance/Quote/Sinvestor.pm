@@ -35,7 +35,7 @@ our $DISPLAY    = 'Sinvestor';
 # see https://web.s-investor.de/app/webauswahl.jsp for "Institutsliste"
 our $FEATURES   = {'INST_ID' => 'Institut Id (default: 0000057 for "Sparkasse Krefeld")',
                    'EXCHANGE' => 'select market place (i.e. "gettex", "Xetra", "Tradegate")'};
-our @LABELS     = qw/symbol isin last close exchange exchanges volume open price change p_change date time low high/;
+our @LABELS     = qw/symbol isin last close exchange exchanges volume open price change p_change date time low high ask bid source/;
 our $METHODHASH = {subroutine => \&sinvestor,
                    display => $DISPLAY,
                    labels => \@LABELS,
@@ -169,7 +169,10 @@ sub sinvestor {
         my $volume = get_de_number(td_search($lastvalue, 'Volumen/Trade'));
         #my $volume = get_de_number(td_search($lastvalue, 'Volumen/Tag'));
 
-        my $table = $tree->look_down('_tag'=>'table', 'id'=>'detailHandelsplatz');
+        my $table = ($tree->look_down('_tag'=>'table'))[1];
+        my ($bid, $ask) = map { get_de_number($_) } td_search($lastvalue, 'Kurs');
+
+        $table = $tree->look_down('_tag'=>'table', 'id'=>'detailHandelsplatz');
         my %exchanges = ();
         foreach ($table->look_down('_tag'=>'tr', 'class'=>'si_click_nav rowLink')) {
             my $a = $_->attr('data-dest');
@@ -197,11 +200,14 @@ sub sinvestor {
             $isFound = 1;
             $info{$symbol, 'success'}   = 1;
             $info{$symbol, 'method'}    = 'Sinvestor';
+            $info{$symbol, 'source'}    = $url;
             $info{$symbol, 'symbol'}    = $isin;
             $info{$symbol, 'isin'}      = $isin;
             $info{$symbol, 'name'}      = $sharename;
             $info{$symbol, 'volume'}    = $volume;
             $info{$symbol, 'currency'}  = $currency;
+            $info{$symbol, 'ask'}       = $ask;
+            $info{$symbol, 'bid'}       = $bid;
             $info{$symbol, 'exchange'}  = $exchange;
             $info{$symbol, 'exchanges'} = [ grep { exists $exchange2code_uc{uc($_)}
                                               and defined $exchange2code_uc{uc($_)}
@@ -316,6 +322,7 @@ exchange
 exchanges
 last
 method
+source
 success
 symbol
 isin
@@ -329,3 +336,5 @@ low
 high
 change
 p_change
+ask
+bid
