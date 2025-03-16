@@ -44,7 +44,7 @@ my $ONVISTA_URL = 'https://www.onvista.de/suche/';
 
 our $DISPLAY    = 'OnVista - Germany';
 our $FEATURES   = { 'EXCHANGE' => 'select market place (i.e. "GER", "Xetra", "Tradegate")' };
-our @LABELS     = qw/symbol isin wkn name open close high low last date volume currency exchange method ask bid p_change time exchanges/;
+our @LABELS     = qw/symbol isin wkn name open close high low last date volume currency exchange method ask bid change p_change time exchanges source/;
 our $METHODHASH = {subroutine => \&onvista, 
                    display => $DISPLAY, 
                    labels => \@LABELS};
@@ -193,6 +193,7 @@ sub onvista {
 
         $info{ $stock, "success" } = 1;
         $info{ $stock, 'method' } = 'onvista';
+        $info{ $stock, 'source' } = $url;
         $info{ $stock, 'name' } = $json_decoded->{'props'}{'pageProps'}{'data'}{'snapshot'}{'instrument'}{'name'};
 
         map { $info{ $stock, $_ } = $json_quote->{$_} } qw(open high low last volume ask bid);
@@ -200,6 +201,7 @@ sub onvista {
         $info{ $stock, 'currency' } = $json_quote->{'isoCurrency'};
         $info{ $stock, 'exchange' } = $json_quote->{'market'}{'name'};
         $info{ $stock, 'close' } = $json_quote->{'previousLast'};
+        $info{ $stock, 'change' } = $json_quote->{'performance'};
         $info{ $stock, 'p_change' } = $json_quote->{'performancePct'};
         $quoter->store_date(\%info, $stock, {isodate => substr $json_quote->{'datetimeLast'}, 0, 10});
 
@@ -307,6 +309,10 @@ The following labels are returned:
 
 =item currency
 
+=item change
+
 =item p_change
+
+=item source
 
 =back
