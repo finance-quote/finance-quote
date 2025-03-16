@@ -26,6 +26,7 @@ use HTML::TableExtract;
 use HTML::TreeBuilder;
 use LWP::UserAgent;
 use String::Util qw(trim);
+use Encode qw(encode_utf8);
 
 # VERSION
 
@@ -75,7 +76,7 @@ RETRY:
       ### [<now>] Body: $body
 
       my $tree = HTML::TreeBuilder->new;
-      unless ($tree->parse($body)) {
+      unless ($tree->parse(encode_utf8($body))) {
         $info{ $symbol, "success" } = 0;
         $info{ $symbol, "errormsg" } = 'Parse body failed';
         next;
