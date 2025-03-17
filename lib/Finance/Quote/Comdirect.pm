@@ -76,7 +76,7 @@ RETRY:
       ### [<now>] Body: $body
 
       my $tree = HTML::TreeBuilder->new;
-      unless ($tree->parse(encode_utf8($body))) {
+      unless ($tree->parse($body)) {
         $info{ $symbol, "success" } = 0;
         $info{ $symbol, "errormsg" } = 'Parse body failed';
         next;
@@ -92,7 +92,7 @@ RETRY:
         next;
       }
 
-      my %exchange2nid = map { $_->as_text => $_->attr('value') }
+      my %exchange2nid = map { encode_utf8($_->as_text) => $_->attr('value') }
         grep { ref eq 'HTML::Element' and $_->tag eq 'option' } $select->content_list;
 
       my $option = $select->look_down(_tag => 'option', selected => 'selected');
@@ -102,7 +102,7 @@ RETRY:
         next;
       }
 
-      if ($exchange and $exchange ne $option->as_text) {
+      if ($exchange and $exchange ne encode_utf8($option->as_text)) {
         unless (exists($exchange2nid{$exchange}) and $try < 2) {
             $info{ $symbol, "success" } = 0;
             $info{ $symbol, "errormsg" } = 'Marketplace not found: ' . "'".$exchange."'";
@@ -117,12 +117,12 @@ RETRY:
       }
 
       $info{$symbol, 'exchanges'} = [ sort keys %exchange2nid ];
-      $info{$symbol, 'exchange'} = $option->as_text;
+      $info{$symbol, 'exchange'} = encode_utf8($option->as_text);
       $info{$symbol, 'notation_id'} = $option->attr('value');
 
       my $h1 = $tree->look_down(_tag => 'h1');
       if ($h1) {
-        $info{$symbol, 'name'} = trim($h1->as_text);
+        $info{$symbol, 'name'} = trim(encode_utf8($h1->as_text));
       }
 
       my $div = $tree->look_down(_tag => 'div', class => "realtime-indicator");
