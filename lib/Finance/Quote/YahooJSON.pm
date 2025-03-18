@@ -228,7 +228,7 @@ sub yahoo_json {
                   # in Strawberry perl 5.18.2 in Windows
                   local $^W = 0;
                   $info{ $stocks, "div_yield" } =
-                    $json_resources_summaryDetail->{'trailingAnnualDividendYield'}{'raw'} =~ m/[\d,\.]+/ ?
+                    $json_resources_summaryDetail->{'trailingAnnualDividendYield'}{'raw'} =~ m/^[\d,\.]+$/ ?
                     $json_resources_summaryDetail->{'trailingAnnualDividendYield'}{'raw'} * 100          :
                     0.0;
                 }
