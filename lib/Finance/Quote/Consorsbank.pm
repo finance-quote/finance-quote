@@ -104,7 +104,8 @@ our @LABELS = qw/
 
 our $METHODHASH = {subroutine => \&consorsbank,
                    display => $DISPLAY,
-                   labels => \@LABELS};
+                   labels => \@LABELS,
+                   features => $FEATURES};
 
 sub methodinfo {
   return (
