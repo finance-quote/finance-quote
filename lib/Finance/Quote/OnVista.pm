@@ -45,9 +45,10 @@ my $ONVISTA_URL = 'https://www.onvista.de/suche/';
 our $DISPLAY    = 'OnVista - Germany';
 our $FEATURES   = { 'EXCHANGE' => 'select market place (i.e. "GER", "Xetra", "Tradegate")' };
 our @LABELS     = qw/symbol isin wkn name open close high low last date volume currency exchange method ask bid change p_change time exchanges source/;
-our $METHODHASH = {subroutine => \&onvista, 
-                   display => $DISPLAY, 
-                   labels => \@LABELS};
+our $METHODHASH = {subroutine => \&onvista,
+                   display => $DISPLAY,
+                   labels => \@LABELS,
+                   features => $FEATURES};
 
 sub methodinfo {
     return ( 
