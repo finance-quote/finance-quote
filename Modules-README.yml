@@ -1266,7 +1266,7 @@
 - module: Union.pm
   state: working
   added: TBD
-  changed: 2022-07-18
+  changed: 2025-04-07
   removed: ~
   urls: https://legacy-apps.union-investment.de/handle?generate=true&action=doDownloadSearch&start_time=...
   apikey: false
