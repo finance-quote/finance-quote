@@ -74,7 +74,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Comdirect
     Consorsbank
     Currencies
-    DWS
     Deka
     FinanceAPI
     Finanzpartner
@@ -1711,7 +1710,6 @@ http://www.gnucash.org/
   Finance::Quote::Comdirect,
   Finance::Quote::Consorsbank,
   Finance::Quote::Currencies,
-  Finance::Quote::DWS,
   Finance::Quote::Deka,
   Finance::Quote::FinanceAPI,
   Finance::Quote::Finanzpartner,

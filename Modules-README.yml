@@ -443,10 +443,12 @@
   state: working
   added: TBD
   changed: 2022-09-28
-  removed: ~
+  removed: 2025-04-12
   urls: https://www.deami.de/dps/ff/prices.aspx
   apikey: false
-  notes: Test file checks that name returned in JSON matches hard coded value in dws.t
+  notes: |
+    Test file checks that name returned in JSON matches hard coded value in dws.t
+    The data returned from the URL stopped being updated.
   testfile: dws.t
   testcases:
     - 848646
