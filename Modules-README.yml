@@ -303,7 +303,7 @@
 #
 - module: Consorsbank.pm
   state: working
-  added: 2023-07-20
+  added: 2025-03-14
   changed: ~
   removed: ~
   urls:
@@ -318,7 +318,6 @@
     - DE0008469008
     - FR0003500008
     - _81341467
-    - DE000CX0QLH6
     - DE0001102580
     - FR0010411884
     - LU1508476725

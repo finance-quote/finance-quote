@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Added EXCHANGE feature to Consorsbank.pm and some fixes - PR #479
 	* Enabled usage count in Quote.pm. Removed DWS.pm. Improved check that divident is a number in YahooJSON.pm by adding regex anchors.
 	* Added ssl_opts to user agent in Union.pm to account for bad certificate chain - Issue #482
 	* Added ETFs search, more labels and EXCHANGE feature to Comdirect.pm - PR #478
