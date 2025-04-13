@@ -33,7 +33,6 @@
 # $Id: Union.pm,v 1.3 2005/03/20 01:44:13 hampton Exp $
 
 package Finance::Quote::Union;
-require 5.005;
 
 use strict;
 use LWP::UserAgent;
@@ -46,8 +45,23 @@ our $UNION_URL1 = "https://legacy-apps.union-investment.de/handle?generate=true&
 # Date format 27.07.2022&end_time=01.08.2022
 our $UNION_URL2 ="&csvformat=us&choose_indi_fondsnames=";
 
-sub methods { return (unionfunds => \&unionfunds); }
-sub labels { return (unionfunds => [qw/exchange name date isodate price method/]); }
+our $DISPLAY    = 'Union - German Funds';
+our @LABELS     = qw/exchange name date isodate price method currency/;
+our $METHODHASH = {subroutine => \&unionfunds, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS};
+
+sub methodinfo {
+    return ( 
+        unionfunds => $METHODHASH,
+    );
+}
+
+sub labels { my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
+}
 
 # =======================================================================
 # The unionfunds routine gets quotes of UNION funds (Union Invest)
@@ -77,6 +91,9 @@ sub unionfunds
 		my $starttime = POSIX::strftime ("%d.%m.%Y" , localtime($epoc));
 		my $url = $UNION_URL1 . $starttime."&end_time=" . $endtime . $UNION_URL2 . $fund;
 
+  # Website not supplying intermediate certificate causing
+  # GET to fail
+  $ua->ssl_opts(verify_hostname => 0, SSL_verify_mode => 0x00);
 		
   # get csv data
   my $response = $ua->request(GET $url);
