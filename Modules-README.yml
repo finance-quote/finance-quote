@@ -238,7 +238,7 @@
 - module: Comdirect.pm
   state: working
   added: TBD
-  changed: 2024-10-18
+  changed: 2025-03-13
   removed: ~
   urls: https://www.comdirect.de/inf/search/all.html?SEARCH_VALUE=
   apikey: false
@@ -248,6 +248,7 @@
     - VWAGY
     - Volkswagen
     - DE0007664039
+    - FR0010510800
 #
 - module: CSE.pm
   state: working
@@ -302,7 +303,7 @@
 #
 - module: Consorsbank.pm
   state: working
-  added: 2023-07-20
+  added: 2025-03-14
   changed: ~
   removed: ~
   urls:
@@ -317,7 +318,6 @@
     - DE0008469008
     - FR0003500008
     - _81341467
-    - DE000CX0QLH6
     - DE0001102580
     - FR0010411884
     - LU1508476725
@@ -442,10 +442,12 @@
   state: working
   added: TBD
   changed: 2022-09-28
-  removed: ~
+  removed: 2025-04-12
   urls: https://www.deami.de/dps/ff/prices.aspx
   apikey: false
-  notes: Test file checks that name returned in JSON matches hard coded value in dws.t
+  notes: |
+    Test file checks that name returned in JSON matches hard coded value in dws.t
+    The data returned from the URL stopped being updated.
   testfile: dws.t
   testcases:
     - 848646
@@ -642,7 +644,7 @@
 - module: GoogleWeb.pm
   state: working
   added: 2023-09-16
-  changed: 2023-12-16
+  changed: 2025-03-06
   removed: ~
   urls: https://www.google.com/finance/
   apikey: false
@@ -1265,7 +1267,7 @@
 - module: Union.pm
   state: working
   added: TBD
-  changed: 2022-07-18
+  changed: 2025-04-07
   removed: ~
   urls: https://legacy-apps.union-investment.de/handle?generate=true&action=doDownloadSearch&start_time=...
   apikey: false

@@ -74,7 +74,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Comdirect
     Consorsbank
     Currencies
-    DWS
     Deka
     FinanceAPI
     Finanzpartner
@@ -606,14 +605,16 @@ sub fetch {
     return;
   }
 
-  # Temporary Counting - not concerned about return code
-  # my $COUNT_URL =
-  #   'http://www.panix.com/~hd-fxsts/finance-quote.html?' . $method;
-  # my $count_ua = LWP::UserAgent->new(timeout => 10);
-  # my $count_response = $count_ua->head($COUNT_URL);
+  unless ($ENV{"FQ_NOCOUNT"}) {
+    # Temporary Counting - not concerned about return code
+    my $COUNT_URL =
+      'http://www.panix.com/~hd-fxsts/finance-quote.html?' . $VERSION . '&' . $method;
+    my $count_ua = LWP::UserAgent->new(timeout => 10);
+    my $count_response = $count_ua->head($COUNT_URL);
 
-  # ### COUNT_URL: $COUNT_URL
-  # ### Code: $count_response->code
+    ### COUNT_URL: $COUNT_URL
+    ### Code: $count_response->code
+  }
 
   # Failover code.  This steps through all available methods while
   # we still have failed stocks to look-up.  This loop only
@@ -1709,7 +1710,6 @@ http://www.gnucash.org/
   Finance::Quote::Comdirect,
   Finance::Quote::Consorsbank,
   Finance::Quote::Currencies,
-  Finance::Quote::DWS,
   Finance::Quote::Deka,
   Finance::Quote::FinanceAPI,
   Finance::Quote::Finanzpartner,
