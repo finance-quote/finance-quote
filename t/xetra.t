@@ -16,8 +16,8 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-my @valid    = ('DE0008404005', 'FR0000120628');
-my @invalid  = ('BOGUS', 'NL0011540547', 'NL0000009165', 'XS2630111719');
+my @valid    = ('DE0008404005', 'NL0011540547', 'FR0000120628', 'XS2630111719', 'NL0000009165');
+my @invalid  = ('BOGUS');
 my @symbols  = (@valid, @invalid);
 my $today    = today();
 my $window   = 32;   # XS2630111719 quotes are only updates 1-2 a month
@@ -45,7 +45,7 @@ my %quotes2 = $q2->fetch('xetra', @symbols);
 ok(%quotes1);
 ok(%quotes2);
 
-### [<now>] quotes: %quotes1
+### [<now>] quotes: %quotes
 
 foreach my $symbol (@valid) {
   while (my ($key, $lambda) = each %check) {
@@ -53,7 +53,7 @@ foreach my $symbol (@valid) {
     ok($lambda->($quotes2{$symbol, $key}, $symbol, \%quotes2), "$symbol: $key -> $quotes2{$symbol, $key}");
   }
 }
-
+    
 foreach my $symbol (@invalid) {
   ok((not $quotes1{'BOGUS', 'success'}), 'failed as expected');
   ok((not $quotes2{'BOGUS', 'success'}), 'failed as expected');
