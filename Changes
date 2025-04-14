@@ -1,7 +1,5 @@
 {{$NEXT}}
 	* Added EXCHANGE feature to Sinvestor.pm and some fixes - PR #481
-	* Tradegate now uses Sinvestor.pm via EXCHANGE feature - PR #481
-	* XETRA now uses Sinvestor.pm via EXCHANGE feature - PR #481
 	* Added EXCHANGE feature to OnVista.pm - PR #480
 	* Added EXCHANGE feature to Consorsbank.pm and some fixes - PR #479
 	* Enabled usage count in Quote.pm. Removed DWS.pm. Improved check that divident is a number in YahooJSON.pm by adding regex anchors.
