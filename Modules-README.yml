@@ -877,7 +877,7 @@
 - module: OnVista.pm
   state: working
   added: TBD
-  changed: 2025-02-02
+  changed: 2025-03-13
   removed: ~
   urls:
     - https://www.onvista.de/suche/<symbol>
