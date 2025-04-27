@@ -473,6 +473,10 @@ Finance::Quote respects all environment that your installed version of
 LWP::UserAgent respects.  Most importantly, it respects the http\_proxy
 environment variable.
 
+# USAGE COUNTER
+
+A simple usage counter has been enabled. Other than the user's IP address, Finance::Quote version, and which method was used, no other data is collected. To opt out of your usage being counted, set the environment variable "FQ\_NOCOUNT".
+
 # BUGS
 
 The caller cannot control the fetch failover order.
@@ -563,7 +567,6 @@ http://www.gnucash.org/
     Finance::Quote::Comdirect,
     Finance::Quote::Consorsbank,
     Finance::Quote::Currencies,
-    Finance::Quote::DWS,
     Finance::Quote::Deka,
     Finance::Quote::FinanceAPI,
     Finance::Quote::Finanzpartner,
@@ -575,7 +578,6 @@ http://www.gnucash.org/
     Finance::Quote::HU,
     Finance::Quote::IndiaMutual,
     Finance::Quote::MarketWatch,
-    Finance::Quote::MorningstarAU,
     Finance::Quote::MorningstarCH,
     Finance::Quote::MorningstarJP,
     Finance::Quote::MorningstarUK,
@@ -604,7 +606,7 @@ Please read it if you are interested in adding extra methods to this package.
 The latest hacker's guide can also be found on GitHub at
 https://github.com/finance-quote/finance-quote/blob/master/Documentation/Hackers-Guide
 
-# Donations
+# DONATIONS
 
 While the contributors to Finance::Quote are happy to volunteer their time and resources on this project, donations are helpful and great way to say thank you. So far the only real cost to the team is domain registration for finance-quote.org. However, some operating systems and hardware upgrades do have a cost. Access to the latest or current environments is needed for development and testing. Upgrades to the latest MS Windows often includes a cost, and recently Apple's move to ARM/M1/M2 CPUs has stifled some contributors' ability to assist. With that in mind, you can send donations to the email address donations@finance-quote.org through PayPal. If it's for a particular contributor, please indicate in a note while submitting the donation through PayPal.
 

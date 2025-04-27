@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.65      2025-04-26 18:17:38-07:00 America/Los_Angeles
 	* Added EXCHANGE feature to Sinvestor.pm and some fixes - PR #481
 	* Added EXCHANGE feature to OnVista.pm - PR #480
 	* Added EXCHANGE feature to Consorsbank.pm and some fixes - PR #479
