@@ -1,4 +1,6 @@
 {{$NEXT}}
+	* Added Cookie Jar to Comdirect user agent - Issue #491
+	* Removed HU.pm, Oslobors.pm, and SEB.pm - Issue #490
 
 1.65      2025-04-26 18:17:38-07:00 America/Los_Angeles
 	* Added EXCHANGE feature to Sinvestor.pm and some fixes - PR #481
