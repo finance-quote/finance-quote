@@ -35,7 +35,8 @@ our $FEATURES   = { 'EXCHANGE' => 'select market place (i.e. "gettex", "Xetra", 
 our @LABELS     = qw/symbol name open high low last date time p_change ask bid currency isin wkn method exchange exchanges/;
 our $METHODHASH = {subroutine => \&comdirect,
                    display => $DISPLAY, 
-                   labels => \@LABELS};
+                   labels => \@LABELS,
+                   features => $FEATURES};
 
 sub methodinfo {
   return ( 
@@ -57,6 +58,9 @@ sub comdirect {
   my @symbols = @_;
   my $ua      = $quoter->user_agent();
   my (%info, %pricetable, %infotable);
+
+  # Issue #491 - Website needs cookies enabled.
+  $ua->cookie_jar(HTTP::Cookies->new);
 
   foreach my $symbol (@_) {
       my $try = 0;

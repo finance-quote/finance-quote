@@ -82,7 +82,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     FTfunds
     GoldMoney
     GoogleWeb
-    HU
     IndiaMutual
     MarketWatch
     MorningstarCH
@@ -91,8 +90,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     NSEIndia
     NZX
     OnVista
-    Oslobors
-    SEB
     SIX
     Sinvestor
     StockData
@@ -1726,7 +1723,6 @@ http://www.gnucash.org/
   Finance::Quote::FTfunds,
   Finance::Quote::GoldMoney,
   Finance::Quote::GoogleWeb,
-  Finance::Quote::HU,
   Finance::Quote::IndiaMutual,
   Finance::Quote::MarketWatch,
   Finance::Quote::MorningstarCH,
@@ -1735,8 +1731,6 @@ http://www.gnucash.org/
   Finance::Quote::NSEIndia,
   Finance::Quote::NZX,
   Finance::Quote::OnVista,
-  Finance::Quote::Oslobors,
-  Finance::Quote::SEB,
   Finance::Quote::SIX,
   Finance::Quote::StockData,
   Finance::Quote::Stooq,

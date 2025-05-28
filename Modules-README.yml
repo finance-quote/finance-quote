@@ -266,7 +266,7 @@
     - SLTL.N0000
 #
 - module: Cdnfundlibrary.pm
-  state: failing
+  state: removed
   added: TBD
   changed: 2019-12-01
   removed: 2024-04-14
@@ -439,7 +439,7 @@
     - AUD AUD
 #
 - module: DWS.pm
-  state: working
+  state: removed
   added: TBD
   changed: 2022-09-28
   removed: 2025-04-12
@@ -508,7 +508,7 @@
     - DE0009805507
 #
 - module: FTPortfolios.pm
-  state: failing
+  state: removed
   added: TBD
   changed: ~
   removed: 2021-01-03
@@ -537,7 +537,7 @@
     - GB00B7W6PR65
 #
 - module: Fidelity.pm
-  state: failing
+  state: removed
   added: TBD
   changed: 2020-03-21
   removed: 2023-12-16
@@ -617,7 +617,7 @@
     - BKNG
 #
 - module: Fundata.pm
-  state: failing
+  state: removed
   added: TBD
   change: TBD
   removed: 2024-04-14
@@ -658,7 +658,7 @@
     - NULC
 #
 - module: HEX.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
   removed: ~
@@ -669,10 +669,10 @@
   testcases:
 #
 - module: HU.pm
-  state: failing
+  state: removed
   added: TBD
   changed: 2019-06-22
-  removed: ~
+  removed: 2025-05-27
   urls:
     - http://www.bamosz.hu/alapoldal?isin=
     - http://www.bet.hu/topmenu/kereskedesi_adatok/product_search?isinquery=
@@ -746,7 +746,7 @@
     - INF082J01127
 #
 - module: LeRevenu.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
   removed: ~
@@ -757,7 +757,7 @@
   testcases:
 #
 - module: ManInvestments.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
   removed: ~
@@ -782,7 +782,7 @@
     - PCAR
 #
 - module: MorningstarAU.pm
-  state: failing
+  state: removed
   added: TBD
   changed:
   removed: 2025-02-23
@@ -895,10 +895,10 @@
     - A3GQ2N
 #
 - module: Oslobors.pm
-  state: failing
+  state: removed
   added: 2020-02-06
   changed: 2020-02-06
-  removed:
+  removed: 2025-05-27
   urls:
     - https://www.oslobors.no/ob/servlets/components?type=table&source=feed.omff.FUNDS&view=REALTIME&columns=ITEM%2C+PRICECHANGEPCT%2C+PRICE%2C+DATE%2C+QUOTATIONCURRENCY&filter=ITEM_SECTOR%3D%3Ds
   apikey: false
@@ -912,7 +912,7 @@
     - ST-VEKST.OSE
 #
 - module: Platinum.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
   removed: ~
@@ -923,15 +923,17 @@
   testcases:
 #
 - module: SEB.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
-  removed: ~
+  removed: 2025-05-27
   urls:
   apikey: false
   notes: ~
-  testfile: TBD
+  testfile: seb.t
   testcases:
+    - SEB Auto Hållbar 100
+    - SEB Life - Ethical Global Index
 #
 - module: Sinvestor.pm
   state: working
@@ -968,7 +970,7 @@
     - AAPL
 #
 - module: SIXfunds.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
   removed: ~
@@ -979,7 +981,7 @@
   testcases:
 #
 - module: SIXshares.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
   removed: ~
@@ -1012,7 +1014,7 @@
     - WM
 #
 - module: StockHouseCanada.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
   removed: ~
@@ -1055,7 +1057,7 @@
     - HBI:US
 #
 - module: TNetuk.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
   removed: ~
@@ -1089,7 +1091,7 @@
     - FR0010510800
 #
 - module: Tradeville.pm
-  state: failing
+  state: removed
   added: ~
   changed: ~
   removed: 2023-05-28
@@ -1133,7 +1135,7 @@
     - LINCOME
 #
 - module: Tdefunds.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
   removed: ~
@@ -1144,7 +1146,7 @@
   testcases:
 #
 - module: Tdwaterhouse.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
   removed: ~
@@ -1220,7 +1222,7 @@
     - GTFBX
 #
 - module: Trustnet.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
   removed: ~
@@ -1250,7 +1252,7 @@
     - BRK.A
 #
 - module: USFedBonds.pm
-  state: failing
+  state: removed
   added: ~
   changed: ~
   removed: 2022-07-21
@@ -1288,7 +1290,7 @@
   testcases:
 #
 - module: VWD.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
   removed: ~
@@ -1374,7 +1376,7 @@
     - T
 #
 - module: YahooYQL.pm
-  state: failing
+  state: removed
   added: TBD
   changed: ~
   removed: 2020-11-16
@@ -1399,7 +1401,7 @@
     - AMS
 #
 - module: ZA_UnitTrusts.pm
-  state: TBD
+  state: removed
   added: TBD
   changed: ~
   removed: ~
