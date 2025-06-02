@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-
+use Finance::Quote::CMBChina;
 
 # 启用 DEBUG 模式
 $ENV{DEBUG} = 1;
@@ -34,9 +34,9 @@ if ($info{'XY040208', 'success'}) {
 %info = $quoter->fetch('cmbchina', 'INVALID');
 ok(!$info{'INVALID', 'success'}, "Test with invalid product code");
 
-# 检查货币信息
+# 只有在成功获取数据时才检查货币信息
 if ($info{'INVALID', 'success'}) {
     is($info{'INVALID', 'currency'}, 'CNY', "Currency should be CNY");
 } else {
-    fail("Currency check skipped due to previous failure");
+    diag("Currency check skipped due to previous failure");
 }
