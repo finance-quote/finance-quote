@@ -88,7 +88,7 @@ sub cmbchina {
                 warn "Formatted date: $formatted_date" if $ENV{DEBUG};
                 
                 # Use Finance::Quote's store_date method to handle date parsing
-                $quoter->store_date(\%info, $symbol, { isodate => $formatted_date });
+                $quoter->store_date(\%info, $symbol, { iso => $formatted_date });
                 warn "After store_date: isodate = '" . $info{$symbol, 'isodate'} . "'" if $ENV{DEBUG};
             }
     }
