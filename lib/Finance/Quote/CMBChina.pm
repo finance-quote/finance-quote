@@ -34,6 +34,9 @@ sub cmbchina {
         # Send HTTP request
         my $response = $ua->request(GET $url);
         
+        # Add debug output for URL and response
+        print STDERR "Request URL: $url\n";
+        print STDERR "Response status: " . $response->status_line . "\n";
         
         # Check if request was successful
         unless ($response->is_success) {
@@ -42,8 +45,12 @@ sub cmbchina {
             next;
         }
         
-        # Use decoded_content to automatically detect encoding
-        my $html = $response->decoded_content();
+        # Decode the HTML content
+        my $html = decode('gb2312', $response->content, Encode::FB_QUIET);
+        
+        # Add debug output
+        use Data::Dumper;
+        warn "Decoded HTML: " . substr($html, 0, 500) . "..." if $ENV{DEBUG};
         
         # Parse HTML to extract table data using XPath
         my $tree = HTML::TreeBuilder::XPath->new;
@@ -54,11 +61,15 @@ sub cmbchina {
         my $net_value = $tree->findvalue('//*[@id="cList"]//table//tr[2]/td[3]/text()');
         my $date = $tree->findvalue('//*[@id="cList"]//table//tr[2]/td[5]/text()');
         
-        # Trim whitespace from extracted values
-        $product_code =~ s/^\s+|\s+$//g if defined $product_code;
-        $net_value =~ s/^\s+|\s+$//g if defined $net_value;
-        $date =~ s/^\s+|\s+$//g if defined $date;
+        # Add debug output for extracted values
+        warn "Extracted product code: '$product_code'" if $ENV{DEBUG};
+        warn "Extracted net value: '$net_value'" if $ENV{DEBUG};
+        warn "Extracted date: '$date'" if $ENV{DEBUG};
         
+        # Add debug output for extracted values
+        warn "Extracted product code: '$product_code'" if $ENV{DEBUG};
+        warn "Extracted net value: '$net_value'" if $ENV{DEBUG};
+        warn "Extracted date: '$date'" if $ENV{DEBUG};
         
         # Check if we found the target product
         unless ($product_code && $product_code eq $symbol) {
@@ -76,9 +87,11 @@ sub cmbchina {
             
             # Parse and store date
             if ($date) {
-                # Format date as YYYY-MM-DD correctly
-                my $formatted_date = substr($date, 0, 4) . "-" . substr($date, 4, 2) . "-" . substr($date, 6, 2);
-                $quoter->store_date(\%info, $symbol, { iso => $formatted_date });
+                # Try to parse date in different formats
+                my $epoch = str2time($date) || str2time("20" . substr($date, 0, 2) . "-" . substr($date, 2, 2) . "-" . substr($date, 4, 2));
+                if ($epoch) {
+                    $info{$symbol, 'isodate'} = scalar(gmtime($epoch))->ymd;
+                }
             }
     }
     

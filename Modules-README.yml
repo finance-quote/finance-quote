@@ -438,6 +438,22 @@
     - IDR CAD
     - AUD AUD
 #
+- module: CMBChina.pm
+  state: working
+  added: TBD
+  changed: 2025-04-14
+  removed: ~
+  urls:
+    - https://cmbchina.com/cfweb/personal/prodvalue.aspx
+  apikey: false
+  notes: |
+    Module to fetch fund values from China Merchants Bank's website.
+    It specifically targets the product value page for wealth management products.
+  testfile: cmbchina.t
+  testcases:
+    - XY040208
+    - BOGUS
+#
 - module: DWS.pm
   state: removed
   added: TBD

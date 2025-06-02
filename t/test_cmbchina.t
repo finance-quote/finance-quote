@@ -15,16 +15,16 @@ my $quoter = Finance::Quote->new('CMBChina');
 
 # 获取产品数据并验证是否成功
 my %info = $quoter->fetch('cmbchina', 'XY040208');
-ok($info{'XY040208', 'success'}, "Product data fetched successfully");
+ok($info{'success'}, "Product data fetched successfully");
 
-if ($info{'XY040208', 'success'}) {
+if ($info{'success'}) {
     # 数据存在时进行诊断输出
     diag("Successfully fetched data for XY040208");
-    diag("Net value: " . $info{'XY040208', 'last'});
-    diag("Date: " . $info{'XY040208', 'isodate'});
+    diag("Net value: " . $info{'last'});
+    diag("Date: " . $info{'isodate'});
     
     # 检查必需的字段
-    ok(exists $info{'XY040208', $_}, "Field $_ exists") foreach qw/symbol last isodate currency/;
+    ok(exists $info{$_}, "Field $_ exists") foreach qw/symbol last isodate currency/;
 } else {
     # 数据未成功获取时标记相关测试为失败
     fail("Required fields check skipped due to previous failure") foreach qw/1..4/;
@@ -32,11 +32,11 @@ if ($info{'XY040208', 'success'}) {
 
 # 测试无效产品代码的情况
 %info = $quoter->fetch('cmbchina', 'INVALID');
-ok(!$info{'INVALID', 'success'}, "Test with invalid product code");
+ok(!$info{'success'}, "Test with invalid product code");
 
 # 检查货币信息
-if ($info{'INVALID', 'success'}) {
-    is($info{'INVALID', 'currency'}, 'CNY', "Currency should be CNY");
+if ($info{'success'}) {
+    is($info{'currency'}, 'CNY', "Currency should be CNY");
 } else {
     fail("Currency check skipped due to previous failure");
 }

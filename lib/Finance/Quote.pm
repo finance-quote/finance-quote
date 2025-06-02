@@ -43,7 +43,6 @@ use Finance::Quote::UserAgent;
 use HTTP::Request::Common;
 use Encode;
 use JSON qw( decode_json );
-use Finance::Quote::CMBChina;
 
 use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
             $TIMEOUT @MODULES %MODULES %METHODS $AUTOLOAD
@@ -72,6 +71,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Bourso
     BVB
     CSE
+    CMBChina
     Comdirect
     Consorsbank
     Currencies
