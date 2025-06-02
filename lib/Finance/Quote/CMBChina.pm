@@ -34,9 +34,6 @@ sub cmbchina {
         # Send HTTP request
         my $response = $ua->request(GET $url);
         
-        # Add debug output for URL and response
-        print STDERR "Request URL: $url\n";
-        print STDERR "Response status: " . $response->status_line . "\n";
         
         # Check if request was successful
         unless ($response->is_success) {
@@ -62,10 +59,6 @@ sub cmbchina {
         $net_value =~ s/^\s+|\s+$//g if defined $net_value;
         $date =~ s/^\s+|\s+$//g if defined $date;
         
-        # Add debug output for extracted values
-        warn "Extracted product code: '$product_code'" if $ENV{DEBUG};
-        warn "Extracted net value: '$net_value'" if $ENV{DEBUG};
-        warn "Extracted date: '$date'" if $ENV{DEBUG};
         
         # Check if we found the target product
         unless ($product_code && $product_code eq $symbol) {
@@ -85,11 +78,7 @@ sub cmbchina {
             if ($date) {
                 # Format date as YYYY-MM-DD correctly
                 my $formatted_date = substr($date, 0, 4) . "-" . substr($date, 4, 2) . "-" . substr($date, 6, 2);
-                warn "Formatted date: $formatted_date" if $ENV{DEBUG};
-                
-                # Use Finance::Quote's store_date method to handle date parsing
                 $quoter->store_date(\%info, $symbol, { iso => $formatted_date });
-                warn "After store_date: isodate = '" . $info{$symbol, 'isodate'} . "'" if $ENV{DEBUG};
             }
     }
     
