@@ -62,9 +62,14 @@ sub cmbchina {
         my $date = $tree->findvalue('//*[@id="cList"]/table/tbody/tr[2]/td[5]');
         
         # Add debug output for extracted values
-        print STDERR "Extracted product code: '$product_code'\n";
-        print STDERR "Extracted net value: '$net_value'\n";
-        print STDERR "Extracted date: '$date'\n";
+        warn "Extracted product code: '$product_code'" if $ENV{DEBUG};
+        warn "Extracted net value: '$net_value'" if $ENV{DEBUG};
+        warn "Extracted date: '$date'" if $ENV{DEBUG};
+        
+        # Add debug output for extracted values
+        warn "Extracted product code: '$product_code'" if $ENV{DEBUG};
+        warn "Extracted net value: '$net_value'" if $ENV{DEBUG};
+        warn "Extracted date: '$date'" if $ENV{DEBUG};
         
         # Check if we found the target product
         unless ($product_code && $product_code eq $symbol) {

@@ -1,6 +1,10 @@
 use strict;
 use warnings;
 
+
+# 启用 DEBUG 模式
+$ENV{DEBUG} = 1;
+
 # 添加 Finance::Quote 模块的路径到 @INC
 use lib 'C:/Users/fatca/Documents/Devs/FQ_CMBChina/finance-quote/lib';  # 替换为你的模块实际安装路径
 
