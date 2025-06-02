@@ -48,10 +48,6 @@ sub cmbchina {
         # Use decoded_content to automatically detect encoding
         my $html = $response->decoded_content();
         
-        # Add debug output
-        use Data::Dumper;
-        warn "Decoded HTML: " . substr($html, 0, 500) . "..." if $ENV{DEBUG};
-        
         # Parse HTML to extract table data using XPath
         my $tree = HTML::TreeBuilder::XPath->new;
         $tree->parse($html);
@@ -87,11 +83,13 @@ sub cmbchina {
             
             # Parse and store date
             if ($date) {
-                # Try to parse date in different formats
-                my $epoch = str2time($date) || str2time("20" . substr($date, 0, 2) . "-" . substr($date, 2, 2) . "-" . substr($date, 4, 2));
-                if ($epoch) {
-                    $info{$symbol, 'isodate'} = scalar(gmtime($epoch))->ymd;
-                }
+                # Format date as YYYY-MM-DD correctly
+                my $formatted_date = substr($date, 0, 4) . "-" . substr($date, 4, 2) . "-" . substr($date, 6, 2);
+                warn "Formatted date: $formatted_date" if $ENV{DEBUG};
+                
+                # Use Finance::Quote's store_date method to handle date parsing
+                $quoter->store_date(\%info, $symbol, { isodate => $formatted_date });
+                warn "After store_date: isodate = '" . $info{$symbol, 'isodate'} . "'" if $ENV{DEBUG};
             }
     }
     
