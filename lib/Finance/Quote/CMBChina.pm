@@ -34,6 +34,10 @@ sub cmbchina {
         # Send HTTP request
         my $response = $ua->request(GET $url);
         
+        # Add debug output for URL and response
+        print STDERR "Request URL: $url\n";
+        print STDERR "Response status: " . $response->status_line . "\n";
+        
         # Check if request was successful
         unless ($response->is_success) {
             $info{$symbol, 'success'} = 0;
@@ -42,7 +46,7 @@ sub cmbchina {
         }
         
         # Decode the HTML content
-        my $html = decode('gbk', $response->content, Encode::FB_QUIET);
+        my $html = decode('gb2312', $response->content, Encode::FB_QUIET);
         
         # Add debug output
         use Data::Dumper;
@@ -58,9 +62,9 @@ sub cmbchina {
         my $date = $tree->findvalue('//*[@id="cList"]/table/tbody/tr[2]/td[5]');
         
         # Add debug output for extracted values
-        warn "Extracted product code: '$product_code'" if $ENV{DEBUG};
-        warn "Extracted net value: '$net_value'" if $ENV{DEBUG};
-        warn "Extracted date: '$date'" if $ENV{DEBUG};
+        print STDERR "Extracted product code: '$product_code'\n";
+        print STDERR "Extracted net value: '$net_value'\n";
+        print STDERR "Extracted date: '$date'\n";
         
         # Check if we found the target product
         unless ($product_code && $product_code eq $symbol) {
@@ -90,6 +94,8 @@ sub cmbchina {
 }
 
 1;
+
+__END__
 
 =head1 NAME
 
