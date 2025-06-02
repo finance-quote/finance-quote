@@ -91,7 +91,9 @@ __END__
 
 =head1 NAME
 
-Finance::Quote::CMBChina - Obtain fund values from 招商银行 (China Merchants Bank)
+Finance::Quote::CMBChina - Obtain fund values from China Merchants Bank
+
+=encoding utf8
 
 =head1 SYNOPSIS
 
