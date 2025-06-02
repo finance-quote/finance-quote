@@ -57,9 +57,9 @@ sub cmbchina {
         $tree->parse($html);
         
         # Extract required data using provided XPath expressions
-        my $product_code = $tree->findvalue('//*[@id="cList"]/table/tbody/tr[2]/td[1]');
-        my $net_value = $tree->findvalue('//*[@id="cList"]/table/tbody/tr[2]/td[3]');
-        my $date = $tree->findvalue('//*[@id="cList"]/table/tbody/tr[2]/td[5]');
+        my $product_code = $tree->findvalue('//*[@id="cList"]//table//tr[2]/td[1]/text()');
+        my $net_value = $tree->findvalue('//*[@id="cList"]//table//tr[2]/td[3]/text()');
+        my $date = $tree->findvalue('//*[@id="cList"]//table//tr[2]/td[5]/text()');
         
         # Add debug output for extracted values
         warn "Extracted product code: '$product_code'" if $ENV{DEBUG};
