@@ -45,8 +45,8 @@ sub cmbchina {
             next;
         }
         
-        # Decode the HTML content
-        my $html = decode('gb2312', $response->content, Encode::FB_QUIET);
+        # Use decoded_content to automatically detect encoding
+        my $html = $response->decoded_content();
         
         # Add debug output
         use Data::Dumper;
@@ -61,10 +61,10 @@ sub cmbchina {
         my $net_value = $tree->findvalue('//*[@id="cList"]//table//tr[2]/td[3]/text()');
         my $date = $tree->findvalue('//*[@id="cList"]//table//tr[2]/td[5]/text()');
         
-        # Add debug output for extracted values
-        warn "Extracted product code: '$product_code'" if $ENV{DEBUG};
-        warn "Extracted net value: '$net_value'" if $ENV{DEBUG};
-        warn "Extracted date: '$date'" if $ENV{DEBUG};
+        # Trim whitespace from extracted values
+        $product_code =~ s/^\s+|\s+$//g if defined $product_code;
+        $net_value =~ s/^\s+|\s+$//g if defined $net_value;
+        $date =~ s/^\s+|\s+$//g if defined $date;
         
         # Add debug output for extracted values
         warn "Extracted product code: '$product_code'" if $ENV{DEBUG};
