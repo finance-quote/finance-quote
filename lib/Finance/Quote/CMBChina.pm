@@ -70,7 +70,7 @@ sub cmbchina {
             # Populate info hash
             $info{$symbol, 'success'} = 1;
             $info{$symbol, 'symbol'} = $product_code;
-            $info{$symbol, 'last'} = $net_value;
+            $info{$symbol, 'nav'} = $net_value;
             $info{$symbol, 'method'} = 'cmbchina';
             $info{$symbol, 'currency'} = 'CNY'; # Assuming Chinese Yuan
             
