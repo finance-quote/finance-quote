@@ -9,15 +9,27 @@ use HTML::TreeBuilder::XPath;
 
 # VERSION
 
-our $CMBCHINA_URL = 'https://cmbchina.com/cfweb/personal/prodvalue.aspx';
-our @LABELS = qw/date isodate open high low close volume last method currency/;
+my $CMBCHINA_URL = 'https://cmbchina.com/cfweb/personal/prodvalue.aspx';
 
-sub labels {
-    return ( cmbchina => [@LABELS] );
+our $DISPLAY    = 'CMBChina';
+our $FEATURES   = {};
+our @LABELS     = qw/date isodate open high low close volume last method currency/;
+our $METHODHASH = {subroutine => \&cmbchina, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS,
+                   features => $FEATURES};
+
+sub methodinfo {
+    return ( 
+        cmbchina   => $METHODHASH,
+        cmb        => $METHODHASH,
+    );
 }
 
+sub labels { my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
 sub methods {
-    return ( cmbchina => \&cmbchina );
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub cmbchina {
@@ -28,58 +40,43 @@ sub cmbchina {
     my $ua = $quoter->user_agent();
     
     foreach my $symbol (@symbols) {
-        # Construct URL with the product code
         my $url = "$CMBCHINA_URL?comCod=000&PrdType=T0052&PrdCode=$symbol";
-        
-        # Send HTTP request
         my $response = $ua->request(GET $url);
         
-        
-        # Check if request was successful
         unless ($response->is_success) {
             $info{$symbol, 'success'} = 0;
             $info{$symbol, 'errormsg'} = "HTTP request failed: " . $response->status_line;
             next;
         }
         
-        # Use decoded_content to automatically detect encoding
         my $html = $response->decoded_content();
-        
-        # Parse HTML to extract table data using XPath
         my $tree = HTML::TreeBuilder::XPath->new;
         $tree->parse($html);
         
-        # Extract required data using provided XPath expressions
         my $product_code = $tree->findvalue('//*[@id="cList"]//table//tr[2]/td[1]/text()');
         my $net_value = $tree->findvalue('//*[@id="cList"]//table//tr[2]/td[3]/text()');
         my $date = $tree->findvalue('//*[@id="cList"]//table//tr[2]/td[5]/text()');
         
-        # Trim whitespace from extracted values
         $product_code =~ s/^\s+|\s+$//g if defined $product_code;
         $net_value =~ s/^\s+|\s+$//g if defined $net_value;
         $date =~ s/^\s+|\s+$//g if defined $date;
         
-        
-        # Check if we found the target product
         unless ($product_code && $product_code eq $symbol) {
             $info{$symbol, 'success'} = 0;
             $info{$symbol, 'errormsg'} = "Product code mismatch or not found";
             next;
         }
-            
-            # Populate info hash
-            $info{$symbol, 'success'} = 1;
-            $info{$symbol, 'symbol'} = $product_code;
-            $info{$symbol, 'nav'} = $net_value;
-            $info{$symbol, 'method'} = 'cmbchina';
-            $info{$symbol, 'currency'} = 'CNY'; # Assuming Chinese Yuan
-            
-            # Parse and store date
-            if ($date) {
-                # Format date as YYYY-MM-DD correctly
-                my $formatted_date = substr($date, 0, 4) . "-" . substr($date, 4, 2) . "-" . substr($date, 6, 2);
-                $quoter->store_date(\%info, $symbol, { iso => $formatted_date });
-            }
+        
+        $info{$symbol, 'success'} = 1;
+        $info{$symbol, 'symbol'} = $product_code;
+        $info{$symbol, 'nav'} = $net_value;
+        $info{$symbol, 'method'} = 'cmbchina';
+        $info{$symbol, 'currency'} = 'CNY';
+        
+        if ($date) {
+            my $formatted_date = substr($date, 0, 4) . "-" . substr($date, 4, 2) . "-" . substr($date, 6, 2);
+            $quoter->store_date(\%info, $symbol, { iso => $formatted_date });
+        }
     }
     
     return wantarray() ? %info : \%info;

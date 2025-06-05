@@ -10,7 +10,7 @@ use lib 'C:/Users/fatca/Documents/Devs/FQ_CMBChina/finance-quote/lib';  # 替换
 
 use Finance::Quote::CMBChina;
 
-use Test::More tests => 6;
+use Test::More tests => 7;
 use Finance::Quote;
 
 my $quoter = Finance::Quote->new('CMBChina');
