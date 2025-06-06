@@ -22,11 +22,11 @@ ok($info{'XY040208', 'success'}, "Product data fetched successfully");
 if ($info{'XY040208', 'success'}) {
     # 数据存在时进行诊断输出
     diag("Successfully fetched data for XY040208");
-    diag("Net value: " . $info{'XY040208', 'last'});
+    diag("Net value: " . $info{'XY040208', 'nav'});
     diag("Date: " . $info{'XY040208', 'isodate'});
     
     # 检查必需的字段
-    ok(exists $info{'XY040208', $_}, "Field $_ exists") foreach qw/symbol last isodate currency/;
+    ok(exists $info{'XY040208', $_}, "Field $_ exists") foreach qw/symbol nav isodate currency/;
 } else {
     # 数据未成功获取时标记相关测试为失败
     fail("Required fields check skipped due to previous failure") foreach qw/1..4/;

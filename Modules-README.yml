@@ -292,10 +292,10 @@
 #
 - module: CMBChina.pm
   state: working
-  added: 2024/06/05
+  added: 2025-06-05
   changed: ~
   removed: ~
-  urls:
+  urls: https://yfapi.net/v6/finance/quote?region=US&lang=en&symbols=
   apikey: false
   notes: This module could fetch the fund nav from CMBChina website.
   testfile: cmbchina.t

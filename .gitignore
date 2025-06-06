@@ -15,3 +15,4 @@ GTAGS
 *.private
 
 memory-bank/
+.vscode/
