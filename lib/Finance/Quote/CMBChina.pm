@@ -1,3 +1,26 @@
+#!/usr/bin/perl -w
+# vi: set ts=2 sw=2 noai ic showmode showmatch:  
+#
+#    Copyright (C) 2025, Garfield Chen <fatcat1985@outlook.com>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+#    02110-1301, USA
+
+#    Changes:
+#    Initial Version: 2025-06-06, Garfield Chen
+
 package Finance::Quote::CMBChina;
 
 use strict;
@@ -102,18 +125,33 @@ Finance::Quote::CMBChina - Obtain fund values from China Merchants Bank
 =head1 DESCRIPTION
 
 This module fetches fund values from China Merchants Bank's website
-(https://cmbchina.com). It specifically targets the product value page
+(https://yfapi.net/v6/finance/quote?region=US&lang=en&symbols=). It specifically targets the product value page
 for wealth management products.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::CMBChina:
-symbol, last, p_change, method, isodate, currency.
+The following labels are returned:
 
-=head1 CAVEATS
+=over
 
-This module assumes that the HTML structure of the CMBChina website remains
-stable. Changes to the website layout may cause this module to fail or
-return incorrect data.
+=item name
+
+=item symbol
+
+=item open
+
+=item high
+
+=item low
+
+=item price
+
+=item date
+
+=item volume
+
+=item currency
+
+=back
 
 =cut
