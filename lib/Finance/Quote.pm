@@ -1715,6 +1715,7 @@ http://www.gnucash.org/
   Finance::Quote::CSE,
   Finance::Quote::Comdirect,
   Finance::Quote::Consorsbank,
+  Finance::quote::CMBChina,
   Finance::Quote::Currencies,
   Finance::Quote::Deka,
   Finance::Quote::FinanceAPI,
