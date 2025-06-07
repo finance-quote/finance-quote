@@ -125,7 +125,7 @@ Finance::Quote::CMBChina - Obtain fund values from China Merchants Bank
 =head1 DESCRIPTION
 
 This module fetches fund values from China Merchants Bank's website
-(https://yfapi.net/v6/finance/quote?region=US&lang=en&symbols=). It specifically targets the product value page
+(https://cmbchina.com/cfweb/personal/prodvalue.aspx?comCod=000&PrdType=T0057&PrdCode=). It specifically targets the product value page
 for wealth management products.
 
 =head1 LABELS RETURNED

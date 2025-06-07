@@ -295,7 +295,7 @@
   added: 2025-06-05
   changed: ~
   removed: ~
-  urls: https://yfapi.net/v6/finance/quote?region=US&lang=en&symbols=
+  urls: https://cmbchina.com/cfweb/personal/prodvalue.aspx?comCod=000&PrdType=T0057&PrdCode=
   apikey: false
   notes: This module could fetch the fund nav from CMBChina website.
   testfile: cmbchina.t
