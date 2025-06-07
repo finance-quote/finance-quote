@@ -36,7 +36,7 @@ my $CMBCHINA_URL = 'https://cmbchina.com/cfweb/personal/prodvalue.aspx';
 
 our $DISPLAY    = 'CMBChina';
 our $FEATURES   = {};
-our @LABELS     = qw/date isodate open high low close volume last method currency/;
+our @LABELS     = qw/symbol nav isodate currency/;
 our $METHODHASH = {subroutine => \&cmbchina, 
                    display => $DISPLAY, 
                    labels => \@LABELS,
@@ -134,21 +134,12 @@ The following labels are returned:
 
 =over
 
-=item name
 
 =item symbol
 
-=item open
+=item nav
 
-=item high
-
-=item low
-
-=item price
-
-=item date
-
-=item volume
+=item isodate
 
 =item currency
 
