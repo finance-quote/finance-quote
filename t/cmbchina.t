@@ -3,12 +3,17 @@ use warnings;
 
 
 # Enable Debug mode
-$ENV{DEBUG} = 1;
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
 
 use Finance::Quote::CMBChina;
 
-use Test::More tests => 7;
+use Test::More;
 use Finance::Quote;
+
+if (not $ENV{ONLINE_TEST}) {
+    plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
+}
 
 my $quoter = Finance::Quote->new('CMBChina');
 
