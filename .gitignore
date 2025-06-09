@@ -14,3 +14,5 @@ GTAGS
 *.swp
 *.private
 
+memory-bank/
+.vscode/
