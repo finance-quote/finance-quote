@@ -15,6 +15,8 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
+plan tests => 7;
+
 my $quoter = Finance::Quote->new('CMBChina');
 
 # Fetch the fund data and verfiy if it was successful
