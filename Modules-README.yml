@@ -62,14 +62,14 @@
 - module: ASX.pm
   state: working
   added: TBD
-  changed: 2024-10-21
+  changed: 2025-06-11
   removed: ~
-  urls:
+  urls: https://asx.api.markitdigital.com/asx-research/1.0/companies/
   apikey: false
   notes: |
     Most securities are available from YahooJSON (and possibly other sources).
-    Primary URL https://www.asx.com.au/asx/1/share/$symbol now utilizing
-    Imperva's Incapsula to prevent web scraping and robots. The alternate
+    Previous URL, https://www.asx.com.au/asx/1/share/$symbol, now utilizing
+    Imperva's Incapsula to prevent web scraping and robots. The current
     URL https://asx.api.markitdigital.com/asx-research/1.0/companies/
     does not return a trade date.
   testfile: asx.t
@@ -89,7 +89,7 @@
     - ETPMPT
     - GOLD
     - IAA
-    - KIJOA
+    - BKIJOB
     - XAO
     - XJO
 #

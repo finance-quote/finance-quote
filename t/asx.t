@@ -19,7 +19,7 @@ my @numerics   = qw/360 14D A2M XF1/;
 my @corp_bonds = qw/AYUHD/;
 my @govt_bonds = qw/GSBK51 GSIC50/;
 my @etps       = qw/BEAR ETPMPT GOLD IAA/;
-my @warrants   = qw/BKIJOA/;
+my @warrants   = qw/BKIJOB/;
 my @indices    = qw/XAO XJO/;
 my @invalids   = qw/BOGUS TooLong Non-AN/;
 

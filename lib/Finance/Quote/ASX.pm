@@ -215,10 +215,19 @@ sub get_asx_data {
 	my($data, $error, $json, $response, $status);
 
 ### ASX.pm  Retrieving data from ASX URL: $url
+
+# HTTP code 400 is returned if the symbol is not found, along with
+# a JSON structure:
+# {"error":{"code":400,"message":"Bad Request: Symbol not found","errors":[{"message":"Bad Request: Symbol not found"}]}}
+
 	$response = $ua->get($url);
 	if	(! $response->is_success) {
 		$status = 0;
+    if ( $response->code == 400 && $response->header('content-type') =~ m|application/json|i && $response->content =~ m|Symbol not found|i ) {
+      $error = "Symbol not found!";
+    } else {
 		$error = "Unable to fetch data from the ASX server '$url'.  Status: " . $response->status_line;
+    }
 ### ASX.pm  Error: $error
 		return $status, $error, undef;
 	}
