@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* ASX - Changed error message when symbol isn't found - Issue #497
 	* Added a new module to fetch the fund nav from CMBChina - PR #494
 	* Added Cookie Jar to Comdirect user agent - Issue #491
 	* Removed HU.pm, Oslobors.pm, and SEB.pm - Issue #490
