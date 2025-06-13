@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=2 sw=2 noai ic showmode showmatch: 
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -32,20 +33,33 @@ my $URL      = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://api.twel
 my $THROTTLE = 1.05 * 60.0/8.0;  # 5% more than maximum seconds / request for free tier
 my $AGENT    = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36';
 
-sub methods { 
-  return ( twelvedata => \&twelvedata );
+our $DISPLAY    = 'TwelveData';
+our $FEATURES   = {'API_KEY' => 'registered user API key'};
+our @LABELS     = qw/symbol name exchange currency isodate currency open high low close last/;
+our $METHODHASH = {subroutine => \&twelvedata, 
+                       display => $DISPLAY, 
+                       labels => \@LABELS,
+                       features => $FEATURES};
+
+sub methodinfo {
+  return ( 
+    twelvedata   => $METHODHASH,
+    usa          => $METHODHASH,
+    nyse         => $METHODHASH,
+    nasdaq       => $METHODHASH,
+  );
+}
+
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
+}
+
+sub labels {
+  my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
 sub parameters {
   return ('API_KEY');
-}
-
-{
-    our @labels = qw/symbol name exchange currency isodate currency open high low close last/;
-
-    sub labels {
-        return ( twelvedata => \@labels );
-    }
 }
 
 
