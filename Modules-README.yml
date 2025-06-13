@@ -1247,13 +1247,14 @@
 - module: TwelveData.pm
   state: working
   added: 2023-05-26
-  changed: 2024-04-25
+  changed: 2025-06-13
   removed:
   urls:
     - https://api.twelvedata.com/quote?symbol={$symbol}&apikey={$token}
   apikey: true
   notes: |
     API Required.  Register at https://twelvedata.com.
+    Limit 800 per day, 8 per minute.
   testfile: twelvedata.t
   testcases:
     - MSFT
