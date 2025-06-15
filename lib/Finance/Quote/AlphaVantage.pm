@@ -271,6 +271,14 @@ sub alphavantage {
             next;
         }
 
+        # AlphaVantage can return an empty "Global Quote" when
+        # a symbol is not found.
+        if ( ! $quote->{'01. symbol'} ) {
+            $info{ $stock, 'success' } = 0;
+            $info{ $stock, 'errormsg' } = "Symbol $stock not found.";
+            next;
+        }
+
         # %ts holds data as
         #  {
         #     "Global Quote": {
