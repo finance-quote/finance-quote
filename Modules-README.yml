@@ -166,10 +166,10 @@
   testcases:
 #
 - module: Bloomberg.pm
-  state: working
+  state: removed
   added:
   changed: 2024-03-18
-  removed:
+  removed: 2025-06-21
   urls: https://www.bloomberg.com/quote/
   apikey: false
   notes:
@@ -1169,10 +1169,10 @@
   testcases:
 #
 - module: Tiaacref.pm
-  state: working
+  state: removed
   added: 2000-05-14
   changed: 2020-10-11
-  removed: ~
+  removed: 2025-06-21
   urls:
     - https://www.tiaa.org/public/investment-performance
   apikey: false
@@ -1218,10 +1218,10 @@
     - 912810QY7
 #
 - module: Troweprice.pm
-  state: working
+  state: removed
   added: TBD
   changed: 2020-10-11
-  removed: ~
+  removed: 2025-06-21
   urls: https://www3.troweprice.com/fb2/ppfweb/downloadPrices.do
   apikey: false
   notes: data available elsewhere -- marked for deprecation

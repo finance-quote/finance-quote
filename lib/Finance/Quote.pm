@@ -66,7 +66,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     ASX
     AlphaVantage
     BSEIndia
-    Bloomberg
     BorsaItaliana
     Bourso
     BVB
@@ -96,11 +95,9 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     StockData
     Stooq
     TesouroDireto
-    Tiaacref
     TMX
     Tradegate
     TreasuryDirect
-    Troweprice
     TSP
     TwelveData
     Union
@@ -112,8 +109,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
 
 @ISA    = qw/Exporter/;
 @EXPORT = ();
-@EXPORT_OK = qw/troweprice asx tiaacref
-                currency_lookup/;
+@EXPORT_OK = qw/asx currency_lookup/;
 @EXPORT_TAGS = ( all => [@EXPORT_OK]);
 
 $USE_EXPERIMENTAL_UA = 0;
@@ -1707,7 +1703,6 @@ http://www.gnucash.org/
   Finance::Quote::AEX,
   Finance::Quote::ASEGR,
   Finance::Quote::ASX,
-  Finance::Quote::Bloomberg,
   Finance::Quote::BorsaItaliana,
   Finance::Quote::BSEIndia,
   Finance::Quote::Bourso,
@@ -1738,10 +1733,8 @@ http://www.gnucash.org/
   Finance::Quote::Stooq,
   Finance::Quote::TSP,
   Finance::Quote::TMX,
-  Finance::Quote::Tiaacref,
   Finance::Quote::TesouroDireto,
   Finance::Quote::TreasuryDirect,
-  Finance::Quote::Troweprice,
   Finance::Quote::TwelveData,
   Finance::Quote::Union,
   Finance::Quote::YahooJSON,
