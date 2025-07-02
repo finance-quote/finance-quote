@@ -118,7 +118,9 @@ sub multipliers
     return ($b, $a);
   }
 
-  return (1.0, $rate);
+  return ($json_data->{'rates'}->{${from}}, $json_data->{'rates'}->{${to}});
+
+  # return (1.0, $rate);
 }
 
 

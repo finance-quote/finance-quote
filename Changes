@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Modified CurrencyRates/CurrencyFreaks.pm to return from and to values instead of calculated rate.
 	* Removed Bloomberg.pm, Tiaacref.pm, Troweprice.pm
 	* AlphaVantage - return 'symbol not found' when no price data is returned.
 	* ASX - Changed error message when symbol isn't found - Issue #497

@@ -367,7 +367,7 @@
 #
 - module: CurrencyRates/CurrencyFreaks.pm
   state: working
-  Added: 2024-05-09
+  Added: 2025-06-16
   changed: ~
   removed: ~
   urls: https://api.currencyfreaks.com/v2.0/rates/latest?apikey=YOUR_APIKEY&symbols={CURRENCYCODE},{CURRENCYCODE},...
