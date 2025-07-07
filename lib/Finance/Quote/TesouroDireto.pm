@@ -52,7 +52,10 @@ sub tesouro
       $fundhash{$fund} = 0;
   }
 
-  my $url = "https://raw.githubusercontent.com/ghostnetrn/bot-tesouro-direto/main/tesouro.json";
+  my $url = "https://www.tesourodireto.com.br/json/br/com/b3/tesourodireto/service/api/treasurybondsinfo.json";
+  $ua->agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36');
+  $ua->timeout(10);
+  $ua->max_redirect(5);
   my $response = $ua->request(GET $url);
 
   if ($response->is_success) {
