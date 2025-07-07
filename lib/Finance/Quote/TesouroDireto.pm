@@ -125,7 +125,7 @@ Finance::Quote::TesouroDireto - Obtain quotes for Brazilian government bounds
 =head1 DESCRIPTION
 
 This module obtains quotes for Brazilian government bounds, obtained from
-https://www.tesourodireto.com.br/titulos/precos-e-taxas.htm
+https://www.tesourodireto.com.br/json/br/com/b3/tesourodireto/service/api/treasurybondsinfo.json
 
 =head1 LABELS RETURNED
 

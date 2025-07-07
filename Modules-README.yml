@@ -1191,11 +1191,10 @@
 - module: TesouroDireto.pm
   state: working
   added: 2022-02-06
-  changed: 2024-09-11
+  changed: 2025-07-07
   removed: ~
   urls:
-    - https://www.tesourodireto.com.br/titulos/precos-e-taxas.htm
-    - https://github.com/ghostnetrn/bot-tesouro-direto
+    - https://www.tesourodireto.com.br/json/br/com/b3/tesourodireto/service/api/treasurybondsinfo.json
   apikey: false
   notes: ~
   testfile: tesouro_direto.t
