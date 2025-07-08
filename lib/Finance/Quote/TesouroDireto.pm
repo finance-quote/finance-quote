@@ -33,8 +33,27 @@ use JSON;
 
 # VERSION
 
-sub methods { return (tesouro_direto => \&tesouro); }
-sub labels { return (tesouro_direto => [qw/exchange date isodate symbol name price last method currency/]); }
+our $DISPLAY    = 'Brazilian Govt Bonds, tesouro_direto';
+our $FEATURES   = {};
+our @LABELS     = qw/exchange date isodate symbol name price last method currency/;
+our $METHODHASH = {subroutine => \&tesouro,
+                   display => $DISPLAY,
+                   labels => \@LABELS,
+                   features => $FEATURES};
+
+sub methodinfo {
+    return (
+        tesouro_direto => $METHODHASH,
+    );
+}
+
+sub methods {
+    my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
+}
+
+sub labels {
+    my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
 
 sub tesouro
 {
