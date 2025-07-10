@@ -33,21 +33,33 @@ use if DEBUG, 'Smart::Comments', '###';
 
 # VERSION
 
-my $MW_URL = 'https://www.marketwatch.com/investing/stock/';
+our $DISPLAY    = 'MarketWatch';
+our $FEATURES   = {};
+our @LABELS     = qw/symbol name last date currency method/;
+our $METHODHASH = {subroutine => \&marketwatch, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS,
+                   features => $FEATURES};
+
+sub methodinfo {
+  return ( 
+      marketwatch => $METHODHASH,
+      nyse        => $METHODHASH,
+      nasdaq      => $METHODHASH,
+  );
+}
 
 sub methods {
-  return (marketwatch => \&marketwatch,
-          nyse        => \&marketwatch,
-          nasdaq      => \&marketwatch);
+  my %m = methodinfo();
+  return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
-our @labels = qw/symbol name last date currency method/;
-
-sub labels { 
-  return (marketwatch => \@labels,
-          nyse        => \@labels,
-          nasdaq      => \@labels); 
+sub labels {
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
+
+my $MW_URL = 'https://www.marketwatch.com/investing/stock/';
 
 sub marketwatch {
 
