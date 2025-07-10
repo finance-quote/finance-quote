@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Added methodinfo() to MarketWatch.pm
 	* Optimizing TesouroDireto.pm - Using official Tesouro Direto URL (https://www.tesourodireto.com.br/...)
 
 1.66      2025-07-05 11:34:42-07:00 America/Los_Angeles
