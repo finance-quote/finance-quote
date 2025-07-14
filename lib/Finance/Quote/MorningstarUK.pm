@@ -43,12 +43,15 @@ use LWP::Simple;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTTP::Cookies;
+use JSON qw(decode_json);
+use Text::Template;
 
 # VERSION
 
 $MSTARUK_MAIN_URL   =   "https://www.morningstar.co.uk";
 $MSTARUK_LOOK_UP    =   "https://www.morningstar.co.uk/uk/funds/SecuritySearchResults.aspx?search=";
-$MSTARUK_NEXT_URL	=	"https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=";
+# $MSTARUK_NEXT_URL	=	"https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=";
+$MSTARUK_NEXT_URL = Text::Template->new( TYPE => 'STRING', SOURCE => 'https://api-global.morningstar.com/sal-service/v1/fund/quote/v7/{$secid}/data?fundServCode=&showAnalystRatingChinaFund=false&showAnalystRating=false&hideesg=false&region=GBR&languageId=en-gb&locale=en-gb&clientId=MDC&benchmarkId=mstarorcat&component=sal-mip-investment-overview&version=4.65.0' );
 
 # FIXME -
 
@@ -119,13 +122,14 @@ sub mstaruk_fund  {
 
 # Find name by regexp
 
-        my ($name, $nexturl, $isin);
+        my ($name, $nexturl, $secid);
  		if ($webdoc =~
-        m[<td class="msDataText searchLink"><a href="(.*?)">(.*?)</a></td><td class="msDataText searchIsin"><span>[a-zA-Z]{2}[a-zA-Z0-9]{9}\d(.*)</span></td>] )
+        m[<td class="msDataText searchLink"><a href="(.*?id=([A-Z0-9]+))">(.*?)</a></td><td class="msDataText searchIsin"><span>[a-zA-Z]{2}[a-zA-Z0-9]{9}\d(.*)</span></td>] )
         {
             $nexturl = $1;
-            $name = $2;
-            $isin = $3;
+            $secid = $2;
+			### [<now>] secID: $secid
+            $name = $3;
         }
 
 		if (!defined($name)) {
@@ -150,12 +154,17 @@ sub mstaruk_fund  {
 
 		$nexturl =~ s/&amp;/&/;
 
+		$nexturl = $MSTARUK_NEXT_URL->fill_in(HASH => {secid => $secid});
+		$ua->default_header('Apikey' => 'lstzFDEOhfFNMLikKa0am9mgEKLBl49T');
+
 # Now need to look-up next page using $next_url
 
-		### [<now>] NextURL: $MSTARUK_MAIN_URL.$nexturl
+		# ### [<now>] NextURL: $MSTARUK_MAIN_URL.$nexturl
+		### [<now>] NextURL: $nexturl
 
         # $webdoc  = get($MSTARUK_MAIN_URL.$nexturl);
-		my $response = $ua->request( GET $MSTARUK_MAIN_URL.$nexturl );
+		# my $response = $ua->request( GET $MSTARUK_MAIN_URL.$nexturl );
+		my $response = $ua->request( GET $nexturl );
 
 		### [<now>] Response: $response
 		
