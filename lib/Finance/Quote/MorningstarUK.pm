@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=4 sw=4 noai ic showmode showmatch: 
 
 #  MorningstarUK.pm
 #
@@ -35,6 +36,9 @@ use warnings;
 # URLs
 use vars qw($VERSION $MSTARUK_NEXT_URL $MSTARUK_LOOK_UP $MSTARUK_MAIN_URL);
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use LWP::Simple;
 use LWP::UserAgent;
 use HTTP::Request::Common;
@@ -42,9 +46,9 @@ use HTTP::Cookies;
 
 # VERSION
 
-$MSTARUK_MAIN_URL   =   "http://www.morningstar.co.uk";
-$MSTARUK_LOOK_UP    =   "http://www.morningstar.co.uk/uk/funds/SecuritySearchResults.aspx?search=";
-$MSTARUK_NEXT_URL	=	"http://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=";
+$MSTARUK_MAIN_URL   =   "https://www.morningstar.co.uk";
+$MSTARUK_LOOK_UP    =   "https://www.morningstar.co.uk/uk/funds/SecuritySearchResults.aspx?search=";
+$MSTARUK_NEXT_URL	=	"https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=";
 
 # FIXME -
 
@@ -107,6 +111,9 @@ sub mstaruk_fund  {
 		        "Error - failed to retrieve fund data";
 		    next;
 	    }
+
+		### [<now>] webdoc: $webdoc
+
 	    $fundquote {$code, "symbol"} = $code;
 	    $fundquote {$code, "source"} = $MSTARUK_MAIN_URL;
 
@@ -145,7 +152,15 @@ sub mstaruk_fund  {
 
 # Now need to look-up next page using $next_url
 
-        $webdoc  = get($MSTARUK_MAIN_URL.$nexturl);
+		### [<now>] NextURL: $MSTARUK_MAIN_URL.$nexturl
+
+        # $webdoc  = get($MSTARUK_MAIN_URL.$nexturl);
+		my $response = $ua->request( GET $MSTARUK_MAIN_URL.$nexturl );
+
+		### [<now>] Response: $response
+		
+		$webdoc = $response->decoded_content;
+
         if (!$webdoc)
         {
 	        # serious error, report it and give up
