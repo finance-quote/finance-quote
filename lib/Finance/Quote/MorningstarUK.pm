@@ -60,7 +60,7 @@ sub methods { return (morningstaruk => \&mstaruk_fund,
                       ukfunds => \&mstaruk_fund); }
 
 {
-    my @labels = qw/name currency last date time price nav source iso_date method net p_change success errormsg/;
+    my @labels = qw/name currency last date price nav source iso_date method success errormsg/;
 
     sub labels { return (morningstaruk => \@labels,
                          mstaruk => \@labels,
@@ -150,58 +150,38 @@ sub mstaruk_fund  {
 		    next;
 		}
 
-# modify $nexturl to remove html escape encoding for the Ampersand (&) character
-
-		$nexturl =~ s/&amp;/&/;
-
 		$nexturl = $MSTARUK_NEXT_URL->fill_in(HASH => {secid => $secid});
 		$ua->default_header('Apikey' => 'lstzFDEOhfFNMLikKa0am9mgEKLBl49T');
 
-# Now need to look-up next page using $next_url
-
-		# ### [<now>] NextURL: $MSTARUK_MAIN_URL.$nexturl
 		### [<now>] NextURL: $nexturl
 
-        # $webdoc  = get($MSTARUK_MAIN_URL.$nexturl);
-		# my $response = $ua->request( GET $MSTARUK_MAIN_URL.$nexturl );
 		my $response = $ua->request( GET $nexturl );
 
-		### [<now>] Response: $response
-		
-		$webdoc = $response->decoded_content;
+		if ($response->code != 200 ) {
+			$fundquote {$code,"success"} = 0;
+			$fundquote {$code,"errormsg"} = "Error - $code not found";
+			next;
+		}
 
-        if (!$webdoc)
-        {
+		$webdoc = $response->content;
+		### [<now>] 2nd Webdoc: $webdoc
+
+		my $json;
+		eval {$json = decode_json $webdoc};
+        if ($@) {
 	        # serious error, report it and give up
 		    $fundquote {$code,"success"} = 0;
 		    $fundquote {$code,"errormsg"} =
-		        "Error - failed to retrieve fund data";
+		        "Error - failed to retrieve fund data - could not decode JSON";
 		    next;
 	    }
+		### [<now>] JSON: $json
 
 # Find date, currency and price all in one table row
 
-		my ($currency, $date, $price, $pchange);
-		if ($webdoc =~
-		m[<td class="line heading">NAV<span class="heading"><br />([0-9]{2}/[0-9]{2}/[0-9]{4})</span>.*([A-Z]{3}).([0-9\.]+).*Day Change[^%]*>([0-9\.\-]+)] )
-        {
-
-            $date = $1;
-            $currency = $2;
-            $price = $3;
-            $pchange = $4;
-        }
-
-		if (!defined($pchange)) {
-			# not a serious error - don't report it ....
-#			$fundquote {$code,"success"} = 0;
-			# ... but set a useful message ....
-			$fundquote {$code,"errormsg"} = "Warning - failed to find net or %-age change";
-			# set to (minus)zero
-            $pchange = -0.00;
-			# ... and continue
-		}
-		$fundquote {$code, "p_change"} = $pchange;	# set %-change
+		my $currency = $json->{'currency'};
+		my $price = $json->{'nav'};
+		(my $date = $json->{'latestPriceDate'}) =~ s/T.*//;
 
 		if (!defined($date)) {
 			# not a serious error - don't report it ....
@@ -214,7 +194,7 @@ sub mstaruk_fund  {
 		}
 		else
 		{
-		    $quoter->store_date(\%fundquote, $code, {eurodate => $date});
+		    $quoter->store_date(\%fundquote, $code, {isodate => $date});
 		}
 
 		if (!defined($price)) {
@@ -233,17 +213,12 @@ sub mstaruk_fund  {
 
 		# defer setting currency and price until we've dealt with possible GBX currency...
 
-# Calculate net change - it's not included in the morningstar factsheets
-
-		my $net = ($price * $pchange) / 100 ;
-
 # deal with GBX pricing of UK unit trusts
 
 		if ($currency eq "GBX")
 		{
 			$currency = "GBP" ;
 			$price = $price / 100 ;
-            $net   = $net   / 100 ;
 		}
 
 		# now set prices and currency
@@ -251,17 +226,9 @@ sub mstaruk_fund  {
 		$fundquote {$code, "price"} = $price;
 		$fundquote {$code, "last"} = $price;
 		$fundquote {$code, "nav"} = $price;
-		$fundquote {$code, "net"} = $net;
 		$fundquote {$code, "currency"} = $currency;
 
-# Set a dummy time as gnucash insists on having a valid format
-
-		my $time = "12:00";     # set to Midday if no time supplied ???
-                                # gnucash insists on having a valid-format
-
-		$fundquote {$code, "time"} = $time; # set time
-
-		$fundquote {$code, "method"} = "mstaruk";   # set method
+		$fundquote {$code, "method"} = "morningstaruk";   # set method
 
 	}
 
