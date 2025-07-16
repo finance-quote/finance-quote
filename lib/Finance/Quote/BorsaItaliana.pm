@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=4 sw=4 noai ic showmode showmatch: 
 #    This module is based on the Finance::Quote::BSERO module
 #    It was first called BOMSE but has been renamed to yahooJSON
 #    since it gets a lot of quotes besides Indian
@@ -23,12 +24,13 @@
 
 package Finance::Quote::BorsaItaliana;
 
-require 5.005;
-
 use strict;
 use vars qw($VERSION $YIND_URL_HEAD $YIND_URL_TAIL);
 use LWP::UserAgent;
 use Web::Scraper;
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
 
 # VERSION
 
@@ -36,18 +38,26 @@ use Web::Scraper;
 my $YIND_URL_HEAD = 'https://www.borsaitaliana.it/borsa/search/scheda.html?code=';
 my $YIND_URL_TAIL = '&lang=it';
 
-sub methods {
-    return ( borsa_italiana => \&borsa_italiana,
+our $DISPLAY    = 'Borsa Italiana (Bonds), IT';
+our @LABELS = qw/name last date isodate currency method exchange price symbol/;
+our $METHODHASH = {subroutine => \&borsa_italiana,
+                   display => $DISPLAY,
+                   labels => \@LABELS};
+
+sub methodinfo {
+    return (
+        borsa_italiana => $METHODHASH,
     );
 }
-{
-    my @labels = qw/name last date isodate volume currency method exchange type
-        div_yield eps pe year_range open high low close/;
 
-    sub labels {
-        return ( borsa_italiana => \@labels,
-        );
-    }
+sub methods {
+	my %m = methodinfo();
+	return map {$_ => $m{$_}{subroutine} } keys %m;
+}
+
+sub labels {
+	my %m = methodinfo();
+	return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
 sub borsa_italiana {
@@ -77,6 +87,8 @@ sub borsa_italiana {
         $info{ $bond, "symbol" } = $bond;
 
         if ( $code == 200 ) {
+
+			### [<now>] Body: $body
 
             my $widget = scraper {
                 process 'div.summary-value span.t-text', 'val' => 'TEXT';
@@ -157,7 +169,7 @@ sub borsa_italiana {
 
 =head1 NAME
 
-Finance::Quote::BorsaItaliana - Obtain quotes from Borsa Italiana site
+Finance::Quote::BorsaItaliana - Obtain bond quotes from Borsa Italiana site
 
 =head1 SYNOPSIS
 
@@ -175,7 +187,8 @@ This module is loaded by default on a Finance::Quote object. It's
 also possible to load it explicitly by placing "BorsaItaliana" in the argument
 list to Finance::Quote->new().
 
-This module provides the "borsa_italiana" fetch method.
+This module provides the "borsa_italiana" fetch method. Currently this
+module retrieves data for bonds only.
 
 =head1 LABELS RETURNED
 
