@@ -28,7 +28,6 @@
 
 
 package Finance::Quote::MorningstarUK;
-require 5.005;
 
 use strict;
 use warnings;
@@ -53,18 +52,30 @@ $MSTARUK_LOOK_UP    =   "https://www.morningstar.co.uk/uk/funds/SecuritySearchRe
 # $MSTARUK_NEXT_URL	=	"https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=";
 $MSTARUK_NEXT_URL = Text::Template->new( TYPE => 'STRING', SOURCE => 'https://api-global.morningstar.com/sal-service/v1/fund/quote/v7/{$secid}/data?fundServCode=&showAnalystRatingChinaFund=false&showAnalystRating=false&hideesg=false&region=GBR&languageId=en-gb&locale=en-gb&clientId=MDC&benchmarkId=mstarorcat&component=sal-mip-investment-overview&version=4.65.0' );
 
-# FIXME -
+# FIXME - Needs cleanup
 
-sub methods { return (morningstaruk => \&mstaruk_fund,
-                      mstaruk => \&mstaruk_fund,
-                      ukfunds => \&mstaruk_fund); }
+our $DISPLAY    = 'Morningstar UK';
+our @LABELS = qw/name currency last date price nav source iso_date method success errormsg/;
+our $METHODHASH = {subroutine => \&mstaruk_fund,
+                   display => $DISPLAY,
+                   labels => \@LABELS};
 
-{
-    my @labels = qw/name currency last date price nav source iso_date method success errormsg/;
+sub methodinfo {
+    return (
+        morningstaruk => $METHODHASH,
+        mstaruk       => $METHODHASH,
+        ukfunds       => $METHODHASH,
+    );
+}
 
-    sub labels { return (morningstaruk => \@labels,
-                         mstaruk => \@labels,
-                         ukfunds => \@labels); }
+sub methods {
+	my %m = methodinfo();
+	return map {$_ => $m{$_}{subroutine} } keys %m;
+}
+
+sub labels {
+	my %m = methodinfo();
+	return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
 #
@@ -180,8 +191,8 @@ sub mstaruk_fund  {
 # Find date, currency and price all in one table row
 
 		my $currency = $json->{'currency'};
-		my $price = $json->{'nav'};
-		(my $date = $json->{'latestPriceDate'}) =~ s/T.*//;
+		my $price    = $json->{'nav'};
+		(my $date    = $json->{'latestPriceDate'}) =~ s/T.*//;
 
 		if (!defined($date)) {
 			# not a serious error - don't report it ....
