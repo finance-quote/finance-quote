@@ -843,7 +843,7 @@
 - module: MorningstarUK.pm
   state: working
   added: TBD
-  changed: 2023-05-20
+  changed: 2025-07-16
   removed: ~
   urls:
   apikey: false

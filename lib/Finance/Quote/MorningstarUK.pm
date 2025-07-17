@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=4 sw=4 noai ic showmode showmatch: 
 
 #  MorningstarUK.pm
 #
@@ -27,7 +28,6 @@
 
 
 package Finance::Quote::MorningstarUK;
-require 5.005;
 
 use strict;
 use warnings;
@@ -35,29 +35,47 @@ use warnings;
 # URLs
 use vars qw($VERSION $MSTARUK_NEXT_URL $MSTARUK_LOOK_UP $MSTARUK_MAIN_URL);
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use LWP::Simple;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTTP::Cookies;
+use JSON qw(decode_json);
+use Text::Template;
 
 # VERSION
 
-$MSTARUK_MAIN_URL   =   "http://www.morningstar.co.uk";
-$MSTARUK_LOOK_UP    =   "http://www.morningstar.co.uk/uk/funds/SecuritySearchResults.aspx?search=";
-$MSTARUK_NEXT_URL	=	"http://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=";
+$MSTARUK_MAIN_URL   =   "https://www.morningstar.co.uk";
+$MSTARUK_LOOK_UP    =   "https://www.morningstar.co.uk/uk/funds/SecuritySearchResults.aspx?search=";
+# $MSTARUK_NEXT_URL	=	"https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=";
+$MSTARUK_NEXT_URL = Text::Template->new( TYPE => 'STRING', SOURCE => 'https://api-global.morningstar.com/sal-service/v1/fund/quote/v7/{$secid}/data?fundServCode=&showAnalystRatingChinaFund=false&showAnalystRating=false&hideesg=false&region=GBR&languageId=en-gb&locale=en-gb&clientId=MDC&benchmarkId=mstarorcat&component=sal-mip-investment-overview&version=4.65.0' );
 
-# FIXME -
+# FIXME - Needs cleanup
 
-sub methods { return (morningstaruk => \&mstaruk_fund,
-                      mstaruk => \&mstaruk_fund,
-                      ukfunds => \&mstaruk_fund); }
+our $DISPLAY    = 'Morningstar UK';
+our @LABELS = qw/name currency last date price nav source iso_date method success errormsg/;
+our $METHODHASH = {subroutine => \&mstaruk_fund,
+                   display => $DISPLAY,
+                   labels => \@LABELS};
 
-{
-    my @labels = qw/name currency last date time price nav source iso_date method net p_change success errormsg/;
+sub methodinfo {
+    return (
+        morningstaruk => $METHODHASH,
+        mstaruk       => $METHODHASH,
+        ukfunds       => $METHODHASH,
+    );
+}
 
-    sub labels { return (morningstaruk => \@labels,
-                         mstaruk => \@labels,
-                         ukfunds => \@labels); }
+sub methods {
+	my %m = methodinfo();
+	return map {$_ => $m{$_}{subroutine} } keys %m;
+}
+
+sub labels {
+	my %m = methodinfo();
+	return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
 #
@@ -107,18 +125,22 @@ sub mstaruk_fund  {
 		        "Error - failed to retrieve fund data";
 		    next;
 	    }
+
+		### [<now>] webdoc: $webdoc
+
 	    $fundquote {$code, "symbol"} = $code;
 	    $fundquote {$code, "source"} = $MSTARUK_MAIN_URL;
 
 # Find name by regexp
 
-        my ($name, $nexturl, $isin);
+        my ($name, $nexturl, $secid);
  		if ($webdoc =~
-        m[<td class="msDataText searchLink"><a href="(.*?)">(.*?)</a></td><td class="msDataText searchIsin"><span>[a-zA-Z]{2}[a-zA-Z0-9]{9}\d(.*)</span></td>] )
+        m[<td class="msDataText searchLink"><a href="(.*?id=([A-Z0-9]+))">(.*?)</a></td><td class="msDataText searchIsin"><span>[a-zA-Z]{2}[a-zA-Z0-9]{9}\d(.*)</span></td>] )
         {
             $nexturl = $1;
-            $name = $2;
-            $isin = $3;
+            $secid = $2;
+			### [<now>] secID: $secid
+            $name = $3;
         }
 
 		if (!defined($name)) {
@@ -139,45 +161,42 @@ sub mstaruk_fund  {
 		    next;
 		}
 
-# modify $nexturl to remove html escape encoding for the Ampersand (&) character
+		$nexturl = $MSTARUK_NEXT_URL->fill_in(HASH => {secid => $secid});
+		$ua->default_header('Apikey' => 'lstzFDEOhfFNMLikKa0am9mgEKLBl49T');
 
-		$nexturl =~ s/&amp;/&/;
+		### [<now>] NextURL: $nexturl
 
-# Now need to look-up next page using $next_url
+		my $response = $ua->request( GET $nexturl );
 
-        $webdoc  = get($MSTARUK_MAIN_URL.$nexturl);
-        if (!$webdoc)
-        {
+		if ($response->code != 200 ) {
+			$fundquote {$code,"success"} = 0;
+			$fundquote {$code,"errormsg"} = "Error - $code not found";
+			next;
+		}
+
+		$webdoc = $response->content;
+		### [<now>] 2nd Webdoc: $webdoc
+
+		my $json;
+		eval {$json = decode_json $webdoc};
+        if ($@) {
 	        # serious error, report it and give up
 		    $fundquote {$code,"success"} = 0;
 		    $fundquote {$code,"errormsg"} =
-		        "Error - failed to retrieve fund data";
+		        "Error - failed to retrieve fund data - could not decode JSON";
 		    next;
 	    }
+		### [<now>] JSON: $json
 
 # Find date, currency and price all in one table row
 
-		my ($currency, $date, $price, $pchange);
-		if ($webdoc =~
-		m[<td class="line heading">NAV<span class="heading"><br />([0-9]{2}/[0-9]{2}/[0-9]{4})</span>.*([A-Z]{3}).([0-9\.]+).*Day Change[^%]*>([0-9\.\-]+)] )
-        {
-
-            $date = $1;
-            $currency = $2;
-            $price = $3;
-            $pchange = $4;
-        }
-
-		if (!defined($pchange)) {
-			# not a serious error - don't report it ....
-#			$fundquote {$code,"success"} = 0;
-			# ... but set a useful message ....
-			$fundquote {$code,"errormsg"} = "Warning - failed to find net or %-age change";
-			# set to (minus)zero
-            $pchange = -0.00;
-			# ... and continue
+		my ($date, $time);
+		my $currency = $json->{'currency'};
+		my $price    = $json->{'nav'};
+		if ( $json->{'latestPriceDate'} =~ m|(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}):| ) {
+			$date = $1;
+			$time = $2;
 		}
-		$fundquote {$code, "p_change"} = $pchange;	# set %-change
 
 		if (!defined($date)) {
 			# not a serious error - don't report it ....
@@ -190,7 +209,7 @@ sub mstaruk_fund  {
 		}
 		else
 		{
-		    $quoter->store_date(\%fundquote, $code, {eurodate => $date});
+		    $quoter->store_date(\%fundquote, $code, {isodate => $date});
 		}
 
 		if (!defined($price)) {
@@ -209,17 +228,12 @@ sub mstaruk_fund  {
 
 		# defer setting currency and price until we've dealt with possible GBX currency...
 
-# Calculate net change - it's not included in the morningstar factsheets
-
-		my $net = ($price * $pchange) / 100 ;
-
 # deal with GBX pricing of UK unit trusts
 
 		if ($currency eq "GBX")
 		{
 			$currency = "GBP" ;
 			$price = $price / 100 ;
-            $net   = $net   / 100 ;
 		}
 
 		# now set prices and currency
@@ -227,17 +241,9 @@ sub mstaruk_fund  {
 		$fundquote {$code, "price"} = $price;
 		$fundquote {$code, "last"} = $price;
 		$fundquote {$code, "nav"} = $price;
-		$fundquote {$code, "net"} = $net;
 		$fundquote {$code, "currency"} = $currency;
 
-# Set a dummy time as gnucash insists on having a valid format
-
-		my $time = "12:00";     # set to Midday if no time supplied ???
-                                # gnucash insists on having a valid-format
-
-		$fundquote {$code, "time"} = $time; # set time
-
-		$fundquote {$code, "method"} = "mstaruk";   # set method
+		$fundquote {$code, "method"} = "morningstaruk";   # set method
 
 	}
 
