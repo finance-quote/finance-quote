@@ -190,9 +190,13 @@ sub mstaruk_fund  {
 
 # Find date, currency and price all in one table row
 
+		my ($date, $time);
 		my $currency = $json->{'currency'};
 		my $price    = $json->{'nav'};
-		(my $date    = $json->{'latestPriceDate'}) =~ s/T.*//;
+		if ( $json->{'latestPriceDate'} =~ m|(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}):| ) {
+			$date = $1;
+			$time = $2;
+		}
 
 		if (!defined($date)) {
 			# not a serious error - don't report it ....

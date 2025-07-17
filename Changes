@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Fixed MorningstarUK.pm
 	* Added methodinfo() to MarketWatch.pm and BorsaItaliana.pm
 	* Optimizing TesouroDireto.pm - Using official Tesouro Direto URL (https://www.tesourodireto.com.br/...)
 
