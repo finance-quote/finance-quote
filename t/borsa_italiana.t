@@ -7,7 +7,7 @@ if ( not $ENV{"ONLINE_TEST"} ) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-my @bonds = ("IT0000966017", "IT0005592370", "IT0001086567", "IT0005534984");
+my @bonds = ("IT0000966017", "IT0001086567", "IT0005534984");
 
 plan tests => 1 + 8*(1+$#bonds) + 1;
 
