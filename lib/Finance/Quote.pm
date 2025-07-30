@@ -94,6 +94,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Sinvestor
     StockData
     Stooq
+    SwissFundData
     TesouroDireto
     TMX
     Tradegate
@@ -1731,6 +1732,7 @@ http://www.gnucash.org/
   Finance::Quote::SIX,
   Finance::Quote::StockData,
   Finance::Quote::Stooq,
+  Finance::Quote::SwissFundData,
   Finance::Quote::TSP,
   Finance::Quote::TMX,
   Finance::Quote::TesouroDireto,
