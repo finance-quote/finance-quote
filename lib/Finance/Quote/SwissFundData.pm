@@ -49,18 +49,31 @@ $SFDCH_LOOK_UP	= "https://www.swissfunddata.ch/sfdpub/en/funds/prices?text=";
 
 # VERSION
 
-sub methods { return (swissfunddata => \&swissfunddata_fund); }
+our $DISPLAY = "SwissFundData";
+our @LABELS = qw/name currency date nav isodate method success errormsg/;
+out $METHODHASH = {
+	subroutine => \&swissfunddata,
+	display => $DISPLAY,
+	labels => \@LABELS
+};
 
-{
-    my @labels = qw/name currency date nav isodate method success errormsg/;
-
-    sub labels { return (swissfunddata => \@labels); }
+sub methodinfo {
+	return (
+		swissfunddata => $METHODHASH,
+	);
 }
 
-#
-# =======================================================================
+sub labels {
+	my %m = methodinfo();
+	return map {$_ => [@{$m{$_}{labels}}]} keys %m;
+}
 
-sub swissfunddata_fund  {
+sub methods {
+	my %m = methodinfo();
+	return map {$_ => $m{$_}{subroutine}} keys %m;
+}
+
+sub swissfunddata  {
     my $quoter = shift;
     my @symbols = @_;
 
@@ -75,13 +88,14 @@ sub swissfunddata_fund  {
     $ua->cookie_jar($cookie_jar);
 
     foreach (@symbols) {
-	my $code = $_;
+	my $symbol = $_;
 
-	$info {$code, "success"} = 1; # ever the optimist....
-	$info {$code, "errormsg"} = "Success";
+	$info {$symbol, "source"} = "SwissFundData";
+	$info {$symbol, "success"} = 1; # ever the optimist....
+	$info {$symbol, "errormsg"} = "Success";
 
 	# perform the look-up - if not found, return with error
-	my $reply = $ua->get($SFDCH_LOOK_UP.$code);
+	my $reply = $ua->get($SFDCH_LOOK_UP.$symbol);
 	my $widget = scraper {
 		process 'div#resultContainer table tbody tr:first-child td:nth-child(2)', 'name_isin' => ['HTML', sub {trim($_)}];
 		process 'div#resultContainer table tbody tr:first-child td:nth-child(3)', 'nav_currency_date' => ['TEXT', sub {trim($_)}];
@@ -90,15 +104,15 @@ sub swissfunddata_fund  {
 	
 	unless (exists $text->{name_isin}) {
 		# serious error, report it and give up
-		$info {$code, "success"} = 0;
-		$info {$code, "errormsg"} = "Error - failed to retrieve fund data: can not read name/isin.";
+		$info {$symbol, "success"} = 0;
+		$info {$symbol, "errormsg"} = "Error - failed to retrieve fund data: can not read name/isin.";
 		next;	
 	}
 
 	unless (exists $text->{nav_currency_date}) {
 		# serious error, report it and give up
-		$info {$code, "success"} = 0;
-		$info {$code, "errormsg"} = "Error - failed to retrieve basic fund data: can not read nav/currency/date";
+		$info {$symbol, "success"} = 0;
+		$info {$symbol, "errormsg"} = "Error - failed to retrieve basic fund data: can not read nav/currency/date";
 		next;
 	}
 
@@ -115,55 +129,40 @@ sub swissfunddata_fund  {
 		$isin = "*** UNKNOWN ***";
 	}
 
-	my ($nav, $currency, $day, $month, $year);
-	if ($text->{nav_currency_date} =~ m[(\d+\.\d+) (\w+) (\d{2})\.(\d{2})\.(\d{4})]) {
+	my ($nav, $currency, $date);
+	if ($text->{nav_currency_date} =~ m[(\d+\.\d+) (\w+) (\d{2}\.\d{2}\.\d{4})]) {
 		$nav = trim($1);
 		$currency = trim($2);
-		$day = trim($3);
-		$month = trim($4);
-		$year = trim($5);
+		$date = trim($3);
 	}
 
 	if (!defined($nav)) {
 		# serious error, report it and give up
-		$info {$code, "success"} = 0;
-		$info {$code, "errormsg"} = "Error - failed to retrieve fund data: missing 'nav'";
+		$info {$symbol, "success"} = 0;
+		$info {$symbol, "errormsg"} = "Error - failed to retrieve fund data: missing 'nav'";
 		next;
 	}
 	if (!defined($currency)) {
 		# serious error, report it and give up
-		$info {$code, "success"} = 0;
-		$info {$code, "errormsg"} = "Error - failed to retrieve fund data: missing 'currency'";
+		$info {$symbol, "success"} = 0;
+		$info {$symbol, "errormsg"} = "Error - failed to retrieve fund data: missing 'currency'";
 		next;
 	}
-	if (!defined($day)) {
+	if (!defined($date)) {
 		# serious error, report it and give up
-		$info {$code, "success"} = 0;
-		$info {$code, "errormsg"} = "Error - failed to retrieve fund data: missing 'date/day'";
-		next;
-	}
-	if (!defined($month)) {
-		# serious error, report it and give up
-		$info {$code, "success"} = 0;
-		$info {$code, "errormsg"} = "Error - failed to retrieve fund data: missing 'date/month'";
-		next;
-	}
-	if (!defined($year)) {
-		# serious error, report it and give up
-		$info {$code, "success"} = 0;
-		$info {$code, "errormsg"} = "Error - failed to retrieve fund data: missing 'date/year'";
+		$info {$symbol, "success"} = 0;
+		$info {$symbol, "errormsg"} = "Error - failed to retrieve fund data: missing 'date'";
 		next;
 	}
 	
-	$info {$code, "name"} = $name;
-	$info {$code, "isin"} = $isin;
-	$info {$code, "nav"} = $nav;
-	$info {$code, "currency"} = $currency;
-	$info {$code, "date"} = $month."/".$day."/".$year;
-	$info {$code, "isodate"} = $year."-".$month."-".$day;
-	$info {$code, "method"} = "swissfunddata";
+	$info {$symbol, "name"} = $name;
+	$info {$symbol, "isin"} = $isin;
+	$info {$symbol, "nav"} = $nav;
+	$info {$symbol, "currency"} = $currency;
+	$quoter->store_date(\%info, $symbol, {eurodate => $date);
+	$info {$symbol, "method"} = "swissfunddata";
 	# It seems that GnuCash insists on having the time set?!
-	$info {$code, "time"} = "12:00";
+	$info {$symbol, "time"} = "12:00";
     }
 
     return wantarray ? %info : \%info;
@@ -229,4 +228,3 @@ at your option, any later version of Perl 5 you may have available.
 =cut
 
 __END__
-

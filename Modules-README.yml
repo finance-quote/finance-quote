@@ -1052,6 +1052,22 @@
     - GBP.UK
     - GBPG.UK
 #
+#
+- module: SwissFundData.pm
+  state: working
+  added: 2025-07-27
+  changed: ~
+  removed: ~
+  urls:
+    - https://www.swissfunddata.ch/sfdpub/
+  apikey: false
+  notes: ~
+  testfile: swissfunddata.t
+  testcases:
+    - CH0012056260
+    - CH0014933193
+    - CH0316793139
+#
 - module: TMX.pm
   state: working
   added: TBD
