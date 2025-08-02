@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=4 sw=4 noai ic showmode showmatch: 
 
 #  MorningstarCH.pm
 #
@@ -7,9 +8,9 @@
 #
 #  author: Manuel Friedli (manuel@fritteli.ch)
 #
-#  version: 0.1 Initial version - 02 March 2019
+#  version: 0.2 Updated version - 30 July 2025
 #
-#  This file is heavily based on MStaruk.pm by Martin Sadler
+#  This file is heavily based on MorningstarUK.pm by Martin Sadler
 #  (martinsadler@users.sourceforge.net), version 0.1, 01 April 2013
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -30,7 +31,6 @@
 
 
 package Finance::Quote::MorningstarCH;
-require 5.006;
 
 use strict;
 use warnings;
@@ -38,32 +38,51 @@ use warnings;
 # URLs
 use vars qw($VERSION $MSTARCH_NEXT_URL $MSTARCH_LOOK_UP $MSTARCH_MAIN_URL);
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 use LWP::Simple;
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTTP::Cookies;
-
-
-$MSTARCH_MAIN_URL   =	"https://www.morningstar.ch";
-$MSTARCH_LOOK_UP    =	"https://www.morningstar.ch/ch/funds/SecuritySearchResults.aspx?search=";
-$MSTARCH_NEXT_URL   =	"https://www.morningstar.ch/ch/funds/snapshot/snapshot.aspx?id=";
-
-# FIXME -
+use JSON qw(decode_json);
+use Text::Template;
 
 # VERSION
 
-sub methods { return (morningstarch => \&morningstarch_fund); }
+$MSTARCH_MAIN_URL   =   "https://www.morningstar.ch";
+$MSTARCH_LOOK_UP    =   "https://www.morningstar.ch/ch/funds/SecuritySearchResults.aspx?search=";
+$MSTARCH_NEXT_URL = Text::Template->new( TYPE => 'STRING', SOURCE => 'https://api-global.morningstar.com/sal-service/v1/fund/quote/v7/{$secid}/data?fundServCode=&showAnalystRatingChinaFund=false&showAnalystRating=false&hideesg=false&region=EEA&languageId=en-eu&locale=en-eu&clientId=MDC&benchmarkId=mstarorcat&component=sal-mip-investment-overview&version=4.65.0' );
 
-{
-    my @labels = qw/name currency last date time price nav source iso_date method net p_change success errormsg/;
+# FIXME - Needs cleanup
 
-    sub labels { return (morningstarch => \@labels); }
+our $DISPLAY    = 'Morningstar CH';
+our @LABELS = qw/name currency last date price nav source iso_date method success errormsg/;
+our $METHODHASH = {subroutine => \&mstarch_fund,
+                   display => $DISPLAY,
+                   labels => \@LABELS};
+
+sub methodinfo {
+    return (
+        morningstarch => $METHODHASH,
+        mstarch       => $METHODHASH,
+    );
+}
+
+sub methods {
+	my %m = methodinfo();
+	return map {$_ => $m{$_}{subroutine} } keys %m;
+}
+
+sub labels {
+	my %m = methodinfo();
+	return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
 #
 # =======================================================================
 
-sub morningstarch_fund  {
+sub mstarch_fund  {
     my $quoter = shift;
     my @symbols = @_;
 
@@ -107,18 +126,22 @@ sub morningstarch_fund  {
 		        "Error - failed to retrieve fund data";
 		    next;
 	    }
+
+		### [<now>] webdoc: $webdoc
+
 	    $fundquote {$code, "symbol"} = $code;
 	    $fundquote {$code, "source"} = $MSTARCH_MAIN_URL;
 
 # Find name by regexp
 
-        my ($name, $nexturl, $isin);
+        my ($name, $nexturl, $secid);
  		if ($webdoc =~
-        m[<td class="msDataText searchLink"><a href="(.*?)">(.*?)</a></td><td class="msDataText searchIsin"><span>[a-zA-Z]{2}[a-zA-Z0-9]{9}\d(.*)</span></td>] )
+        m[<td class="msDataText searchLink"><a href="(.*?id=([A-Z0-9]+))">(.*?)</a></td><td class="msDataText searchIsin"><span>[a-zA-Z]{2}[a-zA-Z0-9]{9}\d(.*)</span></td>] )
         {
             $nexturl = $1;
-            $name = $2;
-            $isin = $3;
+            $secid = $2;
+			### [<now>] secID: $secid
+            $name = $3;
         }
 
 		if (!defined($name)) {
@@ -139,46 +162,42 @@ sub morningstarch_fund  {
 		    next;
 		}
 
-# modify $nexturl to remove html escape encoding for the Ampersand (&) character
+		$nexturl = $MSTARCH_NEXT_URL->fill_in(HASH => {secid => $secid});
+		$ua->default_header('Apikey' => 'lstzFDEOhfFNMLikKa0am9mgEKLBl49T');
 
-		$nexturl =~ s/&amp;/&/;
+		### [<now>] NextURL: $nexturl
 
-# Now need to look-up next page using $next_url
+		my $response = $ua->request( GET $nexturl );
 
-        $webdoc  = get($MSTARCH_MAIN_URL.$nexturl);
-        if (!$webdoc)
-        {
+		if ($response->code != 200 ) {
+			$fundquote {$code,"success"} = 0;
+			$fundquote {$code,"errormsg"} = "Error - $code not found";
+			next;
+		}
+
+		$webdoc = $response->content;
+		### [<now>] 2nd Webdoc: $webdoc
+
+		my $json;
+		eval {$json = decode_json $webdoc};
+        if ($@) {
 	        # serious error, report it and give up
 		    $fundquote {$code,"success"} = 0;
 		    $fundquote {$code,"errormsg"} =
-		        "Error - failed to retrieve fund data";
+		        "Error - failed to retrieve fund data - could not decode JSON";
 		    next;
 	    }
+		### [<now>] JSON: $json
 
 # Find date, currency and price all in one table row
 
-		my ($currency, $date, $price, $pchange);
-		if ($webdoc =~
-		m[<td class="line heading">NAV<span class="heading"><br />([0-9]{2}\.[0-9]{2}\.[0-9]{4})</span>.*([A-Z]{3}).([0-9\,\.]+).*>([0-9\,\.\-]+)%?] )
-        {
-
-            $date = $1;
-            $currency = $2;
-            $price = $3;
-            $pchange = $4;
-        }
-
-		if (!defined($pchange)) {
-			# not a serious error - don't report it ....
-#			$fundquote {$code,"success"} = 0;
-			# ... but set a useful message ....
-			$fundquote {$code,"errormsg"} = "Warning - failed to find net or %-age change";
-			# set to (minus)zero
-            $pchange = -0.00;
-			# ... and continue
+		my ($date, $time);
+		my $currency = $json->{'currency'};
+		my $price    = $json->{'nav'};
+		if ( $json->{'latestPriceDate'} =~ m|(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}):| ) {
+			$date = $1;
+			$time = $2;
 		}
-		$pchange =~ s/,/./;
-		$fundquote {$code, "p_change"} = $pchange;	# set %-change
 
 		if (!defined($date)) {
 			# not a serious error - don't report it ....
@@ -191,7 +210,7 @@ sub morningstarch_fund  {
 		}
 		else
 		{
-		    $quoter->store_date(\%fundquote, $code, {eurodate => $date});
+		    $quoter->store_date(\%fundquote, $code, {isodate => $date});
 		}
 
 		if (!defined($price)) {
@@ -200,7 +219,6 @@ sub morningstarch_fund  {
 			$fundquote {$code,"errormsg"} = "Error - failed to find a price";
 			next;
 		}
-		$price =~ s/,/./;
 
 		if (!defined($currency)) {
 	    	# serious error, report it and give up
@@ -211,26 +229,22 @@ sub morningstarch_fund  {
 
 		# defer setting currency and price until we've dealt with possible GBX currency...
 
-# Calculate net change - it's not included in the morningstar factsheets
+# deal with GBX pricing of UK unit trusts
 
-		my $net = ($price * $pchange) / 100 ;
+		if ($currency eq "GBX")
+		{
+			$currency = "GBP" ;
+			$price = $price / 100 ;
+		}
 
 		# now set prices and currency
 
 		$fundquote {$code, "price"} = $price;
 		$fundquote {$code, "last"} = $price;
 		$fundquote {$code, "nav"} = $price;
-		$fundquote {$code, "net"} = $net;
 		$fundquote {$code, "currency"} = $currency;
 
-# Set a dummy time as gnucash insists on having a valid format
-
-		my $time = "12:00";     # set to Midday if no time supplied ???
-                                # gnucash insists on having a valid-format
-
-		$fundquote {$code, "time"} = $time; # set time
-
-		$fundquote {$code, "method"} = "morningstarch";   # set method
+		$fundquote {$code, "method"} = "morningstaruk";   # set method
 
 	}
 
@@ -241,13 +255,13 @@ sub morningstarch_fund  {
 
 =head1 NAME
 
-Finance::Quote::morningstarch - Obtain CH Unit Trust quotes from morningstar.ch.
+Finance::Quote::MorningstarCH - Obtain CH Unit Trust quotes from morningstar.ch.
 
 =head1 SYNOPSIS
 
     $q = Finance::Quote->new;
 
-    %info = Finance::Quote->fetch("morningstarch","<isin> ...");  # Only query morningstar.ch using ISINs
+    %info = $q->fetch("morningstarch","<isin> ...");  # Only query morningstar.ch using ISINs
 
 =head1 DESCRIPTION
 
@@ -270,7 +284,7 @@ Trusts and OEICs prices and other information from morningstar.ch.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned by Finance::Quote::morningstarch :
+The following labels may be returned by Finance::Quote::MorningstarCH :
 
     name, currency, last, date, time, price, nav, source, method,
     iso_date, net, p_change, success, errormsg.
@@ -284,11 +298,11 @@ Morning Star websites, https://morningstar.ch
 =head1 AUTHOR
 
 Manuel Friedli, E<lt>manuel@fritteli.chE<gt>
-Based heavily on the work of Martin Sadler E<lt>martinsadler@users.sourceforge.netE<gt>, many thanks!
+Based heavily on the work of Martin Sadler, E<lt>martinsadler@users.sourceforge.netE<gt>, many thanks!
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2019 by Manuel Friedli
+Copyright (C) 2019, 2025 by Manuel Friedli
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,
@@ -298,4 +312,3 @@ at your option, any later version of Perl 5 you may have available.
 =cut
 
 __END__
-
