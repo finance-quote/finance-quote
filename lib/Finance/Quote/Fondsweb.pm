@@ -1,5 +1,6 @@
 #
 # Copyright (C) 2018, Diego Marcolungo
+# vi: set ts=2 sw=2 noai ic showmode showmatch:  
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,11 +28,24 @@ use HTML::TreeBuilder::XPath;
 
 our $FONDSWEB_URL = "https://www.fondsweb.com/de/";
 
-sub methods { return ( fondsweb => \&fondsweb ); }
+our $DISPLAY    = 'Fondsweb, DE';
+our @LABELS     = qw/name symbol isin date isodate year_range nav last price currency source method type/;
+our $METHODHASH = {subroutine => \&fondsweb,
+                   display    => $DISPLAY,
+                   labels     => \@LABELS};
 
-{
-	my @labels = qw/name symbol isin date isodate year_range nav last price currency source method type/;
-	sub labels { return (fondsweb => \@labels); }
+sub methodinfo {
+    return (
+        fondsweb => $METHODHASH,
+    );
+}
+
+sub labels {
+	my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
+
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 # 123.456.789,00 -> 123456789.00
