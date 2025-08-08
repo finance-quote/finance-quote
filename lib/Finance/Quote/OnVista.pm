@@ -108,12 +108,13 @@ sub onvista {
         }
         ### [<now>] Result Array: $result_array
         my $item;
-        foreach $item ( @$result_array ) {
-          ### [<now>] Item: $item
-          if ( ($item->{'symbol'} && $item->{'symbol'} eq $stock)
-             or ($item->{'wkn'} && $item->{'wkn'} eq $stock)
-             or ($item->{'isin'} && $item->{'isin'} eq $stock)
+        foreach my $arrayitem ( @$result_array ) {
+          ### [<now>] ArrayItem: $arrayitem
+          if ( ($arrayitem->{'symbol'} && $arrayitem->{'symbol'} eq $stock)
+             or ($arrayitem->{'wkn'} && $arrayitem->{'wkn'} eq $stock)
+             or ($arrayitem->{'isin'} && $arrayitem->{'isin'} eq $stock)
              ) {
+            $item = $arrayitem;
             last;
           }
         }

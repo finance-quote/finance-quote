@@ -600,8 +600,12 @@ sub fetch {
   }
 
   {
+    # Setting no critic to avoid Stricture disabled failure
+    # in t/04-critic.t
+    ## no critic
     no strict 'vars';
     our $VERSION = '0.00' unless defined $VERSION;
+    ## use critic
     unless ($ENV{"FQ_NOCOUNT"}) {
       # Temporary Counting - not concerned about return code
       my $COUNT_URL =

@@ -131,7 +131,7 @@ sub ftfunds_fund  {
 
 DEBUG and print "\nTitle  = ",$webdoc->title,"\n";
 DEBUG and print "\nStatus = ",$webdoc->status_line, "\n";
-DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
+# DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 
 		$fundquote {$code, "source"} = $FTFUNDS_LOOK_LD.$code;
 
@@ -154,7 +154,7 @@ DEBUG and print "\nTrying unlisted funds for ",$code," : ",$1,"\n";
 
 DEBUG and print "\nTitle  = ",$webdoc->title,"\n";
 DEBUG and print "\nStatus = ",$webdoc->status_line, "\n";
-DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
+# DEBUG > 1 and print "\nCookie Jar = : \n",Dumper($cj),"\n\n";
 
 			$fundquote {$code, "source"} = $FTFUNDS_LOOK_UD.$code;
 		}
