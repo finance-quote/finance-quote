@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Added a new module to fetch data from SwissFundData - PR #515
 	* Fixed MorningstarCH.pm
 	* Fixed MorningstarUK.pm
 	* Added methodinfo() to MarketWatch.pm and BorsaItaliana.pm
