@@ -468,9 +468,9 @@
 - module: Deka.pm
   state: working
   added: TBD
-  changed: ~
+  changed: 2025-08-02
   removed: ~
-  urls:
+  urls: https://www.deka.de/privatkunden/pflichtseiten/fondspreise?service=fondspreislisteExportController&action=exportCsv&typ=inVertrieb
   apikey: false
   notes: ~
   testfile: deka.t
@@ -505,7 +505,7 @@
 - module: Fondsweb.pm
   state: working
   added: TBD
-  changed: 2022-11-21
+  changed: 2025-08-02
   removed: ~
   urls: https://www.fondsweb.com/de/
   apikey: false
@@ -588,7 +588,7 @@
 - module: Finanzpartner.pm
   state: working
   added: TBD
-  changed: 2023-11-27
+  changed: 2025-08-02
   removed: ~
   urls: https://www.finanzpartner.de/fi/
   apikey: false
@@ -813,8 +813,8 @@
 - module: MorningstarCH.pm
   state: working
   added: 2019-03-02
-  changed: 2022-05-10
-  removed:
+  changed: 2025-07-30
+  removed: ~
   urls:
     - https://www.morningstar.ch/ch/funds/SecuritySearchResults.aspx?search=
     - https://www.morningstar.ch/ch/funds/snapshot/snapshot.aspx?id=
@@ -824,7 +824,7 @@
   testcases:
     - CH0012056260
     - CH0014933193
-    - CH0002788567
+    - LU1191063541
     - BOGUS
 #
 - module: MorningstarJP.pm

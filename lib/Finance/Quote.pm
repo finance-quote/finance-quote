@@ -1741,6 +1741,7 @@ http://www.gnucash.org/
   Finance::Quote::Union,
   Finance::Quote::YahooJSON,
   Finance::Quote::YahooWeb,
+  Finance::Quote::XETRA,
   Finance::Quote::ZA
 
 You should have received the Finance::Quote hacker's guide with this package.

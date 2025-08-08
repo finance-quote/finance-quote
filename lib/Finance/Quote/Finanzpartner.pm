@@ -1,4 +1,5 @@
 # Finance::Quote Perl module to retrieve quotes from Finanzpartner.de
+# vi: set ts=2 sw=2 noai ic showmode showmatch:  
 #    Copyright (C) 2007  Jan Willamowius <jan@willamowius.de>
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -29,8 +30,25 @@ use Encode;
 
 my $FINANZPARTNER_URL = "https://www.finanzpartner.de/fi/";
 
-sub methods {return (finanzpartner        => \&finanzpartner);}
-sub labels { return (finanzpartner=>[qw/name date price last method/]); } # TODO
+our $DISPLAY    = 'Finanzpartner, DE';
+our @LABELS     = qw/name date price last method/;
+our $METHODHASH = {subroutine => \&finanzpartner, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS};
+
+sub methodinfo {
+    return ( 
+        finanzpartner => $METHODHASH,
+    );
+}
+
+sub labels {
+	my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
+
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
+}
 
 sub finanzpartner
 {

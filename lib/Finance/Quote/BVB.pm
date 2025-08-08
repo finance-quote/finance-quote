@@ -41,21 +41,30 @@ use if DEBUG, 'Smart::Comments', '###';
 use vars qw($BVB_URL);
 $BVB_URL = "https://bvb.ro/TradingAndStatistics/Trading/HistoricalTradingInfo.ashx?day=";
 
-sub methods {
-	return (bvb        => \&bvb,
-			romania    => \&bvb,
-			tradeville => \&bvb,
-			europe     => \&bvb);
+our $DISPLAY    = 'Bucharest Stock Exchange, RO';
+our $FEATURES   = {};
+our @LABELS     = qw/symbol name market trades volume value open low high avg close refprice var date/;
+our $METHODHASH = {subroutine => \&bvb, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS,
+                   features => $FEATURES};
+
+sub methodinfo {
+    return ( 
+        bvb        => $METHODHASH,
+        romania    => $METHODHASH,
+        tradeville => $METHODHASH,
+        europe     => $METHODHASH,
+    );
 }
 
-sub labels { 
-	my @labels = qw/symbol name market trades volume value open low high avg close refprice var date/;
-	
-	return (bvb        => \@labels,
-			romania    => \@labels,
-			tradeville => \@labels,
-			europe     => \@labels); 
-}
+sub methods {
+    my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
+    }
+
+sub labels {
+    my %m = methodinfo(); return map {$_ => $m{$_}{labels} } keys %m;
+    }
 
 sub bvb {
 	my $quoter = shift;

@@ -13,7 +13,7 @@ my $q      = Finance::Quote->new();
 my $year   = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my %quotes = $q->morningstarch("CH0012056260","CH0014933193","CH0002788567","BOGUS");
+my %quotes = $q->morningstarch("CH0012056260","CH0014933193","LU1191063541","BOGUS");
 ok(%quotes);
 
 # Check the last values are defined.  These are the most
@@ -24,8 +24,8 @@ ok($quotes{"CH0012056260","success"});
 ok($quotes{"CH0014933193","last"} > 0);
 ok($quotes{"CH0014933193","success"});
 
-ok($quotes{"CH0002788567","last"} > 0);
-ok($quotes{"CH0002788567","success"});
+ok($quotes{"LU1191063541","last"} > 0);
+ok($quotes{"LU1191063541","success"});
 
 # Check that bogus stocks return failure:
 

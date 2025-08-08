@@ -2,9 +2,9 @@
 #
 #    Deka import modul based on Union.pm
 #    Version 2016-01-12
+# vi: set ts=2 sw=2 noai ic showmode showmatch: 
 
 package Finance::Quote::Deka;
-require 5.005;
 
 use strict;
 use LWP::UserAgent;
@@ -12,8 +12,23 @@ use HTTP::Request::Common;
 
 # VERSION
 
-sub methods { return (deka => \&deka); }
-sub labels { return (deka => [qw/exchange name date isodate price method/]); }
+our $DISPLAY    = 'Deka Investments, DE';
+our @LABELS     = qw/exchange name date isodate price method/;
+our $METHODHASH = {subroutine => \&deka, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS};
+
+sub methodinfo {
+  return ( 
+      deka => $METHODHASH,
+  );
+}
+
+sub labels { my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+
+sub methods {
+  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
+}
 
 # =======================================================================
 # The deka routine gets quotes of DEKA funds (Deka Investments)
