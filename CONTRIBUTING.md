@@ -68,6 +68,9 @@ and its dependencies. The following steps provide a recipe for setup.
         $ perlbrew --notest install perl-5.28.1                            # --notest is risky, but significant speeds installation
         $ perlbrew switch perl-5.28.1
         $ perlbrew install-cpanm
+
+- C: Install Dist::Zilla
+
         $ cpanm install Dist::Zilla
            
         # inside the finance-quote directory 
@@ -79,7 +82,7 @@ and its dependencies. The following steps provide a recipe for setup.
         $ cpanm install Data::Dumper::Perltidy Smart::Comments
          
 
-- C: Test out finance-quote
+- D: Test out finance-quote
 
           # Light-weight test mode that skips all online tests
 
@@ -93,7 +96,16 @@ and its dependencies. The following steps provide a recipe for setup.
           # Using bash syntax to set environment variables
 
           $ cpanm Test::Pod Test::Pod::Coverage Test::Kwalitee Test::Perl::Critic
-          $ TEST_AUTHOR=1 ONLINE_TEST=1 ALPHAVANTAGE_API_KEY=<YOUR API KEY> dzil test
+
+          # This runs a few code checks, including best practices as noted
+          # in "Perl Best Practices".
+
+          $ TEST_AUTHOR=1 dzil test
+
+          # Be aware of the limit of API keys. Running many tests may consume
+          # the maximum number of allowed queries.
+
+          $ TEST_AUTHOR=1 ONLINE_TEST=1 TEST_ALPHAVANTAGE_API_KEY=<YOUR API KEY> dzil test
 
           # To do an online test for one module 
 
@@ -102,6 +114,10 @@ and its dependencies. The following steps provide a recipe for setup.
           # Use prove to during test development - it is fast
 
           $ prove -lv t/fq-class-methods.t
+
+          # Use perlcritic on your module
+
+          $ perlcritic lib/Finance/Quote/YourModule.pm
 
 # How to write a Finance::Quote module
 
