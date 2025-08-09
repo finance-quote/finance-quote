@@ -51,7 +51,7 @@ $SFDCH_LOOK_UP	= "https://www.swissfunddata.ch/sfdpub/en/funds/prices?text=";
 
 our $DISPLAY = "SwissFundData";
 our @LABELS = qw/name currency date nav isodate method success errormsg/;
-out $METHODHASH = {
+our $METHODHASH = {
 	subroutine => \&swissfunddata,
 	display => $DISPLAY,
 	labels => \@LABELS
@@ -159,7 +159,7 @@ sub swissfunddata  {
 	$info {$symbol, "isin"} = $isin;
 	$info {$symbol, "nav"} = $nav;
 	$info {$symbol, "currency"} = $currency;
-	$quoter->store_date(\%info, $symbol, {eurodate => $date);
+	$quoter->store_date(\%info, $symbol, {eurodate => $date});
 	$info {$symbol, "method"} = "swissfunddata";
 	# It seems that GnuCash insists on having the time set?!
 	$info {$symbol, "time"} = "12:00";
