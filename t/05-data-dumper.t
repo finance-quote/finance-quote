@@ -16,5 +16,17 @@ my $fq = Finance::Quote->new;
 
 # Sometimes Data::Dumper gets left in code by accident.  Make sure
 # we haven't done so.
+# Older versions of XML::LibXML is an example.
+# Unfortunately for Ubuntu 22.04 and earlier (and likely other Linux
+# distributions), the later versions are not available from the standard
+# repositories. In addition, attempting to install the current version
+# of XML::LibXML from CPAN for those operating systems fails with many
+# errors during "make test". Decision was made to use SKIP rather than
+# having users run cpan or cpanm with the no test option.
 
-ok(! exists $INC{'Data/Dumper.pm'}, "Data::Dumper should not be loaded");
+SKIP: {
+  skip "XML::LibXML version not > 2.0207",
+    1 if ($XML::LibXML::VERSION <= 2.0207);
+  ok(! exists $INC{'Data/Dumper.pm'}, "Data::Dumper should not be loaded");
+}
+

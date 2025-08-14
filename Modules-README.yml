@@ -381,6 +381,21 @@
     - AUD AUD
     - INR INR
 #
+- module: CurrencyRates/ECB.pm
+  state: working
+  added: TBD
+  changed: ~
+  removed: ~
+  urls: https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml
+  apikey: false
+  notes:
+  testfile: currency.t
+  testcases:
+    - USD EUR
+    - GBP IDR
+    - IDR CAD
+    - AUD AUD
+#
 - module: CurrencyRates/FinanceAPI.pm
   state: working
   Added: 2024-10-04
