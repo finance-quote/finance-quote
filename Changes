@@ -1,9 +1,9 @@
 {{$NEXT}}
+	* Fixed TesouroDireto.pm using the csv from the redesigned official site - PR #525
 	* Added a new module to fetch data from SwissFundData - PR #515
 	* Fixed MorningstarCH.pm
 	* Fixed MorningstarUK.pm
 	* Added methodinfo() to MarketWatch.pm and BorsaItaliana.pm
-	* Fixed TesouroDireto.pm using the csv from the redesigned official site
 
 1.66      2025-07-05 11:34:42-07:00 America/Los_Angeles
 	* Modified CurrencyRates/CurrencyFreaks.pm to return from and to values instead of calculated rate.
