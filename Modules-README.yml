@@ -1221,10 +1221,10 @@
 - module: TesouroDireto.pm
   state: working
   added: 2022-02-06
-  changed: 2025-07-07
+  changed: 2025-08-28
   removed: ~
   urls:
-    - https://www.tesourodireto.com.br/json/br/com/b3/tesourodireto/service/api/treasurybondsinfo.json
+    - https://tesourodireto.com.br/documents/d/guest/rendimento-resgatar-csv?download=true
   apikey: false
   notes: ~
   testfile: tesouro_direto.t

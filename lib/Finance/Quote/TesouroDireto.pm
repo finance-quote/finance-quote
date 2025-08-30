@@ -55,6 +55,16 @@ sub labels {
     my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
+# Sanitizes input from tesouro's csv (R$ x.xxx,xx) to US values (xxxx.xx)
+sub convert_price {
+  $_ = shift;
+
+  # Replaces ',' with '.' and removes the other "extra" characters
+  tr/,.R$ /./d ;
+
+  return $_;
+}
+
 sub tesouro
 {
   my $quoter = shift;
@@ -71,7 +81,7 @@ sub tesouro
       $fundhash{$fund} = 0;
   }
 
-  my $url = "https://www.tesourodireto.com.br/json/br/com/b3/tesourodireto/service/api/treasurybondsinfo.json";
+  my $url = "https://tesourodireto.com.br/documents/d/guest/rendimento-resgatar-csv?download=true";
   $ua->agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36');
   $ua->timeout(10);
   $ua->max_redirect(5);
@@ -79,27 +89,25 @@ sub tesouro
 
   if ($response->is_success) {
 
-    my $data = decode_json($response->content)->{'response'};
-    my $quote_date = substr($data->{'TrsrBondMkt'}{'qtnDtTm'},0,10);
-    my @bounds_list = @{$data->{'TrsrBdTradgList'}};
+    # process csv data
+    foreach (split('\015?\012',$response->content)) {
 
-    foreach(@bounds_list) {
+      @q = $quoter->parse_csv_semicolon($_) or next;
+      next unless (defined $q[0]);
 
-      my $quote_name = $_->{'TrsrBd'}{'nm'};
-
-      if (exists $fundhash{$quote_name})
+      if (exists $fundhash{$q[0]})
       {
-        $fundhash{$quote_name} = 1;
+        $fundhash{$q[0]} = 1;
 
-        $info{$quote_name, "exchange"} = "Tesouro Direto";
-        $info{$quote_name, "name"}     = $quote_name;
-        $info{$quote_name, "symbol"}   = $quote_name;
-        $info{$quote_name, "price"}    = $_->{'TrsrBd'}{'untrRedVal'};
-        $info{$quote_name, "last"}     = $_->{'TrsrBd'}{'untrRedVal'};
-	      $quoter->store_date(\%info, $quote_name, {isodate => $quote_date});
-        $info{$quote_name, "method"}   = "tesouro_direto";
-        $info{$quote_name, "currency"} = "BRL";
-        $info{$quote_name, "success"}  = 1;
+        $info{$q[0], "exchange"} = "Tesouro Direto";
+        $info{$q[0], "name"}     = $q[0];
+        $info{$q[0], "symbol"}   = $q[0];
+        $info{$q[0], "price"}    = convert_price($q[2]);
+        $info{$q[0], "last"}     = convert_price($q[2]);
+        $quoter->store_date(\%info, $q[0], {today => 1});
+        $info{$q[0], "method"}   = "tesouro_direto";
+        $info{$q[0], "currency"} = "BRL";
+        $info{$q[0], "success"}  = 1;
       }
     }
 
@@ -144,7 +152,7 @@ Finance::Quote::TesouroDireto - Obtain quotes for Brazilian government bounds
 =head1 DESCRIPTION
 
 This module obtains quotes for Brazilian government bounds, obtained from
-https://www.tesourodireto.com.br/json/br/com/b3/tesourodireto/service/api/treasurybondsinfo.json
+https://tesourodireto.com.br/documents/d/guest/rendimento-resgatar-csv?download=true
 
 =head1 LABELS RETURNED
 
