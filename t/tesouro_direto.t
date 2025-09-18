@@ -7,7 +7,7 @@ if ( not $ENV{"ONLINE_TEST"} ) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-my @bounds = ("Tesouro Prefixado 2031", "Tesouro IPCA+ 2045");
+my @bounds = ("Tesouro Prefixado 2031", "Tesouro IPCA+ 2045", "Tesouro Renda+ Aposentadoria Extra 2065", "Tesouro Educa+ 2043");
 
 plan tests => 1 + 8*(1+$#bounds) + 1;
 

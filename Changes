@@ -1,4 +1,6 @@
 {{$NEXT}}
+	* Update TesouroDireto tests to cover Renda+ and Educa+ bonds
+	* Fixed TesouroDireto.pm (again) using Tesouro Transparente dataset
 	* Fixed TesouroDireto.pm using the csv from the redesigned official site - PR #525
 	* Added a new module to fetch data from SwissFundData - PR #515
 	* Fixed MorningstarCH.pm
