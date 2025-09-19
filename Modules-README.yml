@@ -1221,16 +1221,19 @@
 - module: TesouroDireto.pm
   state: working
   added: 2022-02-06
-  changed: 2025-08-28
+  changed: 2025-09-16
   removed: ~
   urls:
-    - https://tesourodireto.com.br/documents/d/guest/rendimento-resgatar-csv?download=true
+    - https://www.tesourotransparente.gov.br/ckan/dataset/taxas-dos-titulos-ofertados-pelo-tesouro-direto
+    - https://www.tesourotransparente.gov.br/ckan/dataset/df56aa42-484a-4a59-8184-7676580c81e3/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1/download/precotaxatesourodireto.csv
   apikey: false
   notes: ~
   testfile: tesouro_direto.t
   testcases:
     - Tesouro Prefixado 2031
     - Tesouro IPCA+ 2045
+    - Tesouro Renda+ Aposentadoria Extra 2065
+    - Tesouro Educa+ 2043
 #
 - module: TreasuryDirect.pm
   state: working

@@ -29,7 +29,7 @@ use if DEBUG, 'Smart::Comments';
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
-use JSON;
+use Time::Piece;
 
 # VERSION
 
@@ -55,14 +55,34 @@ sub labels {
     my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
-# Sanitizes input from tesouro's csv (R$ x.xxx,xx) to US values (xxxx.xx)
+# Sanitizes input from tesouro's csv (x.xxx,xx) to US values (xxxx.xx)
 sub convert_price {
   $_ = shift;
 
   # Replaces ',' with '.' and removes the other "extra" characters
-  tr/,.R$ /./d ;
+  tr/,. /./d ;
 
   return $_;
+}
+
+# Returns the bond name (concatenation of bond type and year).
+# Some "special" bonds are paid in installments; the name of these
+# bonds uses the year of the first installment, however the due date
+# from the csv refers to the last one.
+sub get_bond_name {
+    my ($name, $date) = @_;
+
+    my $year = substr($date, 6, 4);
+
+    # Apply the conditional logic based on the value of $name.
+    if ($name eq 'Tesouro Renda+ Aposentadoria Extra') {
+        return "$name " . ($year - 19);
+    } elsif ($name eq 'Tesouro Educa+') {
+        return "$name " . ($year - 4);
+    } else {
+        # Otherwise, return a string of the name and the original year.
+        return "$name $year";
+    }
 }
 
 sub tesouro
@@ -81,10 +101,7 @@ sub tesouro
       $fundhash{$fund} = 0;
   }
 
-  my $url = "https://tesourodireto.com.br/documents/d/guest/rendimento-resgatar-csv?download=true";
-  $ua->agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36');
-  $ua->timeout(10);
-  $ua->max_redirect(5);
+  my $url = "https://www.tesourotransparente.gov.br/ckan/dataset/df56aa42-484a-4a59-8184-7676580c81e3/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1/download/precotaxatesourodireto.csv";
   my $response = $ua->request(GET $url);
 
   if ($response->is_success) {
@@ -95,19 +112,24 @@ sub tesouro
       @q = $quoter->parse_csv_semicolon($_) or next;
       next unless (defined $q[0]);
 
-      if (exists $fundhash{$q[0]})
-      {
-        $fundhash{$q[0]} = 1;
+      my $bond_name = get_bond_name($q[0], $q[1]);
 
-        $info{$q[0], "exchange"} = "Tesouro Direto";
-        $info{$q[0], "name"}     = $q[0];
-        $info{$q[0], "symbol"}   = $q[0];
-        $info{$q[0], "price"}    = convert_price($q[2]);
-        $info{$q[0], "last"}     = convert_price($q[2]);
-        $quoter->store_date(\%info, $q[0], {today => 1});
-        $info{$q[0], "method"}   = "tesouro_direto";
-        $info{$q[0], "currency"} = "BRL";
-        $info{$q[0], "success"}  = 1;
+      if (exists $fundhash{$bond_name})
+      {
+        my $t = Time::Piece->strptime($q[2], "%d/%m/%Y");
+        next unless ($t->epoch > $fundhash{$bond_name});
+
+        $fundhash{$bond_name} = $t->epoch;
+
+        $info{$bond_name, "exchange"} = "Tesouro Direto";
+        $info{$bond_name, "name"}     = $bond_name;
+        $info{$bond_name, "symbol"}   = $bond_name;
+        $info{$bond_name, "price"}    = convert_price($q[6]);
+        $info{$bond_name, "last"}     = convert_price($q[6]);
+        $quoter->store_date(\%info, $bond_name, {eurodate => $q[2]});
+        $info{$bond_name, "method"}   = "tesouro_direto";
+        $info{$bond_name, "currency"} = "BRL";
+        $info{$bond_name, "success"}  = 1;
       }
     }
 
@@ -152,7 +174,10 @@ Finance::Quote::TesouroDireto - Obtain quotes for Brazilian government bounds
 =head1 DESCRIPTION
 
 This module obtains quotes for Brazilian government bounds, obtained from
-https://tesourodireto.com.br/documents/d/guest/rendimento-resgatar-csv?download=true
+the dataset released by Secretaria do Tesouro Nacional on Tesouro 
+Transparente under the Open Database License (ODbL):
+
+https://www.tesourotransparente.gov.br/ckan/dataset/taxas-dos-titulos-ofertados-pelo-tesouro-direto
 
 =head1 LABELS RETURNED
 
