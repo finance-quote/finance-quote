@@ -65,6 +65,7 @@ sub borsa_italiana {
     my $quoter = shift;
     my @bonds = @_;
     my ( %info, $reply, $url, $te, $ts, $row, @cells, $ce );
+	my ($dd,$mm,$yy,$hh,$mi,$ss);
     my ( $my_date );
     my $ua = $quoter->user_agent();
 
@@ -136,7 +137,11 @@ sub borsa_italiana {
             my $date = $result->{dt}[1];
             $date =~ s/.*Contratto:\ //g;
             $date =~ s/[^0123456789]//g;
-            my ($dd,$mm,$yy,$hh,$mi,$ss) = $date =~ /^([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{1,})([0-9]{2})([0-9]{2})\z/ or die;
+            unless ( ($dd,$mm,$yy,$hh,$mi,$ss) = $date =~ /^([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{1,})([0-9]{2})([0-9]{2})\z/ ) {
+                $info{$bond, 'success'} = 0;
+                $info{$bond, 'errormsg'} = 'Invalid trade date. Closed or expired?';
+                next;
+            }
             my $my_date= $dd.".".$mm.".".$yy." ".$hh.":".$mi.":".$ss;
 
             $info{ $bond, "success" }  = 1;

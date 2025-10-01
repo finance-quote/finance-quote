@@ -186,7 +186,7 @@
 - module: BorsaItaliana.pm
   state: working
   added: 2025-07-16
-  changed: ~
+  changed: 2025-09-30
   removed: ~
   urls:
     - https://www.borsaitaliana.it/borsa/search/scheda.html?code={$isin}&lang=it
