@@ -33,7 +33,7 @@ use JSON qw( decode_json );
 # VERSION 
 
 our $DISPLAY    = 'ASEGR - Athens Exchange Group, GR';
-our @LABELS     = qw/symbol name open high low last date volume currency method/;
+our @LABELS     = qw/symbol method instrument name isin currency last close high low open volume isodate date/;
 our $METHODHASH = {subroutine => \&asegr, 
                    display => $DISPLAY, 
                    labels => \@LABELS};
@@ -92,6 +92,7 @@ sub find_symbol {
       $info{ $symbol, 'volume' } = $item->{'totalVolume'};
       $info{ $symbol, 'isodate' } = $item->{'tradeDate'};
       my $isodate = $item->{'tradeDate'};
+      $info{ $symbol, 'date' } = $item->{'tradeDate'};
       $quoter->store_date( \%info, $symbol, { isodate => $isodate } );
       return 1;
     }
@@ -163,7 +164,39 @@ This module provides both the 'asegr' and 'greece' fetch methods.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned: symbol date isodate close volume high low isin.
+The following labels may be returned:
+
+=over
+
+=item symbol
+
+=item method
+
+=item instrument
+
+=item name
+
+=item isin
+
+=item currency
+
+=item last
+
+=item close
+
+=item high
+
+=item low
+
+=item open
+
+=item volume
+
+=item isodate
+
+=item date
+
+=back
 
 =head1 Terms & Conditions
 
