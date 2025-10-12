@@ -82,12 +82,14 @@ sub find_symbol {
       } else {
         $info{ $symbol, 'name' } = $item->{'companyName'};
       }
+      $info{ $symbol, 'isin' } = $item->{'isinCode'};
       $info{ $symbol, 'currency' } = $item->{'currCode'};
       $info{ $symbol, 'last' } = $item->{'closePrice'};
       $info{ $symbol, 'close' } = $item->{'closePrice'};
       $info{ $symbol, 'high' } = $item->{'highPrice'};
       $info{ $symbol, 'low' } = $item->{'lowPrice'};
       $info{ $symbol, 'open' } = $item->{'openPrice'};
+      $info{ $symbol, 'volume' } = $item->{'totalVolume'};
       $info{ $symbol, 'isodate' } = $item->{'tradeDate'};
       my $isodate = $item->{'tradeDate'};
       $quoter->store_date( \%info, $symbol, { isodate => $isodate } );

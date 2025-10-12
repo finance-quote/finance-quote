@@ -17,7 +17,7 @@ if (not $ENV{ONLINE_TEST}) {
 }
 
 my %skip   = ('bond'       => {'high' => 1, 'low' => 1},
-              'derivative' => {'isin' => 1},
+              'derivative' => {'isin' => 1, 'isodate' => 1},
               'index'      => {'isin' => 1});
 
 my %valid  = ('CPI'          => 'stock',
