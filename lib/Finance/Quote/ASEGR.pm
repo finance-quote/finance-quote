@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+#    vi: set ts=2 sw=2 noai ic expandtab showmode showmatch: 
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -13,6 +14,10 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #    02110-1301, USA
+
+#   Changes:
+#   Rewrite: 2025-10-11 - Many changes to web site, Bruce Schuck
+
 package Finance::Quote::ASEGR;
 
 use strict;
@@ -22,134 +27,111 @@ use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
 
 use LWP::UserAgent;
-use Web::Scraper;
-use Spreadsheet::XLSX;
-use String::Util qw(trim);
+use Text::Template;
+use JSON qw( decode_json );
 
 # VERSION 
 
-our @labels = qw/symbol date isodate close volume high low isin/;
+our $DISPLAY    = 'ASEGR - Athens Exchange Group, GR';
+our @LABELS     = qw/symbol method instrument name isin currency last close high low open volume isodate date/;
+our $METHODHASH = {subroutine => \&asegr, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS};
 
-our %labels = (symbol => ['symbol', 'trading symbol'],
-               date   => ['date'],
-               close  => ['price', 'current nominal value', 'closing price'],
-               volume => ['volume'],
-               high   => ['max'],
-               low    => ['min'],
-               isin   => ['isin']);
+my $URL   = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://www.athexgroup.gr/en/market-data/instruments/{$instrument}/inbroker');
 
-sub methods { 
-  return ( greece => \&asegr,
-	   asegr  => \&asegr,
-	   europe => \&asegr);
+my @instruments = qw/stocks bonds etfs lending derivatives indices/;
+my ( %jsondata, %info );
+
+sub methodinfo {
+  return ( 
+   asegr  => $METHODHASH,
+   greece => $METHODHASH,
+   europe => $METHODHASH,
+  );
 }
 
-sub labels { 
-  return ( greece => \@labels,
-	   asegr  => \@labels,
-	   europe => \@labels);
+sub labels {
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
-our @sources = qw/statistics-end-of-day-securities 
-                  statistics-end-of-day-etfs
-                  statistics-end-of-day-bonds
-                  statistics-end-of-day-warrants
-                  statistics-end-of-day-derivatives
-                  statistics-end-of-day-lending
-                  statistics-end-of-day-indices/;
+sub methods {
+  my %m = methodinfo();
+  return map {$_ => $m{$_}{subroutine} } keys %m;
+}
 
-sub load_source {
-  my $ua     = shift;
-  my $table  = shift;
-  my $source = shift;
+# Since %jsondata and %info are global to this module
+# pass in the instrument and symbol to search for the data
+sub find_symbol {
+  my $instrument = shift;
+  my $symbol = shift;
+  my $quoter = shift;
 
-  eval {
-    my $url   = "https://www.athexgroup.gr/web/guest/$source";
-    my $reply = $ua->get($url);
+  my $searchparams = $instrument . $symbol;
+  ### [<now>] Searching for: $searchparams
 
-    ### Fetched : $url, $reply->code
-
-    my $data = scraper {
-      process 'div.portlet-content-container div.portlet-body table ~ p:last-child > a:first-child', 'link[]' => '@href';
-    };
-    
-    my $result = $data->scrape($reply);
-  
-    foreach my $link (@{$result->{link}}) {
-      $reply = $ua->get($link);
-
-      ### Fetched : $link, $reply->code
-      my $xlsx = $reply->decoded_content();
-      my $io;
-      open($io, '<', \$xlsx);
-
-      my $workbook = Spreadsheet::XLSX->new($io);
-
-      for my $worksheet ($workbook->worksheets()) {
-        my ($row_min, $row_max) = $worksheet->row_range();
-        my ($col_min, $col_max) = $worksheet->col_range();
-
-        my %head = map {$_ => trim(lc($worksheet->get_cell($row_min, $_)->value()))} ($col_min .. $col_max);
-
-        for my $row (($row_min+1) .. $row_max) {
-          my $this = {};
-
-          for my $col ($col_min .. $col_max) {
-
-            my $cell = $worksheet->get_cell($row, $col);
-            next unless $cell;
-
-            $this->{$head{$col}} = trim($cell->value());
-          }
-
-          $table->{$this->{'symbol'}} = $this if exists $this->{'symbol'};
-          $table->{$this->{'trading symbol'}} = $this if exists $this->{'trading symbol'};
-        }
+  foreach my $item( @{$jsondata{$instrument}->{'data'}} ) {
+    if ($item->{instrCode} eq $symbol) {
+      $info{ $symbol, 'success' } = 1;
+      $info{ $symbol, 'symbol' } = $symbol;
+      $info{ $symbol, 'method' } = 'asegr';
+      $info{ $symbol, 'instrument' } = $instrument;
+      if ($instrument ne 'stocks') {
+        $info{ $symbol, 'name' } = $item->{'instrName'};
+      } else {
+        $info{ $symbol, 'name' } = $item->{'companyName'};
       }
+      $info{ $symbol, 'isin' } = $item->{'isinCode'};
+      $info{ $symbol, 'currency' } = $item->{'currCode'};
+      $info{ $symbol, 'last' } = $item->{'closePrice'};
+      $info{ $symbol, 'close' } = $item->{'closePrice'};
+      $info{ $symbol, 'high' } = $item->{'highPrice'};
+      $info{ $symbol, 'low' } = $item->{'lowPrice'};
+      $info{ $symbol, 'open' } = $item->{'openPrice'};
+      $info{ $symbol, 'volume' } = $item->{'totalVolume'};
+      $info{ $symbol, 'isodate' } = $item->{'tradeDate'};
+      my $isodate = $item->{'tradeDate'};
+      $info{ $symbol, 'date' } = $item->{'tradeDate'};
+      $quoter->store_date( \%info, $symbol, { isodate => $isodate } );
+      return 1;
     }
-  };
-  if ($@) {
-    ### Error: $@
   }
+
+  return 0;
+
 }
 
 sub asegr {
   my $quoter  = shift;
   my @symbols = @_;
   my $ua      = $quoter->user_agent();
-  my @found;
-  my %info;
+  my ($url, $reply);
 
   my %table;
   my $index = 0;
 
-  while (@symbols and $index < @sources) {
-    # Load the next source
-    load_source($ua, \%table, $sources[$index++]);
-
-    # Sift through @symbols
-    push(@found, grep {exists $table{$_}} @symbols);
-    @symbols = grep {not exists $table{$_}} @symbols;
-  }
-
-  ### Found     : @found
-  ### Not found : @symbols
-
-  foreach my $symbol (@found) {
-    foreach my $label (@labels) {
-      next if $label eq 'isodate';
-        foreach my $key (@{$labels{$label}}) {
-          $info{$symbol,$label} = $table{$symbol}->{$key} if exists $table{$symbol}->{$key};
+  SYMBOL: foreach my $symbol (@symbols) {
+    ### [<now>] Symbol: $symbol
+#    $info{ $symbol, 'success' } = 0;
+#    $info{ $symbol, 'errormsg' } = 'Symbol not found';
+    INSTRUMENT: foreach my $instrument (@instruments) {
+#     if $jsondata{$instrument} not defined, fetch data
+      if (!defined ($jsondata{$instrument}) ) {
+        $url = $URL->fill_in(HASH => {instrument => $instrument});
+        ### [<now>] Fetching url: $url
+        $reply = $ua->get($url);
+        if ($reply->is_success) {
+          $jsondata{$instrument} = decode_json($reply->content);
+          ### [<now>] jsondata: $jsondata{$instrument}
+          find_symbol($instrument, $symbol, $quoter) && next SYMBOL;
+        } else {
+          next INSTRUMENT;
         }
+      } else {
+        find_symbol($instrument, $symbol, $quoter) && next SYMBOL;
+      }
     }
-
-    $quoter->store_date(\%info, $symbol, {eurodate => $info{$symbol,'date'}});
-  }
-
-  # Anything left in @symbols is a failure
-  foreach my $symbol (@symbols) {
-    $info{$symbol, 'success'}  = 0;
-    $info{$symbol, 'errormsg'} = 'Not found'; 
   }
 
   return wantarray() ? %info : \%info;
@@ -182,7 +164,39 @@ This module provides both the 'asegr' and 'greece' fetch methods.
 
 =head1 LABELS RETURNED
 
-The following labels may be returned: symbol date isodate close volume high low isin.
+The following labels may be returned:
+
+=over
+
+=item symbol
+
+=item method
+
+=item instrument
+
+=item name
+
+=item isin
+
+=item currency
+
+=item last
+
+=item close
+
+=item high
+
+=item low
+
+=item open
+
+=item volume
+
+=item isodate
+
+=item date
+
+=back
 
 =head1 Terms & Conditions
 

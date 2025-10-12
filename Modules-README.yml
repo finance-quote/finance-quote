@@ -41,13 +41,18 @@
 - module: ASEGR.pm
   state: working
   added: TBD
-  changed: 2024-05-11
+  changed: 2025-10-11
   removed: ~
   urls:
+    - https://www.athexgroup.gr/en/market-data/instruments/stocks/inbroker
+    - https://www.athexgroup.gr/en/market-data/instruments/bonds/inbroker
+    - https://www.athexgroup.gr/en/market-data/instruments/etfs/inbroker
+    - https://www.athexgroup.gr/en/market-data/instruments/lending/inbroker
+    - https://www.athexgroup.gr/en/market-data/instruments/derivatives/inbroker
+    - https://www.athexgroup.gr/en/market-data/instruments/indices/inbroker
   apikey: false
   notes: |
-    The module was not broken as someone previously reported.
-    Test cases in asegr.t needed to be updated.
+    The module was rewritten 2025-10-11
   testfile: asegr.t
   testcases:
     - CPI
@@ -296,7 +301,11 @@
   removed: ~
   urls: https://cmbchina.com/cfweb/personal/prodvalue.aspx?comCod=000&PrdType=T0057&PrdCode=
   apikey: false
-  notes: This module could fetch the fund nav from CMBChina website.
+  notes: |
+    This module could fetch the fund nav from CMBChina website.
+    Supplied test case no longer working. Cannot find source of valid
+    symbols. Module will be removed if the original author does not 
+    respond to request for assistance.
   testfile: cmbchina.t
   testcases:
     - XY040208
