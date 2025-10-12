@@ -561,7 +561,7 @@ Check list:
 - Included a VERSION comment just \*after\* the use module statements.
 - Added the module name in alphabetical order to the @MODULES or @CURRENCY\_MODULES variable in Quote.pm.
 - Added the module name in alphabetical order in the SEE ALSO section of the Quote.pm POD.
-- Created a well-named test file in the t/ directory, including a test that succeeds and a test that fails.
+- Created a well-named test file in the t/ directory, including a test that succeeds and a test that fails. PLEASE indicate where to find valid symbols if your test file contains symbols for securities that expire such as Funds. Failing tests will cause your module to be removed from Finance::Quote if it is too difficult for maintainers to find valid symbols for tests.
 - Ensure tests 00-store-date.t, 01-pod.t, 02-pod-coverage.t, 03-kwalitee.t, 04-critic.t, 05-data-dumper.t pass.
 - Added module information in alphabetical order to the Modules-README.yml file.
 - Add a quick description of the change/addition to the Changes file. Most recent changes at the top of the list. Add new lines just below the {{$NEXT}} label at the top of the file.
