@@ -77,7 +77,11 @@ sub find_symbol {
       $info{ $symbol, 'symbol' } = $symbol;
       $info{ $symbol, 'method' } = 'asegr';
       $info{ $symbol, 'instrument' } = $instrument;
-      $info{ $symbol, 'name' } = $item->{'companyName'};
+      if ($instrument ne 'stocks') {
+        $info{ $symbol, 'name' } = $item->{'instrName'};
+      } else {
+        $info{ $symbol, 'name' } = $item->{'companyName'};
+      }
       $info{ $symbol, 'currency' } = $item->{'currCode'};
       $info{ $symbol, 'last' } = $item->{'closePrice'};
       $info{ $symbol, 'close' } = $item->{'closePrice'};
@@ -87,8 +91,11 @@ sub find_symbol {
       $info{ $symbol, 'isodate' } = $item->{'tradeDate'};
       my $isodate = $item->{'tradeDate'};
       $quoter->store_date( \%info, $symbol, { isodate => $isodate } );
+      return 1;
     }
   }
+
+  return 0;
 
 }
 
@@ -114,13 +121,12 @@ sub asegr {
         if ($reply->is_success) {
           $jsondata{$instrument} = decode_json($reply->content);
           ### [<now>] jsondata: $jsondata{$instrument}
-          find_symbol($instrument, $symbol, $quoter);
-          next SYMBOL;
+          find_symbol($instrument, $symbol, $quoter) && next SYMBOL;
         } else {
           next INSTRUMENT;
         }
       } else {
-        find_symbol($instrument, $symbol, $quoter);
+        find_symbol($instrument, $symbol, $quoter) && next SYMBOL;
       }
     }
   }
