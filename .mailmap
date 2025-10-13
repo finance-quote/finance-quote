@@ -1,6 +1,8 @@
 # mailmap file
 Bruce Schuck <bschuck@asgard-systems.com>
 Bruce Schuck <bschuck@asgard-systems.com> <bruce.schuck@dish.com>
+Chris Good <goodchris96@gmail.com>
+Chris Good <goodchris96@gmail.com> goodvibes2 <chris.good@ozemail.com.au>
 Erik Colson <eco@ecocode.net> <ec@mini.local>
 Erik Colson <eco@ecocode.net> <ec@epsilon.(none)>
 Erik Colson <eco@ecocode.net> <ec@ubuntu-vm.(none)>
@@ -12,4 +14,4 @@ Joseph Heron <heron.joseph@gmail.com> <heron.joseph@gmail.com>
 Hiranya Samarasekera <hiranyas@gmail.com> <hiranya.samarasekera@ebuilder.com>
 Hiranya Samarasekera <hiranyas@gmail.com> Hiranya <hiranyas@gmail.com>
 Gabor Szabo <gabor@szabgab.com>
-
+#
