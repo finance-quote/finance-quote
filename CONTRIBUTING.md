@@ -446,6 +446,25 @@ about the stocks that the caller requested. As such, you should
 never return information about stocks that were not requested, even
 if you fetch and/or process that information.
 
+## Editor Settings
+
+As an OpenSource project, there have been many contributors to Finance::Quote.
+Which means a variety of text editors and coding styles can be found.
+We ask that if a module is being modified, that contributors follow
+the formatting and indenting style of the original author.
+
+One way to satisfy this is to take note of things like vi/vim modeline
+commands or Emacs file variables that previous authors may have included.
+
+For example I primarily use vim and include the following modeline near
+the top of most scripts and code.
+
+`# vi: set ts=4 sw=4 noai ic expandtab showmatch showmode:`
+
+The equivalent for Emacs may be:
+
+`# -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; case-fold-search: nil; -*-`
+
 ## Using your new module
 
 Using your new module is easy. Normally when using Finance::Quote you'd
