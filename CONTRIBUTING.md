@@ -432,6 +432,12 @@ function this way:
 
 See the documentation in Quote.pm for more information.
 
+## Please don't die
+
+Finance::Quote should always return data, even if no data was retrieved
+for any of the securities. Instead, set "success" to 0 and an error
+message ("errormsg") for all of the requested securities.
+
 ## Things to avoid
 
 Some sources of information will provide more stock information than
@@ -549,8 +555,7 @@ where
 and to\_multiplier/from\_multiplier will convert a value in currency "from"
 into currency "to".
 
-On error, multipliers() must either return undef or throw and exception
-with die().
+On error, multipliers() must return undef.
 
 # How to contribute your module to the world
 
