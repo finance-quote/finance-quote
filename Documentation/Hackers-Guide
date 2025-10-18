@@ -21,8 +21,8 @@ $Version$
         3.6. Currency
         3.7. Development & Debugging Code
         3.8. Dates
-        3.9. Things to avoid
-        3.10. Using your new module
+        3.10. Things to avoid
+        3.11. Using your new module
     4. How to write a Finance::Quote::CurrencyRates module
         4.1. The package name
         4.2. The new() constructor
@@ -423,7 +423,15 @@ function this way:
 
 See the documentation in Quote.pm for more information.
 
-3.9 Things to avoid
+3.9 Please don't "die"
+----------------------
+
+Finance::Quote should always return data, even if no data was retrieved 
+for any of the securities. Instead, set "success" to 0 and an error
+message ("errormsg") for all of the requested securities.
+
+
+3.10 Things to avoid
 --------------------
 Some sources of information will provide more stock information than
 requested.  Some code may rely upon your code only returning information
@@ -431,7 +439,28 @@ about the stocks that the caller requested.  As such, you should
 never return information about stocks that were not requested, even
 if you fetch and/or process that information.
 
-3.10 Using your new module
+3.11 Editor Settings
+--------------------
+
+As an OpenSource project, there have been many contributors to Finance::Quote.
+Which means a variety of text editors and coding styles can be found.
+We ask that if a module is being modified, that contributors follow
+the formatting and indenting style of the original author.
+
+One way to satisfy this is to take note of things like vi/vim modeline
+commands or Emacs file variables that previous authors may have included.
+
+For example I primarily use vim and include the following modeline near
+the top of most scripts and code.
+
+  # vi: set ts=4 sw=4 noai ic expandtab showmatch showmode:
+
+The equivalent for Emacs may be:
+
+  # -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; case-fold-search: nil; -*-
+
+
+3.12 Using your new module
 --------------------------
 Using your new module is easy.  Normally when using Finance::Quote you'd
 do something like the following:
@@ -545,9 +574,7 @@ where
 and to_multiplier/from_multiplier will convert a value in currency "from"
 into currency "to".
 
-On error, multipliers() must either return undef or throw and exception
-with die().
-
+On error, multipliers() must return undef.
 
 5. How to contribute your module to the world
 =============================================

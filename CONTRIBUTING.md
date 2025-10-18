@@ -432,6 +432,12 @@ function this way:
 
 See the documentation in Quote.pm for more information.
 
+## Please don't die
+
+Finance::Quote should always return data, even if no data was retrieved
+for any of the securities. Instead, set "success" to 0 and an error
+message ("errormsg") for all of the requested securities.
+
 ## Things to avoid
 
 Some sources of information will provide more stock information than
@@ -439,6 +445,25 @@ requested. Some code may rely upon your code only returning information
 about the stocks that the caller requested. As such, you should
 never return information about stocks that were not requested, even
 if you fetch and/or process that information.
+
+## Editor Settings
+
+As an OpenSource project, there have been many contributors to Finance::Quote.
+Which means a variety of text editors and coding styles can be found.
+We ask that if a module is being modified, that contributors follow
+the formatting and indenting style of the original author.
+
+One way to satisfy this is to take note of things like vi/vim modeline
+commands or Emacs file variables that previous authors may have included.
+
+For example I primarily use vim and include the following modeline near
+the top of most scripts and code.
+
+`# vi: set ts=4 sw=4 noai ic expandtab showmatch showmode:`
+
+The equivalent for Emacs may be:
+
+`# -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; case-fold-search: nil; -*-`
 
 ## Using your new module
 
@@ -549,8 +574,7 @@ where
 and to\_multiplier/from\_multiplier will convert a value in currency "from"
 into currency "to".
 
-On error, multipliers() must either return undef or throw and exception
-with die().
+On error, multipliers() must return undef.
 
 # How to contribute your module to the world
 
