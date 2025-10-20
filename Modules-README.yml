@@ -227,12 +227,13 @@
 - module: BVB.pm
   state: working
   added: 2023-05-28
-  changed: 2024-08-18
+  changed: 2025-10-20
   removed: ~
-  urls: https://bvb.ro/TradingAndStatistics/Trading/HistoricalTradingInfo.ashx?day=
+  urls: https://bvb.ro/FinancialInstruments/Details/FinancialInstrumentsDetails.aspx?s=
   apikey: false
   notes: |
-    Issue #409 indicates the retrieval of quotes does not work. BVB.pm written to replace it. Uses the day end historical quotes file from the exchange.
+    Reverted back to original URL. Using the CSV file fails occasionally
+    due to not all valid symbols being represented.
   testfile: bvb.t
   testcases:
     - TLV

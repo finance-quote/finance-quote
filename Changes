@@ -1,7 +1,8 @@
 {{$NEXT}}
+	* Modified parsing in BVB.pm - Issue #513
 
 1.67      2025-10-18 11:29:58-07:00 America/Los_Angeles
-  * Fixed ASEGR.pm. Web site redesigned, URL used for data was no longer workingy - Issue #509
+	* Fixed ASEGR.pm. Web site redesigned, URL used for data was no longer workingy - Issue #509
 	* Handle no trade date in BorsaItaliana.pm - Issue #528
 	* Fixed TesouroDireto.pm using Tesouro Transparente as datasource - PR #527
 	* Added a new module to fetch data from SwissFundData - PR #515
