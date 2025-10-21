@@ -1324,11 +1324,15 @@
 - module: Union.pm
   state: working
   added: TBD
-  changed: 2025-04-07
+  changed: 2025-10-21
   removed: ~
-  urls: https://legacy-apps.union-investment.de/handle?generate=true&action=doDownloadSearch&start_time=...
+  urls: https://internal.api.union-investment.de/beta/web/funddata/fundsearch?segment=web_de&type=fondssuche&api-version=beta-2.0.0
+	methods:
+    - unionfunds
   apikey: false
-  notes: symbol has changed from WKN to ISIN
+  notes: |
+		search symbol has changed from WKN to ISIN
+		See the module source for the required API Key.
   testfile: union.t
   testcases:
     - DE0008491002

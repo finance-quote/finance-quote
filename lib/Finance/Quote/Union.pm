@@ -35,7 +35,10 @@
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 #
 #    Changes:
-#    Rewritten for issue #516: 20254-10-21, Bruce Schuck
+#    Rewritten for issue #516: 2025-10-21, Bruce Schuck
+#      Parses JSON retrieved from
+#      https://internal.api.union-investment.de/beta/web/funddata/fundsearch?segment=web_de&type=fondssuche&api-version=beta-2.0.0
+#      See module for required API Key
 
 package Finance::Quote::Union;
 
@@ -206,7 +209,20 @@ now the ISIN is needed as symbol value.
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::UNION:
-exchange, name, date, price, last.
+
+=over
+
+=item exchange 
+
+=item name 
+
+=item date 
+
+=item price 
+
+=item last
+
+=back
 
 =head1 SEE ALSO
 

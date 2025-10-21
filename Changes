@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Rewrote Union.pm for URL that returns JSON - Issue #516
 	* Modified parsing in BVB.pm - Issue #513
 
 1.67      2025-10-18 11:29:58-07:00 America/Los_Angeles
