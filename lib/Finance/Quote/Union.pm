@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 #
+# vi: set ts=4 sw=4 ic noai expandtab showmode showmatch: 
+#
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
 #    Copyright (C) 2000, Yannick LE NY <y-le-ny@ifrance.com>
@@ -8,6 +10,8 @@
 #    Copyright (C) 2000, Volker Stuerzl <volker.stuerzl@gmx.de>
 #    Copyright (C) 2002, Rainer Dorsch <rainer.dorsch@informatik.uni-stuttgart.de>
 #    Copyright (C) 2022, Andre Joost <andrejoost@gmx.de>
+#    Copyright (C) 2025, Bruce Schuck <bschuck@asgard-systems.com>
+#
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,20 +34,22 @@
 #
 # This code was developed as part of GnuCash <http://www.gnucash.org/>
 #
-# $Id: Union.pm,v 1.3 2005/03/20 01:44:13 hampton Exp $
+#    Changes:
+#    Rewritten for issue #516: 20254-10-21, Bruce Schuck
 
 package Finance::Quote::Union;
 
 use strict;
-use LWP::UserAgent;
-use HTTP::Request::Common;
-use POSIX qw(strftime);
+
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments', '###';
+
+use JSON qw(decode_json);
 
 # VERSION
 
-our $UNION_URL1 = "https://legacy-apps.union-investment.de/handle?generate=true&action=doDownloadSearch&start_time=";
-# Date format 27.07.2022&end_time=01.08.2022
-our $UNION_URL2 ="&csvformat=us&choose_indi_fondsnames=";
+# This url retrieve a JSON data structure containing data for all funds
+our $UNION_URL = 'https://internal.api.union-investment.de/beta/web/funddata/fundsearch?segment=web_de&type=fondssuche&api-version=beta-2.0.0';
 
 our $DISPLAY    = 'Union - German Funds';
 our @LABELS     = qw/exchange name date isodate price method currency/;
@@ -57,92 +63,121 @@ sub methodinfo {
     );
 }
 
-sub labels { my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+sub labels {
+    my %m = methodinfo();
+    return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
 
 sub methods {
-  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
+    my %m = methodinfo();
+    return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 # =======================================================================
 # The unionfunds routine gets quotes of UNION funds (Union Invest)
-# On their website UNION provides a csv file in the format
-#    label1,label2,...
-#    name1,symbol1,buy1,bid1,...
-#    name2,symbol2,buy2,bid2,...
-#    ...
+# The URL returns a JSON data structure containing a table containing
+# quote data for all funds
 #
-# This subroutine was written by Volker Stuerzl <volker.stuerzl@gmx.de>
+# This subroutine was written by Bruce Schuck <bschuck@asgard-systems.com>
 
 sub unionfunds
 {
-  my $quoter = shift;
-  my @funds = @_;
-  return unless @funds;
-  my $ua = $quoter->user_agent;
-  my (%fundhash, @q, %info, $tempdate);
+    my $quoter = shift;
+    my @funds = @_;
+    return unless @funds;
+    my $ua = $quoter->user_agent;
+    my (%info, $json, $results);
 
-  # create hash of all funds requested
-  foreach my $fund (@funds)
-  {
-    $fundhash{$fund} = 0;
-	    my $endtime = POSIX::strftime ("%d.%m.%Y" , localtime());
-		my $epoc = time();
-        $epoc = $epoc - 7 * 24 * 60 * 60;   # one week before of current date.
-		my $starttime = POSIX::strftime ("%d.%m.%Y" , localtime($epoc));
-		my $url = $UNION_URL1 . $starttime."&end_time=" . $endtime . $UNION_URL2 . $fund;
+    # Set headers. API key is sent as a header.
+    my @ua_headers = (
+        'Accept'     => 'application/json',
+        'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+        'x-api-key'  => '6d5b7ad050e948ce99516c20fbe37425',
+    );    
 
-  # Website not supplying intermediate certificate causing
-  # GET to fail
-  $ua->ssl_opts(verify_hostname => 0, SSL_verify_mode => 0x00);
-		
-  # get csv data
-  my $response = $ua->request(GET $url);
-  if ($response->is_success)
-  {
-    # process csv data
-    foreach (split('\015?\012',$response->content))
-    {
+    # Website not supplying intermediate certificate causing
+    # GET to fail
+    # The website installed a new certificate. The following line
+    # is no longer required.
+    # $ua->ssl_opts(verify_hostname => 0, SSL_verify_mode => 0x00);
 
-      @q = split(/,/) or next;
-      next unless (defined $q[1]);
-      if (exists $fundhash{$q[1]})
-      {
-        $fundhash{$q[1]} = 1;
+    # Get JSON data
+    my $response = $ua->get($UNION_URL, @ua_headers);
+    ### [<now>] Response Code: $response->code
 
-
-        $info{$q[1], "exchange"} = "UNION";
-        $info{$q[1], "name"}     = $q[0];
-        $info{$q[1], "symbol"}   = $q[1];
-        $info{$q[1], "price"}    = $q[4];
-        $info{$q[1], "last"}     = $q[4];
-	$quoter->store_date(\%info, $q[1], {eurodate => $q[6]});
-        $info{$q[1], "method"}   = "unionfunds";
-        $info{$q[1], "currency"} = $q[2];
-        $info{$q[1], "success"}  = 1;
-      }
+    unless ($response->is_success) {
+        foreach my $fund (@funds) {
+            $info{$fund, "success"}  = 0;
+            $info{$fund, "errormsg"} = "Error accessing $UNION_URL";
+        }
+        return wantarray() ? %info : \%info;
     }
-  }
-  }
-    # check to make sure a value was returned for every fund requested
-    foreach my $fund (keys %fundhash)
-    {
-      if ($fundhash{$fund} == 0)
-      {
-        $info{$fund, "success"}  = 0;
-        $info{$fund, "errormsg"} = "No data returned";
-      }
-	}
 
-  return wantarray() ? %info : \%info;
+    # The body should be JSON
+    eval {$json = decode_json($response->content)};
+    if($@) {
+        foreach my $fund (@funds) {
+            $info{$fund, "success"}  = 0;
+            $info{$fund, "errormsg"} = "No JSON data returned";
+        }
+        return wantarray() ? %info : \%info;
+    }
+    # ### [<now>] JSON: $json
+
+    my $componentarray = $json->{'content'}{'container'}{'component'};
+    ### Component Array: $componentarray
+
+    unless ($componentarray) {
+        foreach my $fund (@funds) {
+            $info{$fund, "success"}  = 0;
+            $info{$fund, "errormsg"} = "Unexpected JSON data";
+        }
+        return wantarray() ? %info : \%info;
+    }
+
+    # Loop through componentarray looking for result array
+    foreach my $component( @$componentarray ) {
+        if ( $component->{'result'} ) {
+            $results = $component->{'result'};
+            last;
+        }
+    }
+
+    unless ( $results ) {
+        foreach my $fund (@funds) {
+            $info{$fund, "success"}  = 0;
+            $info{$fund, "errormsg"} = "JSON data does not include results";
+        }
+        return wantarray() ? %info : \%info;
+    }
+
+    foreach my $fund (@funds) {
+        foreach my $funddata (@$results) {
+            if ($fund eq $funddata->{'tableRows'}[0]{'isin'}{'value'} ) {
+                $info{$fund, 'success'} = 1;
+                $info{$fund, 'name' } = $funddata->{'tableRows'}[0]{'fundName'}{'value'};
+                $info{$fund, 'exchange'} = 'UNION';
+                $info{$fund, 'symbol'} = $fund;
+                $info{$fund, 'price'} = $funddata->{'tableRows'}[0]{'returnPrice'}{'valueSortable'};
+                $info{$fund, 'last'} = $funddata->{'tableRows'}[0]{'returnPrice'}{'valueSortable'};
+                my $date = $funddata->{'tableRows'}[0]{'date'}{'value'};
+                my ($price, $currency) = split(/ /, $funddata->{'tableRows'}[0]{'returnPrice'}{'value'});
+                $info{$fund, 'currency'} = $currency;
+                $quoter->store_date(\%info, $fund, {eurodate => $date});
+                last;
+            }
+        }
+        unless ($info{$fund, 'success'}) {
+            $info{$fund, 'success'} = 0;
+            $info{$fund, 'errormsg'} = 'Symbol not found';
+        }
+    }
+
+    return wantarray() ? %info : \%info;
 
 }
 
 1;
-
-# UNION provides a csv file named historische-preise.csv on
-# <https://www.union-investment.de/fonds_depot/fonds-finden/preise-berechnen#HistorischeTagespreise>
-# containing the prices of a selction of all their funds for a selected period.
-
 
 __END__
 
