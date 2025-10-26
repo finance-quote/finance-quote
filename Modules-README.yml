@@ -296,10 +296,10 @@
   testcases:
 #
 - module: CMBChina.pm
-  state: working
+  state: removed
   added: 2025-06-05
   changed: ~
-  removed: ~
+  removed: 2025-10-25
   urls: https://cmbchina.com/cfweb/personal/prodvalue.aspx?comCod=000&PrdType=T0057&PrdCode=
   apikey: false
   notes: |
