@@ -23,6 +23,8 @@ use HTML::TreeBuilder::XPath;
 use JSON qw( decode_json );
 use LWP::Protocol::http;
 use Text::Template;
+use HTTP::Cookies;
+use URI::Escape;
 
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
@@ -35,7 +37,8 @@ use constant JSONBODY => "body";
 # Fix for 500 Header line too long message
 push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, MaxLineLength => 0);
 
-my $URL   = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://finance.yahoo.com/quote/{$symbol}/history?p={$symbol}');
+my $URL   = Text::Template->new(TYPE => 'STRING', SOURCE => 'https://finance.yahoo.com/quote/{$symbol}/history?p={$symbol}&crumb={$crumb}');
+# my $AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36';
 my $AGENT = 'Mozilla/5.0';
 my $XPATH = Text::Template->new(TYPE => 'STRING', SOURCE => '//*[@data-symbol=~"^{$symbol}$"][@data-field=~"regularMarketPrice"]');
 
@@ -67,10 +70,77 @@ sub yahooweb {
     my ( %info, $url, $reply, $script_tag );
     my $ua = $quoter->user_agent();
     my $agent = $ua->agent();
+
+    my $cookie_jar = HTTP::Cookies->new;
+
+    # Redirect handler deals with cookie consent workflow applicable to EU countries
+    # credit to John Weber from Germany for injecting redirect handler
+    my $gcrumb = "";
+    $ua->add_handler("response_redirect", sub {
+        my($response, $ua, $h) = @_;
+
+        # Check where we've been redirected and act accordingly
+        my $redirect_uri = URI->new($response->header("Location"));
+        if ($redirect_uri->path eq "/consent") {
+
+            # Remember gcrumb value for collectConsent request later
+            my %params = $redirect_uri->query_form;
+            $gcrumb = $params{'gcrumb'};
+
+        } elsif ($redirect_uri->path eq "/v2/collectConsent") {
+
+            my %params = $redirect_uri->query_form;
+            my $sessionId = $params{'sessionId'};
+
+            # Turn this request into a POST with form data to confoo accept cookies
+            my $request = POST($redirect_uri, [
+                'csrfToken' => $gcrumb,
+                'sessionId' => $sessionId,
+                'originalDoneUrl' => 'https://www.yahoo.com/?guccounter=1',
+                'namespace' => 'yahoo',
+            # For the EU consent, either can :
+            #   'agree' => 'agree'
+            # to it or
+                'reject' => 'reject'
+            ]);
+            return $request;
+        }
+        return;
+    });
+
+    $ua->cookie_jar($cookie_jar);
     $ua->agent($AGENT);
 
+    # Tell user agent to redirect POSTs in additional to GET AND HEAD
+    $ua->requests_redirectable(['GET', 'HEAD', 'POST']);
+
+    # get necessary cookies
+    $reply = $ua->get('https://www.yahoo.com/', "Accept" => "text/html");
+
+    if ($reply->code != 200) {
+        foreach my $symbol (@stocks) {
+            $info{$symbol, "success"} = 0;
+            $info{$symbol, "errormsg"} = "Error accessing www.yahoo.com: $@";
+        }     
+        return wantarray() ? %info : \%info;
+    }
+
+    # get the crumb that corrosponds to cookies retrieved
+    $reply = $ua->request(GET 'https://query2.finance.yahoo.com/v1/test/getcrumb');
+    if ($reply->code != 200) {
+        foreach my $symbol (@stocks) {
+            $info{$symbol, "success"} = 0;
+            $info{$symbol, "errormsg"} = "Error accessing queary.finance.yahoo.com/v1/test/getcrumb: $@";
+        }     
+        return wantarray() ? %info : \%info;
+    }
+    my $crumb = uri_escape($reply->content);
+
+    ### [<now>]    cookie_jar : $cookie_jar
+    ### [<now>]         crumb : $crumb
+
     foreach my $symbol (@stocks) {
-        $url   = $URL->fill_in(HASH => {symbol => $symbol});
+        $url   = $URL->fill_in(HASH => {symbol => $symbol, crumb => $crumb});
 
         ### [<now>] YahooWeb: $url
         $reply = $ua->request(GET $url);

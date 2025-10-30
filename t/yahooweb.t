@@ -34,7 +34,8 @@ my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_refer
 
 plan tests => 1 + %check*@valid + @invalid;
 
-my %quotes = $q->yahooweb(@symbols);
+# my %quotes = $q->yahooweb(@symbols);
+my %quotes = $q->fetch('yahooweb', @symbols);
 ok(%quotes);
 
 ### [<now>] quotes: %quotes
