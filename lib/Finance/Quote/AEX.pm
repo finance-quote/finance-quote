@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# vi: set ts=4 sw=4 noai ic showmode showmatch:  
+# vi: set ts=4 sw=4 expandtab noai ic showmode showmatch:  
 
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -73,6 +73,7 @@ sub aex {
       $reply  = $ua->get($search);
 
       ### Search: $search, $reply->code
+      ### Content URL 1: $reply->decoded_content
 
       if (not defined $reply->previous) {
         # Got a search page
@@ -183,7 +184,7 @@ sub aex {
         process 'div.table-responsive td:first-child, div.table-responsive td:first-child + td', 'data[]' => ['TEXT', sub {trim($_)}];
       };
 
-      ### Body : $url, $reply->code
+      ### Body : $url, $reply->code, $reply->decoded_content
 
       my $body = $widget->scrape($reply);
 
@@ -195,6 +196,15 @@ sub aex {
       }
      
       my %table = @{$body->{data}};
+
+      # Bonds return '%' for currency representing a percentage
+      # of face value. Face value not available, indicate query
+      # failure.
+      if ( $table{Currency} eq '%' ) {
+          $info{$symbol, 'success'}  = 0;
+          $info{$symbol, 'errormsg'} = 'Price data not available from Euronext';
+          next;
+      }
 
       $info{$symbol, 'success'}  = 1;
       $info{$symbol, 'currency'} = $table{Currency};
@@ -268,8 +278,8 @@ Finance::Quote::AEX - Obtain quotes from Euronext Amsterdam/Paris/... eXchange
 
 =head1 DESCRIPTION
 
-This module fetches information from https://live.euronext.com. Stocks and bonds
-are supported.
+This module fetches information from https://live.euronext.com. Stocks and funds
+are supported. Bonds are currently not supported. 
 
 This module is loaded by default on a Finance::Quote object. It's also possible
 to load it explicitly by placing 'aex' in the argument list to
