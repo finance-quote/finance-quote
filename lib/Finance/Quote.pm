@@ -609,7 +609,7 @@ sub fetch {
     unless ($ENV{"FQ_NOCOUNT"}) {
       # Temporary Counting - not concerned about return code
       my $COUNT_URL =
-        'http://www.panix.com/~hd-fxsts/finance-quote.html?' . $VERSION . '&' . $method;
+        'http://www.panix.com/~hd-fxsts/finance-quote.html?fqversion=' . $VERSION . '&fqmethod=' . $method;
       my $count_ua = LWP::UserAgent->new(timeout => 10);
       my $count_response = $count_ua->head($COUNT_URL);
 
