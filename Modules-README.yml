@@ -805,7 +805,7 @@
 #
 - module: MarketWatch.pm
   state: working
-  added: 2025-07-10
+  added: 2025-11-19
   changed: ~
   removed: ~
   urls: https://www.marketwatch.com/investing/stock/<symbol>
