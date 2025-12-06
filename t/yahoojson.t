@@ -10,7 +10,7 @@ if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
 
-plan tests => 58;
+plan tests => 65;
 
 my $q = Finance::Quote->new();
 
@@ -31,7 +31,7 @@ foreach my $stock (@stocks) {
     }
     else {
         ok( $name, "Name is defined : $name" );
-        
+
         my $fetch_method = $quotes{ $stock, "method" };
         ok( $fetch_method eq 'yahoo_json', "fetch_method is yahoo_json" );
 
@@ -43,6 +43,11 @@ foreach my $stock (@stocks) {
 
         my $type = $quotes{ $stock, "type" };
         ok( $type, "Symbol type $type" );
+
+        for my $field (qw( market_cap volume_10_days trailing_pe book_value shares_outstanding shares_short shares_float )) {
+            my $value = $quotes{ $stock, $field } // 0;
+            ok( $value > 0, "$field $value > 0 for $stock" ) if $stock eq "AMZN";
+        }
 
         #TODO: Add a test to raise a warning if the quote is excessively old
         my $isodate = $quotes{ $stock, "isodate" };
