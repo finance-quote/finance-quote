@@ -497,21 +497,25 @@ sub usbonds
 
     ### listPrices: @listPrices
 
-    for ( my $index = 0 ; $index < scalar @validSymbols ; $index++ )
-    {
-      my ( $mo, $yr ) = ( $listQuoteDate [ $index ] =~ m/([0-9]+)\/([0-9]+)/ ) ;
+    for ( my $index = 0 ; $index < scalar @validSymbols ; $index++ ) {
       my $keyNow = $validSymbols [ $index ] ;
-      $quotes { $keyNow, "exchange" } = "Treasury Direct" ;
-      $quotes { $keyNow, "method"   } = "usbonds" ;
-      $quotes { $keyNow, "price"    } = $listPrices [ $index ] ;
-      $quotes { $keyNow, "last"     } = $listPrices [ $index ] ;
-      $quotes { $keyNow, "symbol"   } = $validSymbols [ $index ] ;
-      $quotes { $keyNow, "currency" } = "USD" ;
-      $quotes { $keyNow, "source"   } = "USBonds" ;
-      $quotes { $keyNow, "date"     } = $mo . "/01/" . $yr ;
-      $quotes { $keyNow, "isodate"  } = $yr . "-" . $mo . "-01" ;
-      $quotes { $keyNow, "version"  } = '1.10' ;
-      $quotes { $keyNow, "success"  } = 1 ;
+      if ( defined $listPrices [ $index ] ) {
+        my ( $mo, $yr ) = ( $listQuoteDate [ $index ] =~ m/([0-9]+)\/([0-9]+)/ ) ;
+        $quotes { $keyNow, "exchange" } = "Treasury Direct" ;
+        $quotes { $keyNow, "method"   } = "usbonds" ;
+        $quotes { $keyNow, "price"    } = $listPrices [ $index ] ;
+        $quotes { $keyNow, "last"     } = $listPrices [ $index ] ;
+        $quotes { $keyNow, "symbol"   } = $validSymbols [ $index ] ;
+        $quotes { $keyNow, "currency" } = "USD" ;
+        $quotes { $keyNow, "source"   } = "USBonds" ;
+        $quotes { $keyNow, "date"     } = $mo . "/01/" . $yr ;
+        $quotes { $keyNow, "isodate"  } = $yr . "-" . $mo . "-01" ;
+        $quotes { $keyNow, "version"  } = '1.10' ;
+        $quotes { $keyNow, "success"  } = 1 ;
+      } else {
+        $quotes { $keyNow, "success"  } = 0;
+        $quotes { $keyNow, "errormsg" } = "No price data for $keyNow";
+      }
     }
   }
   return wantarray() ? %quotes : \%quotes;
