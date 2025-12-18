@@ -101,6 +101,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     TSP
     TwelveData
     Union
+		USBonds
     XETRA
     YahooJSON
     YahooWeb
@@ -1290,24 +1291,24 @@ and pass method specific parameters.
 
 =over
 
-=item C<timeout => T> sets the web request timeout to C<T> seconds
+=item C<timeout =E<gt> T> sets the web request timeout to C<T> seconds
 
-=item C<failover => B> where C<B> is a boolean value indicating if failover in
+=item C<failover =E<gt> B> where C<B> is a boolean value indicating if failover in
 fetch is permitted
 
-=item C<fetch_currency => C> sets the desired currency code to C<C> for fetch
+=item C<fetch_currency =E<gt> C> sets the desired currency code to C<C> for fetch
 results
 
-=item C<currency_rates => H> configures the order currency rate modules are
+=item C<currency_rates =E<gt> H> configures the order currency rate modules are
 consulted for exchange rates and currency rate module options
 
-=item C<required_labels => A> sets the required labels for fetch results to
+=item C<required_labels =E<gt> A> sets the required labels for fetch results to
 array C<A>
 
 =item C<<ModuleName>> as a string is the name of a specific
 Finance::Quote::Module to load
 
-=item C<<methodname> => H> passes hash C<H> to methodname during fetch to 
+=item C<<methodname> =E<gt> H> passes hash C<H> to methodname during fetch to 
 configure the method
 
 =back
@@ -1326,7 +1327,7 @@ modules. Note that the FQ_LOAD_QUOTELET environment variable must begin with
 '-defaults' if you wish the default modules to be loaded.
 
 Method names correspond to the Perl module in the Finance::Quote module space.
-For example, C<Finance::Quote->new('ASX')> will load the module
+For example, C<Finance::Quote-E<gt>new('ASX')> will load the module
 Finance::Quote::ASX, which provides the method "asx".
 
 Some methods require API keys or have unique options. Passing 'method => HASH'
@@ -1741,6 +1742,7 @@ http://www.gnucash.org/
   Finance::Quote::TreasuryDirect,
   Finance::Quote::TwelveData,
   Finance::Quote::Union,
+  Finance::Quote::USBonds,
   Finance::Quote::YahooJSON,
   Finance::Quote::YahooWeb,
   Finance::Quote::XETRA,

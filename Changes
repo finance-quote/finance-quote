@@ -1,5 +1,6 @@
 {{$NEXT}}
 	* YahooJSON.pm - Add additional fields/labels - PR #544
+	* New Module, USBonds.pm
 	* MarketWatch.pm - Added headers to fix 401 code - Issue #542
 	* Modified AEX.pm to return no data available is currency indicator is '%' (bonds return percentage of par/facevalue) - Issue #539
 	* Fixed YahooWeb.pm - Issue #533 - PR #538

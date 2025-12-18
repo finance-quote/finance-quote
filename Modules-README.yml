@@ -1337,6 +1337,23 @@
   testcases:
     - DE0008491002
 #
+- module: USBonds.pm
+  state: working
+  added: 2025-12-13
+  changed: ~
+  removed: ~
+  urls: http://www.treasurydirect.gov/BC/SBCPrice
+  methods:
+    - usbonds
+  apikey: false
+  notes: |
+    Originally written by Ken Farley in 2018 for his own use.
+    Provided to F::Q team 2025-12-12.
+  testfile: usbonds.t
+  testcases:
+    - EE-100-2020-07
+    - EE-50-2015-04
+#
 - module: UserAgent.pm
   state: TBD
   added: TBD
@@ -1346,7 +1363,7 @@
   apikey: false
   notes: ~
   testfile: TBD
-  testcases:
+  testcases: NA
 #
 - module: VWD.pm
   state: removed
