@@ -50,7 +50,8 @@ my $browser = 'Mozilla/5.0';
 
 our $DISPLAY    = 'YahooJSON';
 our @LABELS     = qw/name last date isodate volume currency method exchange type
-        div_yield eps pe year_range open high low close/;
+        div_yield eps pe year_range open high low close market_cap volume_10_days
+        trailing_pe book_value shares_outstanding shares_short shares_float/;
 our $METHODHASH = {subroutine => \&yahoo_json, 
                    display => $DISPLAY, 
                    labels => \@LABELS};
@@ -232,6 +233,20 @@ sub yahoo_json {
                     $json_resources_summaryDetail->{'trailingAnnualDividendYield'}{'raw'} * 100          :
                     0.0;
                 }
+                $info{ $stocks, "market_cap" } =
+                    $json_resources_price->{'marketCap'}{'raw'};
+                $info{ $stocks, "volume_10_days" } =
+                    $json_resources_price->{'averageDailyVolume10Day'}{'raw'};
+                $info{ $stocks, "trailing_pe" } =
+                    $json_resources_summaryDetail->{'trailingPE'}{'raw'};
+                $info{ $stocks, "book_value" } =
+                    $json_resources_defaultKeyStatistics->{'bookValue'}{'raw'};
+                $info{ $stocks, "shares_outstanding" } =
+                    $json_resources_defaultKeyStatistics->{'sharesOutstanding'}{'raw'};
+                $info{ $stocks, "shares_short" } =
+                    $json_resources_defaultKeyStatistics->{'sharesShort'}{'raw'};
+                $info{ $stocks, "shares_float" } =
+                    $json_resources_defaultKeyStatistics->{'floatShares'}{'raw'};
                 $info{ $stocks, "eps"} =
                     $json_resources_defaultKeyStatistics->{'trailingEps'}{'raw'};
 		        #    $json_resources_summaryDetail->{'epsTrailingTwelveMonths'};

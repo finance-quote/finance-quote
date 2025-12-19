@@ -1399,7 +1399,7 @@
 - module: YahooJSON.pm
   state: working
   added:
-  changed: 2025-03-03
+  changed: 2025-11-23
   removed:
   urls:
     - https://query2.finance.yahoo.com/v11/finance/quoteSummary/?symbol=...&modules=price,summaryDetail,defaultKeyStatistics
