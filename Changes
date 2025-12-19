@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Changes to AlphaVantage.pm and CurrencyRates/AlphaVantage.pm to throttle queries - Issue #546
 	* YahooJSON.pm - Add additional fields/labels - PR #544
 	* New Module, USBonds.pm
 	* MarketWatch.pm - Added headers to fix 401 code - Issue #542

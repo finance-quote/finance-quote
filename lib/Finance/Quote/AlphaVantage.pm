@@ -16,6 +16,10 @@
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #    02110-1301, USA
 
+# 2025-12-19: sleep_before_query uncommented. Set its parameters
+#             to 1 query every 2 seconds. Error message from AV
+#             indicates they are limiting free/basic use to one
+#             query per second.
 # 2024-04-07: Commented call to sleep_before_query in get_content
 #             subroutine. AlphaVantage is not throttling API calls,
 #             but limits usage with free API key to 25 per day.
@@ -36,7 +40,7 @@ use HTTP::Request::Common;
 # optimal server-side performance:
 #   https://www.alphavantage.co/support/#api-key
 our @alphaqueries=();
-my $maxQueries = { quantity =>5 , seconds => 60}; # no more than x
+my $maxQueries = { quantity =>1 , seconds => 2}; # no more than x
                                                   # queries per y
                                                   # seconds, based on
                                                   # https://www.alphavantage.co/support/#support
@@ -214,7 +218,7 @@ sub alphavantage {
             . $ticker;
 
         my $get_content = sub {
-            # sleep_before_query();
+            sleep_before_query();
             my $time=int(time()-$launch_time);
             # print STDERR "Query at:".$time."\n";
             $reply = $ua->request( GET $url);
