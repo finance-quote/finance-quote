@@ -63,6 +63,10 @@ sub multipliers
   my $rate;
   do {
     $try_cnt += 1;
+#   AlphaVantage is limiting free/basic api use to one query per second.
+#   sleep 2 ensures a query for currency exchange is not immediately
+#   following a price query.
+    sleep 2;
     my $reply = $ua->get($url
         . '&from_currency=' . ${from}
         . '&to_currency=' . ${to}

@@ -101,7 +101,7 @@
 - module: AlphaVantage.pm
   state: working
   added:
-  changed: 2025-06-15
+  changed: 2025-12-19
   removed:
   urls:
     - https://www.alphavantage.co/query?function=GLOBAL_QUOTE&apikey=$ALPHAVANTAGE_API_KEY&symbol=
@@ -117,6 +117,7 @@
     Users must first request an API key and set the environment
     variable ALPHAVANTAGE_API_KEY. The AlphaVantage API does not
     return a currency.
+    AV limits free/basic key usage to 1 per second.
   testfile: alphavantage.t
   testcases:
     - BP.L
@@ -361,7 +362,7 @@
 - module: CurrencyRates/AlphaVantage.pm
   state: working
   Added: TBD
-  changed: 2022-11-23
+  changed: 2025-12-19
   removed: ~
   urls: https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE
   apikey: true
@@ -369,6 +370,8 @@
     Recently modified for Issue #229 in PR #230
     The commit/PR was reverted 2022-11-23 (PR #249), AlphaVantage changed
     the CURRENCY_EXCHANGE_RATE to no longer require a premium API Key.
+    AV limits free/basic api usage to 1 per second, "sleep 2" added
+    before "$ua->get" to prevent throttling error.
   testfile: currency.t
   testcases:
     - GBP IQD
