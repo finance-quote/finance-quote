@@ -1305,10 +1305,10 @@ consulted for exchange rates and currency rate module options
 =item C<required_labels =E<gt> A> sets the required labels for fetch results to
 array C<A>
 
-=item C<<ModuleName>> as a string is the name of a specific
+=item C<ModuleName> as a string is the name of a specific
 Finance::Quote::Module to load
 
-=item C<<methodname> =E<gt> H> passes hash C<H> to methodname during fetch to 
+=item C<methodname =E<gt> H> passes hash C<H> to methodname during fetch to 
 configure the method
 
 =back
