@@ -150,18 +150,18 @@ securities.
 specific modules, set parameters that control the behavior of the fetch method,
 and pass method specific parameters.
 
-- `timeout =` T> sets the web request timeout to `T` seconds
-- `failover =` B> where `B` is a boolean value indicating if failover in
+- `timeout => T` sets the web request timeout to `T` seconds
+- `failover => B` where `B` is a boolean value indicating if failover in
 fetch is permitted
-- `fetch_currency =` C> sets the desired currency code to `C` for fetch
+- `fetch_currency => C` sets the desired currency code to `C` for fetch
 results
-- `currency_rates =` H> configures the order currency rate modules are
+- `currency_rates => H` configures the order currency rate modules are
 consulted for exchange rates and currency rate module options
-- `required_labels =` A> sets the required labels for fetch results to
+- `required_labels => A` sets the required labels for fetch results to
 array `A`
-- `<ModuleName`> as a string is the name of a specific
+- `ModuleName` as a string is the name of a specific
 Finance::Quote::Module to load
-- `<methodname` => H> passes hash `H` to methodname during fetch to 
+- `methodname => H` passes hash `H` to methodname during fetch to 
 configure the method
 
 With no arguments, `new` creates a Finance::Quote object with the default
@@ -178,7 +178,7 @@ modules. Note that the FQ\_LOAD\_QUOTELET environment variable must begin with
 '-defaults' if you wish the default modules to be loaded.
 
 Method names correspond to the Perl module in the Finance::Quote module space.
-For example, `Finance::Quote-`new('ASX')> will load the module
+For example, `Finance::Quote->new('ASX')` will load the module
 Finance::Quote::ASX, which provides the method "asx".
 
 Some methods require API keys or have unique options. Passing 'method => HASH'
@@ -565,7 +565,6 @@ http://www.gnucash.org/
     Finance::Quote::CSE,
     Finance::Quote::Comdirect,
     Finance::Quote::Consorsbank,
-    Finance::Quote::CMBChina,
     Finance::Quote::Currencies,
     Finance::Quote::Deka,
     Finance::Quote::FinanceAPI,
@@ -593,6 +592,7 @@ http://www.gnucash.org/
     Finance::Quote::TreasuryDirect,
     Finance::Quote::TwelveData,
     Finance::Quote::Union,
+    Finance::Quote::USBonds,
     Finance::Quote::YahooJSON,
     Finance::Quote::YahooWeb,
     Finance::Quote::XETRA,

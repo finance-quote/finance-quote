@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.68      2025-12-21 11:40:59-08:00 America/Los_Angeles
 	* Changes to AlphaVantage.pm and CurrencyRates/AlphaVantage.pm to throttle queries - Issue #546
 	* YahooJSON.pm - Add additional fields/labels - PR #544
 	* New Module, USBonds.pm
