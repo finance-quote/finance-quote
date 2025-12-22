@@ -460,6 +460,22 @@
     - IDR CAD
     - AUD AUD
 #
+- module: CurrencyRates/TwelveData.pm
+  state: working
+  Added: 2025-12-22
+  changed: ~
+  removed: ~
+  urls: https://api.twelvedata.com/exchange_rate?
+  apikey: true
+  notes: |
+    Allows TWELVEDATA_API_KEY environment variable.
+    Running test file requires TEST_TWELVEDATA_API_KEY environment variable
+  testfile: currency.t
+  testcases:
+    - USD EUR
+    - GBP IDR
+    - IDR CAD
+#
 - module: CurrencyRates/YahooJSON.pm
   state: working
   Added: 2023-04-09
