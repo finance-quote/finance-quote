@@ -57,6 +57,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     FinanceAPI
     Fixer
     OpenExchange
+    TwelveData
     YahooJSON
 /;
 
@@ -880,7 +881,7 @@ sub currency {
   return $amount if ($from_code eq $to_code); # Trivial case.
 
   my $ua = $this->get_user_agent;
-  
+
   foreach my $rate (@{$this->{currency_rate_method}}) {
     ### rate: ref($rate)
     my $final = eval {
@@ -1704,6 +1705,7 @@ http://www.gnucash.org/
   Finance::Quote::CurrencyRates::FinanceAPI,
   Finance::Quote::CurrencyRates::Fixer,
   Finance::Quote::CurrencyRates::OpenExchange,
+  Finance::Quote::CurrencyRates::TwelveData,
   Finance::Quote::CurrencyRates::YahooJSON,
   Finance::Quote::AEX,
   Finance::Quote::ASEGR,
