@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# vi: set ts=2 sw=2 noai ic showmode showmatch:  
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch:  
 #
 #    Copyright (C) 2023, Bruce Schuck <bschuck@asgard-systems.com>
 #
@@ -28,6 +28,7 @@ use Encode qw(decode encode);
 use LWP::UserAgent;
 use HTTP::Request::Common;
 use HTTP::CookieJar::LWP ();
+use HTTP::Cookies;
 use HTML::TableExtract;
 
 use constant DEBUG => $ENV{DEBUG};
@@ -86,12 +87,28 @@ sub stooq {
   my $quoter = shift;
   my @stocks = @_;
   my (%info, $tree, $table, $pricetable, $url, $reply);
-  my $cj = HTTP::CookieJar::LWP->new;
-#  my $ua = LWP::UserAgent->new(cookie_jar => $cj);
+
+  my $cj = HTTP::Cookies->new();
+  # Cookies content gleaned from browser session
+  $cj->set_cookie(0, 'cookie_user', '%3F+++1dllg000G+1100d1300c3%7Clrq', '/', '.stooq.com');
+  $cj->set_cookie(0, 'cookie_uu', '260114000', '/', '.stooq.com');
+  $cj->set_cookie(0, 'FCCDCF', '%5Bnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5B32%2C%22%5B%5C%22ab16ab99-60a0-4da1-a296-29c8a27efbf9%5C%22%2C%5B1767931790%2C786000000%5D%5D%22%5D%2C%5B13%2C%22%5B%5C%22DBABL~BVQqAAAAAg%5C%22%2C%5B%5B7%2C%5B1768425873%2C984063000%5D%5D%5D%5D%22%5D%5D%5D', '/', '.stooq.com');
+  $cj->set_cookie(0, 'FCNEC', '%5B%5B%22AKsRol_Zywhkz7ukryuiQZ7evZsxa0eSbPMEpqvZUwq6Kmf32IqN4xQFgJjIG_fDDxo4f5sLKIXXGsrdQayx3tROTwoyC8BZX4rNDu3fBfzCikX_gkuhCra5dJotNToqdQrxouYXlgE_k7KTmpnQn7AEOImeVQrz2g%3D%3D%22%5D%5D', '/', '.stooq.com');
+  $cj->set_cookie(0, 'PHPSESSID', '3vqtfg7shbf23iog9frtbqdn15', '/', 'stooq.com');
+  $cj->set_cookie(0, 'privacy', '...', '/', 'stooq.com');
+  $cj->set_cookie(0, 'uid', 'usb132zim841xr4doi8j12uk4a', '/', 'stooq.com');
+
   my $ua = $quoter->user_agent();
+
   $ua->cookie_jar($cj);
-  $ua->default_header('Accept-Encoding' => 'deflate');
-  $ua->default_header('Accept-Language' => 'en-US,en;q=0.5');
+
+  $ua->default_header('Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7');
+  $ua->default_header('Accept-Encoding' => 'gzip, deflate, br, zstd');
+  $ua->default_header('Accept-Language' => 'en-US,en;q=0.9');
+  $ua->default_header('Host' => 'stooq.com');
+  $ua->default_header('Pragma' => 'no-cache');
+  $ua->default_header('Upgrade-Insecure-Requests' => '1');
+  $ua->default_header('User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36');
 
   foreach my $stock (@stocks) {
 
