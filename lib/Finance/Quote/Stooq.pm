@@ -95,7 +95,7 @@ sub stooq {
   $cj->set_cookie(0, 'FCCDCF', '%5Bnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5B32%2C%22%5B%5C%22ab16ab99-60a0-4da1-a296-29c8a27efbf9%5C%22%2C%5B1767931790%2C786000000%5D%5D%22%5D%2C%5B13%2C%22%5B%5C%22DBABL~BVQqAAAAAg%5C%22%2C%5B%5B7%2C%5B1768425873%2C984063000%5D%5D%5D%5D%22%5D%5D%5D', '/', '.stooq.com');
   $cj->set_cookie(0, 'FCNEC', '%5B%5B%22AKsRol_Zywhkz7ukryuiQZ7evZsxa0eSbPMEpqvZUwq6Kmf32IqN4xQFgJjIG_fDDxo4f5sLKIXXGsrdQayx3tROTwoyC8BZX4rNDu3fBfzCikX_gkuhCra5dJotNToqdQrxouYXlgE_k7KTmpnQn7AEOImeVQrz2g%3D%3D%22%5D%5D', '/', '.stooq.com');
   $cj->set_cookie(0, 'PHPSESSID', '3vqtfg7shbf23iog9frtbqdn15', '/', 'stooq.com');
-  $cj->set_cookie(0, 'privacy', '...', '/', 'stooq.com');
+  $cj->set_cookie(0, 'privacy', '1768598448', '/', 'stooq.com');
   $cj->set_cookie(0, 'uid', 'usb132zim841xr4doi8j12uk4a', '/', 'stooq.com');
 
   my $ua = $quoter->user_agent();
@@ -120,6 +120,7 @@ sub stooq {
     my $headers = $reply->headers_as_string;
     my $body    = $reply->decoded_content;
 
+    ### Headers: $headers
     ### Body: $body
 
     my ($name, $bid, $ask, $last, $open, $high, $low, $date, $currency);
