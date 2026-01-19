@@ -284,3 +284,12 @@ The following labels are returned:
 =item currency
 
 =back
+
+=head1 Caveat
+
+When accessed from Europe the website requires cookie consent. Many of the 
+cookies are set via Google's "Google's Privacy & messaging tool
+(formerly known as Google Funding Choices)". It may be necessary to
+manually capture cookies in a browser and replace the values in this
+module.
+
