@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# vi: set ts=2 sw=2 noai ic showmode showmatch:  
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch:  
 #
 #    Copyright (C) 2023, Bruce Schuck <bschuck@asgard-systems.com>
 #
@@ -37,20 +37,30 @@ use if DEBUG, 'Smart::Comments', '###';
 
 my $BVB_URL = 'https://bvb.ro/FinancialInstruments/Details/FinancialInstrumentsDetails.aspx?s=';
 
-sub methods {
-  return (bvb        => \&bvb,
-          romania    => \&bvb,
-          tradeville => \&bvb,
-          europe     => \&bvb);
+our $DISPLAY    = 'BVB - Bucharest Stock Exchange';
+our @LABELS     =
+  qw/symbol name open high low last bid ask date currency method/;
+our $METHODHASH = {subroutine => \&bvb, 
+                   display    => $DISPLAY, 
+                   labels     => \@LABELS};
+
+sub methodinfo {
+    return ( 
+        bvb        => $METHODHASH,
+        romania    => $METHODHASH,
+        tradeville => $METHODHASH,
+        europe     => $METHODHASH,
+    );
 }
 
-our @labels = qw/symbol name open high low last bid ask date currency method/;
+sub labels {
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
 
-sub labels { 
-  return (bvb        => \@labels,
-          romania    => \@labels,
-          tradeville => \@labels,
-          europe     => \@labels); 
+sub methods {
+  my %m = methodinfo();
+  return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub bvb {

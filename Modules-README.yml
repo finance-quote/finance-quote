@@ -586,8 +586,8 @@
     - Added date is an estimate. According to Git log it first appeared in commit fdd204b.
   testfile: ftfunds.t
   testcases:
-    - GB0031834814
-    - GB0030881337
+    - GB0031293995
+    - GB0030366719
     - GB0003865176
     - GB00B7W6PR65
 #
