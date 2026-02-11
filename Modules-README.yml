@@ -1127,7 +1127,7 @@
     - STN
     - BCE
     - BMO
-    - HBI:US
+    - GIL:US
 #
 - module: TNetuk.pm
   state: removed
@@ -1495,7 +1495,7 @@
   testfile: za.t
   testcases:
     - AGL
-    - AMS
+    - MTN
 #
 - module: ZA_UnitTrusts.pm
   state: removed

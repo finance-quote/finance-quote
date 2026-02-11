@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch: 
 
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,14 +31,26 @@ use Scalar::Util qw(looks_like_number);
 
 # VERSION
 
-our @labels = qw/last date isodate symbol/;
+our $DISPLAY    = 'SIX - Swiss Stock Exchange';
+our @LABELS     = qw/last close date isodate symbol currency isin name/;
+our $METHODHASH = {subroutine => \&six, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS};
+
+sub methodinfo {
+    return ( 
+        six => $METHODHASH,
+    );
+}
 
 sub labels {
-  return ( six => \@labels );
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
 sub methods {
-  return ( six => \&six );
+  my %m = methodinfo();
+  return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub six {

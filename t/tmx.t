@@ -17,7 +17,7 @@ if (not $ENV{ONLINE_TEST}) {
 my %valid    = ('STN' => 'Stantec Inc.',
                 'BCE' => 'BCE Inc.',
                 'BMO' => 'Bank of Montreal',
-                'HBI:US' => 'Hanesbrands Inc.'
+                'GIL:US' => 'Gildan Activewear Inc. Class A Sub. Vot.'
                );
 my @invalid  = ('BOGUS');
 my @symbols  = (keys %valid, @invalid);

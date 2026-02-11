@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch: 
 
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -16,7 +17,6 @@
 #    02110-1301, USA
 
 package Finance::Quote::NSEIndia;
-require 5.010;
 
 use strict;
 use POSIX qw(strftime);
@@ -31,15 +31,27 @@ use vars qw($NSE_MAIN_URL $NSE_URL);
 $NSE_MAIN_URL = "https://www.nseindia.com";
 $NSE_URL = "https://nsearchives.nseindia.com";
 
-sub methods { return ( 'india' => \&nseindia,
-                       'nseindia' => \&nseindia ); }
+our $DISPLAY    = 'NSEIndia - NSE India';
+our @LABELS     = qw/close last high low open prevclose exchange name/;
+our $METHODHASH = {subroutine => \&nseindia,
+                   display    => $DISPLAY,
+                   labels     => \@LABELS};
+
+sub methodinfo {
+    return ( 
+        nseindia => $METHODHASH,
+        india    => $METHODHASH,
+    );
+}
 
 sub labels {
-    my @labels = qw/close last high low open prevclose exchange name/;
-    return (
-    india => \@labels,
-    nseindia => \@labels
-    );
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
+
+sub methods {
+  my %m = methodinfo();
+  return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub nseindia {

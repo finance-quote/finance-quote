@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch: 
 
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,14 +30,26 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/method source name symbol currency last date isodate high low p_change/;
+our $DISPLAY    = 'ZA - Sharenet South Africa';
+our @LABELS     = qw/method source name symbol currency last price date isodate exchange/;
+our $METHODHASH = {subroutine => \&sharenet, 
+                   display => $DISPLAY, 
+                   labels => \@LABELS};
+
+sub methodinfo {
+    return ( 
+        za => $METHODHASH,
+    );
+}
 
 sub labels {
-  return ( sharenet => \@labels );
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
 sub methods {
-  return ( za => \&sharenet );
+  my %m = methodinfo();
+  return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub sharenet {
@@ -77,6 +90,7 @@ sub sharenet {
         $info{$symbol, 'symbol'}   = $symbol;
         $info{$symbol, 'source'}   = 'sharenet.co.za';
         $info{$symbol, 'exchange'} = 'JSE';
+        $info{$symbol, 'method'} = 'za';
 
         if ($result->{day} =~ /(\d+)\s+(\w{3})/) {
           $quoter->store_date(\%info, $symbol, {day => $1, month => $2});
