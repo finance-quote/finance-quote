@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# vi: set ts=2 sw=2 noai ic showmode showmatch:  
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch:  
 #
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
@@ -48,11 +48,26 @@ $TSP_URL      = 'https://www.tsp.gov/data/fund-price-history.csv';
 $TSP_MAIN_URL = 'http://www.tsp.gov';
 @HEADERS      = ('user-agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36');
 
-sub methods { return (tsp => \&tsp) }
+our $DISPLAY    = 'TSP - US Gov Thrift Savings Plan';
+our @LABELS     = qw/name date isodate currency close/;
+our $METHODHASH = {subroutine => \&tsp, 
+                   display    => $DISPLAY, 
+                   labels     => \@LABELS};
 
-{
-  my @labels = qw/name date isodate currency close/;
-  sub labels { return (tsp => \@labels); }
+sub methodinfo {
+  return ( 
+      tsp => $METHODHASH,
+  );
+}
+
+sub labels {
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
+
+sub methods {
+  my %m = methodinfo();
+  return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub format_name {

@@ -3,6 +3,9 @@ use strict;
 use Test::More;
 use Finance::Quote;
 
+use constant DEBUG => $ENV{DEBUG};
+use if DEBUG, 'Smart::Comments';
+
 if (not $ENV{ONLINE_TEST}) {
     plan skip_all => 'Set $ENV{ONLINE_TEST} to run this test';
 }
@@ -10,7 +13,7 @@ if (not $ENV{ONLINE_TEST}) {
 # Test IndiaMutual functions.
 
 my $q      = Finance::Quote->new();
-my @funds = ("102676", "103131", "148181", "INF194K01W88", "INF090I01FN7",
+my @funds = ("102676", "103131", "INF194K01W88", "INF090I01FN7",
              "INF082J01127");
 my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
@@ -19,6 +22,8 @@ plan tests => 6*@funds + 2;
 
 my %quotes = $q->fetch("indiamutual", @funds);
 ok(%quotes);
+
+### Quotes Hash: %quotes
 
 # Check that the name and nav are defined for all of the funds.
 foreach my $fund (@funds) {

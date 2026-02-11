@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch:  
 
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,16 +31,28 @@ use String::Util qw(trim);
 
 # VERSION
 
-our @labels = qw/currency name exchange volume open high low cap close year_range last p_change symbol isodate date/;
+our $DISPLAY    = 'TMX - Toronto Stock Exchange';
+our @LABELS     = qw/currency name exchange volume open high low cap close year_range last p_change symbol isodate date/;
+our $METHODHASH = {subroutine => \&tmx, 
+                   display    => $DISPLAY, 
+                   labels     => \@LABELS};
+
+sub methodinfo {
+    return ( 
+        tmx    => $METHODHASH,
+        tsx    => $METHODHASH,
+        canada => $METHODHASH,
+    );
+}
 
 sub labels {
-  return ( tmx => \@labels );
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
 sub methods {
-  return ( tmx    => \&tmx,
-           tsx => \&tmx,
-           canada => \&tmx );
+  my %m = methodinfo();
+  return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub tmx {

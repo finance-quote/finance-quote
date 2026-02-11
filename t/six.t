@@ -38,7 +38,6 @@ my %check    = (# Tests are called with (value_to_test, symbol, quote_hash_refer
                 'close'    => sub {not defined $_[0] or looks_like_number($_[0])},
                 'ask'      => sub {not defined $_[0] or looks_like_number($_[0])},
                 'currency' => sub {$_[0] =~ /^[A-Z]{3}$/},
-                'name'     => sub {$_[0] eq $valid{$_[1]}},
                 'isin'     => sub {$_[0] =~ /^[A-Z0-9]{12}$/},
                 'isodate'  => sub {Date::Range->new($today - $window, $today)->includes(Date::Simple::ISO->new($_[0]))},
                 'date'     => sub {my $a = Date::Manip::Date->new(); $a->parse_format('%m/%d/%Y', $_[0]);

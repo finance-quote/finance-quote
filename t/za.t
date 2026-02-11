@@ -18,7 +18,7 @@ if (not $ENV{ONLINE_TEST}) {
 }
 
 my %valid    = ('AGL' => 'ANGLO AMERICAN PLC - AGL',
-                'AMS' => 'ANGLO AMERICAN PLATINUM CORPORATION LIMITED - AMS'
+                'MTN' => 'MTN GROUP LIMITED - MTN'
                );
 my @invalid  = ('BOGUS');
 my @symbols  = (keys %valid, @invalid);

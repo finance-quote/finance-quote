@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch: 
 #
 #    Copyright (C) 1998, Dj Padzensky <djpadz@padz.net>
 #    Copyright (C) 1998, 1999 Linas Vepstas <linas@linas.org>
@@ -37,12 +38,26 @@ use warnings;
 
 # VERSION
 
-sub methods {
-    return ( goldmoney => \&goldmoney );
+our $DISPLAY    = 'GoldMoney - Gold, Silver, Platinum ';
+our @LABELS     = qw/exchange name date isodate price method/;
+our $METHODHASH = {subroutine => \&goldmoney, 
+                   display    => $DISPLAY, 
+                   labels     => \@LABELS};
+
+sub methodinfo {
+    return ( 
+        goldmoney => $METHODHASH,
+    );
 }
 
 sub labels {
-    return ( goldmoney => [qw/exchange name date isodate price method/] );
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
+
+sub methods {
+  my %m = methodinfo();
+  return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 # goldmoney($quoter, @symbols)

@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch: 
 
 #  ftfunds.pm
 #
@@ -69,14 +70,28 @@ $FTFUNDS_LOOK_UD    =	"http://funds.ft.com/UnlistedTearsheet/Summary?s=";
 
 # FIXME -
 
-sub methods { return (ftfunds => \&ftfunds_fund,
-		      ukfunds => \&ftfunds_fund); }
+our $DISPLAY    = 'FTfunds - Financial Times, UK';
+our @LABELS     =
+  qw/name currency last date time price nav source iso_date method net p_change success errormsg/;
+our $METHODHASH = {subroutine => \&ftfunds_fund,
+                   display    => $DISPLAY,
+                   labels     => \@LABELS};
 
-{
-    my @labels = qw/name currency last date time price nav source iso_date method net p_change success errormsg/;
+sub methodinfo {
+    return ( 
+        ftfunds => $METHODHASH,
+        ukfunds => $METHODHASH,
+    );
+}
 
-    sub labels { return (ftfunds => \@labels,
-			 ukfunds => \@labels); }
+sub labels {
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
+
+sub methods {
+  my %m = methodinfo();
+  return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 #

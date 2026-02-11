@@ -2,6 +2,7 @@
 #
 # TreasuryDirect.pm
 #
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch: 
 
 =begin comment
 
@@ -34,14 +35,26 @@ use HTTP::Request;
 
 my $TREASURY_DIRECT_URL = 'https://www.treasurydirect.gov/GA-FI/FedInvest/todaySecurityPriceDate.htm';
 
-sub methods {
-  return treasurydirect => \&treasurydirect;
+our $DISPLAY    = 'TreasuryDirect - US Treasury Bonds';
+our @LABELS     = qw/method source symbol rate bid ask price date isodate/;
+our $METHODHASH = {subroutine => \&treasurydirect, 
+                   display    => $DISPLAY, 
+                   labels     => \@LABELS};
+
+sub methodinfo {
+    return ( 
+        treasurydirect => $METHODHASH,
+    );
 }
 
-
 sub labels {
-  my @labels = qw/ method source symbol rate bid ask price date isodate /;
-  return treasurydirect => \@labels;
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
+
+sub methods {
+  my %m = methodinfo();
+  return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub treasurydirect {
