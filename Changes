@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* XETRA.pm: trim whitespace from date-time before extracting the actual date value. PR #557
 	* Modified Stooq.pm to send cookies. Stooq requires European visitors to their website to accept cookies. Cookies are set using JavaScript. Current version of module hard codes these cookies gleaned from a browser session.
 	* Added CurrencyRates/TwelveData.pm.
 
