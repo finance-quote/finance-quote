@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-#    vi: set ts=2 sw=2 noai ic showmode showmatch:  
+#    vi: set ts=2 sw=2 noai ic showmode showmatch:
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -20,6 +20,7 @@ package Finance::Quote::XETRA;
 use strict;
 use warnings;
 use HTML::Entities;
+use String::Util qw(trim);
 
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
@@ -35,12 +36,12 @@ our $DISPLAY    = 'XETRA - German Sparkasse banking group';
 our $FEATURES   = {'INST_ID' => 'Required Institution ID'};
 our @LABELS     = qw/symbol last close exchange volume open price change p_change/;
 our $METHODHASH = {subroutine => \&xetra,
-                   display => $DISPLAY, 
+                   display => $DISPLAY,
                    labels => \@LABELS,
                    features => $FEATURES};
 
 sub methodinfo {
-    return ( 
+    return (
         xetra   => $METHODHASH,
         europe  => $METHODHASH,
     );
@@ -102,7 +103,7 @@ sub xetra {
 
         $td1 = ($lastvalue->look_down('_tag'=>'td'))[7];
         @child = $td1->content_list;
-        my $date = substr($child[0], 0, 8);
+        my $date = substr(trim($child[0]), 0, 8);
 
         $td1 = ($lastvalue->look_down('_tag'=>'td'))[9];
         @child = $td1->content_list;
