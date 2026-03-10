@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch: 
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -19,6 +20,7 @@ package Finance::Quote::Sinvestor;
 use strict;
 use warnings;
 use HTML::Entities;
+use String::Util qw(trim);
 
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
@@ -68,6 +70,7 @@ sub get_utf8_string {
 
 sub get_de_number {
     my $number = shift;
+    $number = trim($number);
     $number =~ s/\.//g;
     $number =~ s/,/\./;
     return ($number =~ /^([-+]?[0-9]+(\.[0-9]+)?)/) ? $1 : undef;
@@ -148,6 +151,7 @@ sub sinvestor {
 
     eval {
       my $tree = HTML::TreeBuilder->new_from_url($url);
+      ### [<now>] tree: $tree
 
       my $lastvalue = $tree->look_down('class'=>'si_seitenbezeichnung');
 
@@ -222,8 +226,8 @@ sub sinvestor {
             $info{$symbol, 'high'}      = get_de_number(td_search($t, 'Hoch'));
 
             my ($child) = td_search($t, 'Datum/Zeit');
-            my $date = substr($child, 0, 8);
-            my $time = substr($child, 9, 5); # CE(S)T
+            my $date = substr(trim($child), 0, 8);
+            my $time = substr(trim($child), 9, 5); # CE(S)T
             $quoter->store_date(\%info, $symbol, {eurodate => $date});
             $info{$symbol, 'time'}     = $1 if $time =~ /^([0-9]{2}:[0-9]{2})/;
 

@@ -992,7 +992,7 @@
 - module: Sinvestor.pm
   state: working
   added: 2022-10-19
-  changed: 2025-03-16
+  changed: 2026-03-10
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
