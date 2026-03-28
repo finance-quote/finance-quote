@@ -1,5 +1,7 @@
 # NAME
 
+[![gitcgr](https://gitcgr.com/badge/finance-quote/finance-quote.svg)](https://gitcgr.com/finance-quote/finance-quote)
+
 Finance::Quote - Get stock and mutual fund quotes from various exchanges
 
 # SYNOPSIS
