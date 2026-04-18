@@ -554,6 +554,7 @@ http://www.gnucash.org/
     Finance::Quote::CurrencyRates::FinanceAPI,
     Finance::Quote::CurrencyRates::Fixer,
     Finance::Quote::CurrencyRates::OpenExchange,
+    Finance::Quote::CurrencyRates::TwelveData,
     Finance::Quote::CurrencyRates::YahooJSON,
     Finance::Quote::AEX,
     Finance::Quote::ASEGR,
