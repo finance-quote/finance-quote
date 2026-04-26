@@ -476,6 +476,23 @@
     - GBP IDR
     - IDR CAD
 #
+- module: CurrencyRates/UniRate.pm
+  state: working
+  Added: 2026-04-26
+  changed: ~
+  removed: ~
+  urls: https://api.unirateapi.com/api/rates?from={CURRENCYCODE}&to={CURRENCYCODE}&api_key=YOUR_APIKEY
+  apikey: true
+  notes: |
+    Free tier covers /api/rates (1000+ currencies, fiat + crypto).
+    Running test file requires TEST_UNIRATE_API_KEY environment variable.
+  testfile: currency.t
+  testcases:
+    - USD EUR
+    - GBP IDR
+    - IDR CAD
+    - AUD AUD
+#
 - module: CurrencyRates/YahooJSON.pm
   state: working
   Added: 2023-04-09

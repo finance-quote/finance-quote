@@ -58,6 +58,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Fixer
     OpenExchange
     TwelveData
+    UniRate
     YahooJSON
 /;
 
@@ -1706,6 +1707,7 @@ http://www.gnucash.org/
   Finance::Quote::CurrencyRates::Fixer,
   Finance::Quote::CurrencyRates::OpenExchange,
   Finance::Quote::CurrencyRates::TwelveData,
+  Finance::Quote::CurrencyRates::UniRate,
   Finance::Quote::CurrencyRates::YahooJSON,
   Finance::Quote::AEX,
   Finance::Quote::ASEGR,
