@@ -44,6 +44,10 @@ sub new
 
   ### UniRate->new args : $args
 
+  # UniRate supports an environment variable for the API key for parity
+  # with the Twelvedata and FinanceAPI currency-rate modules. An explicit
+  # API_KEY in $args overrides the environment variable.
+  $this->{API_KEY} = $ENV{'UNIRATEAPI_API_KEY'};
   $this->{API_KEY} = $args->{API_KEY} if (ref $args eq 'HASH') and (exists $args->{API_KEY});
 
   return $this;
@@ -125,8 +129,10 @@ object.
 https://unirateapi.com requires users to register and obtain an API key.
 The free tier covers the current-rate lookups used by this module.
 
-The API key is set by providing a unirate hash inside the currency_rates hash
-to Finance::Quote->new as in the synopsis above.
+The API key can be set by setting the environment variable
+"UNIRATEAPI_API_KEY" or by providing a 'unirate' hash inside the
+'currency_rates' hash to Finance::Quote->new as in the synopsis above.
+An explicit value in the hash overrides the environment variable.
 
 =head1 Terms & Conditions
 
