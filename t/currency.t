@@ -48,7 +48,7 @@ sub module_check
   }
 }
 
-plan tests => 8;
+plan tests => 9;
 
 # Check that FQ fails on bogus CurrencyRates method
 my $q = Finance::Quote->new('currency_rates' => {order => ['DoesNotExist']});
@@ -114,6 +114,19 @@ subtest 'FinanceAPI' => sub {
   my @invalid = ( ['20.12 ZZZ', 'GBP'] );
 
   module_check('FinanceAPI', \@valid, \@invalid, {cache => 1, API_KEY => $ENV{TEST_FINANCEAPI_API_KEY}});
+};
+
+# Check UniRate
+subtest 'UniRate' => sub {
+  if ( not $ENV{TEST_UNIRATE_API_KEY} ) {
+    plan skip_all =>
+        'Set $ENV{TEST_UNIRATE_API_KEY} to run this test; get one at https://unirateapi.com';
+  }
+
+  my @valid   = (['100.00 USD', 'EUR'], ['1.00 GBP', 'IDR'], ['1.23 IDR', 'CAD'], ['10.00 AUD', 'AUD']);
+  my @invalid = (['20.12 ZZZ', 'GBP']);
+
+  module_check('UniRate', \@valid, \@invalid, {API_KEY => $ENV{TEST_UNIRATE_API_KEY}});
 };
 
 # Check TwelveData
