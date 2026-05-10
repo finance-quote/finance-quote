@@ -63,7 +63,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
 /;
 
 @MODULES = qw/
-    AEX
     ASEGR
     ASX
     AlphaVantage
@@ -1709,7 +1708,6 @@ http://www.gnucash.org/
   Finance::Quote::CurrencyRates::TwelveData,
   Finance::Quote::CurrencyRates::UniRate,
   Finance::Quote::CurrencyRates::YahooJSON,
-  Finance::Quote::AEX,
   Finance::Quote::ASEGR,
   Finance::Quote::ASX,
   Finance::Quote::BorsaItaliana,
