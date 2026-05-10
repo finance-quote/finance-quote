@@ -3,10 +3,10 @@
 # state: working | failing | obsolete | removed
 ---
 - module: AEX.pm
-  state: working
+  state: failing
   added: TBD
   changed: 2025-11-11
-  removed: ~
+  removed: 2026-05-10
   urls:
     - https://live.euronext.com/en/search_instruments/
     - https://live.euronext.com/en/ajax/getDetailedQuote/
