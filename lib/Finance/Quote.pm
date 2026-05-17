@@ -56,6 +56,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     ECB
     FinanceAPI
     Fixer
+    Frankfurter
     OpenExchange
     TwelveData
     UniRate
@@ -1704,6 +1705,7 @@ http://www.gnucash.org/
   Finance::Quote::CurrencyRates::ECB,
   Finance::Quote::CurrencyRates::FinanceAPI,
   Finance::Quote::CurrencyRates::Fixer,
+  Finance::Quote::CurrencyRates::Frankfurter,
   Finance::Quote::CurrencyRates::OpenExchange,
   Finance::Quote::CurrencyRates::TwelveData,
   Finance::Quote::CurrencyRates::UniRate,
