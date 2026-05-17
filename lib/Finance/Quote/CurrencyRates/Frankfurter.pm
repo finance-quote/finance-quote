@@ -61,13 +61,16 @@ sub multipliers
 # Set headers.
   my @ua_headers = (
     'Accept' => 'application/json',
+    'User-Agent' => 'finance-quote-frankfurter/1.0',
   );
 
   my $reply = $ua->get($FRANKFURTER_URL_HEAD
       . ${from}
-      . '%2F'
+      . '/'
       . ${to}
-      . , @ua_headers);
+      , @ua_headers);
+
+  ### URL: $FRANKFURTER_URL_HEAD . ${from} . '/' . ${to}
 
   ### HTTP Status: $reply->code
   return unless ($reply->code == 200);
