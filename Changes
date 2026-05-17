@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Added CurrencyRates/Frankfurter
 	* Removed AEX.pm - Euronext.com added JavaScript based anti-webscraping.
 	* Added CurrencyRates/UniRate.pm.
 
