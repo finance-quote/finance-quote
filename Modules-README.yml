@@ -442,6 +442,22 @@
     - IDR CAD
     - AUD AUD
 #
+- module: CurrencyRates/Frankfurter.pm
+  state: working
+  Added: 2026-05-17
+  changed: ~
+  removed: ~
+  urls: https://api.frankfurter.dev/v2/rate/<base>/<quote>
+  apikey: false
+  notes: |
+    No API Key required.
+  testfile: currency.t
+  testcases:
+    - USD EUR
+    - USD PLN
+    - CAD IDR
+    - AUD AUD
+#
 - module: CurrencyRates/OpenExchange.pm
   state: working
   Added: TBD
