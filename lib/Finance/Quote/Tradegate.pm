@@ -26,7 +26,7 @@ use if DEBUG, 'Smart::Comments';
 use LWP::UserAgent;
 use Web::Scraper;
 
-# VERSION
+our $VERSION = '1.69'; # VERSION
 
 my $TRADEGATE_URL = 'https://web.s-investor.de/app/detail.htm?boerse=TDG&isin=';
 
@@ -100,8 +100,10 @@ sub tradegate {
 
         $td1 = ($lastvalue->look_down('_tag'=>'td'))[7];
         @child = $td1->content_list;
-        my $date = substr($child[0], 0, 8);
-        my $time = substr($child[0], 9, 5); # CE(S)T
+        my $raw = $child[0];
+        $raw =~ s/^\s+|\s+$//g;
+        my $date = substr($raw, 0, 8);
+        my $time = substr($raw, 9, 5); # CE(S)T
 
         $td1 = ($lastvalue->look_down('_tag'=>'td'))[9];
         @child = $td1->content_list;

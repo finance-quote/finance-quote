@@ -1,4 +1,6 @@
 {{$NEXT}}
+	* Tradegate.pm: trim whitespace before parsing date and time
+
 	* Added CurrencyRates/Frankfurter
 	* Removed AEX.pm - Euronext.com added JavaScript based anti-webscraping.
 	* Added CurrencyRates/UniRate.pm.
