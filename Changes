@@ -1,4 +1,8 @@
 {{$NEXT}}
+	* New module, Finnhub.pm. Fetches quotes from https://finnhub.io using a
+	  free personal-use API key (FINNHUB_API_KEY). Provides the finnhub, usa,
+	  nyse, and nasdaq methods for US equities, ETFs, forex, and crypto.
+
 	* Tradegate.pm: remove explicit "our $VERSION" assignment that collided
 	  with the dzil-injected version, producing a duplicate declaration and
 	  an "our variable $VERSION redeclared" warning. Use a bare # VERSION

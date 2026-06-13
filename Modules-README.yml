@@ -676,6 +676,30 @@
    - "LU0856992614"
    - "LU1720050803"
 #
+- module: Finnhub.pm
+  state: working
+  added: 2026-06-13
+  changed: 2026-06-13
+  removed: ~
+  urls: https://finnhub.io/api/v1/
+  methods:
+    - finnhub
+    - usa
+    - nyse
+    - nasdaq
+  apikey: true
+  notes: |
+    Free API key (personal/non-professional use) from https://finnhub.io.
+    Set the FINNHUB_API_KEY environment variable. Covers US equities, ETFs,
+    forex, and cryptocurrency. Currency and company name are obtained from
+    the company profile endpoint (listed companies only); currency defaults
+    to USD when the profile does not supply one.
+  testfile: finnhub.t
+  testcases:
+   - AAPL
+   - MSFT
+   - SPY
+#
 - module: Fool.pm
   state: working
   added: 2001-05-08

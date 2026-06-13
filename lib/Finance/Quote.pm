@@ -78,6 +78,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Deka
     FinanceAPI
     Finanzpartner
+    Finnhub
     Fondsweb
     Fool
     FTfunds
@@ -1723,6 +1724,7 @@ http://www.gnucash.org/
   Finance::Quote::Deka,
   Finance::Quote::FinanceAPI,
   Finance::Quote::Finanzpartner,
+  Finance::Quote::Finnhub,
   Finance::Quote::Fondsweb,
   Finance::Quote::Fool,
   Finance::Quote::FTfunds,
