@@ -1381,12 +1381,12 @@
   changed: 2025-10-21
   removed: ~
   urls: https://internal.api.union-investment.de/beta/web/funddata/fundsearch?segment=web_de&type=fondssuche&api-version=beta-2.0.0
-	methods:
+  methods:
     - unionfunds
   apikey: false
   notes: |
-		search symbol has changed from WKN to ISIN
-		See the module source for the required API Key.
+    search symbol has changed from WKN to ISIN
+    See the module source for the required API Key.
   testfile: union.t
   testcases:
     - DE0008491002
