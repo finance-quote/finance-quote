@@ -14,7 +14,8 @@ if (not $ENV{ONLINE_TEST}) {
 }
 
 my $q        = Finance::Quote->new('GoogleWeb', timeout => 30);
-my @valid    = ('AAPL', 'ESML', 'KNW', 'GE', 'NULC');
+# AAPL (NASDAQ), GE (NYSE), ESML/NULC (BATS ETFs), VFIAX (MUTF mutual fund)
+my @valid    = ('AAPL', 'ESML', 'VFIAX', 'GE', 'NULC');
 my @invalid  = qw/BOGUS/;
 my @symbols  = (@valid, @invalid);
 my $year     = (localtime())[5] + 1900;

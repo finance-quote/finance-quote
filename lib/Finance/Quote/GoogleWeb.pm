@@ -25,7 +25,6 @@ use strict;
 use warnings;
 
 use Encode qw(decode);
-use HTML::TreeBuilder;
 use HTTP::Request::Common;
 
 use constant DEBUG => $ENV{DEBUG};
@@ -33,7 +32,12 @@ use if DEBUG, 'Smart::Comments', '###';
 
 # VERSION
 
-my $GOOGLE_URL = 'https://www.google.com/finance/';
+my $GOOGLE_URL   = 'https://www.google.com/finance/quote/';
+
+# Endpoint used by the Google Finance search box to resolve a ticker
+# symbol to its primary listing (exchange). It returns the same
+# autocomplete suggestions a user sees while typing in the search box.
+my $SEARCH_URL   = 'https://www.google.com/complete/search?client=finance-immersive&q=';
 
 our $DISPLAY    = 'GoogleWeb - Scrapes www.google.com/finance/';
 our @LABELS     = qw/symbol name last date currency method/;
@@ -63,119 +67,108 @@ sub googleweb {
 
   my $quoter = shift;
   my @stocks = @_;
-  my (%info, $tree, $url, $reply);
+  my (%info, $url, $reply);
   my $ua = $quoter->user_agent();
 
   foreach my $stock (@stocks) {
 
     my $ucstock = uc($stock);
-    $url   = $GOOGLE_URL . "quote/" . $ucstock;
-    $reply = $ua->request( GET $url);
-
-    my $code    = $reply->code;
-    my $desc    = HTTP::Status::status_message($code);
-    my $headers = $reply->headers_as_string;
-    my $body    = decode('UTF-8', $reply->content);
-
-    ### Body: $body
-
-    my ($name, $last, $date, $currency, $time, $taglink, $link, $exchange);
 
     $info{ $stock, "symbol" } = $stock;
 
-    if ( $code == 200 ) {
+    # ---------------------------------------------------------------
+    # Step 1: resolve the symbol to its primary exchange.
+    #
+    # The Google Finance quote URL requires the exchange to be appended
+    # (e.g. AAPL:NASDAQ). The plain quote/AAPL page no longer returns a
+    # list of disambiguation links, so instead we query the same
+    # autocomplete endpoint the search box uses. Its first suggestion
+    # for an exact ticker match is the primary listing.
+    # ---------------------------------------------------------------
+    $url   = $SEARCH_URL . $ucstock;
+    $reply = $ua->request( GET $url );
 
-      # Use HTML::TreeBuilder to parse HTML in $body
-      # Without the exchange Google returns a list of possible matches
-      # For example AAPL will give you a list of links that will
-      # include AAPL:NASDAQ
-      $tree = HTML::TreeBuilder->new;
-      if ($tree->parse_content($body)) {
-        #
-        # Get link with exchange appended (MUTF|NYSE|NASDAQ|NYSEAMERICAN|BATS|HKG)
-        $taglink = $tree->look_down(_tag => 'a', href => qr!^./quote/$ucstock:(MUTF|NYSE|NASDAQ|NYSEAMERICAN|BATS|HKG)!);
-        if ($taglink) {
-          $link = $taglink->attr('href');
-          $link =~ s|\./quote|quote|;
-          ($exchange = $link) =~ s/.*${ucstock}://;
-        } else {
-          $info{ $stock, "success" } = 0;
-          $info{ $stock, "errormsg" } = "$stock not found on Google Finance";
-          next;
-        }
-      } else {  # Could not parse body into tree
-        $info{ $stock, "success" } = 0;
-        $info{ $stock, "errormsg" } =
-          "Error retrieving quote for $stock. Could not parse HTML returned from $url.";
-        next;
-      }
+    my $code = $reply->code;
+    my $desc = HTTP::Status::status_message($code);
 
-      # Found a link that looks like STOCK:EXCHANGE
-      # Fetch that link and parse
-      $url = $GOOGLE_URL . $link;
-
-      $reply = $ua->get($url);
-
-      if ($reply->code ne "200") {
-        $info{ $stock, "success" } = 0;
-        $info{ $stock, "errormsg" } =
-          "Error retrieving quote for $stock from $url";
-        next;
-      }
-      
-      # Parse returned HTML
-      $body = decode('UTF-8', $reply->content);
-      unless ($tree->parse_content($body)) {
-        $info{ $stock, "success" } = 0;
-        $info{ $stock, "errormsg" } =
-          "Cannot parse HTML from $url";
-        next;
-      }
-
-      ### Tree: $tree
-
-      # Look for div tag with data-last-price attribute
-      $taglink =
-        $tree->look_down(_tag => 'div', 'data-last-price' => qr|[0-9.]+|);
-      unless ($taglink) {
-        $info{ $stock, "success" } = 0;
-        $info{ $stock, "errormsg" } = "Cannot find price data in $url";
-        next;
-      }
-
-      $last = $taglink->attr('data-last-price');
-      # Google does not include .00 if the price is a whole dollar amount
-      unless ( $last =~ /\./ ) {
-        $last = $last . '.00';
-      }
-      # Also fix missing cents (15.30 will be 15.3 in the HTML)
-      if ( $last =~ /\d+\.\d$/ ) {
-        $last = $last . '0';
-      }
-
-      $time = $taglink->attr('data-last-normal-market-timestamp');
-      $currency = $taglink->attr('data-currency-code');
-      my ( undef, undef, undef, $mday, $mon, $year, undef, undef, undef ) =
-        localtime($time);
-      $date = sprintf("%d/%02d/%02d", $year + 1900, $mon + 1, $mday);
-
-      $info{ $stock, 'method' } = 'googleweb';
-      $info{ $stock, 'last' } = $last;
-      $info{ $stock, 'currency' } = $currency;
-      $info{ $stock, 'exchange' } = $exchange;
-      $quoter->store_date(\%info, $stock, { isodate => $date});
-      $info{ $stock, 'success' } = 1;
-
-    } else {       # HTTP Request failed (code != 200)
+    unless ( $code == 200 ) {
       $info{ $stock, "success" } = 0;
       $info{ $stock, "errormsg" } =
         "Error retrieving quote for $stock. Attempt to fetch the URL $url resulted in HTTP response $code ($desc)";
+      next;
     }
 
-  }  
+    my $body = decode('UTF-8', $reply->content);
+
+    ### Search Body: $body
+
+    my ($name, $last, $date, $currency, $time, $exchange);
+
+    # Each suggestion carries a small metadata object with the ticker
+    # ("t"), exchange ("x") and company name ("c"). Pick the first one
+    # whose ticker matches the requested symbol exactly.
+    while ( $body =~ /\{([^{}]*)\}/g ) {
+      my $obj = $1;
+      next unless $obj =~ /"t":"([^"]*)"/ && uc($1) eq $ucstock;
+      ($exchange) = $obj =~ /"x":"([^"]*)"/;
+      ($name)     = $obj =~ /"c":"([^"]*)"/;
+      last if $exchange;
+    }
+
+    unless ($exchange) {
+      $info{ $stock, "success" } = 0;
+      $info{ $stock, "errormsg" } = "$stock not found on Google Finance";
+      next;
+    }
+
+    # ---------------------------------------------------------------
+    # Step 2: fetch the quote page for SYMBOL:EXCHANGE and pull the
+    # price, currency and trade time from the embedded data.
+    #
+    # The page no longer exposes data-last-price style attributes and
+    # its CSS class names are obfuscated, but it still embeds a JSON
+    # blob that includes, in a fixed order:
+    #
+    #   ["AAPL","NASDAQ"],"Apple Inc",0,"USD",[291.13,...],...,[1781310600]
+    #    \_ symbol/exchange  \_ name      \_ currency \_ price       \_ epoch
+    # ---------------------------------------------------------------
+    $url   = $GOOGLE_URL . $ucstock . ':' . $exchange;
+    $reply = $ua->request( GET $url );
+
+    if ( $reply->code != 200 ) {
+      $info{ $stock, "success" } = 0;
+      $info{ $stock, "errormsg" } =
+        "Error retrieving quote for $stock from $url";
+      next;
+    }
+
+    $body = decode('UTF-8', $reply->content);
+
+    ### Quote Body: $body
+
+    if ( $body =~ /\["\Q$ucstock\E","\Q$exchange\E"\],"(?:[^"\\]|\\.)*",\d+,"([A-Z]{2,4})",\[(-?[\d.]+),.{0,300}?,\[(\d{6,})\]/s ) {
+      ( $currency, $last, $time ) = ( $1, $2, $3 );
+    } else {
+      $info{ $stock, "success" } = 0;
+      $info{ $stock, "errormsg" } = "Cannot find price data in $url";
+      next;
+    }
+
+    my ( undef, undef, undef, $mday, $mon, $year, undef, undef, undef ) =
+      localtime($time);
+    $date = sprintf("%d/%02d/%02d", $year + 1900, $mon + 1, $mday);
+
+    $info{ $stock, 'method' }   = 'googleweb';
+    $info{ $stock, 'name' }     = $name if defined $name;
+    $info{ $stock, 'last' }     = $last;
+    $info{ $stock, 'currency' } = $currency;
+    $info{ $stock, 'exchange' } = $exchange;
+    $quoter->store_date(\%info, $stock, { isodate => $date });
+    $info{ $stock, 'success' }  = 1;
+
+  }
 
   return wantarray() ? %info : \%info;
-  return \%info;
 
 }
 
