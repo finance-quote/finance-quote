@@ -26,7 +26,7 @@ use if DEBUG, 'Smart::Comments';
 use LWP::UserAgent;
 use Web::Scraper;
 
-our $VERSION = '1.69'; # VERSION
+# VERSION
 
 my $TRADEGATE_URL = 'https://web.s-investor.de/app/detail.htm?boerse=TDG&isin=';
 

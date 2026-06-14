@@ -1,4 +1,9 @@
 {{$NEXT}}
+	* Tradegate.pm: remove explicit "our $VERSION" assignment that collided
+	  with the dzil-injected version, producing a duplicate declaration and
+	  an "our variable $VERSION redeclared" warning. Use a bare # VERSION
+	  marker like the other modules.
+
 	* Tradegate.pm: trim whitespace before parsing date and time
 
 	* Added CurrencyRates/Frankfurter
