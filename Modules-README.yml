@@ -691,9 +691,9 @@
   notes: |
     Free API key (personal/non-professional use) from https://finnhub.io.
     Set the FINNHUB_API_KEY environment variable. Covers US equities, ETFs,
-    forex, and cryptocurrency. Currency and company name are obtained from
-    the company profile endpoint (listed companies only); currency defaults
-    to USD when the profile does not supply one.
+    forex, and cryptocurrency. One API call per symbol, paced to the free
+    tier's 60 calls/minute. The quote endpoint returns no currency, so the
+    price is assumed to be USD (the free tier is US only).
   testfile: finnhub.t
   testcases:
    - AAPL

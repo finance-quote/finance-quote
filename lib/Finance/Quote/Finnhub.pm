@@ -30,9 +30,17 @@ use if DEBUG, 'Smart::Comments', '###';
 
 my $FINNHUB_URL = 'https://finnhub.io/api/v1/';
 
+# Finnhub's free tier permits 60 API calls per minute, and this module
+# makes one call per requested symbol, so a batch of more than 60 symbols
+# would exceed the limit if fired off back to back. @finnhub_calls holds
+# the timestamps of recent API calls; _throttle uses it as a sliding
+# window to pace requests once the limit is neared.
+my $MAX_PER_MIN   = 60;
+our @finnhub_calls = ();
+
 our $DISPLAY    = 'Finnhub - finnhub.io';
 our $FEATURES   = {'API_KEY' => 'registered user API key'};
-our @LABELS     = qw/symbol name last open high low close net p_change date isodate currency method/;
+our @LABELS     = qw/symbol last open high low close net p_change date isodate currency method/;
 our $METHODHASH = {subroutine => \&finnhub,
                    display    => $DISPLAY,
                    labels     => \@LABELS,
@@ -57,6 +65,45 @@ sub methods {
   return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
+# Pace API calls to stay within the allowed calls-per-minute. This is a
+# sliding window: the most recent $max timestamps are kept, and a call is
+# only delayed once $max calls have already been made in the last 60
+# seconds. Small batches therefore run at full speed.
+sub _throttle {
+  my $max = shift;
+  my $q   = $max - 1;
+  if ( $#finnhub_calls >= $q ) {
+    my $elapsed = time() - $finnhub_calls[$q];
+    sleep( 60 - $elapsed ) if $elapsed < 60;
+  }
+  unshift @finnhub_calls, time();
+  pop @finnhub_calls while $#finnhub_calls > $q;
+  return;
+}
+
+# Make a throttled GET request. If Finnhub still returns 429 (rate
+# limited) -- e.g. because the key is shared with another application --
+# wait for the period it advertises and retry a bounded number of times.
+sub _request {
+  my ( $ua, $url, $max ) = @_;
+  my $reply;
+  for ( 1 .. 3 ) {
+    _throttle($max);
+    $reply = $ua->request( GET $url );
+    last unless $reply->code == 429;
+
+    my $wait = $reply->header('Retry-After');
+    if ( !defined $wait ) {
+      my $reset = $reply->header('X-Ratelimit-Reset');
+      $wait = defined $reset ? $reset - time() : 60;
+    }
+    $wait = 1  if $wait < 1;
+    $wait = 60 if $wait > 60;
+    sleep $wait;
+  }
+  return $reply;
+}
+
 sub finnhub {
 
   my $quoter = shift;
@@ -70,6 +117,12 @@ sub finnhub {
   my $token = exists $quoter->{module_specific_data}->{finnhub}->{API_KEY}
             ? $quoter->{module_specific_data}->{finnhub}->{API_KEY}
             : $ENV{'FINNHUB_API_KEY'};
+
+  # Calls allowed per minute. Defaults to the free tier (60); a paid key
+  # can raise it through the module specific data.
+  my $max = exists $quoter->{module_specific_data}->{finnhub}->{CALLS_PER_MINUTE}
+          ? $quoter->{module_specific_data}->{finnhub}->{CALLS_PER_MINUTE}
+          : $MAX_PER_MIN;
 
   foreach my $stock (@stocks) {
 
@@ -92,7 +145,7 @@ sub finnhub {
     #     c = current price   pc = previous close   t = unix timestamp
     # ---------------------------------------------------------------
     $url   = $FINNHUB_URL . 'quote?symbol=' . $stock . '&token=' . $token;
-    $reply = $ua->request( GET $url );
+    $reply = _request( $ua, $url, $max );
 
     ### Quote reply: $reply->code, $reply->content
 
@@ -132,26 +185,10 @@ sub finnhub {
     $quoter->store_date( \%info, $stock,
       { isodate => sprintf( '%d-%02d-%02d', $year + 1900, $mon + 1, $mday ) } );
 
-    # ---------------------------------------------------------------
-    # Company profile: best-effort lookup of the trading currency and
-    # company name. profile2 covers listed companies; it returns an
-    # empty object for ETFs and other instruments, so a missing value
-    # is not treated as an error. The free tier is US focused, so the
-    # currency defaults to USD when the profile does not supply one.
-    # ---------------------------------------------------------------
-    $url   = $FINNHUB_URL . 'stock/profile2?symbol=' . $stock . '&token=' . $token;
-    $reply = $ua->request( GET $url );
-
-    my $currency = 'USD';
-    if ( $reply->code == 200 ) {
-      my $profile = eval { decode_json( $reply->content ) };
-      unless ( $@ ) {
-        $info{ $stock, 'name' } = $profile->{name} if $profile->{name};
-        $currency = $profile->{currency} if $profile->{currency};
-      }
-    }
-    $info{ $stock, 'currency' }          = $currency;
-    $info{ $stock, 'currency_set_by_fq' } = 1;
+    # The quote endpoint does not report a currency. The free tier only
+    # covers US listed securities, so the price is assumed to be in USD.
+    $info{ $stock, 'currency' }           = 'USD';
+    $info{ $stock, 'currency_set_by_fq' }  = 1;
 
     $info{ $stock, 'success' } = 1;
 
@@ -197,10 +234,19 @@ The API key may be set by either providing a module specific hash to
 Finance::Quote->new as in the above example, or by setting the environment
 variable FINNHUB_API_KEY.
 
+=head1 RATE LIMITING
+
+The free tier permits 60 API calls per minute and this module makes one
+call per requested symbol. Requests are paced with a sliding window so
+that batches up to 60 symbols run at full speed and larger batches are
+slowed just enough to stay within the limit. Holders of a paid key may
+raise the limit by passing C<< finnhub => { CALLS_PER_MINUTE => N } >> to
+Finance::Quote->new.
+
 =head1 LABELS RETURNED
 
 The following labels may be returned by Finance::Quote::Finnhub:
-symbol, name, last, open, high, low, close, net, p_change, date, isodate,
+symbol, last, open, high, low, close, net, p_change, date, isodate,
 currency, method.
 
 =head1 CAVEATS
@@ -209,9 +255,11 @@ The free Finnhub tier covers US listed equities, ETFs, forex, and
 cryptocurrency. The trade date is derived from the last trade timestamp
 returned by the quote endpoint, interpreted in the local timezone.
 
-The trading currency and company name are obtained from the company profile
-endpoint, which covers listed companies but not ETFs or other instruments.
-When no currency is reported the price is assumed to be in USD, consistent
-with the free tier's US focus.
+The quote endpoint does not report a currency. Because the free tier only
+covers US listed securities, this module assumes all prices are in USD. Do
+not rely on the currency for securities priced in another currency.
+
+Because requests are paced to honour the rate limit, fetching a large list
+of symbols can take longer than a minute and will block until it completes.
 
 =cut
