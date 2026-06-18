@@ -1,11 +1,10 @@
 {{$NEXT}}
+	* New module, Finnhub.pm. Fetches quotes from https://finnhub.io using a free personal-use API key.
 	* GoogleWeb.pm: adapt to the redesigned Google Finance site.
-
 	* Tradegate.pm: remove explicit "our $VERSION" assignment that collided
 	  with the dzil-injected version, producing a duplicate declaration and
 	  an "our variable $VERSION redeclared" warning. Use a bare # VERSION
 	  marker like the other modules.
-
 	* Tradegate.pm: trim whitespace before parsing date and time
 	* Added CurrencyRates/Frankfurter
 	* Removed AEX.pm - Euronext.com added JavaScript based anti-webscraping.
