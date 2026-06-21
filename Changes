@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.70      2026-06-21 11:34:56-07:00 America/Los_Angeles
 	* New module, Finnhub.pm. Fetches quotes from https://finnhub.io using a free personal-use API key.
 	* GoogleWeb.pm: adapt to the redesigned Google Finance site.
 	* Tradegate.pm: remove explicit "our $VERSION" assignment that collided
