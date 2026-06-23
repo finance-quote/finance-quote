@@ -134,6 +134,44 @@ a module called "DodgyBank" that returned information on DodgyBank's
 managed funds, a reasonable name for that module would be
 Finance::Quote::DodgyBank.
 
+## Licensing and the file header
+
+Finance::Quote as a whole is distributed under the **GNU General Public
+License, version 3 or (at your option) any later version**. The full text
+is in the [`LICENSE`](LICENSE) file at the root of the repository.
+
+New modules are accepted under GPL v3 or later. Each module must begin with
+a copyright line (your name and year) followed by the standard notice below.
+Please do **not** include the obsolete Free Software Foundation postal
+address — point at the licenses URL instead, as shown here:
+
+```perl
+#    Copyright (C) <year>, <Your Name>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, see <https://www.gnu.org/licenses/>.
+```
+
+Existing modules keep their original grant (some are GPL v2-or-later, a few
+are "the same terms as Perl itself"); never downgrade an author's stated
+license. The author test `t/06-license-headers.t` enforces that every module
+carries a license notice, uses the `https` licenses URL, and contains no
+obsolete postal address. Run it with:
+
+```sh
+TEST_AUTHOR=1 prove -Ilib t/06-license-headers.t
+```
+
 ## The methodinfo() subroutine
 
 Your module must have a subroutine named methodinfo(). Future versions

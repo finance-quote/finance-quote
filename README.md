@@ -499,8 +499,15 @@ information when compared to references
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
-version.
+Foundation; either version 3 of the License, or (at your option) any later
+version. See <https://www.gnu.org/licenses/>.
+
+Individual backend modules are offered under their own grants: most under
+GPL version 2 or later, a few under GPL version 3 or later, and some under
+the same terms as Perl itself. See the header of each module in
+`lib/Finance/Quote/` for its specific terms. Because the distribution
+combines GPLv3 modules, the work as a whole is licensed under GPL version 3
+or later.
 
 Currency information fetched through this module is bound by the terms and
 conditons of the data source.
