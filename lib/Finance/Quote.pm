@@ -1650,7 +1650,7 @@ information when compared to references
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation; either version 3 of the License, or (at your option) any later
-version. See <https://www.gnu.org/licenses/>.
+version. See L<https://www.gnu.org/licenses/>.
 
 Individual backend modules are offered under their own grants: most under
 GPL version 2 or later, a few under GPL version 3 or later, and some under
