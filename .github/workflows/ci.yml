@@ -24,7 +24,7 @@ jobs:
     name: OS ${{matrix.runner}} Perl ${{matrix.perl}}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Set up perl
       uses: shogo82148/actions-setup-perl@v1
