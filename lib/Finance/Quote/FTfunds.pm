@@ -132,9 +132,14 @@ sub ftfunds_fund  {
 
 # perform the look-up - if not found, return with error
 
+	my @ua_headers = (
+		'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+		'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+	);
+
 # try listed funds first...
 
-		my $webdoc  = $ua->get($FTFUNDS_LOOK_LD.$code);
+		my $webdoc  = $ua->get($FTFUNDS_LOOK_LD.$code, @ua_headers);
     	if (!$webdoc->is_success)
 		{
 	        # serious error, report it and give up
@@ -157,7 +162,7 @@ DEBUG and print "\nStatus = ",$webdoc->status_line, "\n";
         m[<h2>(0 results)</h2>] )
     	{
 DEBUG and print "\nTrying unlisted funds for ",$code," : ",$1,"\n";
-			$webdoc  = $ua->get($FTFUNDS_LOOK_UD.$code);
+			$webdoc  = $ua->get($FTFUNDS_LOOK_UD.$code, @ua_headers);
 			if (!$webdoc->is_success)
         	{
 	        	# serious error, report it and give up

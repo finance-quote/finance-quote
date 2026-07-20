@@ -609,7 +609,7 @@
 - module: FTfunds.pm
   state: working
   added: 2014-03-02
-  changed: 2023-04-09
+  changed: 2026-07-20
   removed: ~
   urls:
     - https://markets.ft.com/data/funds/tearsheet/summary?s=
@@ -941,7 +941,7 @@
     - 2002013108
 #
 - module: MorningstarUK.pm
-  state: working
+  state: failing
   added: TBD
   changed: 2025-07-16
   removed: ~
