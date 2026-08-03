@@ -14,7 +14,7 @@ if (not $ENV{ONLINE_TEST}) {
 
 my $q      = Finance::Quote->new();
 my @funds = ("102676", "103131", "INF194K01W88", "INF090I01FN7",
-             "INF082J01127");
+             "INF082J01127", "SIF-120", "INF754K30094");
 my $year = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
