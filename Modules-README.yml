@@ -843,9 +843,11 @@
 - module: IndiaMutual.pm
   state: working
   added: TBD
-  changed: 2023-11-18
+  changed: 2026-08-03
   removed: ~
-  urls: https://www.amfiindia.com/spages/NAVAll.txt
+  urls:
+    - https://www.amfiindia.com/spages/NAVAll.txt
+    - https://portal.amfiindia.com/spages/SIF_NAVAll.txt
   apikey: false
   notes: ~
   testfile: indiamutual.t
@@ -855,6 +857,8 @@
     - INF194K01W88
     - INF090I01FN7
     - INF082J01127
+    - SIF-120
+    - INF754K30094
 #
 - module: LeRevenu.pm
   state: removed

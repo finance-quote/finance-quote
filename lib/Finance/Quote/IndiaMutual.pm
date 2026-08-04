@@ -25,7 +25,7 @@ use strict;
 use constant DEBUG => $ENV{DEBUG};
 use if DEBUG, 'Smart::Comments';
 
-use vars qw( $AMFI_URL $AMFI_NAV_LIST $AMFI_MAIN_URL);
+use vars qw( $AMFI_URL $AMFI_SIF_URL $AMFI_NAV_LIST $AMFI_MAIN_URL);
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
@@ -38,6 +38,7 @@ use IO::String;
 
 $AMFI_MAIN_URL = ("http://www.amfiindia.com/");
 $AMFI_URL = ("https://www.amfiindia.com/spages/NAVAll.txt");
+$AMFI_SIF_URL = ("https://portal.amfiindia.com/spages/SIF_NAVAll.txt");
 
 our $DISPLAY    = 'IndiaMutual - Assoc of Mutual Funds in India';
 our @LABELS     = qw/method source link name currency date isodate nav/;
@@ -75,84 +76,60 @@ sub amfiindia   {
 
     # Local Variables
     my %fundquote;
-    my($ua, $url, $reply);
-	my($req, $output);						# Added for retrieving file contents to variable
-	
-    $url = "$AMFI_URL";
-
- 	# Code to read file into variable
-    $ua = $quoter->get_user_agent();
-    $ua->agent("");							# make user_agent as empty for a conducive server response
-	$req = HTTP::Request->new(GET => $url);	#done to avoid downloading file
-	$reply = $ua->request($req);
-
-    # Make sure something is returned
-    unless ($reply->is_success or $reply->code == RC_NOT_MODIFIED) {
-      foreach my $symbol (@symbols) {
-          $fundquote{$symbol,"success"} = 0;
-          $fundquote{$symbol,"errormsg"} = "HTTP failure";
-      }
-      return wantarray ? %fundquote : \%fundquote;
-    }
-
-    # Attach body of response to IO::String object for file-like processing
-    # my $nav_fh = IO::String->new($reply->content)
-;
-    # Create a hash of all stocks requested
     my %symbolhash;
-    foreach my $symbol (@symbols)
-    {
+    foreach my $symbol (@symbols) {
         $symbolhash{$symbol} = 0;
     }
 
-	# Read whole file from variable into array
-	$output = $reply->content;
-	my @array = split("\n", $output);
-	my @words;
-	
-    #Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Net Asset Value;Date
-    # Note it is best to use Scheme Code as not all rows have ISINs in the source file
-    foreach (@array) {
-      next if !/\;/;
-      chomp;
-      s/\r//;
-      
-      @words = split(";", $_);					#the delimiter is ; not a ,
-     
-      my ($symbol1, $symbol2, $symbol3, $name, $nav, $date);
-      $symbol1 = $words[0];
-	  $symbol2 = $words[1];
-	  $symbol3 = $words[2];
-	  
-      my $symbol;
-      if (exists $symbolhash{$symbol1}) {
-          $symbol = $symbol1;
-      }
-      elsif(exists $symbolhash{$symbol2}) {
-          $symbol = $symbol2;
-      }
-      elsif(exists $symbolhash{$symbol3}) {
-          $symbol = $symbol3;
-      }
-      else {
-          next;
-      }
-      $fundquote{$symbol, "symbol"} = $symbol;
-      $fundquote{$symbol, "currency"} = "INR";
-      $fundquote{$symbol, "source"} = $AMFI_MAIN_URL;
-      $fundquote{$symbol, "link"} = $url;
-      $fundquote{$symbol, "method"} = "amfiindia";
-      $fundquote{$symbol, "name"} = $words[3];
-      $fundquote{$symbol, "nav"} = $words[4];
-      $quoter->store_date(\%fundquote, $symbol, {eurodate => $words[5]});
-      
-      $fundquote{$symbol, "success"} = 1;
+    my $ua = $quoter->get_user_agent();
+    $ua->agent("");							# make user_agent as empty for a conducive server response
+
+    my @urls = ($AMFI_URL, $AMFI_SIF_URL);
+    my $http_success = 0;
+
+    foreach my $url (@urls) {
+        my @remaining = grep { ! exists $fundquote{$_, "success"} } @symbols;
+        last unless @remaining;
+
+        my $req = HTTP::Request->new(GET => $url);
+        my $reply = $ua->request($req);
+
+        next unless ($reply->is_success or $reply->code == RC_NOT_MODIFIED);
+        $http_success = 1;
+
+        my $output = $reply->content;
+        my @array = split("\n", $output);
+
+        # Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Net Asset Value;Date
+        # Note it is best to use Scheme Code as not all rows have ISINs in the source file
+        foreach (@array) {
+            next if !/\;/;
+            chomp;
+            s/\r//;
+
+            my @words = split(";", $_);					#the delimiter is ; not a ,
+
+            foreach my $sym ($words[0], $words[1], $words[2]) {
+                next unless defined $sym && length($sym) && $sym ne '-';
+                if (exists $symbolhash{$sym} && ! exists $fundquote{$sym, "success"}) {
+                    $fundquote{$sym, "symbol"} = $sym;
+                    $fundquote{$sym, "currency"} = "INR";
+                    $fundquote{$sym, "source"} = $AMFI_MAIN_URL;
+                    $fundquote{$sym, "link"} = $url;
+                    $fundquote{$sym, "method"} = "amfiindia";
+                    $fundquote{$sym, "name"} = $words[3];
+                    $fundquote{$sym, "nav"} = $words[4];
+                    $quoter->store_date(\%fundquote, $sym, {eurodate => $words[5]});
+                    $fundquote{$sym, "success"} = 1;
+                }
+            }
+        }
     }
 
     foreach my $symbol (@symbols) {
-    unless (exists $fundquote{$symbol, 'success'}) {
+        unless (exists $fundquote{$symbol, 'success'}) {
             $fundquote{$symbol, 'success'} = 0;
-            $fundquote{$symbol, 'errormsg'} = 'Fund not found.';
+            $fundquote{$symbol, 'errormsg'} = $http_success ? 'Fund not found.' : 'HTTP failure';
         }
     }
 
@@ -217,8 +194,9 @@ The link label will be a url location for the NAV list table for all funds.
 
 =head1 NOTES
 
-AMFI provides a link to download a text file containing all the
-L<NAVs|https://www.amfiindia.com/spages/NAVAll.txt>. It is processed
+AMFI provides links to download text files containing all the
+L<NAVs|https://www.amfiindia.com/spages/NAVAll.txt> and
+L<SIF NAVs|https://portal.amfiindia.com/spages/SIF_NAVAll.txt>. They are processed
 in memory using the L<IO::String> Perl module.
 
 =head1 SEE ALSO
