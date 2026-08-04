@@ -1,6 +1,6 @@
 {{$NEXT}}
-	* FTfunds.pm: added useragent, cloned from BVB.pm.
 	* IndiaMutual.pm: Add support for SIF quotes from AMFI.
+	* FTfunds.pm: added useragent, cloned from BVB.pm.
 
 1.70      2026-06-21 11:34:56-07:00 America/Los_Angeles
 	* New module, Finnhub.pm. Fetches quotes from https://finnhub.io using a free personal-use API key.
