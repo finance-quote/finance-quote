@@ -948,7 +948,7 @@
   state: failing
   added: TBD
   changed: 2025-07-16
-  removed: ~
+  removed: 2026-08-08
   urls:
   apikey: false
   notes: Renamed from MStaruk.pm 2023-05-20
