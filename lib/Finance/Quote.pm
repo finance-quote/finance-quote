@@ -86,7 +86,6 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     GoogleWeb
     IndiaMutual
     MarketWatch
-    MorningstarCH
     MorningstarJP
     NSEIndia
     NZX
@@ -1731,7 +1730,6 @@ http://www.gnucash.org/
   Finance::Quote::GoogleWeb,
   Finance::Quote::IndiaMutual,
   Finance::Quote::MarketWatch,
-  Finance::Quote::MorningstarCH,
   Finance::Quote::MorningstarJP,
   Finance::Quote::NSEIndia,
   Finance::Quote::NZX,
