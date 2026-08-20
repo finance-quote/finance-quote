@@ -37,11 +37,11 @@ use IO::String;
 # URLs of where to obtain information.
 
 $AMFI_MAIN_URL = ("http://www.amfiindia.com/");
-$AMFI_URL = ("https://www.amfiindia.com/spages/NAVAll.txt");
+$AMFI_URL = ("https://portal.amfiindia.com/spages/NAVAll.txt");
 $AMFI_SIF_URL = ("https://portal.amfiindia.com/spages/SIF_NAVAll.txt");
 
 our $DISPLAY    = 'IndiaMutual - Assoc of Mutual Funds in India';
-our @LABELS     = qw/method source link name currency date isodate nav/;
+our @LABELS     = qw/method source link name currency date isodate nav plan option/;
 our $METHODHASH = {subroutine => \&amfiindia, 
                    display    => $DISPLAY, 
                    labels     => \@LABELS};
@@ -100,7 +100,7 @@ sub amfiindia   {
         my $output = $reply->content;
         my @array = split("\n", $output);
 
-        # Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Net Asset Value;Date
+        # Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Plan;Option;Net Asset Value;Date
         # Note it is best to use Scheme Code as not all rows have ISINs in the source file
         foreach (@array) {
             next if !/\;/;
@@ -108,19 +108,22 @@ sub amfiindia   {
             s/\r//;
 
             my @words = split(";", $_);					#the delimiter is ; not a ,
+            next unless @words >= 8;
 
             foreach my $sym ($words[0], $words[1], $words[2]) {
                 next unless defined $sym && length($sym) && $sym ne '-';
                 if (exists $symbolhash{$sym} && ! exists $fundquote{$sym, "success"}) {
-                    $fundquote{$sym, "symbol"} = $sym;
+                    $fundquote{$sym, "symbol"}   = $sym;
                     $fundquote{$sym, "currency"} = "INR";
-                    $fundquote{$sym, "source"} = $AMFI_MAIN_URL;
-                    $fundquote{$sym, "link"} = $url;
-                    $fundquote{$sym, "method"} = "amfiindia";
-                    $fundquote{$sym, "name"} = $words[3];
-                    $fundquote{$sym, "nav"} = $words[4];
-                    $quoter->store_date(\%fundquote, $sym, {eurodate => $words[5]});
-                    $fundquote{$sym, "success"} = 1;
+                    $fundquote{$sym, "source"}   = $AMFI_MAIN_URL;
+                    $fundquote{$sym, "link"}     = $url;
+                    $fundquote{$sym, "method"}   = "amfiindia";
+                    $fundquote{$sym, "name"}     = $words[3];
+                    $fundquote{$sym, "plan"}     = $words[4] if defined $words[4] && length $words[4];
+                    $fundquote{$sym, "option"}   = $words[5] if defined $words[5] && length $words[5];
+                    $fundquote{$sym, "nav"}      = $words[6];
+                    $quoter->store_date(\%fundquote, $sym, {eurodate => $words[7]});
+                    $fundquote{$sym, "success"}  = 1;
                 }
             }
         }
@@ -187,6 +190,10 @@ Information available from amfiindia may include the following labels:
 =item currency
 
 =item nav
+
+=item plan
+
+=item option
 
 =back
 
