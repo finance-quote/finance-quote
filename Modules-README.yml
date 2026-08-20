@@ -843,10 +843,10 @@
 - module: IndiaMutual.pm
   state: working
   added: TBD
-  changed: 2026-08-03
+  changed: 2026-08-20
   removed: ~
   urls:
-    - https://www.amfiindia.com/spages/NAVAll.txt
+    - https://portal.amfiindia.com/spages/NAVAll.txt
     - https://portal.amfiindia.com/spages/SIF_NAVAll.txt
   apikey: false
   notes: ~
