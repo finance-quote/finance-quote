@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* IndiaMutual.pm: Update AMFI NAV file parsing to 8-column format with Plan and Option fields.
 	* Removed MorningstarCH.pm - Issue #582
 	* Removed MorningstarUK.pm - Issue #579
 	* IndiaMutual.pm: Add support for SIF quotes from AMFI.
