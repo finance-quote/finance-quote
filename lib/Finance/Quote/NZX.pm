@@ -61,13 +61,19 @@ sub nzx {
         my $url   = "https://www.nzx.com/instruments/$symbol";
         my $reply = $ua->get($url);
 
+        unless ($reply->code == 200) {
+            $info{$symbol, 'success'} = 0;
+            $info{$symbol, 'errormsg'} = 'Symbol not found';
+            return;
+        }
+
         # JSON inside script id="__NEXT_DATA__" type="application/json" crossorigin="">
         my $widget = scraper {
             process '//script[contains(@id, "__NEXT_DATA__")]/text()', "script" => 'TEXT';
         };
 
         my $result = $widget->scrape($reply->decoded_content);
-        #my $result = $widget->scrape($reply->content);
+
         ### RESULT : $result
         ### [<now>] Result->script: $result->{script}
 
@@ -80,7 +86,7 @@ sub nzx {
         }
         ### [<now>] JSON Data: $json_data
 
-        unless ($json_data->{'props'}{'pageProps'}{'overview'}{'code'}
+        unless ($json_data->{'props'}{'pageProps'}{'instrument'}{'tickerInstrumentInfo'}{'code'}
         eq $symbol) {
             $info{$symbol, 'success'} = 0;
             $info{$symbol, 'errormsg'} = 'Symbol not found';
@@ -90,11 +96,11 @@ sub nzx {
         $info{$symbol, 'success'}  = 1;
         $info{$symbol, 'currency'} = 'NZD';
         $info{$symbol, 'symbol'}  = $symbol;
-        $info{$symbol, 'last'}    = $json_data->{'props'}{'pageProps'}{'overview'}{'priceAmount'};
-        $info{$symbol, 'isin'}    = $json_data->{'props'}{'pageProps'}{'overview'}{'ISIN'};
-        $info{$symbol, 'name'}    = $json_data->{'props'}{'pageProps'}{'overview'}{'name'};
+        $info{$symbol, 'last'}    = $json_data->{'props'}{'pageProps'}{'instrument'}{'tickerInstrumentInfo'}{'lastPrice'};
+        $info{$symbol, 'isin'}    = $json_data->{'props'}{'pageProps'}{'instrument'}{'instrumentInfo'}{'isin'};
+        $info{$symbol, 'name'}    = $json_data->{'props'}{'pageProps'}{'instrument'}{'instrumentInfo'}{'name'};
       
-        my $closePriceDate = $json_data->{'props'}{'pageProps'}{'overview'}{'closePriceDate'};
+        my $closePriceDate = $json_data->{'props'}{'pageProps'}{'instrument'}{'tickerInstrumentInfo'}{'closePriceDate'};
         $quoter->store_date(\%info, $symbol, {isodate => $closePriceDate});
       };
       

@@ -978,7 +978,7 @@
 - module: NZX.pm
   state: working
   added: TBD
-  changed: 2024-05-19
+  changed: 2026-08-25
   removed: ~
   urls: https://www.nzx.com/instruments/<symbol>
   methods:
@@ -987,7 +987,7 @@
   notes: ~
   testfile: t/nzx.t
   testcases:
-    - MNW
+    - SCT
 #
 - module: OnVista.pm
   state: working
