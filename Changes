@@ -1,5 +1,41 @@
 {{$NEXT}}
 	* Added NPSNAV.pm for India's National Pension Scheme (NPS) funds.
+	* TreasuryDirect.pm: fixed; the module returned "Parse error" for every
+	  CUSIP. It shelled out to wget, which is absent on many systems, leaving
+	  the response empty. It now uses the Finance::Quote user agent.
+	* TreasuryDirect.pm: the price form no longer takes priceDate.month/day/year,
+	  and is served by a Spring application that rejects a POST without a _csrf
+	  token bound to the session cookie, then answers with a redirect that LWP
+	  does not follow for POST by default.
+	* TreasuryDirect.pm: do not average the bid and ask when one side is
+	  unquoted, as it is for some securities (33 of the 463 priced on
+	  2026-09-02, mostly bills); the mean of a zero and a real price is about
+	  half the true value, and was returned as a plausible number rather than an
+	  error.
+	* TreasuryDirect.pm: bid and ask were inverted. The file's BUY column is
+	  what an investor pays, so it is the ask, and SELL is what they receive, so
+	  it is the bid. BuyPrice is at or above SellPrice in every record, so the
+	  previous mapping reported a negative spread. This changes the meaning of
+	  the bid and ask labels for callers reading them directly; price is
+	  unaffected.
+	* TreasuryDirect.pm: read the day's prices from the XML file the same form
+	  offers, against a published schema, rather than scraping the HTML table.
+	* TreasuryDirect.pm: stopped calling ssl_opts(verify_hostname => 0) on the
+	  shared user agent, which disabled TLS hostname verification for every
+	  module fetched afterwards in the same Finance::Quote object.
+	* TreasuryDirect.pm: new labels maturity, eod and currency. Labels are
+	  omitted rather than returned as zero when the file did not quote them, so
+	  eod is absent during the trading day and one side is absent for a security
+	  quoted on the other.
+	* TreasuryDirect.pm: price is now returned to six decimal places, the
+	  precision FedInvest publishes, where it was previously rounded to two.
+	* TreasuryDirect.pm: report an errormsg when no prices are published on any
+	  of the four days tried, and when the form yields no CSRF token, instead of
+	  returning an empty result or blaming the network.
+	* TreasuryDirect.pm: bound the request timeout when the caller has not set
+	  one; the module previously mutated the shared user agent's timeout.
+	* Added t/treasurydirect-parse.t, offline tests for the price file parse and
+	  the price selection.
 
 1.71      2026-08-30 10:48:34-07:00 America/Los_Angeles
 	* NZX.pm - Fixed JSON mapping - Issue #586

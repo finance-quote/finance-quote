@@ -28,15 +28,16 @@ use warnings;
 
 use vars qw /$VERSION/ ;
 
-use LWP::UserAgent;
+use HTTP::CookieJar::LWP;
 use HTTP::Request::Common;
-use HTML::TableExtract;
-use HTTP::Request;
+use Scalar::Util qw(looks_like_number);
+use XML::LibXML;
 
-my $TREASURY_DIRECT_URL = 'https://www.treasurydirect.gov/GA-FI/FedInvest/todaySecurityPriceDate.htm';
+my $TREASURY_DIRECT_FORM_URL = 'https://www.treasurydirect.gov/GA-FI/FedInvest/selectSecurityPriceDate.htm';
+my $TREASURY_DIRECT_URL      = 'https://www.treasurydirect.gov/GA-FI/FedInvest/securityPriceDetail';
 
 our $DISPLAY    = 'TreasuryDirect - US Treasury Bonds';
-our @LABELS     = qw/method source symbol rate bid ask price date isodate/;
+our @LABELS     = qw/method source symbol rate maturity bid ask eod price date isodate currency/;
 our $METHODHASH = {subroutine => \&treasurydirect, 
                    display    => $DISPLAY, 
                    labels     => \@LABELS};
@@ -58,6 +59,7 @@ sub methods {
 }
 
 sub treasurydirect {
+  my ($quoter, @symbols) = @_;
 
   # check for quotes for today, as well as the last three days
 
@@ -72,6 +74,14 @@ sub treasurydirect {
     return @quotes if @quotes;
   }
 
+  # Nothing was priced on any of those days. Say so, rather than returning an
+  # empty list the caller cannot tell apart from a lookup that never ran.
+  my %info;
+  for my $symbol (@symbols) {
+    $info{$symbol, 'success'}  = 0;
+    $info{$symbol, 'errormsg'} = 'No prices published in the last four days';
+  }
+  return wantarray() ? %info : \%info;
 }
 
 sub treasurydirect_ymd {
@@ -84,147 +94,156 @@ sub treasurydirect_ymd {
 
   $info{$_, 'success'} = 0 for @symbols;
 
+  # The form is Spring-backed: the POST needs a _csrf token bound to the
+  # cookie set when the form is fetched, and answers with a redirect LWP will
+  # not follow for POST unless asked.
   my $ua = $quoter->user_agent;
-  $ua->timeout(10);
-  $ua->ssl_opts( verify_hostname => 0 );
+  $ua->cookie_jar(HTTP::CookieJar::LWP->new) unless $ua->cookie_jar;
+  $ua->requests_redirectable(['GET', 'HEAD', 'POST']);
 
-  my $content;
-  my $url = $TREASURY_DIRECT_URL;
-  #print "[debug]: ", $url, "\n";
+  # Bound our own requests when the caller has expressed no preference. The
+  # retry loop makes up to eight of them and LWP's default is 180 seconds.
+  $ua->timeout(30) unless defined $quoter->get_timeout;
 
-  if (0) {
-    my $response = $ua->request(GET $url);
-    #print "[debug]: ", $response->content, "\n";
-    if (!$response->is_success) {
-      $info{$_, 'errormsg'} = 'Error contacting URL' for @symbols;
-      return wantarray() ? %info : \%info;
-    }
-    $content = $response->content;
+  my $form = $ua->request(GET $TREASURY_DIRECT_FORM_URL);
+  unless ($form->is_success) {
+    $info{$_, 'errormsg'} = 'Error contacting URL' for @symbols;
+    return wantarray() ? %info : \%info;
   }
 
-  # this is no longer working, for some reason
-  elsif (0) {
-    my $url = 'https://www.treasurydirect.gov/GA-FI/FedInvest/selectSecurityPriceDate';
-#    my $post_data = [ "priceDate.month" => "4", "priceDate.day" => "13", "priceDate.year" => "2018", "submit" => "Show+Prices" ];
-    my $post_data = [ 'priceDate.month' => $m,
-		      'priceDate.day' => $d,
-		      'priceDate.year' => $y,
-		      'submit' => 'Show Prices',
-		    ];
-
-    my $request = POST( $url, $post_data);
-    my $resp = $ua->request($request);
-    if ($resp->is_success) {
-      $content = $resp->decoded_content;
-      # print "[debug]: ", $content, "\n";
-    } else {
-      $info{$_, 'errormsg'} = 'Error contacting URL' for @symbols;
-      return wantarray() ? %info : \%info;
-    }
+  # Depends on the form's markup, so name it when it breaks; otherwise the
+  # resulting 403 reads as a network fault.
+  my ($csrf) = ($form->decoded_content // '') =~ /name="_csrf"\s*value="([^"]+)"/;
+  unless (defined $csrf) {
+    $info{$_, 'errormsg'} = 'No CSRF token in price form' for @symbols;
+    return wantarray() ? %info : \%info;
   }
 
-  else {
-    my $url = 'https://www.treasurydirect.gov/GA-FI/FedInvest/selectSecurityPriceDate';
-    #my $data= 'priceDate.month=1&priceDate.day=4&priceDate.year=2021&submit=Show+Prices';
+  my $response = $ua->request(
+    POST $TREASURY_DIRECT_URL,
+    Referer => $TREASURY_DIRECT_FORM_URL,
+    Content => [
+      priceDateDay   => $d,
+      priceDateMonth => $m,
+      priceDateYear  => $y,
+      fileType       => 'xml',
+      xml            => 'XML FORMAT',
+      _csrf          => $csrf,
+    ]
+  );
 
-    my $data =
-      'priceDate.month=' . $m .
-      '&priceDate.day=' . $d .
-      '&priceDate.year=' . $y .
-      '&submit=Show+Prices';
-
-    $content = `wget --no-check-certificate --post-data='$data' $url -O - 2>/dev/null`;
+  unless ($response->is_success) {
+    $info{$_, 'errormsg'} = 'Error contacting URL' for @symbols;
+    return wantarray() ? %info : \%info;
   }
 
-  # submitted a future date
-  return if $content =~ /Submitted date must be equal to/;
-
-  # weekends, holidays (doesn't work like this any more)
-  return if $content =~ /No data for selected date range/;
-
-  my ($date, $isodate);
-  if ($content =~ /Prices For:\s+(\w+)\s+(\d+),\s+(\d+)/) {
-    my @months = qw/ Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec /;
-    my %months; @months{@months} = 1..12;
-    my ($year, $month, $day) = ($3, $months{$1}, $2);
-    $date = sprintf "%02d/%02d/%04d", $month, $day, $year;
-    $isodate = sprintf "%04d-%02d-%02d", $year, $month, $day;
-  }
-
-  my $te = new HTML::TableExtract();
-  $te->parse($content);
-  # print "[debug]: (parsed HTML)",$te, "\n";
-
-  unless ($te->first_table_found()) {
-    #print STDERR  "no tables on this page\n";
+  my $bonds = parse_prices($response->decoded_content);
+  unless (defined $bonds) {
     $info{$_, 'errormsg'} = 'Parse error' for @symbols;
     return wantarray() ? %info : \%info;
   }
 
-  # Debug to dump all tables in HTML...
-
-=begin comment
-
-  print "\n \n \n \n[debug]: ++++ ==== ++++ ==== ++++ ==== ++++ ==== START OF TABLE DUMP ++++ ==== ++++ ==== ++++ ==== ++++ ==== \n \n \n \n";
-
-  for my $ts ($te->table_states) {
-
-    printf "\n \n \n \n[debug]: //// \\\\ //// \\\\ //// \\\\ //// \\\\ START OF TABLE %d,%d //// \\\\ //// \\\\ //// \\\\ //// \\\\ \n \n \n \n",
-      $ts->depth, $ts->count;
-
-    for my $row ($ts->rows) {
-      print '[debug]: ', join('|', map { defined $_ ? $_ : 'undef' } @$row), "\n";
-    }
-  }
-
-  print "\n \n \n \n[debug]: ++++ ==== ++++ ==== ++++ ==== ++++ ==== END OF TABLE DUMP ++++ ==== ++++ ==== ++++ ==== ++++ ==== \n \n \n \n";
-
-=end comment
-
-=cut
-
-  my %bonds;
-  for my $ts ($te->table_states) {
-    for my $row ($ts->rows) {
-      $bonds{$row->[0]} = {
-			   rate => $row->[2],
-			   maturity => $row->[3],
-			   bid => $row->[5],
-			   ask => $row->[6],
-			   };
-    }
-  }
-
-  # no bonds were returned, probably due to being a weekend or holiday
-  return unless keys(%bonds) > 1;
+  # A weekend or holiday. The file is only ever for the date asked for, so
+  # stepping back is the loop's job, not the server's.
+  return unless %{$bonds};
 
   for my $symbol (@symbols) {
 
     # GENERAL FIELDS
     $info{$symbol, 'method'} = 'treasurydirect';
     $info{$symbol, 'symbol'} = $symbol;
-    $info{$symbol, 'source'} = $TREASURY_DIRECT_URL;
+    $info{$symbol, 'source'} = $TREASURY_DIRECT_FORM_URL;
 
     # OTHER INFORMATION
-    if (exists $bonds{$symbol}) {
-
-      $info{$symbol, 'success'} = 1;
-      $info{$symbol, 'currency'} = 'USD';
-
-      $info{$symbol, $_} = $bonds{$symbol}{$_} for keys %{$bonds{$symbol}};
-
-      $info{$symbol, 'price'} = sprintf("%.2f", 0.5*($info{$symbol, 'bid'} + $info{$symbol, 'ask'}));
-
-      $info{$symbol, 'date'} = $date if defined $date;
-      $info{$symbol, 'isodate'} = $isodate if defined $isodate;
-    }
-    else {
+    my $bond = $bonds->{uc $symbol};
+    unless ($bond) {
       $info{$symbol, 'errormsg'} = 'no match';
+      next;
     }
 
+    my $price = price_from($bond);
+    unless (defined $price) {
+      $info{$symbol, 'errormsg'} = 'no usable price';
+      next;
+    }
+
+    $info{$symbol, 'success'}  = 1;
+    $info{$symbol, 'currency'} = 'USD';
+    $info{$symbol, 'price'}    = $price;
+
+    # Publish only what was quoted: fields are strings and may be blank, and
+    # EODPrice is zero until after the close.
+    $info{$symbol, 'maturity'} = $bond->{maturity}
+      if length($bond->{maturity} // '');
+    $info{$symbol, $_} = $bond->{$_}
+      for grep { looks_like_number($bond->{$_}) and $bond->{$_} > 0 } qw/bid ask eod/;
+
+    # Rate is a decimal fraction here; callers have always had a percentage.
+    $info{$symbol, 'rate'} = sprintf("%.3f%%", $bond->{rate} * 100)
+      if looks_like_number($bond->{rate});
+
+    $quoter->store_date(\%info, $symbol, {year => $y, month => $m, day => $d});
   }
 
   return wantarray() ? %info : \%info;
+}
+
+# CUSIP => {rate, maturity, bid, ask, eod}. undef if the document will not
+# parse; empty hashref for a day with no prices. Separate so it can be tested
+# without a network round trip.
+sub parse_prices {
+  my $xml = shift;
+
+  my $dom = eval { XML::LibXML->load_xml(string => $xml) };
+  return unless $dom;
+
+  my %bonds;
+  for my $security ($dom->getElementsByLocalName('Security')) {
+    my %field;
+    for my $child ($security->nonBlankChildNodes()) {
+      # nonBlankChildNodes filters whitespace, not comments, and localname is
+      # undef on those.
+      next unless $child->nodeType == XML_ELEMENT_NODE;
+      $field{$child->localname} = $child->textContent;
+    }
+
+    my $cusip = $field{Cusip};
+    next unless defined $cusip and length $cusip;
+
+    # BUY is what an investor pays, so it is the ask; SELL is what they
+    # receive, so it is the bid. BuyPrice is never below SellPrice, and the
+    # reverse mapping gives a negative spread.
+    $bonds{uc $cusip} = {
+                         rate     => $field{Rate},
+                         maturity => $field{MaturityDate},
+                         ask      => $field{BuyPrice},
+                         bid      => $field{SellPrice},
+                         eod      => $field{EODPrice},
+                         };
+  }
+
+  return \%bonds;
+}
+
+# The price for one security, or undef if the file quoted nothing usable.
+sub price_from {
+  my $bond = shift;
+
+  # Schema-required but string-typed, so present without being numeric -
+  # CallDate is empty in every record.
+  my %num = map { $_ => looks_like_number($bond->{$_}) ? $bond->{$_} + 0 : 0 }
+            qw/bid ask eod/;
+
+  # A security may be quoted on one side only, and averaging the quoted side
+  # against a zero halves it. EODPrice is zero until after the close, so it
+  # cannot carry the fallback alone.
+  my $price = ($num{bid} > 0 and $num{ask} > 0) ? 0.5*($num{bid} + $num{ask})
+            : $num{eod} > 0                     ? $num{eod}
+            : $num{bid} > 0                     ? $num{bid}
+            : $num{ask} > 0                     ? $num{ask}
+            :                                     undef;
+
+  return defined $price ? sprintf("%.6f", $price) : undef;
 }
 
 1;
@@ -248,11 +267,35 @@ Finance::Quote::TreasuryDirect - Obtain bond quotes from Treasury Direct
 This module obtains individual bond quotes by CUSIP number from
 treasurydirect.gov
 
+Prices come from the XML form of the FedInvest daily price file. Only
+securities in that file are available, which is to say marketable Treasury
+bills, notes and bonds. Agency, municipal and corporate CUSIPs are not in that
+file and return an errormsg of 'no match'.
+
+Prices are quoted per 100 of face value.
+
 =head1 LABELS RETURNED
 
 Information available from Treasury Direct may include the following labels:
 
-method source symbol rate bid ask price date isodate
+method source symbol rate maturity bid ask eod price date isodate currency
+
+C<bid> is the file's SELL column, what an investor receives, and C<ask> is its
+BUY column, what an investor pays.
+
+Only the prices the file actually quoted are returned. Some securities,
+mostly bills, are quoted on one side only, and the unquoted label is then
+absent rather than zero. C<eod> is published after the close, so it is absent
+from a file fetched during the trading day.
+
+C<price> is the mean of the bid and the ask where both are quoted, and
+otherwise whichever of the end of day price, the bid or the ask is available,
+in that order. For a one-sided security that makes the price depend on which
+day the fetch lands on - the quoted side from a day in progress, the close
+from a completed one - a difference of about a cent.
+
+C<rate> is the coupon as a percentage. Bills are discount instruments and
+carry no coupon, so theirs is 0.000%.
 
 =head1 SEE ALSO
 

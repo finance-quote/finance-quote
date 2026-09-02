@@ -1347,12 +1347,17 @@
 - module: TreasuryDirect.pm
   state: working
   added: 2022-07-20
-  changed: 2023-05-31
+  changed: 2026-09-02
   removed:
   urls:
-    - https://www.treasurydirect.gov/GA-FI/FedInvest/todaySecurityPriceDate.htm
+    - https://www.treasurydirect.gov/GA-FI/FedInvest/selectSecurityPriceDate.htm
+    - https://www.treasurydirect.gov/GA-FI/FedInvest/securityPriceDetail
   apikey: false
-  notes: Retrieve Treasury bond quotes by CUSIP from treasurydirect.gov
+  notes: |
+    Retrieve Treasury bond quotes by CUSIP from treasurydirect.gov. Only
+    marketable Treasuries are in the FedInvest daily price file; agency,
+    municipal and corporate CUSIPs return 'no match'. Prices are per 100 of
+    face value.
   testfile: treasurydirect.t
   testcases:
     - 912810QT8
