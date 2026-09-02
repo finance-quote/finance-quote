@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Added NPSNAV.pm for India's National Pension Scheme (NPS) funds.
 
 1.71      2026-08-30 10:48:34-07:00 America/Los_Angeles
 	* NZX.pm - Fixed JSON mapping - Issue #586

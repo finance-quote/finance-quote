@@ -87,6 +87,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     IndiaMutual
     MarketWatch
     MorningstarJP
+		NPSNAV
     NSEIndia
     NZX
     OnVista
@@ -1731,6 +1732,7 @@ http://www.gnucash.org/
   Finance::Quote::IndiaMutual,
   Finance::Quote::MarketWatch,
   Finance::Quote::MorningstarJP,
+	Finance::Quote::NPSNAV,
   Finance::Quote::NSEIndia,
   Finance::Quote::NZX,
   Finance::Quote::OnVista,
