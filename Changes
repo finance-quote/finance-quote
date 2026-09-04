@@ -1,14 +1,5 @@
 {{$NEXT}}
-	* TreasuryDirect.pm: fixed; every CUSIP returned "Parse error". Uses the
-	  Finance::Quote user agent rather than wget, sends the form fields and CSRF
-	  token the site now requires, and reads the XML price file.
-	* TreasuryDirect.pm: bid and ask were inverted, and were averaged even when
-	  one side was unquoted, which halved the price. Callers reading bid or ask
-	  directly will see the change.
-	* TreasuryDirect.pm: price now has six decimal places, was two. Added
-	  maturity, eod and currency labels.
-	* TreasuryDirect.pm: no longer disables TLS hostname verification on the
-	  shared user agent.
+	* TreasuryDirect.pm: fixed; every CUSIP returned "Parse error". Note that bid and ask were inverted and have been swapped, and that price now has six decimal places rather than two.
 	* Added NPSNAV.pm for India's National Pension Scheme (NPS) funds.
 
 1.71      2026-08-30 10:48:34-07:00 America/Los_Angeles
