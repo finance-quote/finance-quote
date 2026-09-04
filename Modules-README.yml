@@ -964,12 +964,12 @@
   apikey: false
   notes: |
     Module to fetch the latest Net Asset Values (NAVs) of India's 
-		National Pension Scheme (NPS) funds.
+    National Pension Scheme (NPS) funds.
   testfile: npsnav.t
   testcases:
-		- SM001001
-		- SM001002
-		- SM008001
+    - SM001001
+    - SM001002
+    - SM008001
     - BOGUS
 #
 - module: NSEIndia.pm
