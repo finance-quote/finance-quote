@@ -326,7 +326,7 @@
 - module: Consorsbank.pm
   state: working
   added: 2025-03-14
-  changed: ~
+  changed: 2026-09-07
   removed: ~
   urls:
     - https://www.consorsbank.de/web-financialinfo-service/api/marketdata/stocks?id=$symbol&field=QuotesV1&field=BasicV1

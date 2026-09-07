@@ -111,6 +111,7 @@ sub methodinfo {
   return (
     consorsbank => $METHODHASH,
     europe      => $METHODHASH,
+    germany     => $METHODHASH,
   );
 }
 
