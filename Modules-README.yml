@@ -545,7 +545,7 @@
 - module: Deka.pm
   state: working
   added: TBD
-  changed: 2025-08-02
+  changed: 2026-09-07
   removed: ~
   urls: https://www.deka.de/privatkunden/pflichtseiten/fondspreise?service=fondspreislisteExportController&action=exportCsv&typ=inVertrieb
   apikey: false
@@ -1076,9 +1076,8 @@
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
     - https://web.s-investor.de/app/webauswahl.jsp
   notes: |
-    INST_ID is an optional parameter.
+    INST_ID is an optional parameter. shares and funds from various sources.
   apikey: false
-  notes: shares and funds from various sources
   testfile: sinvestor.t
   testcases:
     - DE0008404005
@@ -1230,7 +1229,6 @@
   notes: |
     INST_ID is an optional parameter.
   apikey: false
-  notes: share quotes from the Tradegate platform
   testfile: tradegate.t
   testcases:
     - DE0008404005
@@ -1491,7 +1489,6 @@
   notes: |
     INST_ID is an optional parameter.
   apikey: false
-  notes: share quotes from the XETRA platform
   testfile: xetra.t
   testcases:
     - DE0008404005
