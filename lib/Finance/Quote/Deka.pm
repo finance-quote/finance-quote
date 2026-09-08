@@ -2,7 +2,7 @@
 #
 #    Deka import modul based on Union.pm
 #    Version 2016-01-12
-# vi: set ts=2 sw=2 noai ic showmode showmatch: 
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch: 
 
 package Finance::Quote::Deka;
 
@@ -18,16 +18,23 @@ our $METHODHASH = {subroutine => \&deka,
                    display => $DISPLAY, 
                    labels => \@LABELS};
 
+my $AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36';
+
 sub methodinfo {
   return ( 
-      deka => $METHODHASH,
+      deka    => $METHODHASH,
+      germany => $METHODHASH,
   );
 }
 
-sub labels { my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+sub labels {
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
 
 sub methods {
-  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
+  my %m = methodinfo();
+  return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 # =======================================================================
@@ -53,6 +60,7 @@ sub deka
   my @funds = @_;
   return unless @funds;
   my $ua = $quoter->user_agent;
+  $ua->agent($AGENT);
   my (%fundhash, @q, %info, $tempdate);
 
   # create hash of all funds requested
