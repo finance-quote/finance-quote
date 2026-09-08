@@ -1,5 +1,6 @@
 # Finance::Quote Perl module to retrieve quotes from Finanzpartner.de
-# vi: set ts=2 sw=2 noai ic showmode showmatch:  
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch:  
+#
 #    Copyright (C) 2007  Jan Willamowius <jan@willamowius.de>
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -37,9 +38,10 @@ our $METHODHASH = {subroutine => \&finanzpartner,
                    labels => \@LABELS};
 
 sub methodinfo {
-    return ( 
-        finanzpartner => $METHODHASH,
-    );
+  return ( 
+  finanzpartner => $METHODHASH,
+  germany       => $METHODHASH,
+);
 }
 
 sub labels {
