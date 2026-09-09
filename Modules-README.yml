@@ -225,6 +225,21 @@
     - 1rTBX4
     - FR0010037341
 #
+- module: BrightStart.pm
+  state: working
+  added: 2026-09-02
+  changed:
+  removed:
+  urls:
+    - https://brightstart.com/investment/price-performance/
+  apikey: false
+  notes: |
+    Daily unit values for the portfolios of the Illinois Bright Start Direct-Sold College Savings Program. Symbols are portfolio names rather than tickers; one request returns every portfolio. A plan that reshuffles its lineup can retire a portfolio, in which case pick another name from the URL above.
+  testfile: brightstart.t
+  testcases:
+    - Equity Portfolio
+    - Vanguard Total Stock Market Index 529 Portfolio
+#
 - module: BVB.pm
   state: working
   added: 2023-05-28
