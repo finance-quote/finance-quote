@@ -1,4 +1,4 @@
-# vi: set ts=2 sw=2 noai ic showmode showmatch: 
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch: 
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -41,6 +41,7 @@ our $METHODHASH = {subroutine => \&comdirect,
 sub methodinfo {
   return ( 
     comdirect => $METHODHASH,
+    germany   => $METHODHASH,
   );
 }
 
@@ -57,12 +58,13 @@ sub comdirect {
   my $quoter  = shift;
   my @symbols = @_;
   my $ua      = $quoter->user_agent();
-  my (%info, %pricetable, %infotable);
+  my (%info, %pricetable);
 
   # Issue #491 - Website needs cookies enabled.
   $ua->cookie_jar(HTTP::Cookies->new);
 
   foreach my $symbol (@_) {
+      my %infotable;
       my $try = 0;
       my $url = 'https://www.comdirect.de/inf/search/all.html?SEARCH_VALUE=' . $symbol;
 
@@ -193,6 +195,21 @@ RETRY:
       $info{$symbol, 'isin'}      = $infotable{ISIN};
       $info{$symbol, 'wkn'}       = $infotable{WKN};
       $info{$symbol, 'symbol'}    = $infotable{Symbol};
+
+      # ISIN and WKN are not always included in the table
+      unless ( defined $info{$symbol. 'isin'} ) {
+        my $meta_block = $tree->look_down(
+          '_tag', 'meta',
+          'itemprop', 'description'
+        );
+        if ($meta_block) {
+          my $content = $meta_block->attr('content');
+          my ($wkn)  = $content =~ /WKN:\s*([A-Z0-9]{6})\b/i;
+          my ($isin) = $content =~ /ISIN:\s*([A-Z]{2}[A-Z0-9]{10})\b/i;
+          $info{$symbol, 'wkn'}  = $wkn;
+          $info{$symbol, 'isin'} = $isin;
+        }
+      }
 
       if ($pricetable{Zeit} =~ /([0-9]{2}[.][0-9]{2}[.][0-9]{2}) ([ 0-9][0-9]:[0-9][0-9])/) {
         $quoter->store_date(\%info, $symbol, {eurodate => $1});
