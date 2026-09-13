@@ -244,7 +244,7 @@
 - module: Comdirect.pm
   state: working
   added: TBD
-  changed: 2025-03-13
+  changed: 2026-09-12
   removed: ~
   urls: https://www.comdirect.de/inf/search/all.html?SEARCH_VALUE=
   apikey: false

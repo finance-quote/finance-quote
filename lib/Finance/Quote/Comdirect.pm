@@ -41,6 +41,7 @@ our $METHODHASH = {subroutine => \&comdirect,
 sub methodinfo {
   return ( 
     comdirect => $METHODHASH,
+    germany   => $METHODHASH,
   );
 }
 
