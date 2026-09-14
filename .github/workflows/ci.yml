@@ -42,8 +42,12 @@ jobs:
         cpanm -v
         cpanm --notest --skip-satisfied Dist::Zilla
 
+#     09/14/2026 - Issues with CPAN MetaDB. Tries to install Alien::Build
+#     2.87, but it doesn't exist
+
     - name: Install Modules
       run: |
+        cpanm --notest Alien::Build@2.84
         dzil authordeps         | cpanm --notest --skip-satisfied
         dzil listdeps --author  | cpanm --notest --skip-satisfied
 
