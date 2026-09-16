@@ -1,5 +1,6 @@
 {{$NEXT}}
-	* Comdirect.pm: Added "germany method, modified parsing for ISIN and WKN values.
+	* OnVista.pm: Added "germany" method to methodinfo hash.
+	* Comdirect.pm: Added "germany" method, modified parsing for ISIN and WKN values.
 	* Finanzpartner.pm: Added "germany" method to methodinfo hash.
 	* Deka.pm: Added user-agent to request. Added "germany" method to methodinfo hash.
 	* Consorsbank.pm: Added "germany" label. Fixed name for "Amundi CAC 40 Daily (-2x) Inv ETF Acc" in t/consorsbank.t.
