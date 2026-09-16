@@ -1009,7 +1009,7 @@
 - module: OnVista.pm
   state: working
   added: TBD
-  changed: 2025-03-13
+  changed: 2026-09-15
   removed: ~
   urls:
     - https://www.onvista.de/suche/<symbol>
