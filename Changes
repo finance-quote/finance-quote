@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Sinvestor.pm: Added "germany" method to methodinfo hash.
 	* OnVista.pm: Added "germany" method to methodinfo hash.
 	* Comdirect.pm: Added "germany" method, modified parsing for ISIN and WKN values.
 	* Finanzpartner.pm: Added "germany" method to methodinfo hash.
