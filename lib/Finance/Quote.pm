@@ -71,6 +71,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     BorsaItaliana
     Bourso
     BVB
+    CoinMarketCap
     CSE
     Comdirect
     Consorsbank
@@ -772,6 +773,13 @@ sub store_date
     $year_specified = 0;
 
     # Process the inputs
+    if ((defined $piecesref->{iso8601}) && ($piecesref->{iso8601})) {
+      ($year, $month, $day) = $piecesref->{iso8601} =~ /^(\d{4})-(\d{2})-(\d{2})T/;
+
+      ### format: printf STDERR "iso8601 %s -> Day %d, Month %s, Year %d\n", $piecesref->{iso8601}, $day, $month, $year 
+
+    }
+
     if ((defined $piecesref->{isodate}) && ($piecesref->{isodate})) {
       if ($piecesref->{isodate} =~ /^([0-9]{4})([0-9]{2})([0-9]{2})$/) {
         ($year, $month, $day) = ($1, $2, $3);
@@ -783,7 +791,7 @@ sub store_date
       $year += 2000 if $year < 100;
       $year_specified = 1;
 
-      ### format: printf "isodate %s -> Day %d, Month %s, Year %d\n", $piecesref->{isodate}, $day, $month, $year
+      ### format: printf STDERR "isodate %s -> Day %d, Month %s, Year %d\n", $piecesref->{isodate}, $day, $month, $year
     }
 
     if ((defined $piecesref->{usdate}) && ($piecesref->{usdate})) {
@@ -807,19 +815,19 @@ sub store_date
       $year += 2000 if $year < 100;
       $year_specified = 1;
 
-      ### format: printf "year %s -> Year %d\n", $piecesref->{year}, $year
+      ### format: printf STDERR "year %s -> Year %d\n", $piecesref->{year}, $year
     }
 
     if (defined ($piecesref->{month})) {
       $month = $piecesref->{month};
 
-      ### format: printf "month %s -> Month %s\n", $piecesref->{month}, $month
+      ### format: printf STDERR "month %s -> Month %s\n", $piecesref->{month}, $month
     }
 
     if (defined ($piecesref->{day})) {
       $day = $piecesref->{day};
 
-      ### format: printf "day %s -> Day %d\n", $piecesref->{day}, $day
+      ### format: printf STDERR "day %s -> Day %d\n", $piecesref->{day}, $day
     }
 
     $month = $mnames{lc(substr($month,0,3))} if ($month =~ /\D/);
@@ -1717,6 +1725,7 @@ http://www.gnucash.org/
   Finance::Quote::Bourso,
   Finance::Quote::BVB,
   Finance::Quote::CSE,
+  Finance::Quote::CoinMarketCap,
   Finance::Quote::Comdirect,
   Finance::Quote::Consorsbank,
   Finance::Quote::Currencies,

@@ -312,6 +312,24 @@
   testcases:
     - XY040208
 #
+- module: CoinMarketCap.pm
+  state: working
+  added: 2026-09-29
+  changed:
+  removed:
+  urls:
+    - https://pro-api.coinmarketcap.com
+  apikey: false
+  notes: |
+    The module fetches prices from https://pro-api.coinmarketcap.com API. 
+    Passing the API key is optional for accessing the CoinMarketCap API.
+  testfile: coinmarketcap.t
+  testcases:
+    - BTC
+    - ETH
+    - SOL
+    - BOGUS
+#
 - module: Cominvest.pm
   state: failing
   added: TBD
@@ -1009,7 +1027,7 @@
 - module: OnVista.pm
   state: working
   added: TBD
-  changed: 2025-03-13
+  changed: 2026-09-15
   removed: ~
   urls:
     - https://www.onvista.de/suche/<symbol>
@@ -1070,7 +1088,7 @@
 - module: Sinvestor.pm
   state: working
   added: 2022-10-19
-  changed: 2026-03-10
+  changed: 2026-09-16
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
