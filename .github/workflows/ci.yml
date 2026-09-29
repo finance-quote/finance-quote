@@ -47,7 +47,6 @@ jobs:
 
     - name: Install Modules
       run: |
-        cpanm --notest Alien::Build@2.84
         dzil authordeps         | cpanm --notest --skip-satisfied
         dzil listdeps --author  | cpanm --notest --skip-satisfied
 

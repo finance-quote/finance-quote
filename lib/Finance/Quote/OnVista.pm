@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# vi: set ts=2 sw=2 noai ic showmode showmatch:  
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch:  
 #
 #    Copyright (C) 2024, Bruce Schuck <bschuck@asgard-systems.com>
 #
@@ -53,13 +53,18 @@ our $METHODHASH = {subroutine => \&onvista,
 sub methodinfo {
     return ( 
         onvista => $METHODHASH,
+        germany => $METHODHASH,
     );
 }
 
-sub labels { my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m; }
+sub labels {
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
+}
 
 sub methods {
-  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
+  my %m = methodinfo();
+  return map {$_ => $m{$_}{subroutine} } keys %m;
 }
 
 sub onvista {

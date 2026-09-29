@@ -43,19 +43,22 @@ our $METHODHASH = {subroutine => \&sinvestor,
                    labels => \@LABELS,
                    features => $FEATURES};
 
-sub labels {
-  my %m = methodinfo(); return map {$_ => [@{$m{$_}{labels}}] } keys %m;
-}
-
 sub methodinfo {
     return (
         sinvestor => $METHODHASH,
         europe    => $METHODHASH,
+        germany   => $METHODHASH,
     );
 }
 
 sub methods {
-  my %m = methodinfo(); return map {$_ => $m{$_}{subroutine} } keys %m;
+  my %m = methodinfo();
+  return map {$_ => $m{$_}{subroutine} } keys %m;
+}
+
+sub labels {
+  my %m = methodinfo();
+  return map {$_ => [@{$m{$_}{labels}}] } keys %m;
 }
 
 sub strip_exchange_name {
