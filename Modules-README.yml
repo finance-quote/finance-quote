@@ -1220,7 +1220,7 @@
 - module: Tradegate.pm
   state: working
   added: 2022-10-19
-  changed: 2026-06-10
+  changed: 2026-10-03
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057
@@ -1426,11 +1426,12 @@
 - module: Union.pm
   state: working
   added: TBD
-  changed: 2025-10-21
+  changed: 2026-10-03
   removed: ~
   urls: https://internal.api.union-investment.de/beta/web/funddata/fundsearch?segment=web_de&type=fondssuche&api-version=beta-2.0.0
   methods:
     - unionfunds
+    - germany
   apikey: false
   notes: |
     search symbol has changed from WKN to ISIN
@@ -1481,7 +1482,7 @@
 - module: XETRA.pm
   state: working
   added: 2020-09-29
-  changed: 2026-03-04
+  changed: 2026-10-03
   removed: ~
   urls:
     - https://web.s-investor.de/app/aktien.htm?INST_ID=0000057

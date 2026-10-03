@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch:  
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -44,10 +45,11 @@ sub labels {
 }
 
 sub methodinfo {
-    return (
-        tradegate => $METHODHASH,
-        europe    => $METHODHASH,
-    );
+  return (
+    tradegate => $METHODHASH,
+    europe    => $METHODHASH,
+    germany   => $METHODHASH,
+  );
 }
 
 sub methods {
