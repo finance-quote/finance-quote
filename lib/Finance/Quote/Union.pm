@@ -63,6 +63,7 @@ our $METHODHASH = {subroutine => \&unionfunds,
 sub methodinfo {
     return ( 
         unionfunds => $METHODHASH,
+        germany    => $METHODHASH,
     );
 }
 
