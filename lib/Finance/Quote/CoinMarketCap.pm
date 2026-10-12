@@ -34,7 +34,7 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use POSIX;
 use JSON qw(decode_json);
- use DateTime::Format::ISO8601;
+use DateTime::Format::ISO8601;
 
 # VERSION
 
