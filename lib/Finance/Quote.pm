@@ -72,6 +72,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Bourso
     BVB
     CSE
+    CoinMarketCap
     Comdirect
     Consorsbank
     Currencies
