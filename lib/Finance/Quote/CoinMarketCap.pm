@@ -25,7 +25,7 @@ package Finance::Quote::CoinMarketCap;
 
 use strict;
 
-use constant DEBUG => $ENV{DEBUG} || $ENV{CMC_DEBUG};
+use constant DEBUG => $ENV{DEBUG} || $ENV{COINMARKETCAP_DEBUG};
 use if DEBUG, 'Smart::Comments', '###';
 
 use vars qw( $CMC_URL $CMC_API_URL );
