@@ -34,7 +34,6 @@ use LWP::UserAgent;
 use HTTP::Request::Common;
 use POSIX;
 use JSON qw(decode_json);
-use DateTime::Format::ISO8601;
 
 # VERSION
 
@@ -152,13 +151,13 @@ sub cmc {
     # "https://pro-api.coinmarketcap.com/public-api/v2/simple/price?symbol=BTC,ETH,SOL&convert=USD"
     # "https://pro-api.coinmarketcap.com/public-api/v2/simple/price?symbol=BTC,ETH,SOL"
 
-    my ($var1, $var2) = split(/\./, $symbol, 2);
-    my $payload = 'symbol=' . $var1;
+    my ($var1, $var2) = split(/-/, $symbol, 2);
+    my $payload = '?symbol=' . $var1;
     if (defined $var2) {
       $payload .= '&convert=' . $var2;
     }
 
-    $url   = $CMC_API_URL . $public_uri . '/v2/simple/price?' . $payload;
+    $url   = $CMC_API_URL . $public_uri . '/v2/simple/price' . $payload;
     $reply = $ua->request(GET $url);
 
     my $body = $reply->content;
@@ -172,8 +171,7 @@ sub cmc {
     if (defined $json_data->{"data"}[0]) {
       $info{$symbol, 'success'} = 1;
 
-      my $dt = DateTime::Format::ISO8601->parse_datetime($json_data->{"status"}->{"timestamp"});
-      $quoter->store_date(\%info, $symbol, {year => $dt->year, month => $dt->month, day => $dt->day});
+      $quoter->store_date(\%info, $symbol, {isodate => substr $json_data->{"status"}->{"timestamp"}, 0, 10});
 
       $info{$symbol, 'method'} = 'cmc';
       $info{$symbol, 'source'} = $CMC_URL;
@@ -210,7 +208,7 @@ Finance::Quote::CoinMarketCap - Obtain fund prices for Crypto currencies.
 
     $q = Finance::Quote->new;
 
-    %info = $q->fetch('CoinMarketCap','BTC');       #get quotes for Bitcoin
+    %info = $q->fetch('CoinMarketCap','BTC-USD'); #get quotes for Bitcoin in USD
 
 =head1 DESCRIPTION
 
@@ -219,8 +217,8 @@ This module fetches latest price for Crypto currencies from CoinMarketCap.
     https://CoinMarketCap.com
 
 Optinally you can specify the ISO4217 Alphabetic Code for a currency after
-a period ('.') to get the pricing in that specific currency. For example 
-BTC.XAU will return the price of Bitcoin in Gold.
+a dash ('-') to get the pricing in that specific currency. For example 
+BTC-XAU will return the price of Bitcoin in Gold.
 
 =head1 LABELS RETURNED
 
@@ -232,7 +230,7 @@ The following labels are returned by Finance::Quote::CMC :
     currency                  pricing currency, eg. "USD"
     method                    "cmc"
     source                    https://CoinMarketCap.com
-    symbol                    "BTC"
+    symbol                    "BTC-XAU"
     name                      "Bitcoin"
     slug                      "bitcoin"
 

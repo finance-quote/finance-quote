@@ -1718,6 +1718,7 @@ http://www.gnucash.org/
   Finance::Quote::Bourso,
   Finance::Quote::BVB,
   Finance::Quote::CSE,
+  Finance::Quote::CoinMarketCap,
   Finance::Quote::Comdirect,
   Finance::Quote::Consorsbank,
   Finance::Quote::Currencies,

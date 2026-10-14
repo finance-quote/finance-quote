@@ -11,7 +11,7 @@ my $q        = Finance::Quote->new('CoinMarketCap');
 my $year     = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
-my @symbols =  qw(BTC ETH SOL BTC.XAU);
+my @symbols =  qw(BTC-USD ETH-INR SOL-EUR BTC-XAU);
 
 plan tests => 9*(1+$#symbols)+2;
 
