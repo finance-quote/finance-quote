@@ -115,7 +115,7 @@ sub cmc {
 
   my $public_uri = '';
 
-  if (defined $token && length ($token) > 0 ) {
+  if (defined $token && length ($token) > 0) {
     $ua->default_header( "X-CMC_PRO_API_KEY" => $token );
   } else {
     $public_uri = '/public-api';
@@ -148,12 +148,22 @@ sub cmc {
 
   foreach my $symbol (@symbols) {
 
+    $info{$symbol, 'symbol'} = $symbol;
+
     # "https://pro-api.coinmarketcap.com/public-api/v2/simple/price?symbol=BTC,ETH,SOL&convert=USD"
     # "https://pro-api.coinmarketcap.com/public-api/v2/simple/price?symbol=BTC,ETH,SOL"
 
     my ($var1, $var2) = split(/-/, $symbol, 2);
+
+    if (!defined $var1 || length($var1) == 0) {
+      $info{$symbol, "success"}  = 0;
+      $info{$symbol, "errormsg"} = "CoinMarketCap fetch not attempted. Crypto symbol is malformed.";
+      next;
+    }
+
     my $payload = '?symbol=' . $var1;
-    if (defined $var2) {
+
+    if (defined $var2 && length($var2) > 0) {
       $payload .= '&convert=' . $var2;
     }
 
@@ -177,7 +187,6 @@ sub cmc {
       $info{$symbol, 'source'} = $CMC_URL;
 
       # $info{$symbol, 'symbol'} = $json_data->{"data"}[0]->{"symbol"};
-      $info{$symbol, 'symbol'} = $symbol;
 
       $info{$symbol, 'last'} = $json_data->{"data"}[0]->{"quotes"}[0]->{"price"};
       $info{$symbol, 'lastupdated'} = $json_data->{"status"}->{"timestamp"};
@@ -189,8 +198,11 @@ sub cmc {
       $info{$symbol, "errormsg"} = "CoinMarketCap fetch failed. No data for $symbol. ".$reply->status_line;
       
       ### Failure: $json_data->{"status"} 
+
     }
 
+  # free CoinMarketCap API rate limit is 50 requests per minute. So, sleep for 1 second between requests.
+  sleep 1 if not (defined $token && length ($token) > 0);
   }
 
   return %info if wantarray;
@@ -208,7 +220,7 @@ Finance::Quote::CoinMarketCap - Obtain fund prices for Crypto currencies.
 
     $q = Finance::Quote->new;
 
-    %info = $q->fetch('CoinMarketCap','BTC-USD'); #get quotes for Bitcoin in USD
+    %info = $q->fetch('CoinMarketCap','BTC-XAU'); # get quotes for Bitcoin in Gold
 
 =head1 DESCRIPTION
 
@@ -218,20 +230,20 @@ This module fetches latest price for Crypto currencies from CoinMarketCap.
 
 Optinally you can specify the ISO4217 Alphabetic Code for a currency after
 a dash ('-') to get the pricing in that specific currency. For example 
-BTC-XAU will return the price of Bitcoin in Gold.
+BTC-USD will return the price of Bitcoin in US Dollars.
 
 =head1 LABELS RETURNED
 
-The following labels are returned by Finance::Quote::CMC :
+The following labels are returned by Finance::Quote::CoinMarketCap:
 
-    lastupdated               latest date, eg. "2026-09-27T19:58:29.169Z"
-    isodate                   latest date, eg. "2010-02-21"
-    last                      latest available price, eg. "16.1053"
-    currency                  pricing currency, eg. "USD"
+    lastupdated               quote time, eg. "2026-09-27T19:58:29.169Z"
+    isodate                   quote date, eg. "2010-02-21"
+    last                      price as of quote time, eg. "16.1053"
+    currency                  pricing currency returned by API, eg. "USD"
     method                    "cmc"
     source                    https://CoinMarketCap.com
-    symbol                    "BTC-XAU"
-    name                      "Bitcoin"
-    slug                      "bitcoin"
+    symbol                    pricing pair, eg. "BTC-XAU"
+    name                      crypto name, eg. "Bitcoin"
+    slug                      crypt slug type, eg. "bitcoin"
 
 =cut

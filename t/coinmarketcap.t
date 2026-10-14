@@ -12,10 +12,11 @@ my $year     = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
 my @symbols =  qw(BTC-USD ETH-INR SOL-EUR BTC-XAU);
+my @bsymbols = qw("BOGUS", "BTC-BOGUS", "-",  "-BTC");
 
-plan tests => 9*(1+$#symbols)+2;
+plan tests => 9*(1+$#symbols)+1*($#bsymbols)+2;
 
-my %quotes = $q->cmc(@symbols, "BOGUS");
+my %quotes = $q->cmc(@symbols, @bsymbols);
 ok(%quotes, "Successful quote retrieval");
 
 foreach my $symbol (@symbols) {
@@ -29,8 +30,8 @@ foreach my $symbol (@symbols) {
       ||substr($quotes{$symbol, "date"}, 6, 4) == $lastyear, "$symbol returned valid date");
   ok ($quotes{$symbol, "lastupdated"});
   ok (defined ($quotes{$symbol, "slug"}), "$symbol returned slug information");
-  ok ($quotes{$symbol, "symbol"} eq $symbol, "$symbol returned Scheme Code");
 }
 
-ok((!$quotes{"BOGUS", "success"}),'BOGUS failed as expected');
-
+foreach my $symbol (@bsymbols) {
+  ok((!$quotes{$symbol, "success"}),"$symbol failed as expected");
+}

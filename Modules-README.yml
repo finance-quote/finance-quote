@@ -325,11 +325,14 @@
     Passing the API key is optional for accessing the CoinMarketCap API.
   testfile: coinmarketcap.t
   testcases:
-    - BTC
-    - ETH
-    - SOL
-    - BTC.XAU
+    - BTC-USD
+    - ETH-INR
+    - SOL-EUR
+    - BTC-XAU
     - BOGUS
+    - BTC-BOGUS
+    - -
+    - -BTC
 #
 - module: Cominvest.pm
   state: failing
