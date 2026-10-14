@@ -12,7 +12,7 @@ my $year     = (localtime())[5] + 1900;
 my $lastyear = $year - 1;
 
 my @symbols =  qw(BTC-USD ETH-INR SOL-EUR BTC-XAU);
-my @bsymbols = qw("BOGUS", "BTC-BOGUS", "-",  "-BTC");
+my @bsymbols = qw(BOGUS BTC-BOGUS "-" "-BTC");
 
 plan tests => 9*(1+$#symbols)+1*($#bsymbols)+2;
 
