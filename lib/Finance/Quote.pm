@@ -72,6 +72,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     Bourso
     BVB
     CSE
+    CoinMarketCap
     Comdirect
     Consorsbank
     Currencies
@@ -1717,6 +1718,7 @@ http://www.gnucash.org/
   Finance::Quote::Bourso,
   Finance::Quote::BVB,
   Finance::Quote::CSE,
+  Finance::Quote::CoinMarketCap,
   Finance::Quote::Comdirect,
   Finance::Quote::Consorsbank,
   Finance::Quote::Currencies,

@@ -312,6 +312,29 @@
   testcases:
     - XY040208
 #
+- module: CoinMarketCap.pm
+  state: working
+  added: 2026-10-14
+  changed:
+  removed:
+  urls:
+    - https://pro-api.coinmarketcap.com
+  apikey: false
+  notes: |
+    The module fetches prices from https://pro-api.coinmarketcap.com API. 
+    Passing the API key is optional for accessing the CoinMarketCap API.
+  testfile: coinmarketcap.t
+  testcases:
+    - BTC-USD
+    - ETH-INR
+    - SOL-EUR
+    - BTC-XAU
+    - BOGUS
+    - -
+    - -BTC
+    - BTC-BOGUS
+    - BOGUS-BOGUS
+#
 - module: Cominvest.pm
   state: failing
   added: TBD
