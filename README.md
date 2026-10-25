@@ -580,6 +580,7 @@ http://www.gnucash.org/
     Finance::Quote::IndiaMutual,
     Finance::Quote::MarketWatch,
     Finance::Quote::MorningstarJP,
+          Finance::Quote::NPSNAV,
     Finance::Quote::NSEIndia,
     Finance::Quote::NZX,
     Finance::Quote::OnVista,
