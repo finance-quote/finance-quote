@@ -359,6 +359,26 @@
   testfile: TBD
   testcases:
 #
+- module: CurrencyRates/AllRatesToday.pm
+  state: working
+  Added: 2026-10-29
+  changed: ~
+  removed: ~
+  urls:
+    - https://allratestoday.com/api/open/latest/<base>
+    - https://allratestoday.com/api/open/central-bank/<bank>
+  apikey: false
+  notes: |
+    No API Key required. Default is the ECB reference table re-based on the
+    source currency; the BANK option (e.g. sama, rbnz, bok) switches to the
+    latest official table of that central bank.
+  testfile: currency.t
+  testcases:
+    - USD EUR
+    - USD PLN
+    - CAD IDR
+    - AUD AUD
+#
 - module: CurrencyRates/AlphaVantage.pm
   state: working
   Added: TBD

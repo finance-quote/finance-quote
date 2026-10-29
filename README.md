@@ -548,6 +548,7 @@ http://www.gnucash.org/
 
 # SEE ALSO
 
+    Finance::Quote::CurrencyRates::AllRatesToday,
     Finance::Quote::CurrencyRates::AlphaVantage,
     Finance::Quote::CurrencyRates::CurrencyFreaks,
     Finance::Quote::CurrencyRates::ECB,
