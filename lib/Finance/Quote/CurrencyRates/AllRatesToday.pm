@@ -34,10 +34,10 @@ use JSON;
 
 # VERSION
 
-my $ALLRATESTODAY_URL_HEAD = 'https://allratestoday.com/api/open/';
+my $ALLRATESTODAY_URL_HEAD = 'https://allratestoday.com/api/';
 
 sub parameters {
-  return ('BANK');
+  return ('BANK', 'API_KEY');
 }
 
 sub new
@@ -58,6 +58,12 @@ sub new
   $this->{BANK} = $args->{BANK} if (ref $args eq 'HASH') and (exists $args->{BANK});
   $this->{BANK} = lc($this->{BANK}) if defined $this->{BANK};
 
+  # Optional: an AllRatesToday API key. With a key the central-bank table is
+  # read from the keyed endpoint, which the terms allow for any use; the
+  # keyless endpoints are for non-commercial use with a visible link.
+  $this->{API_KEY} = $ENV{'ALLRATESTODAY_API_KEY'};
+  $this->{API_KEY} = $args->{API_KEY} if (ref $args eq 'HASH') and (exists $args->{API_KEY});
+
   return $this;
 }
 
@@ -69,7 +75,7 @@ sub multipliers
 
   # ECB reference table re-based on the requested currency; one request
   # covers every quote currency.
-  my $json_data = $this->_get_json($ua, 'latest/' . $from);
+  my $json_data = $this->_get_json($ua, 'open/latest/' . $from);
 
   if ($json_data and ref $json_data->{'rates'} eq 'HASH'
       and $json_data->{'rates'}->{$to}) {
@@ -81,7 +87,7 @@ sub multipliers
 
   # $from is not one of the table's base codes; the pair may still exist
   # the other way around.
-  $json_data = $this->_get_json($ua, 'latest/' . $to);
+  $json_data = $this->_get_json($ua, 'open/latest/' . $to);
 
   if ($json_data and ref $json_data->{'rates'} eq 'HASH'
       and $json_data->{'rates'}->{$from}) {
@@ -94,36 +100,62 @@ sub multipliers
   return;
 }
 
-# Official table of one central bank. Every row says "1 base = value quote".
-# Banks publish either foreign-per-home (base varies, quote is the home
-# currency) or home-per-foreign (base is the home currency, quote varies),
-# so the home currency is the code common to all rows.
+# Official table of one central bank. Every row says "1 base = value quote"
+# and carries a rate type. Banks publish either foreign-per-home (base varies,
+# quote is the home currency) or home-per-foreign (base is the home currency,
+# quote varies), so the home currency is the code common to all rows. One
+# rate type is used per pair: reference, else middle/mid/official, else the
+# mean of a buy and a sell row.
 sub _bank_multipliers
 {
   my ($this, $ua, $from, $to) = @_;
 
-  my $json_data = $this->_get_json($ua, 'central-bank/' . $this->{BANK});
+  my $path = $this->{API_KEY}
+    ? 'v1/central-bank/' . $this->{BANK} . '/latest'
+    : 'open/central-bank/' . $this->{BANK};
+  my $json_data = $this->_get_json($ua, $path);
 
   return unless $json_data and ref $json_data->{'rates'} eq 'ARRAY';
 
-  my @rows = grep { ref $_ eq 'HASH' and $_->{'base'} and $_->{'quote'}
-                    and $_->{'value'} and $_->{'value'} > 0 }
-             @{$json_data->{'rates'}};
+  my %by_pair;
+  foreach my $row (@{$json_data->{'rates'}}) {
+    next unless ref $row eq 'HASH' and $row->{'base'} and $row->{'quote'}
+                and $row->{'value'} and $row->{'value'} > 0;
+    my $pair = uc($row->{'base'}) . '/' . uc($row->{'quote'});
+    $by_pair{$pair}{lc($row->{'type'} || 'reference')} = $row->{'value'};
+  }
+
+  my (%seen, @rows);
+  foreach my $pair (keys %by_pair) {
+    my $types = $by_pair{$pair};
+    my $value;
+    foreach my $type ('reference', 'middle', 'mid', 'official') {
+      $value = $types->{$type}, last if exists $types->{$type};
+    }
+    if (not defined $value and exists $types->{'buy'} and exists $types->{'sell'}) {
+      $value = ($types->{'buy'} + $types->{'sell'}) / 2;
+    }
+    $value = (values %$types)[0] if not defined $value and keys %$types == 1;
+    next unless defined $value;
+
+    my ($base, $quote) = split '/', $pair;
+    push @rows, [$base, $quote, $value];
+    $seen{$base}++;
+    $seen{$quote}++;
+  }
   return unless @rows;
 
-  my %seen;
-  $seen{uc $_->{'base'}}++, $seen{uc $_->{'quote'}}++ foreach @rows;
   my ($home) = sort { $seen{$b} <=> $seen{$a} or $a cmp $b } keys %seen;
 
   # %units: home-currency units per one unit of each currency
   my %units = ($home => 1.0);
   foreach my $row (@rows) {
-    my ($base, $quote) = (uc $row->{'base'}, uc $row->{'quote'});
+    my ($base, $quote, $value) = @$row;
     if ($quote eq $home) {
-      $units{$base} = $row->{'value'};
+      $units{$base} = $value;
     }
     elsif ($base eq $home) {
-      $units{$quote} = 1.0 / $row->{'value'};
+      $units{$quote} = 1.0 / $value;
     }
   }
 
@@ -142,9 +174,12 @@ sub _get_json
 
   my $url = $ALLRATESTODAY_URL_HEAD . $path;
 
-  my $reply = $ua->get($url,
+  my @headers = (
     'Accept'     => 'application/json',
     'User-Agent' => 'finance-quote-allratestoday/1.0');
+  push @headers, 'Authorization' => 'Bearer ' . $this->{API_KEY} if $this->{API_KEY};
+
+  my $reply = $ua->get($url, @headers);
 
   ### URL: $url
   ### HTTP Status: $reply->code
@@ -193,22 +228,29 @@ are listed at https://allratestoday.com/central-bank-rates-api/institutions/
 and include banks that other free aggregators do not carry, such as the
 Saudi Central Bank (sama), Central Bank of the UAE (cbuae), Qatar Central
 Bank (qcb), Bank of Korea (bok), Reserve Bank of New Zealand (rbnz), State
-Bank of Vietnam (sbv) and Bangladesh Bank (bb).
+Bank of Vietnam (sbv) and Bangladesh Bank (bb). When a bank publishes
+several rate types for a pair, the reference rate is used, else the
+middle/official rate, else the mean of the buy and sell rates.
 
 This module is not the default currency conversion module for a
 Finance::Quote object. It can be utilized by setting the environment
 variable FQ_CURRENCY=AllRatesToday. The bank can also be set with the
-environment variable ALLRATESTODAY_BANK.
+environment variable ALLRATESTODAY_BANK, the API key with
+ALLRATESTODAY_API_KEY.
 
 =head1 API_KEY
 
-The open endpoints used by this module do not require an API key.
+The keyless endpoints do not require an API key. With the optional API_KEY
+option (free or paid key from https://allratestoday.com/register) the
+central-bank table is read from the keyed endpoint
+https://allratestoday.com/api/v1/central-bank/<bank>/latest instead.
 
 =head1 Terms & Conditions
 
-Use of https://allratestoday.com/api/open/ is governed by the terms of that
-site (https://allratestoday.com/terms/). Keyless use asks for a visible link
-to https://allratestoday.com where the rates are displayed.
+Use of https://allratestoday.com/api/ is governed by the terms of that site
+(https://allratestoday.com/terms/). Keyless use is for non-commercial use
+and asks for a visible link to https://allratestoday.com where the rates are
+displayed; commercial use needs a key on a paid plan.
 
 Finance::Quote is released under the GNU General Public License, version 2,
 which explicitly carries a "No Warranty" clause.

@@ -369,9 +369,10 @@
     - https://allratestoday.com/api/open/central-bank/<bank>
   apikey: false
   notes: |
-    No API Key required. Default is the ECB reference table re-based on the
-    source currency; the BANK option (e.g. sama, rbnz, bok) switches to the
-    latest official table of that central bank.
+    No API Key required for the keyless endpoints. Default is the ECB
+    reference table re-based on the source currency; the BANK option (e.g.
+    sama, rbnz, bok) switches to the latest official table of that central
+    bank; the optional API_KEY option reads it from the keyed endpoint.
   testfile: currency.t
   testcases:
     - USD EUR
