@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Added CurrencyRates/AllRatesToday.pm. Keyless ECB table plus the official tables of 120+ central banks via the BANK option.
 
 1.72      2026-10-25 11:15:50-07:00 America/Los_Angeles
 	* Tradegate.pm, Union.pm, XETRA.pm: Added "germany" method to methodinfo hash.
