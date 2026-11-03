@@ -85,6 +85,7 @@ sub get_iso_currency {
     $currency =~ s/Schweizer Franken/CHF/ and return $currency;
     $currency =~ s/US Dollar/USD/ and return $currency;
     $currency =~ s/^Taiwan-Dollar.*/TWD/ and return $currency;
+    $currency =~ s/Kanadischer Dollar/CAD/ and return $currency;
     # TODO: add more currencies ..
 }
 
