@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vi: set ts=2 sw=2 noai expandtab ic showmode showmatch:  
 
 # Copyright (C) 2023, Stephan Gambke <s7eph4n@gmail.com>
 
@@ -134,6 +135,11 @@ sub consorsbank {
     # user_agent() provides a ready-to-use LWP::UserAgent
     my $ua = $quoter->user_agent;
 
+    my @ua_headers = (
+      'Accept'     => 'application/json',
+      'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+    );
+
     my %info;
 
     my %mapping =       (# in QuotesV1, PriceV2, ExchangesV2
@@ -196,7 +202,7 @@ sub consorsbank {
 
         my $get_json = sub {
             my $query = shift;
-            my $response = $ua->get($query);
+            my $response = $ua->get($query, @ua_headers);
 
             unless ($response->is_success) {
                 $info{ $symbol, 'errormsg' } = "Unable to fetch data from the Consorsbank server for $symbol.  Error: " . $response->status_line;
