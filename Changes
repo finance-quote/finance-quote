@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Minor fix to BVB. Check for successful look_down before using as_text.
 	* Added CurrencyRates/AllRatesToday.pm. Keyless ECB table plus the official tables of 120+ central banks via the BANK option.
 	* Consorsbank.pm: Added headers (user-agent) to URL fetch.
 	* Added preferred license preamble to CONTRIBUTING.md

@@ -228,7 +228,7 @@
 - module: BVB.pm
   state: working
   added: 2023-05-28
-  changed: 2025-10-20
+  changed: 2026-11-06
   removed: ~
   urls: https://bvb.ro/FinancialInstruments/Details/FinancialInstrumentsDetails.aspx?s=
   apikey: false
