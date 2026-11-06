@@ -48,7 +48,7 @@ sub module_check
   }
 }
 
-plan tests => 11;
+plan tests => 13;
 
 # Check that FQ fails on bogus CurrencyRates method
 my $q = Finance::Quote->new('currency_rates' => {order => ['DoesNotExist']});
@@ -114,6 +114,22 @@ subtest 'FinanceAPI' => sub {
   my @invalid = ( ['20.12 ZZZ', 'GBP'] );
 
   module_check('FinanceAPI', \@valid, \@invalid, {cache => 1, API_KEY => $ENV{TEST_FINANCEAPI_API_KEY}});
+};
+
+# Check AllRatesToday
+subtest 'AllRatesToday' => sub {
+  my @valid   = (['100.00 USD', 'EUR'], ['1.00 USD', 'PLN'], ['1.00 CAD', 'IDR'], ['10.00 AUD', 'AUD']);
+  my @invalid = (['20.12 ZZZ', 'GBP']);
+
+  module_check('AllRatesToday', \@valid, \@invalid);
+};
+
+# Check AllRatesToday with a central bank table
+subtest 'AllRatesToday-SAMA' => sub {
+  my @valid   = (['100.00 SAR', 'USD'], ['1.00 USD', 'SAR'], ['1.00 EUR', 'GBP'], ['10.00 SAR', 'SAR']);
+  my @invalid = (['20.12 ZZZ', 'SAR']);
+
+  module_check('AllRatesToday', \@valid, \@invalid, {BANK => 'sama'});
 };
 
 # Check Frankfurter

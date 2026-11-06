@@ -1,4 +1,5 @@
 {{$NEXT}}
+	* Added CurrencyRates/AllRatesToday.pm. Keyless ECB table plus the official tables of 120+ central banks via the BANK option.
 	* Consorsbank.pm: Added headers (user-agent) to URL fetch.
 	* Added preferred license preamble to CONTRIBUTING.md
 	* Sinvestor.pm: Added "CAD" iso currency detection

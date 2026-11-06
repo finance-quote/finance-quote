@@ -51,6 +51,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
 # VERSION
 
 @CURRENCY_RATES_MODULES = qw/
+    AllRatesToday
     AlphaVantage
     CurrencyFreaks
     ECB
@@ -1700,6 +1701,7 @@ http://www.gnucash.org/
 
 =head1 SEE ALSO
 
+  Finance::Quote::CurrencyRates::AllRatesToday,
   Finance::Quote::CurrencyRates::AlphaVantage,
   Finance::Quote::CurrencyRates::CurrencyFreaks,
   Finance::Quote::CurrencyRates::ECB,
