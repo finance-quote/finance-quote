@@ -106,7 +106,15 @@ sub bvb {
             "Error retrieving quote for $stock. No data returned";
           next;
         }
-        $name = $tree->look_down(_tag => 'h2', class => qr/^mBot0 large textStyled/)->as_text;
+        my $name_element = $tree->look_down(_tag => 'h2', class => qr/^mBot0 large textStyled/);
+        if (defined $name_element) {
+          $name = $name_element->as_text;
+        } else {
+          $info{ $stock, "success" } = 0;
+          $info{ $stock, "errormsg" } =
+            "Error retrieving quote for $stock. No data returned";
+          next;
+        }
         $info{ $stock, 'success' } = 1;
         ($info{ $stock, 'name' } = $name) =~ s/^\s+|\s+$//g ;
         $info{ $stock, 'currency' } = 'RON';
