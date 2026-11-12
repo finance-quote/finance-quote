@@ -479,6 +479,24 @@
     - CAD IDR
     - AUD AUD
 #
+- module: CurrencyRates/FXMacroData.pm
+  state: working
+  Added: 2026-11-12
+  changed: ~
+  removed: ~
+  urls: https://api.fxmacrodata.com/v1/forex/<from>/<to>?limit=1
+  apikey: true
+  notes: |
+    API key required, sent in the X-API-Key header. Latest official
+    central-bank reference rate for the pair; rates below 0.001 are also
+    read from the inverse pair.
+  testfile: currency.t
+  testcases:
+    - USD EUR
+    - GBP JPY
+    - IDR USD
+    - AUD AUD
+#
 - module: CurrencyRates/OpenExchange.pm
   state: working
   Added: TBD

@@ -58,6 +58,7 @@ use vars qw/@ISA @EXPORT @EXPORT_OK @EXPORT_TAGS
     FinanceAPI
     Fixer
     Frankfurter
+    FXMacroData
     OpenExchange
     TwelveData
     UniRate
@@ -1708,6 +1709,7 @@ http://www.gnucash.org/
   Finance::Quote::CurrencyRates::FinanceAPI,
   Finance::Quote::CurrencyRates::Fixer,
   Finance::Quote::CurrencyRates::Frankfurter,
+  Finance::Quote::CurrencyRates::FXMacroData,
   Finance::Quote::CurrencyRates::OpenExchange,
   Finance::Quote::CurrencyRates::TwelveData,
   Finance::Quote::CurrencyRates::UniRate,

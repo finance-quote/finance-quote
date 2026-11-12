@@ -48,7 +48,7 @@ sub module_check
   }
 }
 
-plan tests => 13;
+plan tests => 14;
 
 # Check that FQ fails on bogus CurrencyRates method
 my $q = Finance::Quote->new('currency_rates' => {order => ['DoesNotExist']});
@@ -138,6 +138,19 @@ subtest 'Frankfurter' => sub {
   my @invalid = (['20.12 ZZZ', 'GBP']);
 
   module_check('Frankfurter', \@valid, \@invalid);
+};
+
+# Check FXMacroData
+subtest 'FXMacroData' => sub {
+  if ( not $ENV{TEST_FXMACRODATA_API_KEY} ) {
+    plan skip_all =>
+        'Set $ENV{TEST_FXMACRODATA_API_KEY} to run this test; get one at https://fxmacrodata.com/subscribe?utm_source=github&utm_medium=referral&utm_campaign=finance-quote-currencyrates&utm_content=test';
+  }
+
+  my @valid   = (['100.00 USD', 'EUR'], ['1.00 GBP', 'JPY'], ['1000.00 IDR', 'USD'], ['10.00 AUD', 'AUD']);
+  my @invalid = (['20.12 ZZZ', 'GBP']);
+
+  module_check('FXMacroData', \@valid, \@invalid, {API_KEY => $ENV{TEST_FXMACRODATA_API_KEY}});
 };
 
 # Check UniRate
